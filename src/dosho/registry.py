@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 _CABS: dict[str, str] = {
     "wsclean": "dosho.cabs.wsclean:cab",
     "cubical": "dosho.cabs.cubical:cab",
+    "quartical": "dosho.cabs.quartical:cab",
 }
 
 
