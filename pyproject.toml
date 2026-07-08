@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dosho"
+version = "0.1.0a1"
+description = "A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
+]
+dependencies = [
+    "stimela-ninja",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+# stimela-ninja isn't published to PyPI yet -- points at the local sibling
+# checkout for now. Swap for a real version pin (or a git ref) once it is.
+[tool.uv.sources]
+stimela-ninja = { path = "../stimela-ninja", editable = true }
+
+[project.urls]
+Homepage = "https://github.com/caracal-pipeline/dosho"
+Repository = "https://github.com/caracal-pipeline/dosho"
+Issues = "https://github.com/caracal-pipeline/dosho/issues"
+
+[project.entry-points."shinobi.cabs"]
+dosho = "dosho.registry"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dosho"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/dosho",
+    "/README.md",
+    "/LICENSE",
+    "/AGENTS.md",
+    "/pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "--import-mode=importlib"
+consider_namespace_packages = true
+
+[tool.ruff]
+line-length = 100
