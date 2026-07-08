@@ -11,7 +11,7 @@ documentation, and feedback on the design.
 
 Every tool is authored directly in Python -- no YAML dialect, no
 `dynamic_schema`-style code execution at load time. See
-**[`AGENTS.md`](https://github.com/caracal-pipeline/dosho/blob/main/AGENTS.md)**
+**[`AGENTS.md`](https://github.com/SpheMakh/dosho/blob/main/AGENTS.md)**
 for the full design rationale and tool-authoring conventions; read it
 before porting a new tool or touching `dosho/_builder.py`/
 `dosho/registry.py`. If you're considering a larger change, opening an
@@ -23,7 +23,7 @@ issue to discuss it first is a great way to align before writing code.
   Every ported tool needs a test that checks real CLI/schema shape, not
   just that the object constructs without error.
 - **Report bugs** and request features via
-  [issues](https://github.com/caracal-pipeline/dosho/issues).
+  [issues](https://github.com/SpheMakh/dosho/issues).
 - **Improve documentation** under `docs/` or the docstrings that feed the
   API reference.
 
@@ -35,7 +35,7 @@ points at the local sibling path):
 
 ```bash
 git clone https://github.com/SpheMakh/stimela-ninja.git
-git clone https://github.com/caracal-pipeline/dosho.git
+git clone https://github.com/SpheMakh/dosho.git
 cd dosho
 uv sync --group dev
 uv run pytest

@@ -18,7 +18,7 @@ install both from GitHub:
 .. code-block:: console
 
     $ pip install git+https://github.com/SpheMakh/stimela-ninja.git
-    $ pip install git+https://github.com/caracal-pipeline/dosho.git
+    $ pip install git+https://github.com/SpheMakh/dosho.git
 
 This installs the importable ``dosho`` package, and registers it under
 shinobi's ``shinobi.cabs`` entry-point group -- so ``ninja cabs
@@ -35,7 +35,7 @@ to a ``stimela-ninja`` checkout (``[tool.uv.sources]`` in
 .. code-block:: console
 
     $ git clone https://github.com/SpheMakh/stimela-ninja.git
-    $ git clone https://github.com/caracal-pipeline/dosho.git
+    $ git clone https://github.com/SpheMakh/dosho.git
     $ cd dosho
     $ uv sync --group dev
     $ uv run pytest

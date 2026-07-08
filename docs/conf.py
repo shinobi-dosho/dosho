@@ -77,7 +77,7 @@ html_title = f"dosho {release}"
 html_static_path = ["_static"]
 
 html_theme_options = {
-    "source_repository": "https://github.com/caracal-pipeline/dosho/",
+    "source_repository": "https://github.com/SpheMakh/dosho/",
     "source_branch": "main",
     "source_directory": "docs/",
 }
