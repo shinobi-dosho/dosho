@@ -21,6 +21,13 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.5",
 ]
+# Documentation build (Sphinx + Furo + autodoc). `uv sync --group docs`.
+docs = [
+    "sphinx>=7.2",
+    "furo>=2024.1",
+    "sphinx-copybutton>=0.5",
+    "myst-parser>=2.0",
+]
 
 # stimela-ninja isn't published to PyPI yet -- points at the local sibling
 # checkout for now. Swap for a real version pin (or a git ref) once it is.
@@ -31,6 +38,7 @@ stimela-ninja = { path = "../stimela-ninja", editable = true }
 Homepage = "https://github.com/caracal-pipeline/dosho"
 Repository = "https://github.com/caracal-pipeline/dosho"
 Issues = "https://github.com/caracal-pipeline/dosho/issues"
+Documentation = "https://dosho.readthedocs.io"
 
 [project.entry-points."shinobi.cabs"]
 dosho = "dosho.registry"
@@ -44,6 +52,7 @@ include = [
     "/README.md",
     "/LICENSE",
     "/AGENTS.md",
+    "/CONTRIBUTING.md",
     "/pyproject.toml",
 ]
 
