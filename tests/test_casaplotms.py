@@ -1,4 +1,4 @@
-"""dosho.psteps.casaplotms -- @shinobi.pystep wrapper for CASA's plotms
+"""dosho.cabs.casaplotms -- @shinobi.pystep wrapper for CASA's plotms
 task (casaplotms.plotms, a sibling package to casatasks). Not installed
 in this test environment -- checks schema shape and Recipe wiring only,
 same convention as test_casatasks.py.
@@ -11,7 +11,7 @@ from shinobi import Recipe
 
 import dosho
 from dosho import images
-from dosho.psteps.casaplotms import plotms
+from dosho.cabs.casaplotms import plotms
 
 
 def test_uses_the_pinned_casa6_image():

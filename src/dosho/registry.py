@@ -1,8 +1,9 @@
-"""Lazy name -> cab-module map, registered under shinobi's `shinobi.cabs`
-entry-point group (see this package's `pyproject.toml`). Never imports a
-`dosho.cabs.<tool>` module until something actually asks for that cab, so
-`ninja cabs list` (which only needs names) doesn't pay the cost of every
-tool module.
+"""name -> `Cab`/`StepRef` map, registered under shinobi's `shinobi.cabs`
+entry-point group (see this package's `pyproject.toml`). String-keyed
+runtime lookup, for a caller that doesn't know the tool name until it
+runs (`ninja cabs list/show`, `shinobi.cabs` entry-point discovery) --
+for the write-time-known case, `from dosho.cabs import <tool>` (see
+`dosho/cabs/__init__.py`) is the more ergonomic, direct interface.
 """
 
 from __future__ import annotations
@@ -14,41 +15,42 @@ if TYPE_CHECKING:
     from shinobi import Cab
     from shinobi.steps.schema import StepRef
 
-# name -> "dosho.<subpackage>.<module>:<attribute>". A module that vends
-# several related entries (e.g. a tool with a backup/restore/plotter
-# sibling command) lists each one here under its own name, all pointing
-# at the same module. Entries under `cabs.` are `Cab` objects (real
-# binary-flavour tools); entries under `psteps.` are `StepRef`s (from
-# `@shinobi.pystep` -- Python-package tools with no standalone binary,
-# e.g. CASA tasks). `get()` doesn't care which shape it returns --
+# registered name -> "dosho.cabs:<attribute>". The registered name is the
+# tool's own real name (may be hyphenated, e.g. "simms-skysim",
+# "mosaic-queen" -- not a valid Python identifier), while the attribute is
+# whatever `dosho/cabs/__init__.py` re-exports it as (a valid identifier,
+# e.g. `skysim`, `mosaic_queen`). Every entry resolves through the same
+# `dosho.cabs` module now that it re-exports everything -- `get()`
+# doesn't care whether a given entry is a `Cab` (real binary-flavour
+# tool) or a `StepRef` (from `@shinobi.pystep`, e.g. a CASA task) --
 # `Recipe.add_step` accepts either identically.
 _ENTRIES: dict[str, str] = {
-    "wsclean": "dosho.cabs.wsclean:cab",
-    "cubical": "dosho.cabs.cubical:cab",
-    "quartical": "dosho.cabs.quartical:cab",
-    "aoflagger": "dosho.cabs.aoflagger:cab",
-    "tricolour": "dosho.cabs.tricolour:cab",
-    "crystalball": "dosho.cabs.crystalball:cab",
-    "owlcat_plotelev": "dosho.cabs.owlcat_plotelev:cab",
-    "shadems": "dosho.cabs.shadems:cab",
-    "ragavi": "dosho.cabs.ragavi:cab",
-    "sofia2": "dosho.cabs.sofia2:cab",
-    "simms-skysim": "dosho.cabs.simms_skysim:cab",
-    "mosaic-queen": "dosho.cabs.mosaic_queen:cab",
-    "listobs": "dosho.psteps.casatasks:listobs",
-    "mstransform": "dosho.psteps.casatasks:mstransform",
-    "fixvis": "dosho.psteps.casatasks:fixvis",
-    "clearcal": "dosho.psteps.casatasks:clearcal",
-    "initweights": "dosho.psteps.casatasks:initweights",
-    "flagdata": "dosho.psteps.casatasks:flagdata",
-    "setjy": "dosho.psteps.casatasks:setjy",
-    "gaincal": "dosho.psteps.casatasks:gaincal",
-    "polcal": "dosho.psteps.casatasks:polcal",
-    "bandpass": "dosho.psteps.casatasks:bandpass",
-    "applycal": "dosho.psteps.casatasks:applycal",
-    "fluxscale": "dosho.psteps.casatasks:fluxscale",
-    "flagmanager": "dosho.psteps.casatasks:flagmanager",
-    "plotms": "dosho.psteps.casaplotms:plotms",
+    "wsclean": "dosho.cabs:wsclean",
+    "cubical": "dosho.cabs:cubical",
+    "quartical": "dosho.cabs:quartical",
+    "aoflagger": "dosho.cabs:aoflagger",
+    "tricolour": "dosho.cabs:tricolour",
+    "crystalball": "dosho.cabs:crystalball",
+    "owlcat_plotelev": "dosho.cabs:owlcat_plotelev",
+    "shadems": "dosho.cabs:shadems",
+    "ragavi": "dosho.cabs:ragavi",
+    "sofia2": "dosho.cabs:sofia2",
+    "simms-skysim": "dosho.cabs:skysim",
+    "mosaic-queen": "dosho.cabs:mosaic_queen",
+    "listobs": "dosho.cabs:listobs",
+    "mstransform": "dosho.cabs:mstransform",
+    "fixvis": "dosho.cabs:fixvis",
+    "clearcal": "dosho.cabs:clearcal",
+    "initweights": "dosho.cabs:initweights",
+    "flagdata": "dosho.cabs:flagdata",
+    "setjy": "dosho.cabs:setjy",
+    "gaincal": "dosho.cabs:gaincal",
+    "polcal": "dosho.cabs:polcal",
+    "bandpass": "dosho.cabs:bandpass",
+    "applycal": "dosho.cabs:applycal",
+    "fluxscale": "dosho.cabs:fluxscale",
+    "flagmanager": "dosho.cabs:flagmanager",
+    "plotms": "dosho.cabs:plotms",
 }
 
 

@@ -44,7 +44,7 @@ _FIELD_META: dict[str, ParamMeta] = {
     "subtract_model_column": ParamMeta(nom_de_guerre="subtract-model-column"),
 }
 
-cab = define_cab(
+tricolour = define_cab(
     "tricolour",
     "tricolour",
     images.TRICOLOUR,

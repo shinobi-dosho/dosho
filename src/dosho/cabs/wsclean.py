@@ -283,7 +283,7 @@ _OUTPUT_PATTERNS = [
     )
 ]
 
-cab = define_cab(
+wsclean = define_cab(
     "wsclean",
     "wsclean",
     images.WSCLEAN,

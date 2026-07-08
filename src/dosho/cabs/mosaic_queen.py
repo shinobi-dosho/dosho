@@ -85,7 +85,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "output": ("Directory", True, None),
 }
 
-cab = define_cab(
+mosaic_queen = define_cab(
     "mosaic-queen",
     "mosaic-queen",
     images.MOSAIC_QUEEN,

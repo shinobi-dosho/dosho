@@ -514,7 +514,7 @@ _FIELD_META: dict[str, ParamMeta] = {
     ),
 }
 
-cab = define_cab(
+sofia2 = define_cab(
     "sofia2",
     "sofia",
     images.SOFIA2,

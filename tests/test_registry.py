@@ -28,3 +28,17 @@ def test_every_registered_cab_resolves_and_has_a_matching_name(monkeypatch):
     for name in registry.list_cabs():
         cab = registry.get(name)
         assert cab.name == name
+
+
+def test_direct_import_matches_registry_lookup():
+    """`from dosho.cabs import wsclean`/`from dosho.cabs.casatasks import
+    listobs` (write-time-known) must resolve to the exact same object as
+    `dosho.get(...)` (runtime-known) -- two interfaces, one underlying set
+    of objects.
+    """
+    from dosho.cabs import listobs, wsclean
+    from dosho.cabs.casatasks import listobs as listobs_submodule
+
+    assert wsclean is dosho.get("wsclean")
+    assert listobs is dosho.get("listobs")
+    assert listobs_submodule is listobs

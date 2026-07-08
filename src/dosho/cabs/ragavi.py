@@ -101,7 +101,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "htmlname": ("str", False, None),
 }
 
-cab = define_cab(
+ragavi = define_cab(
     "ragavi",
     "ragavi-vis",
     images.RAGAVI,

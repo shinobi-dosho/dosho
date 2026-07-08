@@ -1,4 +1,4 @@
-"""dosho.psteps.casatasks -- @shinobi.pystep wrappers for CASA tasks.
+"""dosho.cabs.casatasks -- @shinobi.pystep wrappers for CASA tasks.
 
 CASA tasks are Python-package calls (casatasks.<task>), never real
 standalone binaries, so they can't be represented as a dosho.Cab at all
@@ -16,7 +16,7 @@ from shinobi import Recipe
 
 import dosho
 from dosho import images
-from dosho.psteps.casatasks import (
+from dosho.cabs.casatasks import (
     applycal,
     bandpass,
     clearcal,

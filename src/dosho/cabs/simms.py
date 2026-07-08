@@ -1,11 +1,12 @@
-"""simms-skysim -- simms 3.0's sky-model visibility simulator, replacing
-caracal 1.x's separate simulator worker (see stimela-ninja/caracal
-migration notes: simulator -> simms 3.0 skysim).
+"""simms -- simms 3.0's sub-commands, one module-level object per
+sub-command (matching `casatasks.py`'s multi-export convention).
 
-Ported field-by-field from cult-cargo's simms.yml (the simms-skysim
-cab only -- simms.yml also declares simms-telsim/simms, not currently
-used by any ported caracal2 worker, left for a future port if a
-worker needs them).
+`skysim` (simms 3.0's sky-model visibility simulator, replacing caracal
+1.x's separate simulator worker -- see stimela-ninja/caracal migration
+notes: simulator -> simms 3.0 skysim) is the only sub-command ported so
+far, transcribed field-by-field from cult-cargo's simms.yml. That file
+also declares `simms-telsim`/`simms` cabs -- not yet ported; add them
+here as `telsim`/`simms` when a pipeline needs them.
 """
 
 from __future__ import annotations
@@ -91,7 +92,7 @@ _FIELD_META: dict[str, ParamMeta] = {
     ),
 }
 
-cab = define_cab(
+skysim = define_cab(
     "simms-skysim",
     "simms skysim",
     images.SIMMS,

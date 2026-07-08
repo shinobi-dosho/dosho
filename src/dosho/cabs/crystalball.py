@@ -45,7 +45,7 @@ _FIELD_META: dict[str, ParamMeta] = {
     ),
 }
 
-cab = define_cab(
+crystalball = define_cab(
     "crystalball",
     "crystalball",
     images.CRYSTALBALL,

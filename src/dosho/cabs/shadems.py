@@ -167,7 +167,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "dir": ("Directory", False, None),
 }
 
-cab = define_cab(
+shadems = define_cab(
     "shadems",
     "shadems",
     images.SHADEMS,

@@ -1,7 +1,7 @@
 """`@shinobi.pystep` wrapper for CASA's `plotms` task
 (`casaplotms.plotms`, a sibling package to `casatasks`, not part of it --
 same `ctx.import_func`-inside-container mechanism as
-`dosho.psteps.casatasks`, see that module's own docstring for the full
+`dosho.cabs.casatasks`, see that module's own docstring for the full
 rationale).
 
 One general wrapper covers both a minimal single-axis-pair plot (e.g. an

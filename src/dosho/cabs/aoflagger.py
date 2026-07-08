@@ -58,7 +58,7 @@ _FIELD_META: dict[str, ParamMeta] = {
     "fields": ParamMeta(info="Field ID(s). Comma separated string if more than one field"),
 }
 
-cab = define_cab(
+aoflagger = define_cab(
     "aoflagger",
     "aoflagger",
     images.AOFLAGGER,

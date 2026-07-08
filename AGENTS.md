@@ -14,13 +14,29 @@ only states what's specific to authoring cabs here.
 ## Core rule
 
 **Cabs are authored directly in Python, not parsed from a YAML dialect.**
-Every cab is a `shinobi.Cab` object (or several) built in a plain Python
+Every tool is a `shinobi.Cab` object (or several) built in a plain Python
 module under `src/dosho/cabs/`, using shinobi's existing
 `Cab`/`Policies`/`ParamMeta`/`ParamPattern` machinery -- see
 `dosho._builder.define_cab` for the boilerplate-reduction helper. There is
 no YAML authoring path and none should be added: a YAML dialect is exactly
 the kind of "grows its own semantics" surface stimela-ninja's `AGENTS.md`
 warns against.
+
+Not every tool can be a `Cab`, though: shinobi only ever executes
+`flavour="binary"` cabs (real standalone executables, argv-built and
+shelled out to). A tool that's actually a Python-package function call --
+no standalone binary at all (CASA tasks are the running example:
+`casatasks.listobs`, `casaplotms.plotms`) -- is instead a
+`@shinobi.pystep`-decorated function (a `StepRef`, not a `Cab`), calling
+`ctx.import_func("<task>", "<package>")` *inside the running container at
+step-execution time*. That's architecturally distinct from -- and doesn't
+violate -- "never import a cab package" below: the import happens at
+execution time inside the container, on ordinary trusted Python the
+pystep author wrote directly, not shinobi interpreting untrusted cab data
+on the host at load time. Both shapes live side by side under
+`src/dosho/cabs/`, and both are first-class for `Recipe.add_step` -- a
+pipeline author (or `dosho.get(name)`) doesn't need to know or care which
+one a given tool is. See `dosho/cabs/casatasks.py` for the pattern.
 
 ## Never import/execute a tool's own schema-generation code
 
@@ -61,24 +77,43 @@ constant there. The repo's own git tag versions the cab set as a whole.
 ```
 src/dosho/
   __init__.py      # re-exports get(), list_cabs()
-  registry.py       # name -> "dosho.cabs.<mod>:cab" lazy map; get()/list_cabs()
+  registry.py       # registered (real, possibly hyphenated) name ->
+                     # "dosho.cabs:<attribute>"; get()/list_cabs(),
                      # registered under the "shinobi.cabs" entry-point group
+                     # -- for a caller that only knows the tool's name at
+                     # *runtime* (the CLI, shinobi.cabs discovery)
   images.py         # pinned {tool: "quay.io/stimela2/<tool>:<tag>"} constants
   _builder.py        # define_cab() helper over Cab(...) + shinobi.loaders.build_model
   cabs/
-    <tool>.py        # one module per tool, exports `cab: Cab` (or several)
+    __init__.py      # re-exports every tool-level object by name, so
+                      # `from dosho.cabs import wsclean` works directly --
+                      # the write-time-known counterpart to registry.py
+    <tool>.py         # single-command tool: exports one object named after
+                       # the tool itself (e.g. wsclean.py's `wsclean = ...`)
+    <family>.py         # multi-command tool: one module-level object per
+                          # sub-command (e.g. casatasks.py's `listobs`,
+                          # `mstransform`, ...; simms.py's `skysim`, with
+                          # `telsim`/`simms` as later additions)
 tests/
   test_registry.py
   test_<tool>.py     # one per ported cab: round-trips a representative param
                       # set through build_argv and checks real CLI token shape
 ```
 
+Registering a new tool touches two places: the module itself under
+`cabs/`, and both `cabs/__init__.py` (direct-import re-export) and
+`registry.py` (`_ENTRIES`, the runtime-lookup name -- which may differ
+from the Python attribute name if the tool's real name isn't a valid
+identifier, e.g. `"simms-skysim"` -> attribute `skysim`).
+
 ## Before adding a cab
 
-Port from the real tool's own `--help`/docs, cross-checked against the
-matching cult-cargo YAML (if one exists) as a second source, not copied
-from it blindly -- cult-cargo's own schema for the hard cases (wsclean,
-cubical, quartical) is exactly what's being replaced. Every ported cab
-gets a test that builds representative argv and checks it against the
-tool's real CLI shape, not just that the `Cab` object constructs without
-error.
+Port from the real tool's own `--help`/docs (or, for a `@shinobi.pystep`
+wrapper, the real Python package's own function signature), cross-checked
+against the matching cult-cargo YAML (if one exists) as a second source,
+not copied from it blindly -- cult-cargo's own schema for the hard cases
+(wsclean, cubical, quartical) is exactly what's being replaced. Every
+ported tool gets a test: for a `Cab`, round-trip a representative param
+set through `build_argv` and check the real CLI token shape; for a
+pystep, check its `inputs_model` schema shape and that it wires into a
+`Recipe` -- not just that the object constructs without error.

@@ -234,7 +234,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "ms": ("MS", False, None),
 }
 
-cab = define_cab(
+cubical = define_cab(
     "cubical",
     "gocubical",
     images.CUBICAL,

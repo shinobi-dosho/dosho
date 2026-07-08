@@ -117,7 +117,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "gain_directory": ("Directory", False, None),
 }
 
-cab = define_cab(
+quartical = define_cab(
     "quartical",
     "goquartical",
     images.QUARTICAL,

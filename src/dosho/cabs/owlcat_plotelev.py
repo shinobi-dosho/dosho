@@ -29,7 +29,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "output_name": ("File", False, "lst-elev.png"),
 }
 
-cab = define_cab(
+owlcat_plotelev = define_cab(
     "owlcat_plotelev",
     "plot-elevation-tracks.py",
     images.OWLCAT,
