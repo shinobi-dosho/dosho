@@ -3,6 +3,7 @@ repository. See AGENTS.md for the design rationale.
 """
 
 from dosho.registry import get, list_cabs
+from dosho._builder import define_cab 
 
 __all__ = ["get", "list_cabs"]
 

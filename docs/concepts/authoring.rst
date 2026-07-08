@@ -38,7 +38,7 @@ caller doesn't need to know or care which one a given tool is.
 Defining a ``Cab``
 --------------------
 
-:func:`dosho._builder.define_cab` wraps ``Cab(...)`` and
+:func:`dosho.define_cab` wraps ``Cab(...)`` and
 :func:`shinobi.loaders.build_model` to remove the boilerplate of
 hand-transcribing a real tool's parameter list from a flat
 ``{raw_param_name: (dtype, required, default)}`` dict -- the shape a
@@ -46,8 +46,7 @@ tool's own ``--help``/docs naturally give you:
 
 .. code-block:: python
 
-    from dosho._builder import define_cab
-    from dosho import images
+    from dosho import define_cab, images
 
     cab = define_cab(
         "mytool",
