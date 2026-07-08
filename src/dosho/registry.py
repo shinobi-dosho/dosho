@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 # module.
 _CABS: dict[str, str] = {
     "wsclean": "dosho.cabs.wsclean:cab",
+    "cubical": "dosho.cabs.cubical:cab",
 }
 
 
