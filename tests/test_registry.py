@@ -5,7 +5,7 @@ from dosho import registry
 
 
 def test_list_cabs_returns_registered_names():
-    assert set(registry.list_cabs()) == set(registry._CABS)
+    assert set(registry.list_cabs()) == set(registry._ENTRIES)
 
 
 def test_get_unknown_cab_raises_key_error():

@@ -16,6 +16,9 @@ OWLCAT = "quay.io/stimela2/owlcat:cc0.2.1"
 SHADEMS = "quay.io/stimela2/shadems:cc0.1.3"
 RAGAVI = "quay.io/stimela2/ragavi:cc0.2.1"
 SOFIA2 = "quay.io/stimela2/sofia2:cc0.2.1"
-CASA6 = "quay.io/stimela2/casa6:cc0.2.1"
+# The real, tested tag caracal2's own common/casatasks.py pins (not the
+# generic cult-cargo-manifest default) -- casatasks/casaplotms pysteps
+# both use this image.
+CASA6 = "quay.io/stimela2/casa6:6.7-cc0.2.1"
 SIMMS = "quay.io/stimela2/simms:cc0.2.1"
 MOSAIC_QUEEN = "quay.io/stimela2/mosaic-queen:cc0.2.1"
