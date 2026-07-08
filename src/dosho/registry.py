@@ -36,6 +36,8 @@ _ENTRIES: dict[str, str] = {
     "ragavi": "dosho.cabs:ragavi",
     "sofia2": "dosho.cabs:sofia2",
     "simms-skysim": "dosho.cabs:skysim",
+    "simms-telsim": "dosho.cabs:telsim",
+    "simms": "dosho.cabs:simms_classic",
     "mosaic-queen": "dosho.cabs:mosaic_queen",
     "listobs": "dosho.cabs:listobs",
     "mstransform": "dosho.cabs:mstransform",

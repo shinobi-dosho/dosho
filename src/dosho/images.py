@@ -21,4 +21,8 @@ SOFIA2 = "quay.io/stimela2/sofia2:cc0.2.1"
 # both use this image.
 CASA6 = "quay.io/stimela2/casa6:6.7-cc0.2.1"
 SIMMS = "quay.io/stimela2/simms:cc0.2.1"
+# The old (pre-3.0) simms command has its own separate image -- a
+# genuinely different tool from simms 3.0's skysim/telsim, not just a
+# version bump.
+SIMMS_CLASSIC = "quay.io/stimela2/simms-classic:cc0.2.1"
 MOSAIC_QUEEN = "quay.io/stimela2/mosaic-queen:cc0.2.1"

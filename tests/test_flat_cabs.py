@@ -1,6 +1,7 @@
 """The remaining mechanically-ported flat cabs (aoflagger, tricolour,
 crystalball, owlcat_plotelev, shadems, ragavi, sofia2, simms-skysim,
-mosaic-queen) -- each already loaded cleanly via cult-cargo's own YAML
+simms-telsim, simms (classic), mosaic-queen) -- each already loaded cleanly
+via cult-cargo's own YAML
 (no dynamic_schema, no unloadable package-scoped _include), so porting
 them is a field-by-field transcription rather than a structural fix.
 One targeted test per cab: registration + a representative build_argv
@@ -80,6 +81,29 @@ def test_simms_skysim_registered_under_hyphenated_name():
     assert cab.command == "simms skysim"
     argv = build_argv(cab, {})
     assert argv[:2] == ["simms", "skysim"]
+
+
+def test_simms_telsim_sibling_subcommand_of_skysim():
+    cab = dosho.get("simms-telsim")
+    assert cab.name == "simms-telsim"
+    assert cab.command == "simms telsim"
+    assert cab.image == dosho.get("simms-skysim").image  # same simms binary
+    argv = build_argv(cab, {"ms": "/x.ms", "telescope": "meerkat"})
+    assert argv[:2] == ["simms", "telsim"]
+    assert "--telescope" in argv
+    assert argv[-1] == "/x.ms"  # positional
+
+
+def test_simms_classic_is_a_genuinely_different_tool_and_image():
+    cab = dosho.get("simms")
+    assert cab.name == "simms"
+    assert cab.command == "simms"
+    assert cab.image != dosho.get("simms-skysim").image
+    assert cab.field_meta["msname"].nom_de_guerre == "name"
+    argv = build_argv(cab, {"msname": "/x.ms", "telescope": "meerkat"})
+    assert argv[0] == "simms"
+    assert "--name" in argv
+    assert "--tel" in argv
 
 
 def test_mosaic_queen_replace_policy_and_output():

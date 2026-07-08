@@ -92,8 +92,8 @@ src/dosho/
                        # the tool itself (e.g. wsclean.py's `wsclean = ...`)
     <family>.py         # multi-command tool: one module-level object per
                           # sub-command (e.g. casatasks.py's `listobs`,
-                          # `mstransform`, ...; simms.py's `skysim`, with
-                          # `telsim`/`simms` as later additions)
+                          # `mstransform`, ...; simms.py's `skysim`/
+                          # `telsim`/`simms_classic`)
 tests/
   test_registry.py
   test_<tool>.py     # one per ported cab: round-trips a representative param

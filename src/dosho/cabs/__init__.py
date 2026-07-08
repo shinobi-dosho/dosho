@@ -47,7 +47,7 @@ from dosho.cabs.owlcat_plotelev import owlcat_plotelev
 from dosho.cabs.quartical import quartical
 from dosho.cabs.ragavi import ragavi
 from dosho.cabs.shadems import shadems
-from dosho.cabs.simms import skysim
+from dosho.cabs.simms import simms_classic, skysim, telsim
 from dosho.cabs.sofia2 import sofia2
 from dosho.cabs.tricolour import tricolour
 from dosho.cabs.wsclean import wsclean
@@ -75,8 +75,10 @@ __all__ = [
     "ragavi",
     "setjy",
     "shadems",
+    "simms_classic",
     "skysim",
     "sofia2",
+    "telsim",
     "tricolour",
     "wsclean",
 ]

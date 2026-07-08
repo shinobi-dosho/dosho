@@ -40,12 +40,12 @@ $ ninja cabs show wsclean
 
 ## Status
 
-`dosho` currently hosts 12 real-binary `Cab`s (`wsclean`, `cubical`,
+`dosho` currently hosts 14 real-binary `Cab`s (`wsclean`, `cubical`,
 `quartical`, `aoflagger`, `tricolour`, `crystalball`, `owlcat_plotelev`,
-`shadems`, `ragavi`, `sofia2`, `simms` skysim, `mosaic-queen`) and 14
+`shadems`, `ragavi`, `sofia2`, `mosaic-queen`, and all three of `simms`'s
+sub-commands -- `skysim`/`telsim`/classic `simms`) and 14
 `@shinobi.pystep` CASA-task wrappers (`listobs`, `mstransform`, `fixvis`,
 `clearcal`, `initweights`, `flagdata`, `setjy`, `gaincal`, `polcal`,
-`bandpass`, `applycal`, `fluxscale`, `flagmanager`, `plotms`) -- the set
-a real pipeline ([caracal2](https://github.com/caracal-pipeline/caracal2))
-needs. `simms`'s other two sub-commands (`telsim`, `simms`) aren't ported
-yet.
+`bandpass`, `applycal`, `fluxscale`, `flagmanager`, `plotms`) -- the full
+set a real pipeline ([caracal2](https://github.com/caracal-pipeline/caracal2))
+needs.
