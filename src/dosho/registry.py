@@ -48,6 +48,7 @@ _ENTRIES: dict[str, str] = {
     "applycal": "dosho.psteps.casatasks:applycal",
     "fluxscale": "dosho.psteps.casatasks:fluxscale",
     "flagmanager": "dosho.psteps.casatasks:flagmanager",
+    "plotms": "dosho.psteps.casaplotms:plotms",
 }
 
 
