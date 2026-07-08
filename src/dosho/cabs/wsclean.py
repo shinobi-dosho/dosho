@@ -230,7 +230,6 @@ _FIELD_META: dict[str, ParamMeta] = {
     "restore": ParamMeta(repeat_as_tokens=True),
     "restore_list": ParamMeta(repeat_as_tokens=True),
     "beam_shape": ParamMeta(repeat_as_tokens=True),
-
     # dynamic output paths -- see module docstring.
     "dirty": ParamMeta(implicit="{prefix}-dirty.fits"),
     "image": ParamMeta(implicit="{prefix}-image.fits"),

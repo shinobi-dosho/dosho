@@ -21,6 +21,15 @@ _CABS: dict[str, str] = {
     "wsclean": "dosho.cabs.wsclean:cab",
     "cubical": "dosho.cabs.cubical:cab",
     "quartical": "dosho.cabs.quartical:cab",
+    "aoflagger": "dosho.cabs.aoflagger:cab",
+    "tricolour": "dosho.cabs.tricolour:cab",
+    "crystalball": "dosho.cabs.crystalball:cab",
+    "owlcat_plotelev": "dosho.cabs.owlcat_plotelev:cab",
+    "shadems": "dosho.cabs.shadems:cab",
+    "ragavi": "dosho.cabs.ragavi:cab",
+    "sofia2": "dosho.cabs.sofia2:cab",
+    "simms-skysim": "dosho.cabs.simms_skysim:cab",
+    "mosaic-queen": "dosho.cabs.mosaic_queen:cab",
 }
 
 
