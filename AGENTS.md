@@ -38,12 +38,12 @@ on the host at load time. Both shapes live side by side under
 pipeline author (or `dosho.get(name)`) doesn't need to know or care which
 one a given tool is. See `dosho/cabs/casatasks.py` for the pattern.
 
-## Never import/execute a tool's own schema-generation code
+## Never import/execute an external Cab's own schema-generation code
 
-Some real tools (wsclean, CubiCal, QuartiCal) only fully describe their own
-CLI via a Python function that inspects other resolved parameter values at
-run time. shinobi will never import and call that function -- see
-stimela-ninja's "Never eval()/exec() a cab's `command`". Instead:
+External cabs that generate parameters dynamically via embedded functions
+are strictly forbidden, as are cabs whose plain-text source shinobi would
+have to execute to make sense of -- see stimela-ninja's "Never
+eval()/exec() a cab's `command`". Instead:
 
 - **Per-instance dynamic parameter families** (CubiCal's `g1-solvable`,
   QuartiCal's `K.time_interval`, one family per caller-chosen term name)
