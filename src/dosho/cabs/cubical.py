@@ -241,7 +241,12 @@ cubical = define_cab(
     _FIELDS,
     outputs=_OUTPUTS,
     field_meta={"ms": ParamMeta(implicit="{data_ms}")},
-    policies=Policies(prefix="--"),
+    # real cubical.yml: policies: {prefix: '--', explicit_true: true,
+    # explicit_false: false} -- gocubical's optparse-derived CLI expects
+    # every boolean option to always take an explicit value token; a bare
+    # `--flag` with none corrupts parsing of everything after it (see
+    # stimela-ninja's Policies.explicit_true/explicit_false docstring).
+    policies=Policies(prefix="--", explicit_true=True, explicit_false=False),
     input_patterns=[_JONES_TERM_PATTERN],
     info="CubiCal calibration package (https://github.com/ratt-ru/CubiCal)",
 )

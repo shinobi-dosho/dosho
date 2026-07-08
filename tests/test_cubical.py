@@ -63,11 +63,26 @@ def test_build_argv_matches_real_cubical_cli_shape():
     assert argv[0] == "gocubical"
     assert "--data-ms" in argv
     assert "--sol-jones" in argv
-    assert "--g-solvable" in argv
+    # explicit_true=True (real cubical.yml policy): a True boolean emits
+    # "--flag true" (an explicit value token), never a bare "--flag" --
+    # gocubical's own CLI parser doesn't tolerate a bare boolean flag.
+    i = argv.index("--g-solvable")
+    assert argv[i : i + 2] == ["--g-solvable", "true"]
     i = argv.index("--g-type")
     assert argv[i : i + 2] == ["--g-type", "complex-2x2"]
     i = argv.index("--g-time-int")
     assert argv[i : i + 2] == ["--g-time-int", "1"]
+
+
+def test_declared_boolean_field_is_also_explicit_not_a_bare_flag():
+    cab = _cab()
+    argv = build_argv(cab, {"data_ms": "/x.ms", "out_overwrite": True})
+    i = argv.index("--out-overwrite")
+    assert argv[i : i + 2] == ["--out-overwrite", "true"]
+    # explicit_false=False (real cubical.yml policy): False still just
+    # omits the flag entirely, same as before this fix.
+    argv = build_argv(cab, {"data_ms": "/x.ms", "out_overwrite": False})
+    assert "--out-overwrite" not in argv
 
 
 def test_ms_output_is_a_real_passthrough_not_a_synthetic_hack():

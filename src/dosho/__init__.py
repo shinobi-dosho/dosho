@@ -2,9 +2,10 @@
 repository. See AGENTS.md for the design rationale.
 """
 
+from dosho import images
+from dosho._builder import define_cab
 from dosho.registry import get, list_cabs
-from dosho._builder import define_cab 
 
-__all__ = ["get", "list_cabs"]
+__all__ = ["define_cab", "get", "images", "list_cabs"]
 
 __version__ = "0.1.0a1"
