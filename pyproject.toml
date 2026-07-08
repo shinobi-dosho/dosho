@@ -29,10 +29,10 @@ docs = [
     "myst-parser>=2.0",
 ]
 
-# stimela-ninja isn't published to PyPI yet -- points at the local sibling
-# checkout for now. Swap for a real version pin (or a git ref) once it is.
+# stimela-ninja isn't published to PyPI yet -- points at its git repo for
+# now. Swap for a real version pin once it is.
 [tool.uv.sources]
-stimela-ninja = { path = "../stimela-ninja", editable = true }
+stimela-ninja = { git = "https://github.com/SpheMakh/stimela-ninja" }
 
 [project.urls]
 Homepage = "https://github.com/SpheMakh/dosho"
