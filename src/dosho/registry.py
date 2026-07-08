@@ -16,9 +16,10 @@ if TYPE_CHECKING:
 # name -> "dosho.cabs.<module>:<attribute>". A module that vends several
 # related cabs (e.g. a tool with a backup/restore/plotter sibling command)
 # lists each one here under its own cab name, all pointing at the same
-# module. Grows one entry per ported cab -- empty until the first cab
-# (wsclean) lands.
-_CABS: dict[str, str] = {}
+# module.
+_CABS: dict[str, str] = {
+    "wsclean": "dosho.cabs.wsclean:cab",
+}
 
 
 def get(name: str) -> "Cab":
