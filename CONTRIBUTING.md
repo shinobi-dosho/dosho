@@ -38,28 +38,26 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
 
 ## Development setup
 
-The project uses [uv](https://docs.astral.sh/uv/). `dosho` declares a
-plain `stimela-ninja` dependency with no pinned source, so it resolves
-correctly when synced as part of a larger uv workspace (e.g. alongside
-`stimela-ninja` itself). Standalone, that means a bare `uv sync` may
-pull `stimela-ninja`'s latest PyPI release, which can lag its git
-`main` -- `dosho` tracks `main`. Clone `stimela-ninja` next to this
-repo and layer it in as an editable override for the duration of each
-command with `uv run --with-editable`:
+The project uses [uv](https://docs.astral.sh/uv/). `stimela-ninja` is
+published on PyPI, so a plain `uv sync` resolves it like any other
+dependency:
 
 ```bash
-git clone https://github.com/SpheMakh/stimela-ninja.git
 git clone https://github.com/SpheMakh/dosho.git
 cd dosho
 uv sync --group dev
-uv run --with-editable ../stimela-ninja -- pytest
-uv run --with-editable ../stimela-ninja -- ruff check .
+uv run pytest
+uv run ruff check .
 ```
+
+If you're working against an unreleased `stimela-ninja` change, clone
+it next to this repo and layer it in for the duration of a command with
+`uv run --with-editable ../stimela-ninja -- <command>` instead.
 
 ## Testing
 
 ```bash
-uv run --with-editable ../stimela-ninja -- pytest -q
+uv run pytest -q
 ```
 
 Every ported tool's test round-trips a representative param set through
@@ -73,6 +71,6 @@ actually dispatch/execute them.
 
 ```bash
 uv sync --group docs
-uv run --with-editable ../stimela-ninja -- sphinx-build -b html docs docs/_build/html
+uv run sphinx-build -b html docs docs/_build/html
 open docs/_build/html/index.html
 ```

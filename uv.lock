@@ -225,7 +225,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "stimela-ninja", editable = "../stimela-ninja" }]
+requires-dist = [{ name = "stimela-ninja", specifier = ">=0.1.0b2" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1009,8 +1009,8 @@ wheels = [
 
 [[package]]
 name = "stimela-ninja"
-version = "0.1.0b1"
-source = { editable = "../stimela-ninja" }
+version = "0.1.0b2"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "packaging" },
@@ -1019,31 +1019,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "rich" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "click", specifier = ">=8.1" },
-    { name = "packaging", specifier = ">=23" },
-    { name = "pydantic", specifier = ">=2.6" },
-    { name = "pydantic-settings", specifier = ">=2.2" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "rich", specifier = ">=13.7" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "ruff", specifier = ">=0.5" },
-]
-docs = [
-    { name = "furo", specifier = ">=2024.1" },
-    { name = "myst-parser", specifier = ">=2.0" },
-    { name = "sphinx", specifier = ">=7.2" },
-    { name = "sphinx-copybutton", specifier = ">=0.5" },
-]
-examples = [
-    { name = "dosho", editable = "." },
-    { name = "simms", marker = "python_full_version >= '3.11'", git = "https://github.com/wits-cfa/simms.git?rev=7511d435348d05b816d2ff4ec1f7bdd652dec6a1" },
+sdist = { url = "https://files.pythonhosted.org/packages/8e/09/2e0792ce1291d315b0fc65a3d01c36bb308f06c79034398502afed1b6d2e/stimela_ninja-0.1.0b2.tar.gz", hash = "sha256:b45eb39b0450f2be7ab742e7dcf0337b4e8b54ca020b75c3238fba5694adcffd", size = 91095, upload-time = "2026-07-09T16:58:31.672Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/d4/746efc74a50d4a26e5ba912aee922abc9b9c7b3523a571a59232d28cc09f/stimela_ninja-0.1.0b2-py3-none-any.whl", hash = "sha256:59aa88126bd52eba44657a833105221ccee002737448327f6e84da47697b919d", size = 92633, upload-time = "2026-07-09T16:58:30.712Z" },
 ]
 
 [[package]]
