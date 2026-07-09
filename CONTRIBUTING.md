@@ -9,13 +9,19 @@ documentation, and feedback on the design.
 
 ## Scope and philosophy
 
-Every tool is authored directly in Python -- no YAML dialect, no
-`dynamic_schema`-style code execution at load time. See
+Every tool must contain a single executable, a Cab's `command`
+or a `@shinobi.pystep` function. No other tool attribute/section
+will be executed, i.e, no `exec()/eval()` executions or
+dynamic parameter creation at loadtime. Tools must be fully defined
+when they are authored. The `ParamPattern` construct should be more
+than enough for most cases, and anything beyond that should be
+configured in the Python recipe's logic. See
 **[`AGENTS.md`](https://github.com/SpheMakh/dosho/blob/main/AGENTS.md)**
 for the full design rationale and tool-authoring conventions; read it
 before porting a new tool or touching `dosho/_builder.py`/
-`dosho/registry.py`. If you're considering a larger change, opening an
-issue to discuss it first is a great way to align before writing code.
+`dosho/registry.py`.
+
+Our core philosophy: **avoid unnecessary complexity like the plague**.
 
 ## Ways to contribute
 
@@ -26,26 +32,34 @@ issue to discuss it first is a great way to align before writing code.
   [issues](https://github.com/SpheMakh/dosho/issues).
 - **Improve documentation** under `docs/` or the docstrings that feed the
   API reference.
+- **Sizable change/addition** -- if you're considering a larger change,
+  opening an issue to discuss it first is a great way to align before
+  writing code.
 
 ## Development setup
 
-The project uses [uv](https://docs.astral.sh/uv/). Clone this repo next
-to a `stimela-ninja` checkout (`[tool.uv.sources]` in `pyproject.toml`
-points at the local sibling path):
+The project uses [uv](https://docs.astral.sh/uv/). `dosho` declares a
+plain `stimela-ninja` dependency with no pinned source, so it resolves
+correctly when synced as part of a larger uv workspace (e.g. alongside
+`stimela-ninja` itself). Standalone, that means a bare `uv sync` may
+pull `stimela-ninja`'s latest PyPI release, which can lag its git
+`main` -- `dosho` tracks `main`. Clone `stimela-ninja` next to this
+repo and layer it in as an editable override for the duration of each
+command with `uv run --with-editable`:
 
 ```bash
 git clone https://github.com/SpheMakh/stimela-ninja.git
 git clone https://github.com/SpheMakh/dosho.git
 cd dosho
 uv sync --group dev
-uv run pytest
-uv run ruff check .
+uv run --with-editable ../stimela-ninja -- pytest
+uv run --with-editable ../stimela-ninja -- ruff check .
 ```
 
 ## Testing
 
 ```bash
-uv run pytest -q
+uv run --with-editable ../stimela-ninja -- pytest -q
 ```
 
 Every ported tool's test round-trips a representative param set through
@@ -59,6 +73,6 @@ actually dispatch/execute them.
 
 ```bash
 uv sync --group docs
-uv run sphinx-build -b html docs docs/_build/html
+uv run --with-editable ../stimela-ninja -- sphinx-build -b html docs docs/_build/html
 open docs/_build/html/index.html
 ```

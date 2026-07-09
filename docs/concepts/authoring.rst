@@ -1,12 +1,15 @@
 Authoring tools in dosho
 =========================
 
-Why not cult-cargo's YAML?
-----------------------------
+Why a Python cab format, not cult-cargo's YAML?
+--------------------------------------------------
 
-``dosho`` exists because cult-cargo's cab YAML format -- built for
-Stimela 2.0/scabha -- carries assumptions shinobi deliberately refuses to
-support: ``dynamic_schema`` (a Python function imported and *executed* at
+cult-cargo and scabha did the real work of cataloguing this ecosystem's
+tools first, and ``dosho`` leans on that prior art throughout -- this is
+a new repository, not a rejection of the old one. ``dosho`` exists
+because cult-cargo's cab YAML format -- built for Stimela 2.0/scabha --
+carries assumptions shinobi deliberately doesn't carry forward:
+``dynamic_schema`` (a Python function imported and *executed* at
 cab-load time to compute a real tool's schema), package-scoped
 ``_include`` composition, and dtype coverage gaps that silently degrade
 to ``str``. Every tool in ``dosho`` is instead authored directly in
@@ -90,10 +93,12 @@ per-band/per-interval combinatorics) stays validation-only via
 Container images
 -------------------
 
-``dosho`` has no image-building infrastructure -- that machinery doesn't
-earn its keep for a cab-schema repository. ``dosho/images.py`` is the
-single place image references are pinned, reusing existing published
-images; bumping a tool's version is editing one constant there.
+``dosho`` has no image-building infrastructure -- cult-cargo already
+solves that problem well, it's just not this repository's job, since
+``dosho`` is a cab-schema repo, not an image-building one.
+``dosho/images.py`` is the single place image references are pinned,
+reusing existing published images; bumping a tool's version is editing
+one constant there.
 
 Layout: single-command vs. multi-command tools
 --------------------------------------------------

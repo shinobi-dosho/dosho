@@ -1,15 +1,18 @@
 # dosho -- design conventions
 
 `dosho` ("a shinobi's tool bag") is the native cab repository for shinobi
-(stimela-ninja, Stimela 3.0). It exists because cult-cargo's YAML cab
-format -- built for Stimela 2.0/scabha -- carries assumptions shinobi
-deliberately refuses to support: `dynamic_schema` (a Python function
-imported and *executed* at cab-load time to compute a real tool's schema),
+(stimela-ninja, Stimela 3.0). cult-cargo and scabha did the real work of
+cataloguing this ecosystem's tools first, and dosho's cab set leans on
+that prior art throughout -- it's a new repository, not a rejection of
+the old one. It exists because cult-cargo's YAML cab format -- built for
+Stimela 2.0/scabha -- carries assumptions shinobi deliberately doesn't
+carry forward: `dynamic_schema` (a Python function imported and
+*executed* at cab-load time to compute a real tool's schema),
 package-scoped `_include` composition, and dtype coverage gaps that
-silently degrade to `str`. Patching a compatibility loader around those
-forever was costing more than it was saving. See stimela-ninja's own
-`AGENTS.md` for the full design philosophy this repo inherits; this file
-only states what's specific to authoring cabs here.
+silently degrade to `str`. A compatibility loader could paper over those,
+but maintaining one indefinitely was costing more than it was saving. See
+stimela-ninja's own `AGENTS.md` for the full design philosophy this repo
+inherits; this file only states what's specific to authoring cabs here.
 
 ## Core rule
 
@@ -66,8 +69,9 @@ as stimela-ninja itself).
 ## Container images
 
 No image-building infrastructure here (no cult-cargo-style
-bundle-manifest.md + Dockerfile tree) -- that machinery doesn't earn its
-keep for a cab-schema repo. `src/dosho/images.py` is the single place
+bundle-manifest.md + Dockerfile tree) -- cult-cargo already solves that
+problem well; it just isn't this repo's job, since dosho is a cab-schema
+repo, not an image-building one. `src/dosho/images.py` is the single place
 image references are pinned (reusing existing `quay.io/stimela2/*` images
 where they already exist); bumping a tool's version is editing one
 constant there. The repo's own git tag versions the cab set as a whole.
@@ -110,9 +114,10 @@ identifier, e.g. `"simms-skysim"` -> attribute `skysim`).
 
 Port from the real tool's own `--help`/docs (or, for a `@shinobi.pystep`
 wrapper, the real Python package's own function signature), cross-checked
-against the matching cult-cargo YAML (if one exists) as a second source,
-not copied from it blindly -- cult-cargo's own schema for the hard cases
-(wsclean, cubical, quartical) is exactly what's being replaced. Every
+against the matching cult-cargo YAML (if one exists) as a useful second
+source -- but not copied from it blindly, since cult-cargo's own schema
+for the hard cases (wsclean, cubical, quartical) has the known gaps
+dosho exists to close. Every
 ported tool gets a test: for a `Cab`, round-trip a representative param
 set through `build_argv` and check the real CLI token shape; for a
 pystep, check its `inputs_model` schema shape and that it wires into a
