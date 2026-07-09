@@ -70,4 +70,10 @@ def get(name: str) -> "Cab | StepRef":
 
 
 def list_cabs() -> list[str]:
+    """List every tool name registered in this repository.
+
+    Returns:
+        The registered names (may be hyphenated, e.g. `"simms-skysim"`),
+        in no particular order.
+    """
     return list(_entries())

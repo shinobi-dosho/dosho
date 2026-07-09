@@ -41,17 +41,31 @@ def _normalize_caltables(
 
 
 class ListobsOutputs(BaseModel):
+    """Outputs of the `listobs` step."""
+
     listfile: Path
 
 
 @shinobi.pystep(image=images.CASA6)
 def listobs(ctx, vis: Path, listfile: Path) -> ListobsOutputs:
+    """Write a CASA `listobs` text summary of a measurement set.
+
+    Args:
+        ctx: The pystep execution context.
+        vis: Path to the measurement set to summarize.
+        listfile: Path to write the summary to (overwritten if it exists).
+
+    Returns:
+        `ListobsOutputs` with the written `listfile`.
+    """
     listobs_fn = ctx.import_func("listobs", "casatasks")
     listobs_fn(vis=str(vis), listfile=str(listfile), overwrite=True)
     return ListobsOutputs(listfile=listfile)
 
 
 class MstransformOutputs(BaseModel):
+    """Outputs of the `mstransform` step."""
+
     outputvis: Path
 
 
@@ -124,6 +138,8 @@ def mstransform(
 
 
 class FixvisOutputs(BaseModel):
+    """Outputs of the `fixvis` step."""
+
     outputvis: Path
 
 
@@ -145,6 +161,8 @@ def fixvis(
 
 
 class ClearcalOutputs(BaseModel):
+    """Outputs of the `clearcal` step."""
+
     vis: Path
 
 
@@ -161,6 +179,8 @@ def clearcal(ctx, vis: Path, field: str = "", addmodel: bool = False) -> Clearca
 
 
 class InitweightsOutputs(BaseModel):
+    """Outputs of the `initweights` step."""
+
     vis: Path
 
 
@@ -173,6 +193,13 @@ def initweights(ctx, vis: Path, wtmode: str = "ones", dowtsp: bool = True) -> In
 
 
 class FlagdataOutputs(BaseModel):
+    """Outputs of the `flagdata` step.
+
+    Attributes:
+        vis: The (in-place-flagged) measurement set.
+        summary: Flag-count breakdown, populated only when `mode="summary"`.
+    """
+
     vis: Path
     summary: dict | None = None
 
@@ -239,6 +266,8 @@ def flagdata(
 
 
 class SetjyOutputs(BaseModel):
+    """Outputs of the `setjy` step."""
+
     vis: Path
 
 
@@ -282,6 +311,8 @@ def setjy(
 
 
 class GaincalOutputs(BaseModel):
+    """Outputs of the `gaincal` step."""
+
     caltable: Path
 
 
@@ -334,6 +365,8 @@ def gaincal(
 
 
 class PolcalOutputs(BaseModel):
+    """Outputs of the `polcal` step."""
+
     caltable: Path
 
 
@@ -377,6 +410,8 @@ def polcal(
 
 
 class BandpassOutputs(BaseModel):
+    """Outputs of the `bandpass` step."""
+
     caltable: Path
 
 
@@ -398,6 +433,28 @@ def bandpass(
     interp: list[str] | None = None,
     parang: bool = False,
 ) -> BandpassOutputs:
+    """Solve for a bandpass (per-channel gain) calibration table.
+
+    Args:
+        ctx: The pystep execution context.
+        vis: Path to the measurement set to solve against.
+        caltable: Path to write the solved bandpass table to.
+        solint: Solution interval.
+        combine: Data axes to combine solutions over (e.g. `"scan"`).
+        field: Field selection string (typically the bandpass calibrator).
+        spw: Spectral window selection string.
+        refant: Reference antenna.
+        minsnr: Minimum SNR for an accepted solution.
+        solnorm: Whether to normalize the solution amplitudes.
+        fillgaps: Number of channels to interpolate over flagged gaps.
+        gaintable: Previously-solved calibration tables to pre-apply.
+        gainfield: Field selection per `gaintable` entry.
+        interp: Interpolation mode per `gaintable` entry.
+        parang: Whether to apply the parallactic angle correction.
+
+    Returns:
+        `BandpassOutputs` with the solved `caltable`.
+    """
     bandpass_fn = ctx.import_func("bandpass", "casatasks")
     gaintable, gainfield, interp = _normalize_caltables(gaintable, gainfield, interp)
     bandpass_fn(
@@ -420,6 +477,8 @@ def bandpass(
 
 
 class ApplycalOutputs(BaseModel):
+    """Outputs of the `applycal` step."""
+
     vis: Path
 
 
@@ -454,6 +513,8 @@ def applycal(
 
 
 class FluxscaleOutputs(BaseModel):
+    """Outputs of the `fluxscale` step."""
+
     fluxtable: Path
 
 
@@ -470,6 +531,13 @@ def fluxscale(ctx, vis: Path, caltable: Path, fluxtable: Path, reference: str, t
 
 
 class FlagmanagerOutputs(BaseModel):
+    """Outputs of the `flagmanager` step.
+
+    Attributes:
+        vis: The measurement set the flag version operation ran against.
+        versionlist: Flag version names, populated only when `mode="list"`.
+    """
+
     vis: Path
     versionlist: list[str] | None = None
 
