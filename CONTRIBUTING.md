@@ -9,13 +9,19 @@ documentation, and feedback on the design.
 
 ## Scope and philosophy
 
-Every tool is authored directly in Python -- no YAML dialect, no
-`dynamic_schema`-style code execution at load time. See
+Every tool must contain a single executable, a Cab's `command`
+or a `@shinobi.pystep` function. No other tool attribute/section
+will be executed, i.e, no `exec()/eval()` executions or
+dynamic parameter creation at loadtime. Tools must be fully defined
+when they are authored. The `ParamPattern` construct should be more
+than enough for most cases, and anything beyond that should be
+configured in the Python recipe's logic. See
 **[`AGENTS.md`](https://github.com/SpheMakh/dosho/blob/main/AGENTS.md)**
 for the full design rationale and tool-authoring conventions; read it
 before porting a new tool or touching `dosho/_builder.py`/
-`dosho/registry.py`. If you're considering a larger change, opening an
-issue to discuss it first is a great way to align before writing code.
+`dosho/registry.py`.
+
+Our core philosophy: **avoid unnecessary complexity like the plague**.
 
 ## Ways to contribute
 
@@ -26,6 +32,9 @@ issue to discuss it first is a great way to align before writing code.
   [issues](https://github.com/SpheMakh/dosho/issues).
 - **Improve documentation** under `docs/` or the docstrings that feed the
   API reference.
+- **Sizable change/addition** -- if you're considering a larger change,
+  opening an issue to discuss it first is a great way to align before
+  writing code.
 
 ## Development setup
 
