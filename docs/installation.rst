@@ -6,18 +6,17 @@ Requirements
 
 * Python 3.10 or newer
 * `shinobi <https://stimela-ninja.readthedocs.io/en/latest/installation.html>`_
-  (the ``stimela-ninja`` distribution) -- installed automatically as a
-  dependency, but not yet published to PyPI itself; see below.
+  (the ``stimela-ninja`` distribution, published on PyPI) -- installed
+  automatically as a dependency.
 
 From GitHub
 -----------
 
-Neither ``dosho`` nor its ``stimela-ninja`` dependency is on PyPI yet, so
-install both from GitHub:
+``dosho`` itself isn't published to PyPI yet, so install it from GitHub
+(its ``stimela-ninja`` dependency resolves normally from PyPI):
 
 .. code-block:: console
 
-    $ pip install git+https://github.com/SpheMakh/stimela-ninja.git
     $ pip install git+https://github.com/SpheMakh/dosho.git
 
 This installs the importable ``dosho`` package, and registers it under
@@ -28,29 +27,26 @@ it up automatically, with no further configuration.
 For development
 ----------------
 
-The project uses `uv <https://docs.astral.sh/uv/>`_. ``dosho`` declares
-a plain ``stimela-ninja`` dependency with no pinned source, so it
-resolves correctly when synced as part of a larger uv workspace (e.g.
-alongside ``stimela-ninja`` itself). Standalone, that means a bare
-``uv sync`` may pull ``stimela-ninja``'s latest PyPI release, which can
-lag its git ``main`` -- ``dosho`` tracks ``main``. Clone
-``stimela-ninja`` next to this repo and layer it in as an editable
-override for the duration of each command with ``uv run
---with-editable``:
+The project uses `uv <https://docs.astral.sh/uv/>`_. ``stimela-ninja``
+is published on PyPI, so a plain ``uv sync`` resolves it like any other
+dependency:
 
 .. code-block:: console
 
-    $ git clone https://github.com/SpheMakh/stimela-ninja.git
     $ git clone https://github.com/SpheMakh/dosho.git
     $ cd dosho
     $ uv sync --group dev
-    $ uv run --with-editable ../stimela-ninja -- pytest
-    $ uv run --with-editable ../stimela-ninja -- ruff check .
+    $ uv run pytest
+    $ uv run ruff check .
+
+If you're working against an unreleased ``stimela-ninja`` change, clone
+it next to this repo and layer it in for the duration of a command with
+``uv run --with-editable ../stimela-ninja -- <command>`` instead.
 
 To build the documentation locally:
 
 .. code-block:: console
 
     $ uv sync --group docs
-    $ uv run --with-editable ../stimela-ninja -- sphinx-build -b html docs docs/_build/html
+    $ uv run sphinx-build -b html docs docs/_build/html
     $ open docs/_build/html/index.html

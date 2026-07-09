@@ -225,7 +225,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "stimela-ninja" }]
+requires-dist = [{ name = "stimela-ninja", specifier = ">=0.1.0b2" }]
 
 [package.metadata.requires-dev]
 dev = [

@@ -13,7 +13,7 @@ authors = [
     { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
 ]
 dependencies = [
-    "stimela-ninja",
+    "stimela-ninja>=0.1.0b2",
 ]
 
 [dependency-groups]
