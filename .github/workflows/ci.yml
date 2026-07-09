@@ -13,23 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
-    defaults:
-      run:
-        working-directory: dosho
     steps:
       - name: Check out dosho
         uses: actions/checkout@v7
-        with:
-          path: dosho
-
-      # PyPI's stimela-ninja release lags its git main (see CONTRIBUTING.md
-      # "Development setup") -- build against main via --with-editable
-      # rather than the plain `uv sync` resolution.
-      - name: Check out stimela-ninja
-        uses: actions/checkout@v7
-        with:
-          repository: SpheMakh/stimela-ninja
-          path: stimela-ninja
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -40,27 +26,16 @@ jobs:
         run: uv sync --group dev
 
       - name: Run tests
-        run: uv run --with-editable ../stimela-ninja -- pytest -q
+        run: uv run pytest -q
 
       - name: Lint
         run: uv run ruff check .
 
   docs:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: dosho
     steps:
       - name: Check out dosho
         uses: actions/checkout@v7
-        with:
-          path: dosho
-
-      - name: Check out stimela-ninja
-        uses: actions/checkout@v7
-        with:
-          repository: SpheMakh/stimela-ninja
-          path: stimela-ninja
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -71,6 +46,4 @@ jobs:
         run: uv sync --group docs
 
       - name: Build docs
-        run: >
-          uv run --with-editable ../stimela-ninja --
-          sphinx-build -b html docs docs/_build/html -W --keep-going
+        run: uv run sphinx-build -b html docs docs/_build/html -W --keep-going
