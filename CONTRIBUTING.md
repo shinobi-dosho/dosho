@@ -38,23 +38,28 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
 
 ## Development setup
 
-The project uses [uv](https://docs.astral.sh/uv/). Clone this repo next
-to a `stimela-ninja` checkout (`[tool.uv.sources]` in `pyproject.toml`
-points at the local sibling path):
+The project uses [uv](https://docs.astral.sh/uv/). `dosho` declares a
+plain `stimela-ninja` dependency with no pinned source, so it resolves
+correctly when synced as part of a larger uv workspace (e.g. alongside
+`stimela-ninja` itself). Standalone, that means a bare `uv sync` may
+pull `stimela-ninja`'s latest PyPI release, which can lag its git
+`main` -- `dosho` tracks `main`. Clone `stimela-ninja` next to this
+repo and layer it in as an editable override for the duration of each
+command with `uv run --with-editable`:
 
 ```bash
 git clone https://github.com/SpheMakh/stimela-ninja.git
 git clone https://github.com/SpheMakh/dosho.git
 cd dosho
 uv sync --group dev
-uv run pytest
-uv run ruff check .
+uv run --with-editable ../stimela-ninja -- pytest
+uv run --with-editable ../stimela-ninja -- ruff check .
 ```
 
 ## Testing
 
 ```bash
-uv run pytest -q
+uv run --with-editable ../stimela-ninja -- pytest -q
 ```
 
 Every ported tool's test round-trips a representative param set through
@@ -68,6 +73,6 @@ actually dispatch/execute them.
 
 ```bash
 uv sync --group docs
-uv run sphinx-build -b html docs docs/_build/html
+uv run --with-editable ../stimela-ninja -- sphinx-build -b html docs docs/_build/html
 open docs/_build/html/index.html
 ```

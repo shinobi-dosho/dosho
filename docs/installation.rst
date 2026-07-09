@@ -28,9 +28,15 @@ it up automatically, with no further configuration.
 For development
 ----------------
 
-The project uses `uv <https://docs.astral.sh/uv/>`_. Clone ``dosho`` next
-to a ``stimela-ninja`` checkout (``[tool.uv.sources]`` in
-``pyproject.toml`` points at the local sibling path):
+The project uses `uv <https://docs.astral.sh/uv/>`_. ``dosho`` declares
+a plain ``stimela-ninja`` dependency with no pinned source, so it
+resolves correctly when synced as part of a larger uv workspace (e.g.
+alongside ``stimela-ninja`` itself). Standalone, that means a bare
+``uv sync`` may pull ``stimela-ninja``'s latest PyPI release, which can
+lag its git ``main`` -- ``dosho`` tracks ``main``. Clone
+``stimela-ninja`` next to this repo and layer it in as an editable
+override for the duration of each command with ``uv run
+--with-editable``:
 
 .. code-block:: console
 
@@ -38,13 +44,13 @@ to a ``stimela-ninja`` checkout (``[tool.uv.sources]`` in
     $ git clone https://github.com/SpheMakh/dosho.git
     $ cd dosho
     $ uv sync --group dev
-    $ uv run pytest
-    $ uv run ruff check .
+    $ uv run --with-editable ../stimela-ninja -- pytest
+    $ uv run --with-editable ../stimela-ninja -- ruff check .
 
 To build the documentation locally:
 
 .. code-block:: console
 
     $ uv sync --group docs
-    $ uv run sphinx-build -b html docs docs/_build/html
+    $ uv run --with-editable ../stimela-ninja -- sphinx-build -b html docs docs/_build/html
     $ open docs/_build/html/index.html
