@@ -21,6 +21,8 @@ from dosho import images
 
 
 class PlotmsOutputs(BaseModel):
+    """Outputs of the `plotms` step."""
+
     plotfile: Path
 
 
@@ -42,6 +44,29 @@ def plotms(
     overwrite: bool = True,
     showgui: bool = False,
 ) -> PlotmsOutputs:
+    """Render a CASA `plotms` diagnostic plot.
+
+    Args:
+        ctx: The pystep execution context.
+        vis: Path to the measurement set to plot.
+        xaxis: Column/quantity to plot on the x-axis.
+        yaxis: Column/quantity to plot on the y-axis.
+        plotfile: Path to write the rendered plot to.
+        xdatacolumn: Data column for `xaxis`, if applicable.
+        ydatacolumn: Data column for `yaxis`, if applicable.
+        coloraxis: Quantity to color points by.
+        field: Field selection string.
+        correlation: Correlation selection string.
+        iteraxis: Axis to iterate multi-panel plots over (e.g. per
+            correlation), for the fuller diagnostic-plot shape.
+        expformat: Output image format.
+        exprange: Which iteration panels to export (`"all"` or a range).
+        overwrite: Whether to overwrite an existing `plotfile`.
+        showgui: Whether to show the interactive GUI while plotting.
+
+    Returns:
+        `PlotmsOutputs` with the written `plotfile`.
+    """
     plotms_fn = ctx.import_func("plotms", "casaplotms")
     plotms_fn(
         vis=str(vis),
