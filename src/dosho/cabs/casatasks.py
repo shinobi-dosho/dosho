@@ -28,6 +28,18 @@ from pydantic import BaseModel
 from dosho import images
 
 
+def _normalize_caltables(
+    gaintable: list[Path] | None,
+    gainfield: list[str] | None,
+    interp: list[str] | None,
+) -> tuple[list[str], list[str], list[str]]:
+    """Coerce the optional, previously-solved-table triple shared by
+    `gaincal`/`polcal`/`bandpass` into the plain-string lists CASA tasks
+    expect, defaulting `None` to an empty list.
+    """
+    return [str(g) for g in (gaintable or [])], gainfield or [], interp or []
+
+
 class ListobsOutputs(BaseModel):
     listfile: Path
 
@@ -299,6 +311,7 @@ def gaincal(
     on the fly while solving this one.
     """
     gaincal_fn = ctx.import_func("gaincal", "casatasks")
+    gaintable, gainfield, interp = _normalize_caltables(gaintable, gainfield, interp)
     gaincal_fn(
         vis=str(vis),
         caltable=str(caltable),
@@ -312,9 +325,9 @@ def gaincal(
         refant=refant,
         minsnr=minsnr,
         solnorm=solnorm,
-        gaintable=[str(g) for g in (gaintable or [])],
-        gainfield=gainfield or [],
-        interp=interp or [],
+        gaintable=gaintable,
+        gainfield=gainfield,
+        interp=interp,
         parang=parang,
     )
     return GaincalOutputs(caltable=caltable)
@@ -345,6 +358,7 @@ def polcal(
     variation on the `gaincal` wrapper above).
     """
     polcal_fn = ctx.import_func("polcal", "casatasks")
+    gaintable, gainfield, interp = _normalize_caltables(gaintable, gainfield, interp)
     polcal_fn(
         vis=str(vis),
         caltable=str(caltable),
@@ -355,9 +369,9 @@ def polcal(
         solint=solint,
         combine=combine,
         refant=refant,
-        gaintable=[str(g) for g in (gaintable or [])],
-        gainfield=gainfield or [],
-        interp=interp or [],
+        gaintable=gaintable,
+        gainfield=gainfield,
+        interp=interp,
     )
     return PolcalOutputs(caltable=caltable)
 
@@ -385,6 +399,7 @@ def bandpass(
     parang: bool = False,
 ) -> BandpassOutputs:
     bandpass_fn = ctx.import_func("bandpass", "casatasks")
+    gaintable, gainfield, interp = _normalize_caltables(gaintable, gainfield, interp)
     bandpass_fn(
         vis=str(vis),
         caltable=str(caltable),
@@ -396,9 +411,9 @@ def bandpass(
         minsnr=minsnr,
         solnorm=solnorm,
         fillgaps=fillgaps,
-        gaintable=[str(g) for g in (gaintable or [])],
-        gainfield=gainfield or [],
-        interp=interp or [],
+        gaintable=gaintable,
+        gainfield=gainfield,
+        interp=interp,
         parang=parang,
     )
     return BandpassOutputs(caltable=caltable)
