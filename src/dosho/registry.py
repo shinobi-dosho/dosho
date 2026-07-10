@@ -15,45 +15,47 @@ if TYPE_CHECKING:
     from shinobi import Cab
     from shinobi.steps.schema import StepRef
 
-# registered name -> "dosho.cabs:<attribute>". The registered name is the
-# tool's own real name (may be hyphenated, e.g. "simms-skysim",
-# "mosaic-queen" -- not a valid Python identifier), while the attribute is
-# whatever `dosho/cabs/__init__.py` re-exports it as (a valid identifier,
-# e.g. `skysim`, `mosaic_queen`). Every entry resolves through the same
-# `dosho.cabs` module now that it re-exports everything -- `get()`
-# doesn't care whether a given entry is a `Cab` (real binary-flavour
-# tool) or a `StepRef` (from `@shinobi.pystep`, e.g. a CASA task) --
-# `Recipe.add_step` accepts either identically.
-_ENTRIES: dict[str, str] = {
-    "wsclean": "dosho.cabs:wsclean",
-    "cubical": "dosho.cabs:cubical",
-    "quartical": "dosho.cabs:quartical",
-    "aoflagger": "dosho.cabs:aoflagger",
-    "tricolour": "dosho.cabs:tricolour",
-    "crystalball": "dosho.cabs:crystalball",
-    "owlcat_plotelev": "dosho.cabs:owlcat_plotelev",
-    "shadems": "dosho.cabs:shadems",
-    "ragavi": "dosho.cabs:ragavi",
-    "sofia2": "dosho.cabs:sofia2",
-    "simms-skysim": "dosho.cabs:skysim",
-    "simms-telsim": "dosho.cabs:telsim",
-    "simms": "dosho.cabs:simms_classic",
-    "mosaic-queen": "dosho.cabs:mosaic_queen",
-    "listobs": "dosho.cabs:listobs",
-    "mstransform": "dosho.cabs:mstransform",
-    "fixvis": "dosho.cabs:fixvis",
-    "clearcal": "dosho.cabs:clearcal",
-    "initweights": "dosho.cabs:initweights",
-    "flagdata": "dosho.cabs:flagdata",
-    "setjy": "dosho.cabs:setjy",
-    "gaincal": "dosho.cabs:gaincal",
-    "polcal": "dosho.cabs:polcal",
-    "bandpass": "dosho.cabs:bandpass",
-    "applycal": "dosho.cabs:applycal",
-    "fluxscale": "dosho.cabs:fluxscale",
-    "flagmanager": "dosho.cabs:flagmanager",
-    "plotms": "dosho.cabs:plotms",
+# registered name -> re-exported attribute, for the handful of tools whose
+# real (possibly hyphenated) name doesn't match the identifier
+# `dosho/cabs/__init__.py` re-exports it as. Every other entry in
+# `dosho.cabs.__all__` registers under its own attribute name unchanged --
+# see `_build_entries` below. Keeping just the exceptions here (instead of
+# a full name -> attribute table) means a new cab only has to be added
+# once, in `dosho/cabs/__init__.py`'s imports/`__all__`, unless its real
+# name needs to differ from its attribute name.
+_NAME_OVERRIDES: dict[str, str] = {
+    "skysim": "simms-skysim",
+    "telsim": "simms-telsim",
+    "simms_classic": "simms",
+    "mosaic_queen": "mosaic-queen",
 }
+
+
+_entries_cache: dict[str, str] | None = None
+
+
+def _entries() -> dict[str, str]:
+    """registered name -> "dosho.cabs:<attribute>" for every tool
+    `dosho.cabs` re-exports. Every entry resolves through the same
+    `dosho.cabs` module now that it re-exports everything -- `get()`
+    doesn't care whether a given entry is a `Cab` (real binary-flavour
+    tool) or a `StepRef` (from `@shinobi.pystep`, e.g. a CASA task) --
+    `Recipe.add_step` accepts either identically.
+
+    Computed lazily and cached: reading `dosho.cabs.__all__` requires
+    importing that module, which -- per its own docstring -- eagerly
+    constructs every `Cab`/`StepRef` in the repo. Deferring this to first
+    use keeps `import dosho.registry` itself cheap, matching this
+    module's own "lazy, string-keyed lookup" contract.
+    """
+    global _entries_cache
+    if _entries_cache is None:
+        from dosho import cabs
+
+        _entries_cache = {
+            _NAME_OVERRIDES.get(attr, attr): f"dosho.cabs:{attr}" for attr in cabs.__all__
+        }
+    return _entries_cache
 
 
 def get(name: str) -> "Cab | StepRef":
@@ -61,11 +63,17 @@ def get(name: str) -> "Cab | StepRef":
     one of this repo's entries -- the contract `shinobi.cabs.get` relies
     on to fall through to the next installed provider.
     """
-    target = _ENTRIES[name]
+    target = _entries()[name]
     module_name, attr = target.split(":", 1)
     module = importlib.import_module(module_name)
     return getattr(module, attr)
 
 
 def list_cabs() -> list[str]:
-    return list(_ENTRIES)
+    """List every tool name registered in this repository.
+
+    Returns:
+        The registered names (may be hyphenated, e.g. `"simms-skysim"`),
+        in no particular order.
+    """
+    return list(_entries())
