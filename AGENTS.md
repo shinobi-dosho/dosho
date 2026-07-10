@@ -71,10 +71,15 @@ as stimela-ninja itself).
 No image-building infrastructure here (no cult-cargo-style
 bundle-manifest.md + Dockerfile tree) -- cult-cargo already solves that
 problem well; it just isn't this repo's job, since dosho is a cab-schema
-repo, not an image-building one. `src/dosho/images.py` is the single place
-image references are pinned (reusing existing `quay.io/stimela2/*` images
-where they already exist); bumping a tool's version is editing one
-constant there. The repo's own git tag versions the cab set as a whole.
+repo, not an image-building one. `src/dosho/images.yaml` is the single
+place image references are pinned (reusing existing
+`quay.io/stimela2/*` images where they already exist); bumping a tool's
+version is editing one key there. `src/dosho/images.py` loads that file
+and exposes each entry as a module-level constant (`images.WSCLEAN`,
+`images.CASA6`, ...), so cab modules import it exactly as before -- this
+is plain key-value data, not a cab schema, so it doesn't fall under the
+"no YAML authoring path" rule above. The repo's own git tag versions the
+cab set as a whole.
 
 ## Repo layout
 
@@ -86,7 +91,8 @@ src/dosho/
                      # registered under the "shinobi.cabs" entry-point group
                      # -- for a caller that only knows the tool's name at
                      # *runtime* (the CLI, shinobi.cabs discovery)
-  images.py         # pinned {tool: "quay.io/stimela2/<tool>:<tag>"} constants
+  images.yaml       # pinned {tool: "quay.io/stimela2/<tool>:<tag>"} data
+  images.py         # loads images.yaml, exposes each key as a module constant
   _builder.py        # define_cab() helper over Cab(...) + shinobi.loaders.build_model
   cabs/
     __init__.py      # re-exports every tool-level object by name, so
