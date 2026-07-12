@@ -66,7 +66,8 @@ images:
       base: BASE_ASTRO
       package: "quartical==0.2.7"
       pip_install_flags: "--no-build-isolation"
-      cmd: "goquartical --help"
+      # goquartical is config-file-driven and rejects --help; import-check instead.
+      cmd: "python3 -c 'import quartical'"
       dockerfile: pip/Dockerfile
   AOFLAGGER:
     source: "https://gitlab.com/aroffringa/aoflagger"
