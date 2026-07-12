@@ -140,10 +140,17 @@ images:
       # bare `sofia` wants a parameter file (exit 7); -h is the clean self-check.
       cmd: "sofia -h"
       dockerfile: sofia2/Dockerfile
-  # CASA6 pins the real tested tag caracal2 relies on (casatasks/casaplotms).
+  # CASA6 (casatasks/casaplotms) built fresh -- lean KERN base + casa wheels +
+  # baked measures data + extracted casaplotms AppImage. The heavy, isolated one.
   CASA6:
     source: "https://casadocs.readthedocs.io"
-    ref: "quay.io/stimela2/casa6:6.7-cc0.2.1"
+    name: casa6
+    build:
+      version: "6.7"
+      kern_version: "10"
+      wheel_version: "6.7.0.31"
+      cmd: "python3 -c 'import casatasks, casaplotms'"
+      dockerfile: casa6/Dockerfile
   # DEPRECATED: the pre-3.0 simms command, unused by any worker -- slated for removal.
   SIMMS_CLASSIC:
     source: "https://github.com/wits-cfa/simms"

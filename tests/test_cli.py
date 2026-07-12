@@ -5,13 +5,26 @@ import json
 from click.testing import CliRunner
 
 from dosho import cli
+from dosho import images as _images
+
+
+def _a_ref_only_key() -> str:
+    """A manifest key that uses `ref:` (external image), for ref-only assertions.
+
+    Derived from the manifest rather than hardcoded so onboarding a tool
+    (flipping its entry ref:->build:) doesn't break these tests.
+    """
+    for key, entry in _images.manifest["images"].items():
+        if "ref" in entry:
+            return key
+    raise AssertionError("manifest has no ref: entry to test against")
 
 
 def test_images_list_shows_build_and_ref_kinds():
     result = CliRunner().invoke(cli.main, ["images", "list"])
     assert result.exit_code == 0, result.output
     assert "SIMMS" in result.output and "[build]" in result.output
-    assert "CASA6" in result.output and "[ref  ]" in result.output
+    assert _a_ref_only_key() in result.output and "[ref  ]" in result.output
 
 
 def test_build_dry_run_renders_dockerfile_and_tag():
@@ -49,7 +62,7 @@ def test_registry_override_changes_tag():
 
 
 def test_build_refuses_a_ref_only_image():
-    result = CliRunner().invoke(cli.main, ["images", "build", "CASA6"])
+    result = CliRunner().invoke(cli.main, ["images", "build", _a_ref_only_key()])
     assert result.exit_code != 0
     assert "does not build" in result.output
 
@@ -64,7 +77,10 @@ def test_build_keys_emits_json_list_of_build_images():
     result = CliRunner().invoke(cli.main, ["images", "build-keys"])
     assert result.exit_code == 0, result.output
     keys = json.loads(result.output)
-    assert "SIMMS" in keys and "CASA6" not in keys  # CASA6 is a ref:, not built
+    assert "SIMMS" in keys
+    # ref: entries are external images, never in the build set
+    ref_only = {k for k, e in _images.manifest["images"].items() if "ref" in e}
+    assert ref_only and not (ref_only & set(keys))
 
 
 def test_build_plan_orders_bases_before_tools():
