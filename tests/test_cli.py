@@ -1,5 +1,7 @@
 """Tests for the `dosho images` build CLI (no docker required)."""
 
+import json
+
 from click.testing import CliRunner
 
 from dosho import cli
@@ -48,3 +50,43 @@ def test_build_unknown_image_errors():
     result = CliRunner().invoke(cli.main, ["images", "build", "NOPE"])
     assert result.exit_code != 0
     assert "no image" in result.output
+
+
+def test_build_keys_emits_json_list_of_build_images():
+    result = CliRunner().invoke(cli.main, ["images", "build-keys"])
+    assert result.exit_code == 0, result.output
+    keys = json.loads(result.output)
+    assert "SIMMS" in keys and "WSCLEAN" not in keys  # WSCLEAN is a ref:, not built
+
+
+def test_push_skips_already_published_tag(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
+    monkeypatch.setattr(cli, "_run", lambda *a, **k: calls.append(a))
+    result = CliRunner().invoke(cli.main, ["images", "push", "SIMMS"])
+    assert result.exit_code == 0, result.output
+    assert "already published" in result.output
+    assert calls == []  # no docker push
+
+
+def test_push_force_overwrites(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
+    monkeypatch.setattr(cli, "_run", lambda argv, **k: calls.append(argv))
+    result = CliRunner().invoke(cli.main, ["images", "push", "SIMMS", "--force"])
+    assert result.exit_code == 0, result.output
+    assert any(a[:2] == ["docker", "push"] for a in calls)
+
+
+def test_verify_ok_when_present(monkeypatch):
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
+    result = CliRunner().invoke(cli.main, ["images", "verify"])
+    assert result.exit_code == 0, result.output
+    assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0" in result.output
+
+
+def test_verify_fails_when_missing(monkeypatch):
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: False)
+    result = CliRunner().invoke(cli.main, ["images", "verify"])
+    assert result.exit_code != 0
+    assert "MISSING" in result.output

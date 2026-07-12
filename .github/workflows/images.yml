@@ -1,0 +1,91 @@
+# Build dosho's container images and push them to ghcr.io/shinobi-dosho.
+#
+# Automated "merge -> build -> push" (BioContainers-style): when a `build:`
+# image's Dockerfile or the manifest changes, the matching image is rebuilt
+# and pushed with the built-in GITHUB_TOKEN (no external secret -- the repo
+# lives under the shinobi-dosho org). Published tags are immutable: the
+# `dosho images` push guard skips a tag that already exists unless forced.
+name: images
+
+on:
+  push:
+    branches: [main, caracal2-tests]
+    paths:
+      - "src/dosho/cargo/**"
+      - "src/dosho/images.yaml"
+      - ".github/workflows/images.yml"
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Image KEY to build (blank = all build: images)"
+        required: false
+        default: ""
+      force:
+        description: "Overwrite an already-published tag"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC -- verify images are still present
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Emit the JSON matrix of `build:` image KEYs (or the single dispatched one).
+  discover:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.keys.outputs.images }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - id: keys
+        run: |
+          if [ -n "${{ github.event.inputs.image }}" ]; then
+            images='["${{ github.event.inputs.image }}"]'
+          else
+            images="$(uv run dosho images build-keys)"
+          fi
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+          echo "build matrix: $images"
+
+  build:
+    needs: discover
+    if: needs.discover.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.images) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      # Runner default docker (buildkit) builds into the local image store, so
+      # the CLI's sanity `docker run` + `docker push` see the image. (No
+      # setup-buildx-action: its container driver would need --load.)
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: build + push (guarded; skips already-published tags)
+        run: |
+          flags="--push"
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
+          uv run dosho images build "${{ matrix.image }}" $flags
+
+  # Scheduled health check: every build: image's tag must still be in the registry.
+  verify:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: uv run dosho images verify
