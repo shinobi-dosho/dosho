@@ -44,6 +44,54 @@ def _build_keys(manifest: dict[str, Any]) -> list[str]:
     return [key for key, entry in manifest["images"].items() if "build" in entry]
 
 
+# Repo-relative path whose change invalidates *every* build image: the manifest
+# (metadata like bundle_version, or any entry's version/base, can move). A CI
+# workflow change is deliberately NOT here -- it orchestrates builds but can't
+# change image contents, so it shouldn't force a full (cacheless) rebuild.
+_GLOBAL_TRIGGERS = frozenset({"src/dosho/images.yaml"})
+_CARGO_PREFIX = "src/dosho/cargo/"
+
+
+def _affected_keys(manifest: dict[str, Any], changed_files: list[str]) -> set[str]:
+    """The set of `build:` KEYs that must rebuild given `changed_files`
+    (repo-relative paths from a push diff).
+
+    A build image's context is its Dockerfile's parent dir under `cargo/`, so a
+    change to *any* file in that dir (e.g. `casa6/casasiteconfig.py`, or the
+    shared `pip/Dockerfile` used by many tools) invalidates every KEY built from
+    it. Changing the manifest rebuilds everything. Finally, a changed base image
+    transitively pulls in everything that builds `FROM` it.
+    """
+    images = manifest["images"]
+    build = _build_keys(manifest)
+    if _GLOBAL_TRIGGERS.intersection(changed_files):
+        return set(build)
+
+    # cargo subdir (first path component of each entry's dockerfile) -> its KEYs.
+    subdir_keys: dict[str, set[str]] = {}
+    for key in build:
+        subdir = images[key]["build"]["dockerfile"].split("/", 1)[0]
+        subdir_keys.setdefault(subdir, set()).add(key)
+
+    affected: set[str] = set()
+    for path in changed_files:
+        if path.startswith(_CARGO_PREFIX):
+            subdir = path[len(_CARGO_PREFIX) :].split("/", 1)[0]
+            affected |= subdir_keys.get(subdir, set())
+
+    # Base-DAG invalidation: rebuild dependents of any affected base, transitively.
+    while True:
+        grew = {
+            key
+            for key in build
+            if images[key]["build"].get("base") in affected and key not in affected
+        }
+        if not grew:
+            break
+        affected |= grew
+    return affected
+
+
 def _run(argv: list[str], **kwargs: Any) -> None:
     click.echo(click.style("+ " + " ".join(argv), fg="cyan"))
     subprocess.run(argv, check=True, **kwargs)
@@ -56,7 +104,9 @@ def _get_build_entry(key: str) -> tuple[dict[str, Any], dict[str, Any]]:
         raise click.ClickException(f"no image {key!r} in the manifest (have: {', '.join(imgs)})")
     entry = imgs[key]
     if "build" not in entry:
-        raise click.ClickException(f"image {key!r} is a `ref:` (external) -- dosho does not build it")
+        raise click.ClickException(
+            f"image {key!r} is a `ref:` (external) -- dosho does not build it"
+        )
     return entry, manifest["metadata"]
 
 
@@ -69,7 +119,9 @@ def _tag(key: str, entry: dict[str, Any], metadata: dict[str, Any], registry: st
 _OPTIONAL_TEMPLATE_VARS = ("pre_install", "post_install", "extra_deps", "pip_install_flags")
 
 
-def _render_dockerfile(entry: dict[str, Any], metadata: dict[str, Any], package: str | None) -> tuple[str, Path]:
+def _render_dockerfile(
+    entry: dict[str, Any], metadata: dict[str, Any], package: str | None
+) -> tuple[str, Path]:
     build = dict(entry["build"])
     if package:
         build["package"] = package
@@ -78,7 +130,9 @@ def _render_dockerfile(entry: dict[str, Any], metadata: dict[str, Any], package:
     # (via the same resolver cabs use) and expose it to the template as `base_image`.
     base_key = build.get("base")
     if base_key:
-        fmt["base_image"] = _images._resolve_ref(base_key, _images.manifest["images"][base_key], metadata)
+        fmt["base_image"] = _images._resolve_ref(
+            base_key, _images.manifest["images"][base_key], metadata
+        )
     for var in _OPTIONAL_TEMPLATE_VARS:
         fmt.setdefault(var, "")
     dockerfile = _CARGO_DIR / build["dockerfile"]
@@ -108,9 +162,13 @@ def images_list() -> None:
 @click.option("--push", "do_push", is_flag=True, help="push the image after building.")
 @click.option("--no-cache", is_flag=True, help="build without the docker layer cache.")
 @click.option("--registry", default=None, help="override the manifest registry for the tag.")
-@click.option("--package", default=None, help="override the pip package/spec installed (e.g. a prerelease).")
+@click.option(
+    "--package", default=None, help="override the pip package/spec installed (e.g. a prerelease)."
+)
 @click.option("--force", is_flag=True, help="on --push, overwrite an already-published tag.")
-@click.option("--dry-run", is_flag=True, help="render and print the Dockerfile + tag; do not build.")
+@click.option(
+    "--dry-run", is_flag=True, help="render and print the Dockerfile + tag; do not build."
+)
 def images_build(
     key: str,
     do_push: bool,
@@ -171,17 +229,31 @@ def images_build_keys() -> None:
 
 
 @images.command("build-plan")
-def images_build_plan() -> None:
+@click.option(
+    "--changed",
+    multiple=True,
+    metavar="PATH",
+    help="Repo-relative changed file (repeatable). If given, restrict the plan "
+    "to images affected by those changes plus dependents of any changed base.",
+)
+def images_build_plan(changed: tuple[str, ...]) -> None:
     """Print JSON {bases, tools} -- base images (those referenced via `base:` by
     another entry) must build before the tools that build FROM them (for a
     two-stage CI build).
+
+    Without `--changed`, plan every `build:` image. With `--changed`, plan only
+    the images a push actually invalidated (see `_affected_keys`), so CI skips
+    rebuilding unrelated (e.g. heavy) images.
     """
     manifest = _images.manifest
+    images_ = manifest["images"]
     build = _build_keys(manifest)
-    bases = sorted(
-        {manifest["images"][k]["build"]["base"] for k in build if "base" in manifest["images"][k]["build"]}
-    )
-    tools = [k for k in build if k not in bases]
+    keys = _affected_keys(manifest, list(changed)) if changed else set(build)
+
+    # A base is any KEY referenced via `base:`; it builds in the first stage.
+    all_bases = {images_[k]["build"]["base"] for k in build if "base" in images_[k]["build"]}
+    bases = sorted(all_bases & keys)
+    tools = sorted(keys - all_bases)
     click.echo(json.dumps({"bases": bases, "tools": tools}))
 
 

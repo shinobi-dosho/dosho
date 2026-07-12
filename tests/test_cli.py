@@ -91,6 +91,60 @@ def test_build_plan_orders_bases_before_tools():
     assert "SIMMS" in plan["tools"] and "BASE_ASTRO" not in plan["tools"]
 
 
+def _plan(*changed):
+    args = ["images", "build-plan"]
+    for c in changed:
+        args += ["--changed", c]
+    result = CliRunner().invoke(cli.main, args)
+    assert result.exit_code == 0, result.output
+    return json.loads(result.output)
+
+
+def test_build_plan_changed_selects_only_the_changed_leaf_tool():
+    plan = _plan("src/dosho/cargo/wsclean/Dockerfile")
+    assert plan == {"bases": [], "tools": ["WSCLEAN"]}
+
+
+def test_build_plan_changed_shared_pip_dockerfile_selects_all_pip_tools():
+    plan = _plan("src/dosho/cargo/pip/Dockerfile")
+    # every pip tool (base: BASE_ASTRO, dockerfile pip/Dockerfile), no base stage
+    assert plan["bases"] == []
+    assert "SIMMS" in plan["tools"] and "QUARTICAL" in plan["tools"]
+    assert "WSCLEAN" not in plan["tools"] and "CASA6" not in plan["tools"]
+
+
+def test_build_plan_changed_base_rebuilds_base_and_all_dependents():
+    plan = _plan("src/dosho/cargo/base-astro/Dockerfile")
+    assert plan["bases"] == ["BASE_ASTRO"]
+    # base-DAG invalidation: everything built FROM base-astro comes along
+    assert "SIMMS" in plan["tools"] and "QUARTICAL" in plan["tools"]
+    # a tool that does NOT build from base-astro is not pulled in
+    assert "WSCLEAN" not in plan["tools"]
+
+
+def test_build_plan_changed_context_file_selects_its_image():
+    # a non-Dockerfile file in an image's build context still selects it
+    plan = _plan("src/dosho/cargo/casa6/casasiteconfig.py")
+    assert plan == {"bases": [], "tools": ["CASA6"]}
+
+
+def test_build_plan_changed_manifest_rebuilds_everything():
+    plan = _plan("src/dosho/images.yaml")
+    full = _plan()
+    assert plan == full
+
+
+def test_build_plan_changed_unrelated_file_selects_nothing():
+    plan = _plan("README.md")
+    assert plan == {"bases": [], "tools": []}
+
+
+def test_build_plan_changed_workflow_alone_builds_nothing():
+    # a CI-workflow change orchestrates builds but can't change image contents
+    plan = _plan(".github/workflows/images.yml")
+    assert plan == {"bases": [], "tools": []}
+
+
 def test_push_skips_already_published_tag(monkeypatch):
     calls = []
     monkeypatch.setattr(cli, "_image_exists", lambda tag: True)

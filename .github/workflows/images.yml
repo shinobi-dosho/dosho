@@ -6,6 +6,13 @@
 # lives under the shinobi-dosho org). Published tags are immutable: the
 # `dosho images` push guard skips a tag that already exists unless forced.
 #
+# Changed-image selection: `discover` diffs the push (before..after) and builds
+# only the images that diff touched, plus dependents of any changed base
+# (`build-plan --changed`) -- so editing one tool's Dockerfile doesn't rebuild
+# the heavy CASA6 image, while editing base-astro rebuilds everything FROM it.
+# A manifest change rebuilds everything; a change to this workflow alone builds
+# nothing (it can't alter image contents).
+#
 # Two-stage build: shared base images (those referenced via `base:`) build and
 # push FIRST, then the tools that build FROM them (which pull the base from ghcr).
 name: images
@@ -44,14 +51,29 @@ jobs:
       tools: ${{ steps.plan.outputs.tools }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need history to diff before..after for changed-image selection
       - uses: astral-sh/setup-uv@v5
       - id: plan
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
         run: |
           if [ -n "${{ github.event.inputs.image }}" ]; then
             bases='[]'
             tools='["${{ github.event.inputs.image }}"]'
           else
-            plan="$(uv run dosho images build-plan)"
+            args=""
+            # On an ordinary push (not a first push / force-push we can't diff),
+            # restrict the plan to the files the push actually changed.
+            if [ "${{ github.event_name }}" = "push" ] \
+               && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+               && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              for f in $(git diff --name-only "$BEFORE" "$AFTER"); do
+                args="$args --changed $f"
+              done
+            fi
+            plan="$(uv run dosho images build-plan $args)"
             bases="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["bases"]))')"
             tools="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["tools"]))')"
           fi
