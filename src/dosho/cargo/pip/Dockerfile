@@ -5,6 +5,6 @@
 FROM {base_image}
 
 {pre_install}
-RUN pip install --break-system-packages {package} {extra_deps}
+RUN pip install --break-system-packages {pip_install_flags} {package} {extra_deps}
 
 CMD {cmd}

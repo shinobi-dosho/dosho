@@ -20,7 +20,7 @@ def test_build_dry_run_renders_dockerfile_and_tag():
     assert "ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0" in result.output
     # simms builds FROM the shared base-astro image (base: resolved to a full ref)
     assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
-    assert "pip install --break-system-packages simms==3.0b3" in result.output
+    assert "--break-system-packages" in result.output and "simms==3.0b3" in result.output
 
 
 def test_base_image_builds_from_kern_without_a_base_ref():

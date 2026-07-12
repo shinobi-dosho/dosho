@@ -60,25 +60,64 @@ images:
     ref: "quay.io/stimela2/cubical:1.6.4-cc0.2.1"
   QUARTICAL:
     source: "https://github.com/ratt-ru/QuartiCal"
-    ref: "quay.io/stimela2/quartical:0.2.5-cc0.2.1"
+    name: quartical
+    build:
+      version: "0.2.7"
+      base: BASE_ASTRO
+      package: "quartical==0.2.7"
+      pip_install_flags: "--no-build-isolation"
+      cmd: "goquartical --help"
+      dockerfile: pip/Dockerfile
   AOFLAGGER:
     source: "https://gitlab.com/aroffringa/aoflagger"
     ref: "quay.io/stimela2/aoflagger:cc0.2.1"
   TRICOLOUR:
     source: "https://github.com/ratt-ru/tricolour"
-    ref: "quay.io/stimela2/tricolour:cc0.2.1"
+    name: tricolour
+    build:
+      version: "0.2.1"
+      base: BASE_ASTRO
+      package: "tricolour==0.2.1"
+      cmd: "tricolour --help"
+      dockerfile: pip/Dockerfile
   CRYSTALBALL:
     source: "https://github.com/caracal-pipeline/crystalball"
-    ref: "quay.io/stimela2/crystalball:cc0.2.1"
+    name: crystalball
+    build:
+      version: "0.4.3"
+      base: BASE_ASTRO
+      package: "crystalball==0.4.3"
+      extra_deps: "-U matplotlib"
+      cmd: "crystalball --help"
+      dockerfile: pip/Dockerfile
   OWLCAT:
     source: "https://github.com/ratt-ru/owlcat"
-    ref: "quay.io/stimela2/owlcat:cc0.2.1"
+    name: owlcat
+    build:
+      version: "1.8.1"
+      base: BASE_ASTRO
+      package: "owlcat==1.8.1"
+      cmd: "plot-elevation-tracks.py --help"
+      dockerfile: pip/Dockerfile
   SHADEMS:
     source: "https://github.com/ratt-ru/shadeMS"
-    ref: "quay.io/stimela2/shadems:cc0.1.3"
+    name: shadems
+    build:
+      version: "0.5.4"
+      base: BASE_ASTRO
+      package: "shadems==0.5.4"
+      extra_deps: 'pyarrow "dask[dataframe]<2025.1"'
+      cmd: "shadems --help"
+      dockerfile: pip/Dockerfile
   RAGAVI:
     source: "https://github.com/ratt-ru/ragavi"
-    ref: "quay.io/stimela2/ragavi:cc0.2.1"
+    name: ragavi
+    build:
+      version: "0.5.2"
+      base: BASE_ASTRO
+      package: "ragavi==0.5.2"
+      cmd: "ragavi-vis --help"
+      dockerfile: pip/Dockerfile
   SOFIA2:
     source: "https://gitlab.com/SoFiA-Admin/SoFiA-2"
     ref: "quay.io/stimela2/sofia2:cc0.2.1"
@@ -92,4 +131,11 @@ images:
     ref: "quay.io/stimela2/simms-classic:cc0.2.1"
   MOSAIC_QUEEN:
     source: "https://github.com/caracal-pipeline/MosaicQueen"
-    ref: "quay.io/stimela2/mosaic-queen:cc0.2.1"
+    name: mosaic-queen
+    build:
+      version: "2.0.2"
+      base: BASE_ASTRO
+      package: "mosaic-queen==2.0.2"
+      pre_install: "RUN docker-apt-install montage"
+      cmd: "mosaic-queen --help"
+      dockerfile: pip/Dockerfile
