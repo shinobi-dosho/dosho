@@ -66,14 +66,23 @@ def _tag(key: str, entry: dict[str, Any], metadata: dict[str, Any], registry: st
     return f"{registry}/{name}:{entry['build']['version']}-{metadata['bundle_version']}"
 
 
+_OPTIONAL_TEMPLATE_VARS = ("pre_install", "post_install", "extra_deps", "pip_install_flags")
+
+
 def _render_dockerfile(entry: dict[str, Any], metadata: dict[str, Any], package: str | None) -> tuple[str, Path]:
     build = dict(entry["build"])
     if package:
         build["package"] = package
-    dockerfile = _CARGO_DIR / build["dockerfile"]
-    text = dockerfile.read_text()
     fmt = {**metadata, **build}
-    return text.format(**fmt), dockerfile.parent
+    # `base: <KEY>` -- build FROM another dosho image; resolve it to a full ref
+    # (via the same resolver cabs use) and expose it to the template as `base_image`.
+    base_key = build.get("base")
+    if base_key:
+        fmt["base_image"] = _images._resolve_ref(base_key, _images.manifest["images"][base_key], metadata)
+    for var in _OPTIONAL_TEMPLATE_VARS:
+        fmt.setdefault(var, "")
+    dockerfile = _CARGO_DIR / build["dockerfile"]
+    return dockerfile.read_text().format(**fmt), dockerfile.parent
 
 
 @click.group()
@@ -159,6 +168,21 @@ def _push(tag: str, force: bool) -> bool:
 def images_build_keys() -> None:
     """Print the JSON list of `build:` image KEYs (for a CI build matrix)."""
     click.echo(json.dumps(_build_keys(_images.manifest)))
+
+
+@images.command("build-plan")
+def images_build_plan() -> None:
+    """Print JSON {bases, tools} -- base images (those referenced via `base:` by
+    another entry) must build before the tools that build FROM them (for a
+    two-stage CI build).
+    """
+    manifest = _images.manifest
+    build = _build_keys(manifest)
+    bases = sorted(
+        {manifest["images"][k]["build"]["base"] for k in build if "base" in manifest["images"][k]["build"]}
+    )
+    tools = [k for k in build if k not in bases]
+    click.echo(json.dumps({"bases": bases, "tools": tools}))
 
 
 @images.command("verify")

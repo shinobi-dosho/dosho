@@ -18,8 +18,16 @@ def test_build_dry_run_renders_dockerfile_and_tag():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
     assert result.exit_code == 0, result.output
     assert "ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0" in result.output
-    assert "FROM kernsuite/base:10" in result.output
+    # simms builds FROM the shared base-astro image (base: resolved to a full ref)
+    assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
     assert "pip install --break-system-packages simms==3.0b3" in result.output
+
+
+def test_base_image_builds_from_kern_without_a_base_ref():
+    result = CliRunner().invoke(cli.main, ["images", "build", "BASE_ASTRO", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
+    assert "FROM kernsuite/base:10" in result.output
 
 
 def test_build_package_override_changes_installed_spec_but_not_tag():
@@ -57,6 +65,14 @@ def test_build_keys_emits_json_list_of_build_images():
     assert result.exit_code == 0, result.output
     keys = json.loads(result.output)
     assert "SIMMS" in keys and "WSCLEAN" not in keys  # WSCLEAN is a ref:, not built
+
+
+def test_build_plan_orders_bases_before_tools():
+    result = CliRunner().invoke(cli.main, ["images", "build-plan"])
+    assert result.exit_code == 0, result.output
+    plan = json.loads(result.output)
+    assert "BASE_ASTRO" in plan["bases"]
+    assert "SIMMS" in plan["tools"] and "BASE_ASTRO" not in plan["tools"]
 
 
 def test_push_skips_already_published_tag(monkeypatch):

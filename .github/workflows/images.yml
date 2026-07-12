@@ -1,10 +1,13 @@
 # Build dosho's container images and push them to ghcr.io/shinobi-dosho.
 #
 # Automated "merge -> build -> push" (BioContainers-style): when a `build:`
-# image's Dockerfile or the manifest changes, the matching image is rebuilt
+# image's Dockerfile or the manifest changes, the matching image(s) are rebuilt
 # and pushed with the built-in GITHUB_TOKEN (no external secret -- the repo
 # lives under the shinobi-dosho org). Published tags are immutable: the
 # `dosho images` push guard skips a tag that already exists unless forced.
+#
+# Two-stage build: shared base images (those referenced via `base:`) build and
+# push FIRST, then the tools that build FROM them (which pull the base from ghcr).
 name: images
 
 on:
@@ -32,45 +35,70 @@ permissions:
   packages: write
 
 jobs:
-  # Emit the JSON matrix of `build:` image KEYs (or the single dispatched one).
+  # Split the build: images into base images (build first) and tools (build after).
   discover:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.keys.outputs.images }}
+      bases: ${{ steps.plan.outputs.bases }}
+      tools: ${{ steps.plan.outputs.tools }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - id: keys
+      - id: plan
         run: |
           if [ -n "${{ github.event.inputs.image }}" ]; then
-            images='["${{ github.event.inputs.image }}"]'
+            bases='[]'
+            tools='["${{ github.event.inputs.image }}"]'
           else
-            images="$(uv run dosho images build-keys)"
+            plan="$(uv run dosho images build-plan)"
+            bases="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["bases"]))')"
+            tools="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["tools"]))')"
           fi
-          echo "images=$images" >> "$GITHUB_OUTPUT"
-          echo "build matrix: $images"
+          echo "bases=$bases" >> "$GITHUB_OUTPUT"
+          echo "tools=$tools" >> "$GITHUB_OUTPUT"
+          echo "bases: $bases | tools: $tools"
 
-  build:
+  build-base:
     needs: discover
-    if: needs.discover.outputs.images != '[]'
+    if: needs.discover.outputs.bases != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.discover.outputs.images) }}
+        image: ${{ fromJson(needs.discover.outputs.bases) }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      # Runner default docker (buildkit) builds into the local image store, so
-      # the CLI's sanity `docker run` + `docker push` see the image. (No
-      # setup-buildx-action: its container driver would need --load.)
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: build + push (guarded; skips already-published tags)
+      - name: build + push base
+        run: |
+          flags="--push"
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
+          uv run dosho images build "${{ matrix.image }}" $flags
+
+  build-tools:
+    needs: [discover, build-base]
+    # run after the base(s); a skipped build-base (no bases changed) is fine.
+    if: always() && needs.discover.outputs.tools != '[]' && needs.build-base.result != 'failure' && !cancelled()
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.tools) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: build + push tool
         run: |
           flags="--push"
           if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
