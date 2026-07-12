@@ -48,7 +48,9 @@ def test_owlcat_plotelev_output_field_has_real_default():
     assert cab.outputs_model.model_fields["output_name"].default == "lst-elev.png"
     argv = build_argv(cab, {"msname": "/x.ms"})
     assert argv[0] == "plot-elevation-tracks.py"
-    assert "--msname" in argv
+    # the MS is positional (`plot-elevation-tracks.py [options] MS`), not --msname
+    assert "--msname" not in argv
+    assert "/x.ms" in argv
 
 
 def test_shadems_union_dtypes_resolve_to_real_python_types():

@@ -19,7 +19,9 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
 }
 
 _FIELD_META: dict[str, ParamMeta] = {
-    "msname": ParamMeta(info="Name of Measurement set"),
+    # the MS is a positional arg (`plot-elevation-tracks.py [options] MS`),
+    # not `--msname`, so it must not take the `--` prefix.
+    "msname": ParamMeta(positional=True, info="Name of Measurement set"),
     "list": ParamMeta(info="lists fields found in MS, then exits"),
     "display": ParamMeta(info="Display plot on screen"),
     "output_name": ParamMeta(nom_de_guerre="output-name", info="Output filename"),
