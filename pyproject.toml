@@ -15,6 +15,7 @@ authors = [
 dependencies = [
     "stimela-ninja>=0.1.0b2",
     "pyyaml>=6.0",
+    "click>=8.1",
 ]
 
 [dependency-groups]
@@ -35,6 +36,9 @@ Homepage = "https://github.com/SpheMakh/dosho"
 Repository = "https://github.com/SpheMakh/dosho"
 Issues = "https://github.com/SpheMakh/dosho/issues"
 Documentation = "https://dosho.readthedocs.io"
+
+[project.scripts]
+dosho = "dosho.cli:main"
 
 [project.entry-points."shinobi.cabs"]
 dosho = "dosho.registry"

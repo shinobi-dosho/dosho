@@ -70,7 +70,7 @@ as stimela-ninja itself).
 
 `src/dosho/images.yaml` is the **single source of truth** linking each cab to
 its container image. It is a manifest: top-level `metadata` (`registry` =
-`<host>/dosho`, `bundle_version`) plus an `images:` map keyed by the constant
+`ghcr.io/shinobi-dosho`, `bundle_version`) plus an `images:` map keyed by the constant
 cabs read (`images.WSCLEAN`, `images.CASA6`, ...). Each entry is either a
 `ref:` (an existing published image, used verbatim -- the bootstrap state) or a
 `build:` recipe (a dosho-built image, resolved to
@@ -88,7 +88,7 @@ so set them *before* the process starts.
 
 dosho **is** growing image build/maintenance infrastructure (a `dosho images`
 CLI + a `cargo/` Dockerfile tree + CI that builds and pushes to
-`<host>/dosho`, with an auto-generated readthedocs catalog) so cabs, images,
+`ghcr.io/shinobi-dosho`, with an auto-generated readthedocs catalog) so cabs, images,
 registry, and docs stay linked off this one manifest -- modelled on cult-cargo
 and stimela-classic but with CI-automated push. It lands incrementally; until a
 tool is dosho-built, its manifest entry `ref:`s an existing image. Bumping a

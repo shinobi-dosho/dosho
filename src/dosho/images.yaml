@@ -25,9 +25,9 @@
 #   manifest  <  the YAML file named by $DOSHO_IMAGES  <  per-tool $DOSHO_IMAGE_<KEY>
 
 metadata:
-  # namespace is `dosho`; host defaults to ghcr.io. Only used to compose refs
-  # for `build:` entries -- `ref:` entries are used verbatim.
-  registry: ghcr.io/dosho
+  # dosho's own image namespace (the shinobi-dosho GitHub org on ghcr). Only
+  # used to compose refs for `build:` entries -- `ref:` entries are verbatim.
+  registry: ghcr.io/shinobi-dosho
   bundle_version: d0.1.0
 
 images:
@@ -58,8 +58,16 @@ images:
   # pysteps both use this image).
   CASA6:
     ref: "quay.io/stimela2/casa6:6.7-cc0.2.1"
+  # First dosho-built image (KERN suite base) -> ghcr.io/dosho/simms:3.0b3-d0.1.0.
+  # Rebuild+push with `dosho images build SIMMS --push` when bumping the version.
   SIMMS:
-    ref: "quay.io/stimela2/simms:cc0.2.1"
+    name: simms
+    build:
+      version: "3.0b3"
+      package: "simms==3.0b3"
+      kern_version: "10"
+      cmd: "simms --help"
+      dockerfile: simms/Dockerfile
   # pre-3.0 simms -- a genuinely different tool from simms 3.0's skysim/telsim.
   SIMMS_CLASSIC:
     ref: "quay.io/stimela2/simms-classic:cc0.2.1"
