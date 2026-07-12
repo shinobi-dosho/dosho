@@ -14,6 +14,7 @@ import sys
 from datetime import date
 
 sys.path.insert(0, os.path.abspath("../src"))
+sys.path.insert(0, os.path.abspath("_ext"))  # local Sphinx extensions (cab_catalog)
 
 from dosho import __version__  # noqa: E402
 
@@ -36,6 +37,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
     "myst_parser",
+    "cab_catalog",  # generates reference/cabs.rst from the live registry + manifest
 ]
 
 templates_path = ["_templates"]
@@ -77,7 +79,7 @@ html_title = f"dosho {release}"
 html_static_path = ["_static"]
 
 html_theme_options = {
-    "source_repository": "https://github.com/SpheMakh/dosho/",
+    "source_repository": "https://github.com/shinobi-dosho/dosho/",
     "source_branch": "main",
     "source_directory": "docs/",
 }

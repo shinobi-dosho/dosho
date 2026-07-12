@@ -46,6 +46,7 @@ and how it's structured.
    :maxdepth: 2
    :caption: Reference
 
+   reference/cabs
    api/index
 
 .. toctree::
