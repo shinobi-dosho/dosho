@@ -11,7 +11,7 @@ def test_images_list_shows_build_and_ref_kinds():
     result = CliRunner().invoke(cli.main, ["images", "list"])
     assert result.exit_code == 0, result.output
     assert "SIMMS" in result.output and "[build]" in result.output
-    assert "WSCLEAN" in result.output and "[ref  ]" in result.output
+    assert "CASA6" in result.output and "[ref  ]" in result.output
 
 
 def test_build_dry_run_renders_dockerfile_and_tag():
@@ -49,7 +49,7 @@ def test_registry_override_changes_tag():
 
 
 def test_build_refuses_a_ref_only_image():
-    result = CliRunner().invoke(cli.main, ["images", "build", "WSCLEAN"])
+    result = CliRunner().invoke(cli.main, ["images", "build", "CASA6"])
     assert result.exit_code != 0
     assert "does not build" in result.output
 
@@ -64,7 +64,7 @@ def test_build_keys_emits_json_list_of_build_images():
     result = CliRunner().invoke(cli.main, ["images", "build-keys"])
     assert result.exit_code == 0, result.output
     keys = json.loads(result.output)
-    assert "SIMMS" in keys and "WSCLEAN" not in keys  # WSCLEAN is a ref:, not built
+    assert "SIMMS" in keys and "CASA6" not in keys  # CASA6 is a ref:, not built
 
 
 def test_build_plan_orders_bases_before_tools():

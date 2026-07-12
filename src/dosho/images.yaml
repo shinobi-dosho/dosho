@@ -54,7 +54,13 @@ images:
   # ---- still referencing existing published images (onboarded incrementally) ----
   WSCLEAN:
     source: "https://gitlab.com/aroffringa/wsclean"
-    ref: "quay.io/stimela2/wsclean:3.6-haswell-cc0.2.1"
+    name: wsclean
+    build:
+      version: "3.6"
+      kern_version: "10"
+      package_version: "3.6"
+      cmd: "wsclean --version"
+      dockerfile: wsclean/Dockerfile
   CUBICAL:
     source: "https://github.com/ratt-ru/CubiCal"
     ref: "quay.io/stimela2/cubical:1.6.4-cc0.2.1"
@@ -71,7 +77,12 @@ images:
       dockerfile: pip/Dockerfile
   AOFLAGGER:
     source: "https://gitlab.com/aroffringa/aoflagger"
-    ref: "quay.io/stimela2/aoflagger:cc0.2.1"
+    name: aoflagger
+    build:
+      version: "kern10"
+      kern_version: "10"
+      cmd: "aoflagger --version"
+      dockerfile: aoflagger/Dockerfile
   TRICOLOUR:
     source: "https://github.com/ratt-ru/tricolour"
     name: tricolour
@@ -121,7 +132,14 @@ images:
       dockerfile: pip/Dockerfile
   SOFIA2:
     source: "https://gitlab.com/SoFiA-Admin/SoFiA-2"
-    ref: "quay.io/stimela2/sofia2:cc0.2.1"
+    name: sofia2
+    build:
+      version: "2.7.0"
+      kern_version: "10"
+      package_version: "2.7.0"
+      # bare `sofia` wants a parameter file (exit 7); -h is the clean self-check.
+      cmd: "sofia -h"
+      dockerfile: sofia2/Dockerfile
   # CASA6 pins the real tested tag caracal2 relies on (casatasks/casaplotms).
   CASA6:
     source: "https://casadocs.readthedocs.io"
