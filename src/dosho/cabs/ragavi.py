@@ -51,6 +51,11 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
     "xmax": ("float", False, None),
     "ymin": ("float", False, None),
     "ymax": ("float", False, None),
+    # Output HTML name, passed on the CLI (`--htmlname`). File-typed so the
+    # container binds its parent dir -- otherwise ragavi-vis falls back to its
+    # auto-generated name in the cwd (there's no other path input under the
+    # output dir to pull the bind-mount in, unlike ragavi-gains' `table`).
+    "htmlname": ("File", False, None),
 }
 
 _FIELD_META: dict[str, ParamMeta] = {

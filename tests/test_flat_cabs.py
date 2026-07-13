@@ -71,6 +71,16 @@ def test_ragavi_vis_registered_and_prefixed():
     assert argv[0] == "ragavi-vis"
 
 
+def test_ragavi_vis_emits_htmlname_so_the_caller_controls_the_output_path():
+    # htmlname is a File input (emitted on the CLI, parent dir bound) -- without
+    # it ragavi-vis writes an auto-named .html into the cwd.
+    cab = dosho.get("ragavi-vis")
+    assert "htmlname" in cab.inputs_model.model_fields
+    argv = build_argv(cab, {"ms": "/x.ms", "xaxis": "chan", "yaxis": "amp", "htmlname": "/out/plots/p-amp_chan"})
+    assert "--htmlname" in argv
+    assert argv[argv.index("--htmlname") + 1] == "/out/plots/p-amp_chan"
+
+
 def test_sofia2_real_param_count():
     cab = dosho.get("sofia2")
     assert cab.name == "sofia2"
