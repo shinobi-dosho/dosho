@@ -96,6 +96,24 @@ def test_simms_telsim_sibling_subcommand_of_skysim():
     assert argv[-1] == "/x.ms"  # positional
 
 
+def test_ragavi_gains_registered_and_passes_gain_flags():
+    cab = dosho.get("ragavi-gains")
+    assert cab.name == "ragavi-gains"
+    assert cab.command == "ragavi-gains"
+    assert cab.image == dosho.get("ragavi").image  # same ragavi image, sibling script
+    argv = build_argv(
+        cab, {"table": ["/x.G0"], "gaintype": ["G"], "htmlname": "x.G0", "plotname": "x.G0.png"}
+    )
+    assert argv[0] == "ragavi-gains"
+    assert "--table" in argv
+    assert "--gaintype" in argv
+    assert "--htmlname" in argv  # output filename passed on the CLI
+    assert "--plotname" in argv
+    # htmlname/plotname are also same-named passthrough outputs
+    assert "htmlname" in cab.outputs_model.model_fields
+    assert "plotname" in cab.outputs_model.model_fields
+
+
 def test_simms_primary_beam_tag_ms_flags_and_passthrough_output():
     cab = dosho.get("simms-primary-beam")
     assert cab.name == "simms-primary-beam"
