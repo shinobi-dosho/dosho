@@ -1,8 +1,17 @@
-"""ragavi (ragavi-vis) -- interactive Bokeh-based MS visibility plots
-(https://ragavi.readthedocs.io).
+"""ragavi -- Radio Astronomy Gain and Visibility Inspector
+(https://ragavi.readthedocs.io). Two sibling console scripts, one cab each,
+named for their sub-tool so a caller addresses them consistently as
+`dosho.cabs.ragavi:vis` / `dosho.cabs.ragavi:gains`:
 
-Ported field-by-field from cult-cargo's ragavi_vis.yml (flat, static
-schema).
+* `vis` -- `ragavi-vis`, interactive Bokeh-based MS *visibility* plots.
+* `gains` -- `ragavi-gains`, plots of *gain tables* (K/G/B/F/D...),
+  used by crosscal/polcal to render each solved caltable. `htmlname`/
+  `plotname` are output filenames the tool writes, but they are passed *on
+  the command line*, so each is declared as both an input (emitted as
+  `--htmlname`/`--plotname`) and a same-named passthrough output.
+
+Ported field-by-field from cult-cargo's ragavi_vis.yml / ragavi.yml (flat,
+static schemas).
 """
 
 from __future__ import annotations
@@ -42,6 +51,11 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
     "xmax": ("float", False, None),
     "ymin": ("float", False, None),
     "ymax": ("float", False, None),
+    # Output HTML name, passed on the CLI (`--htmlname`). File-typed so the
+    # container binds its parent dir -- otherwise ragavi-vis falls back to its
+    # auto-generated name in the cwd (there's no other path input under the
+    # output dir to pull the bind-mount in, unlike ragavi-gains' `table`).
+    "htmlname": ("File", False, None),
 }
 
 _FIELD_META: dict[str, ParamMeta] = {
@@ -98,11 +112,13 @@ _FIELD_META: dict[str, ParamMeta] = {
 }
 
 _OUTPUTS: dict[str, tuple[str, bool, object]] = {
-    "htmlname": ("str", False, None),
+    # File to match the same-named File input it passes through (the output is
+    # filled from the input value, a Path).
+    "htmlname": ("File", False, None),
 }
 
-ragavi = define_cab(
-    "ragavi",
+vis = define_cab(
+    "ragavi-vis",
     "ragavi-vis",
     images.RAGAVI,
     _FIELDS,
@@ -110,4 +126,71 @@ ragavi = define_cab(
     field_meta=_FIELD_META,
     policies=Policies(prefix="--"),
     info="ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthedocs.io)",
+)
+
+# ragavi-gains: plot gain tables. `htmlname`/`plotname` are output filenames
+# passed on the CLI, so they are inputs (emitted as flags) AND same-named
+# passthrough outputs.
+_GAINS_FIELDS: dict[str, tuple[str, bool, object]] = {
+    "table": ("List[File]", True, None),
+    "ant": ("str", False, None),
+    "corr": ("str", False, None),
+    "cmap": ("str", False, "coolwarm"),
+    "ddid": ("str", False, None),
+    "debug": ("bool", False, None),
+    "doplot": ("str", False, None),
+    "field": ("List[str]", False, None),
+    "gaintype": ("List[str]", False, None),
+    "logfile": ("str", False, None),
+    "xaxis": ("str", False, None),
+    "t0": ("float", False, None),
+    "t1": ("float", False, None),
+    "taql": ("str", False, None),
+    "htmlname": ("str", False, None),
+    "plotname": ("str", False, None),
+}
+
+_GAINS_FIELD_META: dict[str, ParamMeta] = {
+    "table": ParamMeta(info="Gain table(s) to plot. Specify space separated list for multiple."),
+    "ant": ParamMeta(
+        info="Plot only a specific antenna, or comma-separated list of antennas. Defaults to all."
+    ),
+    "corr": ParamMeta(info="Correlation index(ices) to plot. Defaults to all."),
+    "cmap": ParamMeta(info="Matplotlib colour map to use for antennas. Defaults to coolwarm."),
+    "ddid": ParamMeta(info="Spectral window to plot. Defaults to all."),
+    "debug": ParamMeta(info="Enable debugging messages."),
+    "doplot": ParamMeta(
+        info="Y-axes to plot: amplitude & phase (ap), real and imaginary (ri), or (all). Defaults to ap."
+    ),
+    "field": ParamMeta(info="Field ID(s) / NAME(s) to plot. Defaults to all."),
+    "gaintype": ParamMeta(
+        info="Type of gain table(s) to be plotted (e.g. K/G/B/F/D). Table type is auto-detected."
+    ),
+    "logfile": ParamMeta(info="File in which to store logs. Default is ragavi.log."),
+    "xaxis": ParamMeta(
+        info="Choose an x-axis for the plots, otherwise an appropriate one is chosen automatically."
+    ),
+    "t0": ParamMeta(info="Min time to plot [in seconds]. Defaults to full range."),
+    "t1": ParamMeta(info="Max time to plot [in seconds]. Defaults to full range."),
+    "taql": ParamMeta(info="TAQL where clause."),
+    "htmlname": ParamMeta(info="Output HTML file name (with or without .html suffix)."),
+    "plotname": ParamMeta(
+        info="Static output file name (with suffix). '.png' or '.svg' determines the output type."
+    ),
+}
+
+_GAINS_OUTPUTS: dict[str, tuple[str, bool, object]] = {
+    "htmlname": ("str", False, None),
+    "plotname": ("str", False, None),
+}
+
+gains = define_cab(
+    "ragavi-gains",
+    "ragavi-gains",
+    images.RAGAVI,
+    _GAINS_FIELDS,
+    outputs=_GAINS_OUTPUTS,
+    field_meta=_GAINS_FIELD_META,
+    policies=Policies(prefix="--"),
+    info="ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)",
 )

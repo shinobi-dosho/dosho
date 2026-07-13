@@ -43,25 +43,37 @@ from dosho.cabs.casatasks import (
 from dosho.cabs.crystalball import crystalball
 from dosho.cabs.cubical import cubical
 from dosho.cabs.mosaic_queen import mosaic_queen
+from dosho.cabs.msutils import (
+    addcol,
+    addnoise,
+    copycol,
+    flagstats,
+    summary,
+    sumcols,
+)
 from dosho.cabs.owlcat_plotelev import owlcat_plotelev
 from dosho.cabs.quartical import quartical
-from dosho.cabs.ragavi import ragavi
+from dosho.cabs.ragavi import gains as ragavi_gains, vis as ragavi_vis
 from dosho.cabs.shadems import shadems
-from dosho.cabs.simms import simms_classic, skysim, telsim
+from dosho.cabs.simms import primary_beam, simms_classic, skysim, telsim
 from dosho.cabs.sofia2 import sofia2
 from dosho.cabs.tricolour import tricolour
 from dosho.cabs.wsclean import wsclean
 
 __all__ = [
+    "addcol",
+    "addnoise",
     "aoflagger",
     "applycal",
     "bandpass",
     "clearcal",
+    "copycol",
     "crystalball",
     "cubical",
     "fixvis",
     "flagdata",
     "flagmanager",
+    "flagstats",
     "fluxscale",
     "gaincal",
     "initweights",
@@ -71,13 +83,17 @@ __all__ = [
     "owlcat_plotelev",
     "plotms",
     "polcal",
+    "primary_beam",
     "quartical",
-    "ragavi",
+    "ragavi_gains",
+    "ragavi_vis",
     "setjy",
     "shadems",
     "simms_classic",
     "skysim",
     "sofia2",
+    "summary",
+    "sumcols",
     "telsim",
     "tricolour",
     "wsclean",

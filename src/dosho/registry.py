@@ -26,8 +26,17 @@ if TYPE_CHECKING:
 _NAME_OVERRIDES: dict[str, str] = {
     "skysim": "simms-skysim",
     "telsim": "simms-telsim",
+    "primary_beam": "simms-primary-beam",
     "simms_classic": "simms",
     "mosaic_queen": "mosaic-queen",
+    "ragavi_gains": "ragavi-gains",
+    "ragavi_vis": "ragavi-vis",
+    "summary": "msutils-summary",
+    "addcol": "msutils-addcol",
+    "copycol": "msutils-copycol",
+    "sumcols": "msutils-sumcols",
+    "addnoise": "msutils-addnoise",
+    "flagstats": "msutils-flagstats",
 }
 
 

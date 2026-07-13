@@ -95,7 +95,8 @@ _SKYSIM_FIELD_META: dict[str, ParamMeta] = {
         info='Simulation mode. To create a new column use "sim"; to add to column use "add"; to subtract from column use "subtract".'
     ),
     "source_schema": ParamMeta(
-        info="Specify a custom source schema via a YAML file that specifies how to map columns in custom sky model to the columns expected by simms. See the bdsf_gaul schema file at 'https://github.com/wits-cfa/simms/tree/main/simms/schemas'"
+        nom_de_guerre="source-schema",
+        info="Specify a custom source schema via a YAML file that specifies how to map columns in custom sky model to the columns expected by simms. See the bdsf_gaul schema file at 'https://github.com/wits-cfa/simms/tree/main/simms/schemas'",
     ),
 }
 
@@ -173,7 +174,9 @@ _TELSIM_FIELD_META: dict[str, ParamMeta] = {
     "rowchunks": ParamMeta(
         info="Number of chunks to divide the data into, larger number of chunks improves the computation speed. Default is 50000."
     ),
-    "column": ParamMeta(info="The column in which to corrupt the visibilities with noise. Default is MODEL_DATA column."),
+    "column": ParamMeta(
+        info="The column in which to corrupt the visibilities with noise. Default is MODEL_DATA column."
+    ),
     "sefd": ParamMeta(info="Antenna SEFD (one value for all frequencies)"),
     "tsys_over_eta": ParamMeta(
         nom_de_guerre="tsys-over-eta",
@@ -199,7 +202,8 @@ _TELSIM_FIELD_META: dict[str, ParamMeta] = {
         info="If you have provided a sensitivity file with frequencies and their corresponding sefd or tsys_over_eta, then we will fit to get the approximate sefd matching the MS frequencies. There are two fitting options, polyn and spline."
     ),
     "fit_order": ParamMeta(
-        nom_de_guerre="fit-order", info="The fitting order to use when approximating the MS frequencies SEFDs."
+        nom_de_guerre="fit-order",
+        info="The fitting order to use when approximating the MS frequencies SEFDs.",
     ),
 }
 
@@ -243,7 +247,9 @@ _SIMMS_CLASSIC_FIELDS: dict[str, tuple[str, bool, object]] = {
 _SIMMS_CLASSIC_FIELD_META: dict[str, ParamMeta] = {
     "msname": ParamMeta(nom_de_guerre="name", info="Name of MS file to be created"),
     "telescope": ParamMeta(nom_de_guerre="tel", info="Name of telescope that being simulated"),
-    "antenna_file": ParamMeta(nom_de_guerre="antenna-file", info="File that contains antenna coordinates"),
+    "antenna_file": ParamMeta(
+        nom_de_guerre="antenna-file", info="File that contains antenna coordinates"
+    ),
     "type": ParamMeta(info="Type of antenna file"),
     "coord_sys": ParamMeta(
         nom_de_guerre="coord-sys",
@@ -253,13 +259,16 @@ _SIMMS_CLASSIC_FIELD_META: dict[str, ParamMeta] = {
         nom_de_guerre="lon-lat-elv",
         info="Reference position of telescope. Comma seperated longitude,lattitude and elevation 'deg,deg,m'. Elevation is not crucial, lon,lat should be enough. If not specified, we'll try to get this info from the CASA database (assuming that your telescope is known to CASA)",
     ),
-    "noup": ParamMeta(info="Enable this to indicate that your ENU file does not have an 'up' dimension"),
+    "noup": ParamMeta(
+        info="Enable this to indicate that your ENU file does not have an 'up' dimension"
+    ),
     "direction": ParamMeta(
         info="Pointing direction. Example J2000,0h0m0s,-30d0m0d. Option --direction may be specified multiple times for multiple pointings. Provide a list of directions for multiple pointings; each pointing will have a unique field ID"
     ),
     "synthesis": ParamMeta(info="Synthesis time in hours"),
     "scan_length": ParamMeta(
-        nom_de_guerre="scan-length", info="Duration of a single scan in hours. Default is the entire observation (synthesis)"
+        nom_de_guerre="scan-length",
+        info="Duration of a single scan in hours. Default is the entire observation (synthesis)",
     ),
     "dtime": ParamMeta(info="Integration time in seconds"),
     "freq0": ParamMeta(
@@ -272,7 +281,9 @@ _SIMMS_CLASSIC_FIELD_META: dict[str, ParamMeta] = {
     "nchan": ParamMeta(
         info="Number of channels. Can be used in tandem with 'freq0, dfreq, nband' to customise the partitioning of the subbands"
     ),
-    "init_ha": ParamMeta(nom_de_guerre="init-ha", info="Initial hour angle. 'scan-length/2' is the default"),
+    "init_ha": ParamMeta(
+        nom_de_guerre="init-ha", info="Initial hour angle. 'scan-length/2' is the default"
+    ),
     "pol": ParamMeta(info="polarization"),
     "feed": ParamMeta(info="Feed type"),
     "scan_lag": ParamMeta(nom_de_guerre="scan-lag", info="Lag time between scans in hours"),
@@ -281,12 +292,16 @@ _SIMMS_CLASSIC_FIELD_META: dict[str, ParamMeta] = {
         info="Set telescope limits. Elevation and shadow limits. Works in tandem with 'shadow-limit, elevation-limit'",
     ),
     "elevation_limit": ParamMeta(
-        nom_de_guerre="elevation-limit", info="Dish elevation limit. Will only be taken into account if 'set-limits' is enabled."
+        nom_de_guerre="elevation-limit",
+        info="Dish elevation limit. Will only be taken into account if 'set-limits' is enabled.",
     ),
     "shadow_limit": ParamMeta(
-        nom_de_guerre="shadow-limit", info="Shadow limit. Will only be taken into account if 'set-limits' is enabled."
+        nom_de_guerre="shadow-limit",
+        info="Shadow limit. Will only be taken into account if 'set-limits' is enabled.",
     ),
-    "auto_correlations": ParamMeta(nom_de_guerre="auto-correlations", info="Don't flag autocorrelations"),
+    "auto_correlations": ParamMeta(
+        nom_de_guerre="auto-correlations", info="Don't flag autocorrelations"
+    ),
     "date": ParamMeta(
         info="Date of observation. Example UTC,2014/05/26 or UTC,2014/05/26/12:12:12: default is today (format EPOCH,yyyy/mm/dd/[h:m:s])"
     ),
@@ -300,4 +315,52 @@ simms_classic = define_cab(
     field_meta=_SIMMS_CLASSIC_FIELD_META,
     policies=Policies(),
     info="simms (classic): simulate an empty MS from telescope/observation parameters (pre-3.0)",
+)
+
+# `simms` is a click *chained* multicommand (`simms COMMAND [ARGS] COMMAND
+# [ARGS] ...`), so `primary-beam`'s action selector (`tag-ms`) is a trailing
+# *positional* argument that must come AFTER primary-beam's options -- putting
+# `tag-ms` before the options ends the sub-command early and the flags leak
+# back to the top-level `simms` parser ("No such option"). Hence the command
+# stops at `simms primary-beam` and `action` (default "tag-ms") is a positional
+# field, which `build_argv` emits last.
+_PRIMARY_BEAM_TAG_MS_FIELDS: dict[str, tuple[str, bool, object]] = {
+    "ms": ("MS", True, None),
+    "telescope_name_column": ("str", False, "TELESCOPE_NAME"),
+    "label": ("str", False, None),
+    "label_map": ("File", False, None),
+    "from_layout": ("str", False, None),
+    "action": ("str", False, "tag-ms"),
+}
+
+_PRIMARY_BEAM_TAG_MS_FIELD_META: dict[str, ParamMeta] = {
+    "ms": ParamMeta(info="Measurement set whose ANTENNA table to tag"),
+    "telescope_name_column": ParamMeta(
+        nom_de_guerre="telescope-name-column",
+        info="Name of the ANTENNA-table column to store the per-antenna telescope-name labels in.",
+    ),
+    "label": ParamMeta(info="Apply a single telescope-name label uniformly to all antennas."),
+    "label_map": ParamMeta(
+        nom_de_guerre="label-map",
+        info="YAML file mapping antenna names to telescope-name labels.",
+    ),
+    "from_layout": ParamMeta(
+        nom_de_guerre="from-layout",
+        info="Name of a simms layout; per-antenna telescope names are matched against the MS antenna names.",
+    ),
+    "action": ParamMeta(
+        positional=True,
+        info="primary-beam action selector (trailing positional); 'tag-ms' tags the ANTENNA table.",
+    ),
+}
+
+primary_beam = define_cab(
+    "simms-primary-beam",
+    "simms primary-beam",
+    images.SIMMS,
+    _PRIMARY_BEAM_TAG_MS_FIELDS,
+    outputs={"ms": ("MS", False, None)},
+    field_meta=_PRIMARY_BEAM_TAG_MS_FIELD_META,
+    policies=Policies(),
+    info="simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-name labels (simms 3.0)",
 )

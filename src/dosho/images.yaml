@@ -1,29 +1,181 @@
-# Pinned container image references, one entry per tool. The single place
-# a cab's image tag is bumped -- no image-building infrastructure here
-# (see AGENTS.md), just reuse of existing published images.
+# dosho image manifest -- the single source of truth linking each cab's
+# container image to a registry reference (and, once dosho builds its own, to
+# a build recipe). Loaded by images.py, which exposes each KEY as a module
+# constant (images.<KEY>) that cab modules import unchanged.
+#
+# Schema:
+#   metadata:
+#     registry: <host>/<namespace>   # where dosho-built images publish
+#     bundle_version: dX.Y.Z         # tag suffix for dosho-built images
+#   images:
+#     <KEY>:
+#       source: "<upstream repo URL>" # provenance (documentary)
+#       ref: "<full image ref>"       # use this image verbatim (external)
+#       #  -- OR --
+#       build:                        # dosho builds this image
+#         version: "<tool version>"   # -> {registry}/{name}:{version}-{bundle_version}
+#         base: <KEY>                  # optional: build FROM another dosho image
+#         package: "<pip spec>"        # (pip tools) installed into the image
+#         dockerfile: <path under cargo/>
+#         cmd: "<sanity command>"
+#         # ...arbitrary extra vars consumed by the tool's Dockerfile template
+#       name: <repo>                   # optional; defaults to <KEY>.lower()
+#
+# Per-deployment overrides (highest precedence last):
+#   manifest  <  the YAML file named by $DOSHO_IMAGES  <  per-tool $DOSHO_IMAGE_<KEY>
 
-# Tags cross-checked against cult-cargo's bundle-manifest.md (as of the
-# cult-cargo `add-classic-cabs` branch) -- reusing the same published
-# images, not building new ones.
-WSCLEAN: "quay.io/stimela2/wsclean:3.6-haswell-cc0.2.1"
-CUBICAL: "quay.io/stimela2/cubical:1.6.4-cc0.2.1"
-QUARTICAL: "quay.io/stimela2/quartical:0.2.5-cc0.2.1"
-AOFLAGGER: "quay.io/stimela2/aoflagger:cc0.2.1"
-TRICOLOUR: "quay.io/stimela2/tricolour:cc0.2.1"
-CRYSTALBALL: "quay.io/stimela2/crystalball:cc0.2.1"
-OWLCAT: "quay.io/stimela2/owlcat:cc0.2.1"
-SHADEMS: "quay.io/stimela2/shadems:cc0.1.3"
-RAGAVI: "quay.io/stimela2/ragavi:cc0.2.1"
-SOFIA2: "quay.io/stimela2/sofia2:cc0.2.1"
+metadata:
+  registry: ghcr.io/shinobi-dosho
+  bundle_version: d0.1.0
 
-# The real, tested tag caracal2's own common/casatasks.py pins (not the
-# generic cult-cargo-manifest default) -- casatasks/casaplotms pysteps
-# both use this image.
-CASA6: "quay.io/stimela2/casa6:6.7-cc0.2.1"
-SIMMS: "quay.io/stimela2/simms:cc0.2.1"
+images:
+  # Shared base image: KERN suite base + python + casacore + common astro stack.
+  # Pip tools build `FROM` it (base: BASE_ASTRO) so the heavy layer is built once.
+  BASE_ASTRO:
+    name: base-astro
+    source: "https://kernsuite.info"
+    build:
+      version: "kern10"
+      kern_version: "10"
+      cmd: "python3 --version"
+      dockerfile: base-astro/Dockerfile
 
-# The old (pre-3.0) simms command has its own separate image -- a
-# genuinely different tool from simms 3.0's skysim/telsim, not just a
-# version bump.
-SIMMS_CLASSIC: "quay.io/stimela2/simms-classic:cc0.2.1"
-MOSAIC_QUEEN: "quay.io/stimela2/mosaic-queen:cc0.2.1"
+  # ---- dosho-built ----
+  SIMMS:
+    name: simms
+    source: "https://github.com/wits-cfa/simms"
+    build:
+      version: "3.0b3"
+      base: BASE_ASTRO
+      package: "simms==3.0b3"
+      cmd: "simms --help"
+      dockerfile: pip/Dockerfile
+
+  MSUTILS:
+    name: msutils
+    source: "https://github.com/sphemakh/msutils"
+    build:
+      version: "2.0.0b1"
+      base: BASE_ASTRO
+      # [all] pulls the flagstats (dask-ms, matplotlib) + plots (scipy) extras
+      # so `msutils flagstats` works out of the box.
+      package: "msutils[all]==2.0.0b1"
+      cmd: "msutils --help"
+      dockerfile: pip/Dockerfile
+
+  # ---- still referencing existing published images (onboarded incrementally) ----
+  WSCLEAN:
+    source: "https://gitlab.com/aroffringa/wsclean"
+    name: wsclean
+    build:
+      version: "3.6"
+      kern_version: "10"
+      package_version: "3.6"
+      cmd: "wsclean --version"
+      dockerfile: wsclean/Dockerfile
+  CUBICAL:
+    source: "https://github.com/ratt-ru/CubiCal"
+    ref: "quay.io/stimela2/cubical:1.6.4-cc0.2.1"
+  QUARTICAL:
+    source: "https://github.com/ratt-ru/QuartiCal"
+    name: quartical
+    build:
+      version: "0.2.7"
+      base: BASE_ASTRO
+      package: "quartical==0.2.7"
+      pip_install_flags: "--no-build-isolation"
+      # goquartical is config-file-driven and rejects --help; import-check instead.
+      cmd: "python3 -c 'import quartical'"
+      dockerfile: pip/Dockerfile
+  AOFLAGGER:
+    source: "https://gitlab.com/aroffringa/aoflagger"
+    name: aoflagger
+    build:
+      version: "kern10"
+      kern_version: "10"
+      cmd: "aoflagger --version"
+      dockerfile: aoflagger/Dockerfile
+  TRICOLOUR:
+    source: "https://github.com/ratt-ru/tricolour"
+    name: tricolour
+    build:
+      version: "0.2.1"
+      base: BASE_ASTRO
+      package: "tricolour==0.2.1"
+      cmd: "tricolour --help"
+      dockerfile: pip/Dockerfile
+  CRYSTALBALL:
+    source: "https://github.com/caracal-pipeline/crystalball"
+    name: crystalball
+    build:
+      version: "0.4.3"
+      base: BASE_ASTRO
+      package: "crystalball==0.4.3"
+      extra_deps: "-U matplotlib"
+      cmd: "crystalball --help"
+      dockerfile: pip/Dockerfile
+  OWLCAT:
+    source: "https://github.com/ratt-ru/owlcat"
+    name: owlcat
+    build:
+      version: "1.8.1"
+      base: BASE_ASTRO
+      package: "owlcat==1.8.1"
+      cmd: "plot-elevation-tracks.py --help"
+      dockerfile: pip/Dockerfile
+  SHADEMS:
+    source: "https://github.com/ratt-ru/shadeMS"
+    name: shadems
+    build:
+      version: "0.5.4"
+      base: BASE_ASTRO
+      package: "shadems==0.5.4"
+      extra_deps: 'pyarrow "dask[dataframe]<2025.1"'
+      cmd: "shadems --help"
+      dockerfile: pip/Dockerfile
+  RAGAVI:
+    source: "https://github.com/ratt-ru/ragavi"
+    name: ragavi
+    build:
+      version: "0.5.2"
+      # ragavi 0.5.2 (2020) targets Python 3.6 + an era bokeh/numpy and breaks on
+      # the modern shared BASE_ASTRO (Python 3.12 / numpy 2.x / bokeh 3.x removed
+      # Plot.plot_width and np.bool8). Built via a dedicated Dockerfile on
+      # stimela-classic's own ragavi base (stimela/base:1.2.5) -- no shared dosho
+      # base; see cargo/ragavi/Dockerfile.
+      dockerfile: ragavi/Dockerfile
+  SOFIA2:
+    source: "https://gitlab.com/SoFiA-Admin/SoFiA-2"
+    name: sofia2
+    build:
+      version: "2.7.0"
+      kern_version: "10"
+      package_version: "2.7.0"
+      # bare `sofia` wants a parameter file (exit 7); -h is the clean self-check.
+      cmd: "sofia -h"
+      dockerfile: sofia2/Dockerfile
+  # CASA6 (casatasks/casaplotms) built fresh -- lean KERN base + casa wheels +
+  # baked measures data + extracted casaplotms AppImage. The heavy, isolated one.
+  CASA6:
+    source: "https://casadocs.readthedocs.io"
+    name: casa6
+    build:
+      version: "6.7"
+      kern_version: "10"
+      wheel_version: "6.7.0.31"
+      cmd: "python3 -c 'import casatasks, casaplotms'"
+      dockerfile: casa6/Dockerfile
+  # DEPRECATED: the pre-3.0 simms command, unused by any worker -- slated for removal.
+  SIMMS_CLASSIC:
+    source: "https://github.com/wits-cfa/simms"
+    ref: "quay.io/stimela2/simms-classic:cc0.2.1"
+  MOSAIC_QUEEN:
+    source: "https://github.com/caracal-pipeline/MosaicQueen"
+    name: mosaic-queen
+    build:
+      version: "2.0.2"
+      base: BASE_ASTRO
+      package: "mosaic-queen==2.0.2"
+      pre_install: "RUN docker-apt-install montage"
+      cmd: "mosaic-queen --help"
+      dockerfile: pip/Dockerfile

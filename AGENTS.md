@@ -68,18 +68,31 @@ as stimela-ninja itself).
 
 ## Container images
 
-No image-building infrastructure here (no cult-cargo-style
-bundle-manifest.md + Dockerfile tree) -- cult-cargo already solves that
-problem well; it just isn't this repo's job, since dosho is a cab-schema
-repo, not an image-building one. `src/dosho/images.yaml` is the single
-place image references are pinned (reusing existing
-`quay.io/stimela2/*` images where they already exist); bumping a tool's
-version is editing one key there. `src/dosho/images.py` loads that file
-and exposes each entry as a module-level constant (`images.WSCLEAN`,
-`images.CASA6`, ...), so cab modules import it exactly as before -- this
-is plain key-value data, not a cab schema, so it doesn't fall under the
-"no YAML authoring path" rule above. The repo's own git tag versions the
-cab set as a whole.
+`src/dosho/images.yaml` is the **single source of truth** linking each cab to
+its container image. It is a manifest: top-level `metadata` (`registry` =
+`ghcr.io/shinobi-dosho`, `bundle_version`) plus an `images:` map keyed by the constant
+cabs read (`images.WSCLEAN`, `images.CASA6`, ...). Each entry is either a
+`ref:` (an existing published image, used verbatim -- the bootstrap state) or a
+`build:` recipe (a dosho-built image, resolved to
+`{registry}/{name}:{version}-{bundle_version}`). `src/dosho/images.py` loads
+the manifest, resolves each entry to a full reference, and exposes it as a
+module constant, so cab modules import it exactly as before -- this is plain
+data plus resolution, not a cab schema, so it doesn't fall under the "no YAML
+authoring path" rule above.
+
+**Provisioning overrides:** a deployment can repoint any image without editing
+dosho, via (lowest→highest precedence) the manifest, a YAML file named by
+`$DOSHO_IMAGES`, and per-tool `$DOSHO_IMAGE_<KEY>` env vars. Overrides are
+applied at import time (a cab's `image` is baked when the cab is constructed),
+so set them *before* the process starts.
+
+dosho **is** growing image build/maintenance infrastructure (a `dosho images`
+CLI + a `cargo/` Dockerfile tree + CI that builds and pushes to
+`ghcr.io/shinobi-dosho`, with an auto-generated readthedocs catalog) so cabs, images,
+registry, and docs stay linked off this one manifest -- modelled on cult-cargo
+and stimela-classic but with CI-automated push. It lands incrementally; until a
+tool is dosho-built, its manifest entry `ref:`s an existing image. Bumping a
+tool is editing one manifest entry.
 
 ## Repo layout
 

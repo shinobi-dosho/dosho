@@ -6,7 +6,7 @@
 # dependency from an index -- install it from GitHub explicitly first.
 # (Local dev uses `[tool.uv.sources]`'s editable sibling-checkout path
 # instead; this pin is RTD/pip-specific.)
-stimela-ninja @ git+https://github.com/SpheMakh/stimela-ninja.git
+stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git
 sphinx>=7.2
 furo>=2024.1
 sphinx-copybutton>=0.5

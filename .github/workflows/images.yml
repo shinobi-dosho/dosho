@@ -1,0 +1,141 @@
+# Build dosho's container images and push them to ghcr.io/shinobi-dosho.
+#
+# Automated "merge -> build -> push" (BioContainers-style): when a `build:`
+# image's Dockerfile or the manifest changes, the matching image(s) are rebuilt
+# and pushed with the built-in GITHUB_TOKEN (no external secret -- the repo
+# lives under the shinobi-dosho org). Published tags are immutable: the
+# `dosho images` push guard skips a tag that already exists unless forced.
+#
+# Changed-image selection: `discover` diffs the push (before..after) and builds
+# only the images that diff touched, plus dependents of any changed base
+# (`build-plan --changed`) -- so editing one tool's Dockerfile doesn't rebuild
+# the heavy CASA6 image, while editing base-astro rebuilds everything FROM it.
+# A manifest change rebuilds everything; a change to this workflow alone builds
+# nothing (it can't alter image contents).
+#
+# Two-stage build: shared base images (those referenced via `base:`) build and
+# push FIRST, then the tools that build FROM them (which pull the base from ghcr).
+name: images
+
+on:
+  push:
+    branches: [main, caracal2-tests]
+    paths:
+      - "src/dosho/cargo/**"
+      - "src/dosho/images.yaml"
+      - ".github/workflows/images.yml"
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Image KEY to build (blank = all build: images)"
+        required: false
+        default: ""
+      force:
+        description: "Overwrite an already-published tag"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC -- verify images are still present
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Split the build: images into base images (build first) and tools (build after).
+  discover:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      bases: ${{ steps.plan.outputs.bases }}
+      tools: ${{ steps.plan.outputs.tools }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need history to diff before..after for changed-image selection
+      - uses: astral-sh/setup-uv@v5
+      - id: plan
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: |
+          if [ -n "${{ github.event.inputs.image }}" ]; then
+            bases='[]'
+            tools='["${{ github.event.inputs.image }}"]'
+          else
+            args=""
+            # On an ordinary push (not a first push / force-push we can't diff),
+            # restrict the plan to the files the push actually changed.
+            if [ "${{ github.event_name }}" = "push" ] \
+               && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+               && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              for f in $(git diff --name-only "$BEFORE" "$AFTER"); do
+                args="$args --changed $f"
+              done
+            fi
+            plan="$(uv run dosho images build-plan $args)"
+            bases="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["bases"]))')"
+            tools="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["tools"]))')"
+          fi
+          echo "bases=$bases" >> "$GITHUB_OUTPUT"
+          echo "tools=$tools" >> "$GITHUB_OUTPUT"
+          echo "bases: $bases | tools: $tools"
+
+  build-base:
+    needs: discover
+    if: needs.discover.outputs.bases != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.bases) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: build + push base
+        run: |
+          flags="--push"
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
+          uv run dosho images build "${{ matrix.image }}" $flags
+
+  build-tools:
+    needs: [discover, build-base]
+    # run after the base(s); a skipped build-base (no bases changed) is fine.
+    if: always() && needs.discover.outputs.tools != '[]' && needs.build-base.result != 'failure' && !cancelled()
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.tools) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: build + push tool
+        run: |
+          flags="--push"
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
+          uv run dosho images build "${{ matrix.image }}" $flags
+
+  # Scheduled health check: every build: image's tag must still be in the registry.
+  verify:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: uv run dosho images verify
