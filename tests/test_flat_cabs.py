@@ -99,15 +99,23 @@ def test_simms_telsim_sibling_subcommand_of_skysim():
 def test_simms_primary_beam_tag_ms_flags_and_passthrough_output():
     cab = dosho.get("simms-primary-beam")
     assert cab.name == "simms-primary-beam"
-    assert cab.command == "simms primary-beam tag-ms"
+    # `simms` is a chained multicommand: the action ("tag-ms") is a trailing
+    # positional emitted AFTER primary-beam's options, so it is NOT part of the
+    # command string (see the cab's own comment).
+    assert cab.command == "simms primary-beam"
     assert cab.image == dosho.get("simms-skysim").image  # same simms 3.0 binary
-    argv = build_argv(
-        cab, {"ms": "/x.ms", "telescope_name_column": "TEL", "from_layout": "meerkat"}
-    )
-    assert argv[:3] == ["simms", "primary-beam", "tag-ms"]
+    # model_dump() fills the `action` default ("tag-ms"), mirroring dispatch's
+    # _prepare_inputs (which build_argv actually receives at runtime).
+    prepared = cab.inputs_model(
+        ms="/x.ms", telescope_name_column="TEL", from_layout="meerkat"
+    ).model_dump()
+    argv = build_argv(cab, prepared)
+    assert argv[:2] == ["simms", "primary-beam"]
+    assert argv[-1] == "tag-ms"  # action positional, after the options
     assert "--ms" in argv  # tag-ms takes --ms, not a positional
     assert "--telescope-name-column" in argv
     assert "--from-layout" in argv
+    assert argv.index("--from-layout") < argv.index("tag-ms")  # options precede the action
     assert "ms" in cab.outputs_model.model_fields  # passthrough output
 
 
