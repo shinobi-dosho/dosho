@@ -53,7 +53,7 @@ from dosho.cabs.msutils import (
 )
 from dosho.cabs.owlcat_plotelev import owlcat_plotelev
 from dosho.cabs.quartical import quartical
-from dosho.cabs.ragavi import ragavi, ragavi_gains
+from dosho.cabs.ragavi import gains as ragavi_gains, vis as ragavi_vis
 from dosho.cabs.shadems import shadems
 from dosho.cabs.simms import primary_beam, simms_classic, skysim, telsim
 from dosho.cabs.sofia2 import sofia2
@@ -85,8 +85,8 @@ __all__ = [
     "polcal",
     "primary_beam",
     "quartical",
-    "ragavi",
     "ragavi_gains",
+    "ragavi_vis",
     "setjy",
     "shadems",
     "simms_classic",

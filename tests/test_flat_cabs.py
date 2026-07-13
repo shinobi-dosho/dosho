@@ -1,5 +1,5 @@
 """The remaining mechanically-ported flat cabs (aoflagger, tricolour,
-crystalball, owlcat_plotelev, shadems, ragavi, sofia2, simms-skysim,
+crystalball, owlcat_plotelev, shadems, ragavi-vis/gains, sofia2, simms-skysim,
 simms-telsim, simms (classic), mosaic-queen) -- each already loaded cleanly
 via cult-cargo's own YAML
 (no dynamic_schema, no unloadable package-scoped _include), so porting
@@ -63,9 +63,9 @@ def test_shadems_union_dtypes_resolve_to_real_python_types():
     assert argv[-1] == "/x.ms"  # positional
 
 
-def test_ragavi_registered_and_prefixed():
-    cab = dosho.get("ragavi")
-    assert cab.name == "ragavi"
+def test_ragavi_vis_registered_and_prefixed():
+    cab = dosho.get("ragavi-vis")
+    assert cab.name == "ragavi-vis"
     assert cab.command == "ragavi-vis"
     argv = build_argv(cab, {"ms": "/x.ms"})
     assert argv[0] == "ragavi-vis"
@@ -112,7 +112,7 @@ def test_ragavi_gains_registered_and_passes_gain_flags():
     cab = dosho.get("ragavi-gains")
     assert cab.name == "ragavi-gains"
     assert cab.command == "ragavi-gains"
-    assert cab.image == dosho.get("ragavi").image  # same ragavi image, sibling script
+    assert cab.image == dosho.get("ragavi-vis").image  # same ragavi image, sibling script
     argv = build_argv(
         cab, {"table": ["/x.G0"], "gaintype": ["G"], "htmlname": "x.G0", "plotname": "x.G0.png"}
     )

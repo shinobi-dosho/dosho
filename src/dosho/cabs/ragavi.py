@@ -1,8 +1,10 @@
 """ragavi -- Radio Astronomy Gain and Visibility Inspector
-(https://ragavi.readthedocs.io). Two sibling console scripts, one cab each:
+(https://ragavi.readthedocs.io). Two sibling console scripts, one cab each,
+named for their sub-tool so a caller addresses them consistently as
+`dosho.cabs.ragavi:vis` / `dosho.cabs.ragavi:gains`:
 
-* `ragavi` -- `ragavi-vis`, interactive Bokeh-based MS *visibility* plots.
-* `ragavi_gains` -- `ragavi-gains`, plots of *gain tables* (K/G/B/F/D...),
+* `vis` -- `ragavi-vis`, interactive Bokeh-based MS *visibility* plots.
+* `gains` -- `ragavi-gains`, plots of *gain tables* (K/G/B/F/D...),
   used by crosscal/polcal to render each solved caltable. `htmlname`/
   `plotname` are output filenames the tool writes, but they are passed *on
   the command line*, so each is declared as both an input (emitted as
@@ -108,8 +110,8 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "htmlname": ("str", False, None),
 }
 
-ragavi = define_cab(
-    "ragavi",
+vis = define_cab(
+    "ragavi-vis",
     "ragavi-vis",
     images.RAGAVI,
     _FIELDS,
@@ -175,7 +177,7 @@ _GAINS_OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "plotname": ("str", False, None),
 }
 
-ragavi_gains = define_cab(
+gains = define_cab(
     "ragavi-gains",
     "ragavi-gains",
     images.RAGAVI,

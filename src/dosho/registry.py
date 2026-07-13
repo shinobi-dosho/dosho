@@ -30,6 +30,7 @@ _NAME_OVERRIDES: dict[str, str] = {
     "simms_classic": "simms",
     "mosaic_queen": "mosaic-queen",
     "ragavi_gains": "ragavi-gains",
+    "ragavi_vis": "ragavi-vis",
     "summary": "msutils-summary",
     "addcol": "msutils-addcol",
     "copycol": "msutils-copycol",
