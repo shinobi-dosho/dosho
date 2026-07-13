@@ -1615,6 +1615,307 @@ mstransform
      - ``Path``
      - \-
 
+msutils-addcol
+--------------
+
+msutils addcol: add a column to an MS, cloning shape/type from an existing one
+
+:Command: ``msutils addcol``
+:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Source: https://github.com/sphemakh/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``colname``
+     - ``str``
+     - *required*
+     - \-
+   * - ``clone``
+     - ``str | None``
+     - ``'DATA'``
+     - \-
+   * - ``valuetype``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``init_with``
+     - ``float | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-addnoise
+----------------
+
+msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev)
+
+:Command: ``msutils addnoise``
+:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Source: https://github.com/sphemakh/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``column``
+     - ``str | None``
+     - ``'MODEL_DATA'``
+     - \-
+   * - ``sefd``
+     - ``float | None``
+     - ``551.0``
+     - \-
+   * - ``noise``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``add_to``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-copycol
+---------------
+
+msutils copycol: copy one column's data to another (creating it if needed)
+
+:Command: ``msutils copycol``
+:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Source: https://github.com/sphemakh/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``fromcol``
+     - ``str``
+     - *required*
+     - \-
+   * - ``tocol``
+     - ``str``
+     - *required*
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-flagstats
+-----------------
+
+msutils flagstats: out-of-core flag statistics + matplotlib summary plot
+
+:Command: ``msutils flagstats``
+:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Source: https://github.com/sphemakh/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``plot``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``plot``
+     - ``Path | None``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - \-
+
+msutils-sumcols
+---------------
+
+msutils sumcols: sum (or, with --subtract, difference) MS columns into a new column
+
+:Command: ``msutils sumcols``
+:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Source: https://github.com/sphemakh/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``cols``
+     - ``list``
+     - *required*
+     - \-
+   * - ``out``
+     - ``str``
+     - *required*
+     - \-
+   * - ``subtract``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-summary
+---------------
+
+msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)
+
+:Command: ``msutils summary``
+:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Source: https://github.com/sphemakh/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``quiet``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``json_out``
+     - ``Path | None``
+     - \-
+
 owlcat_plotelev
 ---------------
 
@@ -2637,6 +2938,63 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
 **Outputs**
 
 *(none)*
+
+simms-primary-beam
+------------------
+
+simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-name labels (simms 3.0)
+
+:Command: ``simms primary-beam``
+:Image: ``ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0`` (``SIMMS`` 3.0b3, build)
+:Source: https://github.com/wits-cfa/simms
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``telescope_name_column``
+     - ``str | None``
+     - ``'TELESCOPE_NAME'``
+     - \-
+   * - ``label``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``label_map``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``from_layout``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``action``
+     - ``str | None``
+     - ``'tag-ms'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
 
 simms-skysim
 ------------

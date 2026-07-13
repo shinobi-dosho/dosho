@@ -136,3 +136,74 @@ def test_mosaic_queen_replace_policy_and_output():
     assert cab.name == "mosaic-queen"
     assert cab.policies.replace == {"_": "-"}
     assert "output" in cab.outputs_model.model_fields
+
+
+def test_msutils_summary_positional_ms_and_json_flag():
+    cab = dosho.get("msutils-summary")
+    assert cab.name == "msutils-summary"
+    assert cab.command == "msutils summary"
+    argv = build_argv(cab, {"ms": "/x.ms", "json_out": "s.json", "quiet": True})
+    assert argv[:2] == ["msutils", "summary"]
+    # `json_out` renames the field off pydantic's `BaseModel.json`, but the
+    # tool's real `--json` flag is preserved via nom_de_guerre.
+    assert "--json" in argv and "json_out" not in argv
+    assert "--quiet" in argv  # bare bool flag
+    assert argv[-1] == "/x.ms"  # positional, emitted last
+    assert "json_out" in cab.outputs_model.model_fields  # user path is also an output
+
+
+def test_msutils_addcol_two_positionals_in_order_and_ms_output():
+    cab = dosho.get("msutils-addcol")
+    assert cab.name == "msutils-addcol"
+    assert cab.command == "msutils addcol"
+    argv = build_argv(cab, {"ms": "/x.ms", "colname": "CORRECTED_DATA", "init_with": 0.0})
+    assert argv[:2] == ["msutils", "addcol"]
+    assert "--init-with" in argv  # hyphenated flag from sanitised field name
+    # ms then colname, both positional, emitted last in declaration order
+    assert argv[-2:] == ["/x.ms", "CORRECTED_DATA"]
+    assert "ms" in cab.outputs_model.model_fields  # in-place edit -> passthrough
+
+
+def test_msutils_copycol_three_positionals():
+    cab = dosho.get("msutils-copycol")
+    assert cab.name == "msutils-copycol"
+    argv = build_argv(cab, {"ms": "/x.ms", "fromcol": "DATA", "tocol": "CORRECTED_DATA"})
+    assert argv == ["msutils", "copycol", "/x.ms", "DATA", "CORRECTED_DATA"]
+
+
+def test_msutils_sumcols_variadic_positional_cols_as_separate_tokens():
+    cab = dosho.get("msutils-sumcols")
+    assert cab.name == "msutils-sumcols"
+    assert cab.inputs_model.model_fields["cols"].is_required()
+    argv = build_argv(
+        cab, {"ms": "/x.ms", "cols": ["MODEL_DATA", "DATA"], "out": "SUM", "subtract": True}
+    )
+    assert "--out" in argv and "--subtract" in argv
+    # cols are bare positional tokens (repeat_as_tokens), after ms
+    assert argv[-3:] == ["/x.ms", "MODEL_DATA", "DATA"]
+
+
+def test_msutils_addnoise_defaults_and_ms_output():
+    cab = dosho.get("msutils-addnoise")
+    assert cab.name == "msutils-addnoise"
+    fields = cab.inputs_model.model_fields
+    assert fields["sefd"].default == 551.0
+    assert fields["column"].default == "MODEL_DATA"
+    argv = build_argv(cab, {"ms": "/x.ms", "column": "MODEL_DATA", "sefd": 551.0, "add_to": "DATA"})
+    assert "--add-to" in argv  # hyphenated flag
+    assert argv[-1] == "/x.ms"  # positional
+    assert "ms" in cab.outputs_model.model_fields
+
+
+def test_msutils_flagstats_repeated_flags_and_file_outputs():
+    cab = dosho.get("msutils-flagstats")
+    assert cab.name == "msutils-flagstats"
+    # click `multiple=True` options -> flag repeated per value (repeat_list)
+    assert cab.policies.repeat_list is True
+    argv = build_argv(
+        cab, {"ms": "/x.ms", "plot": "f.png", "json_out": "f.json", "field": ["0", "1"]}
+    )
+    assert argv.count("--field") == 2  # one occurrence per value
+    assert "--plot" in argv and "--json" in argv
+    assert argv[-1] == "/x.ms"  # positional
+    assert {"plot", "json_out"} <= set(cab.outputs_model.model_fields)

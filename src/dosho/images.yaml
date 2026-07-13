@@ -51,6 +51,18 @@ images:
       cmd: "simms --help"
       dockerfile: pip/Dockerfile
 
+  MSUTILS:
+    name: msutils
+    source: "https://github.com/sphemakh/msutils"
+    build:
+      version: "2.0.0b1"
+      base: BASE_ASTRO
+      # [all] pulls the flagstats (dask-ms, matplotlib) + plots (scipy) extras
+      # so `msutils flagstats` works out of the box.
+      package: "msutils[all]==2.0.0b1"
+      cmd: "msutils --help"
+      dockerfile: pip/Dockerfile
+
   # ---- still referencing existing published images (onboarded incrementally) ----
   WSCLEAN:
     source: "https://gitlab.com/aroffringa/wsclean"
