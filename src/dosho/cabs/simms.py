@@ -95,7 +95,8 @@ _SKYSIM_FIELD_META: dict[str, ParamMeta] = {
         info='Simulation mode. To create a new column use "sim"; to add to column use "add"; to subtract from column use "subtract".'
     ),
     "source_schema": ParamMeta(
-        info="Specify a custom source schema via a YAML file that specifies how to map columns in custom sky model to the columns expected by simms. See the bdsf_gaul schema file at 'https://github.com/wits-cfa/simms/tree/main/simms/schemas'"
+        nom_de_guerre="source-schema",
+        info="Specify a custom source schema via a YAML file that specifies how to map columns in custom sky model to the columns expected by simms. See the bdsf_gaul schema file at 'https://github.com/wits-cfa/simms/tree/main/simms/schemas'",
     ),
 }
 

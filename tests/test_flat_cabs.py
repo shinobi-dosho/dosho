@@ -85,6 +85,18 @@ def test_simms_skysim_registered_under_hyphenated_name():
     assert argv[:2] == ["simms", "skysim"]
 
 
+def test_simms_skysim_multiword_flags_are_hyphenated():
+    # every multi-word skysim flag must be hyphenated (e.g. --source-schema,
+    # not --source_schema, which simms rejects)
+    cab = dosho.get("simms-skysim")
+    argv = build_argv(
+        cab, {"ms": "/x.ms", "ascii_sky": "/m.txt", "source_schema": "/s.yaml", "field_id": 0}
+    )
+    assert not [a for a in argv if a.startswith("--") and "_" in a]
+    assert "--source-schema" in argv
+    assert "--ascii-sky" in argv
+
+
 def test_simms_telsim_sibling_subcommand_of_skysim():
     cab = dosho.get("simms-telsim")
     assert cab.name == "simms-telsim"
