@@ -112,7 +112,9 @@ _FIELD_META: dict[str, ParamMeta] = {
 }
 
 _OUTPUTS: dict[str, tuple[str, bool, object]] = {
-    "htmlname": ("str", False, None),
+    # File to match the same-named File input it passes through (the output is
+    # filled from the input value, a Path).
+    "htmlname": ("File", False, None),
 }
 
 vis = define_cab(
