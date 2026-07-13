@@ -138,10 +138,12 @@ images:
     name: ragavi
     build:
       version: "0.5.2"
-      base: BASE_ASTRO
-      package: "ragavi==0.5.2"
-      cmd: "ragavi-vis --help"
-      dockerfile: pip/Dockerfile
+      # ragavi 0.5.2 (2020) targets Python 3.6 + an era bokeh/numpy and breaks on
+      # the modern shared BASE_ASTRO (Python 3.12 / numpy 2.x / bokeh 3.x removed
+      # Plot.plot_width and np.bool8). Built via a dedicated Dockerfile on
+      # stimela-classic's own ragavi base (stimela/base:1.2.5) -- no shared dosho
+      # base; see cargo/ragavi/Dockerfile.
+      dockerfile: ragavi/Dockerfile
   SOFIA2:
     source: "https://gitlab.com/SoFiA-Admin/SoFiA-2"
     name: sofia2
