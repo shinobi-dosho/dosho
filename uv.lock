@@ -203,9 +203,11 @@ wheels = [
 
 [[package]]
 name = "dosho"
-version = "0.1.0a1"
+version = "0.1.0a2"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
+    { name = "pyyaml" },
     { name = "stimela-ninja" },
 ]
 
@@ -225,7 +227,11 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "stimela-ninja", specifier = ">=0.1.0b2" }]
+requires-dist = [
+    { name = "click", specifier = ">=8.1" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "stimela-ninja", specifier = ">=0.1.0b2" },
+]
 
 [package.metadata.requires-dev]
 dev = [

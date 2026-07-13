@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 _NAME_OVERRIDES: dict[str, str] = {
     "skysim": "simms-skysim",
     "telsim": "simms-telsim",
+    "primary_beam": "simms-primary-beam",
     "simms_classic": "simms",
     "mosaic_queen": "mosaic-queen",
 }

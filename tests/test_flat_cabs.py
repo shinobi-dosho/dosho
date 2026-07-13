@@ -96,6 +96,21 @@ def test_simms_telsim_sibling_subcommand_of_skysim():
     assert argv[-1] == "/x.ms"  # positional
 
 
+def test_simms_primary_beam_tag_ms_flags_and_passthrough_output():
+    cab = dosho.get("simms-primary-beam")
+    assert cab.name == "simms-primary-beam"
+    assert cab.command == "simms primary-beam tag-ms"
+    assert cab.image == dosho.get("simms-skysim").image  # same simms 3.0 binary
+    argv = build_argv(
+        cab, {"ms": "/x.ms", "telescope_name_column": "TEL", "from_layout": "meerkat"}
+    )
+    assert argv[:3] == ["simms", "primary-beam", "tag-ms"]
+    assert "--ms" in argv  # tag-ms takes --ms, not a positional
+    assert "--telescope-name-column" in argv
+    assert "--from-layout" in argv
+    assert "ms" in cab.outputs_model.model_fields  # passthrough output
+
+
 def test_simms_classic_is_a_genuinely_different_tool_and_image():
     cab = dosho.get("simms")
     assert cab.name == "simms"

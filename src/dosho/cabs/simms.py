@@ -301,3 +301,39 @@ simms_classic = define_cab(
     policies=Policies(),
     info="simms (classic): simulate an empty MS from telescope/observation parameters (pre-3.0)",
 )
+
+_PRIMARY_BEAM_TAG_MS_FIELDS: dict[str, tuple[str, bool, object]] = {
+    "ms": ("MS", True, None),
+    "telescope_name_column": ("str", False, "TELESCOPE_NAME"),
+    "label": ("str", False, None),
+    "label_map": ("File", False, None),
+    "from_layout": ("str", False, None),
+}
+
+_PRIMARY_BEAM_TAG_MS_FIELD_META: dict[str, ParamMeta] = {
+    "ms": ParamMeta(info="Measurement set whose ANTENNA table to tag"),
+    "telescope_name_column": ParamMeta(
+        nom_de_guerre="telescope-name-column",
+        info="Name of the ANTENNA-table column to store the per-antenna telescope-name labels in.",
+    ),
+    "label": ParamMeta(info="Apply a single telescope-name label uniformly to all antennas."),
+    "label_map": ParamMeta(
+        nom_de_guerre="label-map",
+        info="YAML file mapping antenna names to telescope-name labels.",
+    ),
+    "from_layout": ParamMeta(
+        nom_de_guerre="from-layout",
+        info="Name of a simms layout; per-antenna telescope names are matched against the MS antenna names.",
+    ),
+}
+
+primary_beam = define_cab(
+    "simms-primary-beam",
+    "simms primary-beam tag-ms",
+    images.SIMMS,
+    _PRIMARY_BEAM_TAG_MS_FIELDS,
+    outputs={"ms": ("MS", False, None)},
+    field_meta=_PRIMARY_BEAM_TAG_MS_FIELD_META,
+    policies=Policies(),
+    info="simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-name labels (simms 3.0)",
+)
