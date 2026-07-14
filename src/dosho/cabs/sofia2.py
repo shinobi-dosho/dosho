@@ -537,11 +537,10 @@ _FIELD_META: dict[str, ParamMeta] = {
     "mask": ParamMeta(implicit="{output_directory}/{output_filename}_mask.fits"),
     "mask_2d": ParamMeta(implicit="{output_directory}/{output_filename}_mask-2d.fits"),
     "mask_raw": ParamMeta(implicit="{output_directory}/{output_filename}_mask-raw.fits"),
-    "mom0": ParamMeta(implicit="{output_directory}/{output_filename}_mom0.fits"),
-    "mom1": ParamMeta(implicit="{output_directory}/{output_filename}_mom1.fits"),
     "mom2": ParamMeta(implicit="{output_directory}/{output_filename}_mom2.fits"),
     "chan_map": ParamMeta(implicit="{output_directory}/{output_filename}_chan.fits"),
     "noise": ParamMeta(implicit="{output_directory}/{output_filename}_noise.fits"),
+    "noise_txt": ParamMeta(implicit="{output_directory}/{output_filename}_noise.txt"),
 }
 
 _OUTPUTS: dict[str, tuple[str, bool, object]] = {
@@ -558,6 +557,7 @@ _OUTPUTS: dict[str, tuple[str, bool, object]] = {
     "mom2": ("File", False, None),
     "chan_map": ("File", False, None),
     "noise": ("File", False, None),
+    "noise_txt": ("File", False, None),
 }
 
 sofia2 = define_cab(
