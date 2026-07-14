@@ -47,8 +47,10 @@ from dosho.cabs.casatasks import (
 )
 from dosho.cabs.crystalball import crystalball
 from dosho.cabs.cubical import cubical
+from dosho.cabs.ddfacet import ddfacet
 from dosho.cabs.eidos import eidos
 from dosho.cabs.flagms import flagms
+from dosho.cabs.killms import killms
 from dosho.cabs.mosaic_queen import mosaic_queen
 from dosho.cabs.msutils import (
     addcol,
@@ -93,6 +95,7 @@ __all__ = [
     "copycol",
     "crystalball",
     "cubical",
+    "ddfacet",
     "eidos",
     "fixvis",
     "flagdata",
@@ -102,6 +105,7 @@ __all__ = [
     "fluxscale",
     "gaincal",
     "initweights",
+    "killms",
     "listobs",
     "mosaic_queen",
     "mstransform",

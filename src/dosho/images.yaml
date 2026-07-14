@@ -295,3 +295,22 @@ images:
       package: "bdsf==1.14.1"
       cmd: "python3 -c 'import bdsf'"
       dockerfile: pip/Dockerfile
+  # DDFacet's real runtime deps (SOFA, blitz, CASAREST, MAKEMS, MeqTrees-timba)
+  # aren't KERN-suite/BASE_ASTRO packages, so this is a dedicated, from-source
+  # build (adapted from DDFacet's own upstream docker.2404) rather than
+  # base: BASE_ASTRO -- see cargo/ddfacet/Dockerfile's own header.
+  DDFACET:
+    source: "https://github.com/saopicc/DDFacet"
+    name: ddfacet
+    build:
+      version: "1.0.0.0"
+      cmd: "DDF.py --help"
+      dockerfile: ddfacet/Dockerfile
+  KILLMS:
+    source: "https://github.com/saopicc/killMS"
+    name: killms
+    build:
+      version: "3.3.0"
+      base: DDFACET
+      cmd: "kMS.py --help"
+      dockerfile: killms/Dockerfile
