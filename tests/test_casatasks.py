@@ -63,31 +63,42 @@ def test_every_casatask_pystep_resolves_through_the_registry():
 
 
 def test_listobs_schema_shape():
+    """Full real listobs() signature per casadocs, not just vis/listfile --
+    see the module docstring's audit note."""
     fields = listobs.step.inputs_model.model_fields
-    assert set(fields) == {"vis", "listfile"}
     assert fields["vis"].is_required()
     assert fields["listfile"].is_required()
+    assert not fields["overwrite"].is_required()
+    assert fields["overwrite"].default is False  # CASA's own default, not this file's old True
+    assert "spw" in fields and "antenna" in fields and "cachesize" in fields
 
 
 def test_mstransform_has_real_defaults_for_optional_regridding_kwargs():
     fields = mstransform.step.inputs_model.model_fields
     assert fields["vis"].is_required()
-    assert fields["field"].is_required()
+    assert not fields["field"].is_required()  # CASA's own default ('') is now exposed, not hardcoded
     assert not fields["regridms"].is_required()
     assert fields["regridms"].default is False
     assert fields["datacolumn"].default == "corrected"
+    assert fields["realmodelcol"].default is False  # the gap oxkat's split scripts needed
+    assert fields["keepflags"].default is True  # was silently hardcoded, now a real param
 
 
-def test_gaincal_gaintype_is_required_not_defaulted():
-    """gaintype disambiguates K/G/F/KCROSS -- there's no sane default."""
+def test_gaincal_gaintype_defaults_to_casas_own_default():
+    """Deliberately matches CASA's own default ('G') rather than requiring
+    a caller to always specify it -- consistency with casadocs wins over
+    guarding against a silently-wrong solve type.
+    """
     fields = gaincal.step.inputs_model.model_fields
-    assert fields["gaintype"].is_required()
+    assert not fields["gaintype"].is_required()
+    assert fields["gaintype"].default == "G"
     assert not fields["calmode"].is_required()
 
 
-def test_flagdata_mode_required_others_optional():
+def test_flagdata_mode_defaults_to_casas_own_default():
     fields = flagdata.step.inputs_model.model_fields
-    assert fields["mode"].is_required()
+    assert not fields["mode"].is_required()
+    assert fields["mode"].default == "manual"
     assert not fields["field"].is_required()
 
 
@@ -95,16 +106,46 @@ def test_applycal_gaintable_is_required_list():
     fields = applycal.step.inputs_model.model_fields
     assert fields["gaintable"].is_required()
     assert fields["gaintable"].annotation == list[Path]
+    assert "spw" in fields  # was missing entirely -- every other selection param had it
+
+
+def test_gaincal_and_bandpass_have_the_params_oxkats_1gc_ladder_needs():
+    """oxkat's 1GC_casa_refcal.py passes these explicitly on every call;
+    a caller using this cab without them can't reproduce that ladder.
+    """
+    gaincal_fields = gaincal.step.inputs_model.model_fields
+    assert gaincal_fields["append"].default is False
+    assert gaincal_fields["minblperant"].default == 4
+
+    bandpass_fields = bandpass.step.inputs_model.model_fields
+    assert bandpass_fields["bandtype"].default == "B"
+    assert bandpass_fields["minblperant"].default == 4
+    assert bandpass_fields["append"].default is False
+
+
+def test_fluxscale_has_append_and_real_list_typed_reference_transfer():
+    """oxkat's F3 call passes transfer=pcals, a list of every secondary
+    calibrator -- this only round-trips if transfer is a real list, not
+    a string (CASA's own `stringVec` type).
+    """
+    fields = fluxscale.step.inputs_model.model_fields
+    assert fields["append"].default is False
+    assert fields["reference"].is_required()
+    assert fields["reference"].annotation == list[str]
+    assert fields["transfer"].annotation == list[str] | None
 
 
 def test_flagmanager_generic_shape_not_caracal_specific_bookkeeping():
-    """Only the raw CASA task shape (mode/versionname/merge) belongs here
-    -- caracal2's own "before this worker ran" marker convention is
-    pipeline-specific orchestration, not part of this wrapper.
+    """Only the raw CASA task shape belongs here -- caracal2's own "before
+    this worker ran" marker convention is pipeline-specific orchestration,
+    not part of this wrapper. `oldname`/`comment` (mode='rename'/'save')
+    are real CASA parameters this file was missing, not caracal2-specific
+    additions.
     """
     fields = flagmanager.step.inputs_model.model_fields
-    assert set(fields) == {"vis", "mode", "versionname", "merge"}
-    assert fields["mode"].is_required()
+    assert set(fields) == {"vis", "mode", "versionname", "oldname", "comment", "merge"}
+    assert not fields["mode"].is_required()
+    assert fields["mode"].default == "list"
     assert not fields["versionname"].is_required()
 
 
