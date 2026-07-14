@@ -286,3 +286,12 @@ images:
       package: "astro-tigger-lsm==1.8.0"
       cmd: "tigger-convert --help"
       dockerfile: pip/Dockerfile
+  BDSF:
+    source: "https://github.com/lofar-astron/PyBDSF"
+    name: bdsf
+    build:
+      version: "1.14.1"
+      base: BASE_ASTRO
+      package: "bdsf==1.14.1"
+      cmd: "python3 -c 'import bdsf'"
+      dockerfile: pip/Dockerfile

@@ -26,6 +26,7 @@ from __future__ import annotations
 from dosho.cabs.aegean import aegean
 from dosho.cabs.aimfast import aimfast
 from dosho.cabs.aoflagger import aoflagger
+from dosho.cabs.bdsf import catalog as bdsf_catalog
 from dosho.cabs.breizorro import breizorro
 from dosho.cabs.casaplotms import plotms
 from dosho.cabs.chgcentre import chgcentre
@@ -85,6 +86,7 @@ __all__ = [
     "aoflagger",
     "applycal",
     "bandpass",
+    "bdsf_catalog",
     "breizorro",
     "chgcentre",
     "clearcal",

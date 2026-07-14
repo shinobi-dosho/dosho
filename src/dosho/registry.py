@@ -37,6 +37,7 @@ _NAME_OVERRIDES: dict[str, str] = {
     "sumcols": "msutils-sumcols",
     "addnoise": "msutils-addnoise",
     "flagstats": "msutils-flagstats",
+    "bdsf_catalog": "bdsf-catalog",
     "quartical_backup": "quartical-backup",
     "quartical_restore": "quartical-restore",
     "quartical_plotter": "quartical-plotter",
