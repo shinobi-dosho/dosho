@@ -50,6 +50,9 @@ crystalball = define_cab(
     "crystalball",
     images.CRYSTALBALL,
     _FIELDS,
+    # crystalball writes model visibilities into output_column in place --
+    # re-declare ms as an output so a dependent step can chain onto it.
+    outputs={"ms": ("MS", False, None)},
     field_meta=_FIELD_META,
     policies=Policies(),
     info="Crystalball: predict model visibilities from a sky model (https://github.com/caracal-pipeline/crystalball)",

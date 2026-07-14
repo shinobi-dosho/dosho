@@ -49,6 +49,9 @@ tricolour = define_cab(
     "tricolour",
     images.TRICOLOUR,
     _FIELDS,
+    # tricolour flags in place -- re-declare ms as an output so a
+    # dependent step can chain onto the flagged MS.
+    outputs={"ms": ("MS", False, None)},
     field_meta=_FIELD_META,
     policies=Policies(),
     info="Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)",

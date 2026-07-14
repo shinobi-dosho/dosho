@@ -63,6 +63,9 @@ aoflagger = define_cab(
     "aoflagger",
     images.AOFLAGGER,
     _FIELDS,
+    # aoflagger flags in place -- re-declare msname as an output so a
+    # dependent step can chain onto the flagged MS.
+    outputs={"msname": ("MS", False, None)},
     field_meta=_FIELD_META,
     policies=Policies(prefix="-"),
     info="AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)",

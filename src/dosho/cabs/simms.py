@@ -105,6 +105,9 @@ skysim = define_cab(
     "simms skysim",
     images.SIMMS,
     _SKYSIM_FIELDS,
+    # skysim writes simulated visibilities into column in place --
+    # re-declare ms as an output so a dependent step can chain onto it.
+    outputs={"ms": ("MS", False, None)},
     field_meta=_SKYSIM_FIELD_META,
     policies=Policies(),
     info="simms skysim: simulate visibilities from a sky model (simms 3.0)",
@@ -212,6 +215,9 @@ telsim = define_cab(
     "simms telsim",
     images.SIMMS,
     _TELSIM_FIELDS,
+    # telsim writes noise into column in place -- re-declare ms as an
+    # output so a dependent step can chain onto it.
+    outputs={"ms": ("MS", False, None)},
     field_meta=_TELSIM_FIELD_META,
     policies=Policies(),
     info="simms telsim: simulate telescope noise/sensitivity (simms 3.0)",
@@ -312,6 +318,9 @@ simms_classic = define_cab(
     "simms",
     images.SIMMS_CLASSIC,
     _SIMMS_CLASSIC_FIELDS,
+    # simms_classic's whole job is to create msname -- declare it as an
+    # output so a dependent step can chain onto the new MS.
+    outputs={"msname": ("MS", False, None)},
     field_meta=_SIMMS_CLASSIC_FIELD_META,
     policies=Policies(),
     info="simms (classic): simulate an empty MS from telescope/observation parameters (pre-3.0)",
