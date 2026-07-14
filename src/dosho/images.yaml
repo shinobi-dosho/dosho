@@ -179,3 +179,69 @@ images:
       pre_install: "RUN docker-apt-install montage"
       cmd: "mosaic-queen --help"
       dockerfile: pip/Dockerfile
+  BREIZORRO:
+    source: "https://github.com/ratt-ru/breizorro"
+    name: breizorro
+    build:
+      version: "0.2.0"
+      base: BASE_ASTRO
+      package: "breizorro==0.2.0"
+      cmd: "breizorro --help"
+      dockerfile: pip/Dockerfile
+  AIMFAST:
+    source: "https://github.com/Athanaseus/aimfast"
+    name: aimfast
+    build:
+      version: "1.3.4"
+      base: BASE_ASTRO
+      package: "aimfast==1.3.4"
+      # aimfast 1.3.4 hard-pins astLib==0.10.0, which fails to import on
+      # Python 3.12 (PyWCSTools.wcs does `import imp`, removed in 3.12).
+      # A single combined `pip install aimfast astLib>=0.13` is
+      # unresolvable (aimfast's exact pin conflicts with the upgrade), so
+      # this has to be a second, separate pip invocation that overrides
+      # the pin after the fact.
+      post_install: "RUN pip install --break-system-packages -U astLib>=0.13.2"
+      cmd: "aimfast --help"
+      dockerfile: pip/Dockerfile
+  EIDOS:
+    source: "https://github.com/ratt-ru/eidos"
+    name: eidos
+    build:
+      version: "1.1.2"
+      base: BASE_ASTRO
+      package: "eidos==1.1.2"
+      cmd: "eidos --help"
+      dockerfile: pip/Dockerfile
+  SMOPS:
+    source: "https://github.com/ratt-ru/smops"
+    name: smops
+    build:
+      version: "0.1.7"
+      base: BASE_ASTRO
+      package: "smops==0.1.7"
+      # smops 0.1.7 hard-pins stimela==2.0rc4 (a yanked pre-release), whose
+      # bundled scabha fails to import on Python 3.12 (a dataclass with a
+      # mutable default, fixed upstream). Same "second pip invocation"
+      # workaround as AIMFAST -- see that entry's comment.
+      post_install: "RUN pip install --break-system-packages -U stimela"
+      cmd: "smops --help"
+      dockerfile: pip/Dockerfile
+  AEGEAN:
+    source: "https://github.com/PaulHancock/Aegean"
+    name: aegean
+    build:
+      version: "2.3.5"
+      base: BASE_ASTRO
+      package: "AegeanTools==2.3.5"
+      cmd: "aegean --help"
+      dockerfile: pip/Dockerfile
+  RM_TOOLS:
+    source: "https://github.com/CIRADA-Tools/RM-Tools"
+    name: rm-tools
+    build:
+      version: "1.4.11"
+      base: BASE_ASTRO
+      package: "RM-Tools==1.4.11"
+      cmd: "rmsynth1d --help"
+      dockerfile: pip/Dockerfile

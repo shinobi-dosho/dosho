@@ -23,7 +23,10 @@ there, not here.
 
 from __future__ import annotations
 
+from dosho.cabs.aegean import aegean
+from dosho.cabs.aimfast import aimfast
 from dosho.cabs.aoflagger import aoflagger
+from dosho.cabs.breizorro import breizorro
 from dosho.cabs.casaplotms import plotms
 from dosho.cabs.casatasks import (
     applycal,
@@ -42,6 +45,7 @@ from dosho.cabs.casatasks import (
 )
 from dosho.cabs.crystalball import crystalball
 from dosho.cabs.cubical import cubical
+from dosho.cabs.eidos import eidos
 from dosho.cabs.mosaic_queen import mosaic_queen
 from dosho.cabs.msutils import (
     addcol,
@@ -54,8 +58,10 @@ from dosho.cabs.msutils import (
 from dosho.cabs.owlcat_plotelev import owlcat_plotelev
 from dosho.cabs.quartical import quartical
 from dosho.cabs.ragavi import gains as ragavi_gains, vis as ragavi_vis
+from dosho.cabs.rmtools import rmclean3d, rmsynth1d, rmsynth3d
 from dosho.cabs.shadems import shadems
 from dosho.cabs.simms import primary_beam, simms_classic, skysim, telsim
+from dosho.cabs.smops import smops
 from dosho.cabs.sofia2 import sofia2
 from dosho.cabs.tricolour import tricolour
 from dosho.cabs.wsclean import wsclean
@@ -63,13 +69,17 @@ from dosho.cabs.wsclean import wsclean
 __all__ = [
     "addcol",
     "addnoise",
+    "aegean",
+    "aimfast",
     "aoflagger",
     "applycal",
     "bandpass",
+    "breizorro",
     "clearcal",
     "copycol",
     "crystalball",
     "cubical",
+    "eidos",
     "fixvis",
     "flagdata",
     "flagmanager",
@@ -87,10 +97,14 @@ __all__ = [
     "quartical",
     "ragavi_gains",
     "ragavi_vis",
+    "rmclean3d",
+    "rmsynth1d",
+    "rmsynth3d",
     "setjy",
     "shadems",
     "simms_classic",
     "skysim",
+    "smops",
     "sofia2",
     "summary",
     "sumcols",

@@ -1,11 +1,15 @@
 """The remaining mechanically-ported flat cabs (aoflagger, tricolour,
 crystalball, owlcat_plotelev, shadems, ragavi-vis/gains, sofia2, simms-skysim,
-simms-telsim, simms (classic), mosaic-queen) -- each already loaded cleanly
-via cult-cargo's own YAML
-(no dynamic_schema, no unloadable package-scoped _include), so porting
-them is a field-by-field transcription rather than a structural fix.
-One targeted test per cab: registration + a representative build_argv
-shape check against the real tool's CLI.
+simms-telsim, simms (classic), mosaic-queen, breizorro, aimfast, eidos,
+smops, aegean, rmsynth1d, rmsynth3d, rmclean3d) -- no `dynamic_schema`, no
+unloadable package-scoped `_include`, so porting them is a field-by-field
+transcription rather than a structural fix. Most loaded cleanly via
+cult-cargo's own YAML; a few of the later additions (aimfast, eidos,
+rmsynth1d/3d, rmclean3d) instead needed transcription from the real tool's
+own `--help` because cult-cargo's YAML for them had gone stale (missing
+flags, or -- for rm-tools -- flags mapped to the wrong meaning). One
+targeted test per cab: registration + a representative build_argv shape
+check against the real tool's CLI.
 """
 
 import dosho
@@ -247,3 +251,122 @@ def test_msutils_flagstats_repeated_flags_and_file_outputs():
     assert "--plot" in argv and "--json" in argv
     assert argv[-1] == "/x.ms"  # positional
     assert {"plot", "json_out"} <= set(cab.outputs_model.model_fields)
+
+
+def test_breizorro_registered_and_repeated_list_flags():
+    cab = dosho.get("breizorro")
+    assert cab.name == "breizorro"
+    assert cab.command == "breizorro"
+    # click `multiple=True` options -> flag repeated per value (repeat_list)
+    assert cab.policies.repeat_list is True
+    argv = build_argv(
+        cab,
+        {
+            "restored_image": "/img.fits",
+            "threshold": 7.0,
+            "merge": ["/a.fits", "/b.fits"],
+        },
+    )
+    assert argv[0] == "breizorro"
+    assert "--restored-image" in argv and "/img.fits" in argv
+    assert argv.count("--merge") == 2
+    assert "/a.fits" in argv and "/b.fits" in argv
+
+
+def test_aimfast_registered_and_nargs_flags_emit_as_bare_tokens():
+    cab = dosho.get("aimfast")
+    assert cab.name == "aimfast"
+    assert cab.command == "aimfast"
+    argv = build_argv(
+        cab,
+        {
+            "restored_image": "/restored.fits",
+            "compare_models": ["/a.lsm.html", "/b.lsm.html"],
+            "centre_coord": "13:00:00,-30:00:00",
+        },
+    )
+    assert argv[0] == "aimfast"
+    assert "--restored-image" in argv
+    # nargs=2 flag: one flag occurrence, then each value as a bare token
+    assert argv.count("--compare-models") == 1
+    assert "/a.lsm.html" in argv and "/b.lsm.html" in argv
+    # real flag is literally "--centre_coord" (underscore, not hyphenated)
+    assert "--centre_coord" in argv
+
+
+def test_eidos_required_freq_list_and_stokes_case_preserved():
+    cab = dosho.get("eidos")
+    assert cab.name == "eidos"
+    fields = cab.inputs_model.model_fields
+    assert fields["freq"].is_required()
+    assert fields["coeff"].is_required()
+    argv = build_argv(cab, {"freq": [900.0, 1000.0, 1.0], "coeff": "mh", "stokes": "I"})
+    assert argv[0] == "eidos"
+    assert argv.count("--freq") == 1
+    assert "900.0" in argv and "1000.0" in argv
+    # real flag is "--Stokes" (capitalised)
+    assert "--Stokes" in argv
+
+
+def test_smops_required_fields_and_hyphenated_flags():
+    cab = dosho.get("smops")
+    assert cab.name == "smops"
+    fields = cab.inputs_model.model_fields
+    assert fields["ms"].is_required()
+    assert fields["input_prefix"].is_required()
+    argv = build_argv(
+        cab,
+        {"ms": "/x.ms", "input_prefix": "im", "channels_out": 4, "polynomial_order": 2},
+    )
+    assert argv[0] == "smops"
+    assert "--ms" in argv and "/x.ms" in argv
+    assert "--input-prefix" in argv
+    assert "--channels-out" in argv
+    assert "--polynomial-order" in argv
+
+
+def test_aegean_positional_image_and_repeated_beam_triple():
+    cab = dosho.get("aegean")
+    assert cab.name == "aegean"
+    argv = build_argv(cab, {"image": "/img.fits", "beam": [1.0, 0.5, 30.0]})
+    assert argv[0] == "aegean"
+    assert argv[-1] == "/img.fits"  # positional, emitted last
+    assert argv.count("--beam") == 1
+    assert "1.0" in argv and "0.5" in argv and "30.0" in argv
+
+
+def test_rmsynth1d_positional_and_single_dash_flags():
+    cab = dosho.get("rmsynth1d")
+    assert cab.name == "rmsynth1d"
+    assert cab.command == "rmsynth1d"
+    argv = build_argv(cab, {"data_file": "/spec.dat", "fit_rmsf_gaussian": True, "nsamples": 20})
+    assert argv[0] == "rmsynth1d"
+    assert argv[-1] == "/spec.dat"  # positional
+    assert "-t" in argv
+    assert "-s" in argv and "20" in argv
+    assert "--" not in "".join(argv)  # every flag is single-dash
+
+
+def test_rmsynth3d_three_positionals_in_order():
+    cab = dosho.get("rmsynth3d")
+    assert cab.name == "rmsynth3d"
+    argv = build_argv(
+        cab, {"stokes_q": "/Q.fits", "stokes_u": "/U.fits", "freqs": "/freqs.dat", "verbose": True}
+    )
+    assert argv[0] == "rmsynth3d"
+    assert "-v" in argv
+    assert argv[-3:] == ["/Q.fits", "/U.fits", "/freqs.dat"]
+
+
+def test_rmclean3d_positionals_and_long_only_flags_get_double_dash():
+    cab = dosho.get("rmclean3d")
+    assert cab.name == "rmclean3d"
+    argv = build_argv(
+        cab, {"fdf_dirty": "/dirty.fits", "rmsf": "/rmsf.fits", "ncores": 4, "mpi": True}
+    )
+    assert argv[0] == "rmclean3d"
+    assert argv[-2:] == ["/dirty.fits", "/rmsf.fits"]
+    # long-flag-only options embed the second dash via nom_de_guerre
+    assert "--ncores" in argv and "4" in argv
+    assert "--mpi" in argv
+    assert "-ncores" not in argv  # never single-dash
