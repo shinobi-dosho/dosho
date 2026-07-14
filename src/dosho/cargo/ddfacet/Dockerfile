@@ -48,7 +48,7 @@ RUN wget https://www.iausofa.org/s/sofa_c-20231011tar.gz && \
     tar xvfz sofa_c-20231011tar.gz && \
     rm sofa_c-20231011tar.gz && \
     cd /opt/sofa/20231011/c/src && \
-    sed -i '52s/.*/INSTALL_DIR = \\/usr/' makefile && \
+    sed -i '52s/.*/INSTALL_DIR = \/usr/' makefile && \
     make -j4 && \
     make install && \
     make test && \
