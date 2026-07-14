@@ -3,6 +3,20 @@
 
 Ported field-by-field from cult-cargo's sofia2.yml (a flat, static
 100-parameter schema -- no dynamic_schema).
+
+Real SoFiA-2 derives `output.directory`/`output.filename` from
+`input.data` when either is left unset (cwd and the input cube's own
+basename, respectively) -- a run-time default `ParamMeta.implicit`
+templates can't express (no imported tool code, no eval; see wsclean.py's
+own docstring for the same constraint). So, like wsclean's `prefix`, both
+are pinned to concrete dosho-level defaults (`"."`/`"sofia"`) here rather
+than left `None`, trading exact fidelity to SoFiA's own inference for
+outputs that resolve to a real, predictable path a pipeline can chain a
+step onto. Each `output_write*` toggle below has a same-shaped output
+field templated off those two; `output_writeNoise`'s `_noise.txt`
+alternative (only when spectral, not local, noise scaling is enabled) is
+the one exotic case left unmodeled -- `noise` always resolves to the
+FITS-cube path.
 """
 
 from __future__ import annotations
@@ -97,8 +111,8 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
     "parameter_physical": ("bool", False, False),
     "parameter_prefix": ("str", False, "SoFiA"),
     "parameter_wcs": ("bool", False, True),
-    "output_directory": ("str", False, None),
-    "output_filename": ("str", False, None),
+    "output_directory": ("str", False, "."),
+    "output_filename": ("str", False, "sofia"),
     "output_marginCubelets": ("int", False, 10),
     "output_overwrite": ("bool", False, True),
     "output_thresholdMom12": ("float", False, 0.0),
@@ -454,11 +468,11 @@ _FIELD_META: dict[str, ParamMeta] = {
     ),
     "output_directory": ParamMeta(
         nom_de_guerre="output.directory",
-        info="Full path to the directory to which all output files will be written. If unset, the directory of the input data cube will be used by default.",
+        info="Full path to the directory to which all output files will be written. Defaults to '.' here (real SoFiA would fall back to the input data cube's own directory) so this cab's output paths stay predictable.",
     ),
     "output_filename": ParamMeta(
         nom_de_guerre="output.filename",
-        info="File name that will be used as the template for all output files. For example, if output.filename = my_data, then the output files will be named my_data_cat.xml, my_data_mom0.fits, etc. If unset, the name of the input data cube will be used as the file name template by default.",
+        info="File name that will be used as the template for all output files. For example, if output.filename = my_data, then the output files will be named my_data_cat.xml, my_data_mom0.fits, etc. Defaults to 'sofia' here (real SoFiA would fall back to the input data cube's own name) so this cab's output paths stay predictable.",
     ),
     "output_marginCubelets": ParamMeta(
         nom_de_guerre="output.marginCubelets",
@@ -512,6 +526,38 @@ _FIELD_META: dict[str, ParamMeta] = {
         nom_de_guerre="output.writeRawMask",
         info="If set to true, then a data cube containing the raw, binary source mask produced by the source finder prior to linking will be written in FITS format. The raw mask cube will have the suffix _mask-raw.fits.",
     ),
+    # dynamic output paths, one per `output_write*` toggle -- see module
+    # docstring for why `output_directory`/`output_filename` are pinned to
+    # concrete defaults rather than SoFiA's own input-derived ones.
+    "cat_ascii": ParamMeta(implicit="{output_directory}/{output_filename}_cat.txt"),
+    "cat_sql": ParamMeta(implicit="{output_directory}/{output_filename}_cat.sql"),
+    "cat_xml": ParamMeta(implicit="{output_directory}/{output_filename}_cat.xml"),
+    "cubelets": ParamMeta(implicit="{output_directory}/{output_filename}_cubelets"),
+    "filtered": ParamMeta(implicit="{output_directory}/{output_filename}_filtered.fits"),
+    "mask": ParamMeta(implicit="{output_directory}/{output_filename}_mask.fits"),
+    "mask_2d": ParamMeta(implicit="{output_directory}/{output_filename}_mask-2d.fits"),
+    "mask_raw": ParamMeta(implicit="{output_directory}/{output_filename}_mask-raw.fits"),
+    "mom2": ParamMeta(implicit="{output_directory}/{output_filename}_mom2.fits"),
+    "chan_map": ParamMeta(implicit="{output_directory}/{output_filename}_chan.fits"),
+    "noise": ParamMeta(implicit="{output_directory}/{output_filename}_noise.fits"),
+    "noise_txt": ParamMeta(implicit="{output_directory}/{output_filename}_noise.txt"),
+}
+
+_OUTPUTS: dict[str, tuple[str, bool, object]] = {
+    "cat_ascii": ("File", False, None),
+    "cat_sql": ("File", False, None),
+    "cat_xml": ("File", False, None),
+    "cubelets": ("Directory", False, None),
+    "filtered": ("File", False, None),
+    "mask": ("File", False, None),
+    "mask_2d": ("File", False, None),
+    "mask_raw": ("File", False, None),
+    "mom0": ("File", False, None),
+    "mom1": ("File", False, None),
+    "mom2": ("File", False, None),
+    "chan_map": ("File", False, None),
+    "noise": ("File", False, None),
+    "noise_txt": ("File", False, None),
 }
 
 sofia2 = define_cab(
@@ -519,6 +565,7 @@ sofia2 = define_cab(
     "sofia",
     images.SOFIA2,
     _FIELDS,
+    outputs=_OUTPUTS,
     field_meta=_FIELD_META,
     policies=Policies(prefix="--"),
     info="SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/SoFiA-Admin/SoFiA-2)",
