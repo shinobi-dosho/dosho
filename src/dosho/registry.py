@@ -37,6 +37,15 @@ _NAME_OVERRIDES: dict[str, str] = {
     "sumcols": "msutils-sumcols",
     "addnoise": "msutils-addnoise",
     "flagstats": "msutils-flagstats",
+    "quartical_backup": "quartical-backup",
+    "quartical_restore": "quartical-restore",
+    "quartical_plotter": "quartical-plotter",
+    "spimple_binterp": "spimple-binterp",
+    "spimple_imconv": "spimple-imconv",
+    "spimple_spifit": "spimple-spifit",
+    "tigger_convert": "tigger-convert",
+    "tigger_restore": "tigger-restore",
+    "tigger_tag": "tigger-tag",
 }
 
 

@@ -245,3 +245,44 @@ images:
       package: "RM-Tools==1.4.11"
       cmd: "rmsynth1d --help"
       dockerfile: pip/Dockerfile
+  RFINDER:
+    source: "https://github.com/Fil8/RFInder"
+    name: rfinder
+    build:
+      version: "1.1.0"
+      base: BASE_ASTRO
+      package: "rfinder==1.1.0"
+      # rfinder imports pkg_resources at runtime; a bare `pip install` on top
+      # of BASE_ASTRO can otherwise pull the newest setuptools, which dropped
+      # pkg_resources.
+      extra_deps: "'setuptools<81'"
+      cmd: "rfinder --help"
+      dockerfile: pip/Dockerfile
+  PYDDI:
+    source: "https://github.com/IanHeywood/pyddi"
+    name: pyddi
+    build:
+      version: "0.0.4"
+      base: BASE_ASTRO
+      package: "pyddi==0.0.4"
+      extra_deps: "'setuptools<81'"  # see RFINDER's comment
+      cmd: "pyddi --help"
+      dockerfile: pip/Dockerfile
+  SPIMPLE:
+    source: "https://github.com/ratt-ru/spimple"
+    name: spimple
+    build:
+      version: "0.0.5"
+      base: BASE_ASTRO
+      package: "spimple==0.0.5"
+      cmd: "spimple-binterp --help"
+      dockerfile: pip/Dockerfile
+  TIGGER_LSM:
+    source: "https://github.com/ska-sa/tigger-lsm"
+    name: tigger-lsm
+    build:
+      version: "1.8.0"
+      base: BASE_ASTRO
+      package: "astro-tigger-lsm==1.8.0"
+      cmd: "tigger-convert --help"
+      dockerfile: pip/Dockerfile

@@ -358,6 +358,150 @@ def test_rmsynth3d_three_positionals_in_order():
     assert argv[-3:] == ["/Q.fits", "/U.fits", "/freqs.dat"]
 
 
+def test_chgcentre_positionals_and_reused_wsclean_image():
+    cab = dosho.get("chgcentre")
+    assert cab.name == "chgcentre"
+    assert cab.command == "chgcentre"
+    assert cab.image == dosho.get("wsclean").image  # companion binary, same build
+    argv = build_argv(cab, {"ms": "/x.ms", "ra": "00h00m00.0s", "dec": "00d00m00.0s", "force": True})
+    assert argv[0] == "chgcentre"
+    assert "-f" in argv
+    assert argv[-3:] == ["/x.ms", "00h00m00.0s", "00d00m00.0s"]
+    assert "ms" in cab.outputs_model.model_fields  # in-place edit -> passthrough
+
+
+def test_flagms_reuses_owlcat_image_and_positional_ms():
+    cab = dosho.get("flagms")
+    assert cab.name == "flagms"
+    assert cab.command == "flag-ms.py"
+    assert cab.image == dosho.get("owlcat_plotelev").image
+    argv = build_argv(cab, {"ms": "/x.ms", "flag": "L", "verbose": 2})
+    assert argv[0] == "flag-ms.py"
+    assert "--flag" in argv and "L" in argv
+    assert argv[-1] == "/x.ms"  # positional
+
+
+def test_pyddi_hyphenated_flags():
+    cab = dosho.get("pyddi")
+    assert cab.name == "pyddi"
+    argv = build_argv(cab, {"image": "/img.fits", "flux_thresh": 12.0})
+    assert argv[0] == "pyddi"
+    assert "--image" in argv
+    assert "--flux-thresh" in argv and "12.0" in argv
+
+
+def test_rfinder_long_form_flags_diverge_from_short_mnemonics():
+    cab = dosho.get("rfinder")
+    assert cab.name == "rfinder"
+    argv = build_argv(cab, {"input": "/x.ms", "telescope": "meerkat", "no_cleanup": True})
+    assert argv[0] == "rfinder"
+    assert "--input" in argv and "--telescope" in argv
+    # the real long flag is --no_cleanup, not --no_clip (cult-cargo's own field name)
+    assert "--no_cleanup" in argv
+
+
+def test_spimple_binterp_repeated_ms_list_as_bare_tokens():
+    cab = dosho.get("spimple-binterp")
+    assert cab.name == "spimple-binterp"
+    assert cab.command == "spimple-binterp"
+    argv = build_argv(
+        cab, {"image": "/img.fits", "output_filename": "/out", "ms": ["/a.ms", "/b.ms"]}
+    )
+    assert argv[0] == "spimple-binterp"
+    assert argv.count("--ms") == 1  # nargs='+' -> one flag occurrence
+    assert "/a.ms" in argv and "/b.ms" in argv
+
+
+def test_spimple_imconv_shares_image_with_binterp():
+    cab = dosho.get("spimple-imconv")
+    assert cab.name == "spimple-imconv"
+    assert cab.image == dosho.get("spimple-binterp").image
+    argv = build_argv(cab, {"image": "/img.fits", "output_filename": "/out", "circ_psf": True})
+    assert "--circ-psf" in argv
+
+
+def test_spimple_spifit_model_and_residual_lists():
+    cab = dosho.get("spimple-spifit")
+    assert cab.name == "spimple-spifit"
+    argv = build_argv(
+        cab,
+        {
+            "model": ["/m1.fits", "/m2.fits"],
+            "output_filename": "/out",
+            "threshold": 5.0,
+        },
+    )
+    assert argv.count("--model") == 1
+    assert "/m1.fits" in argv and "/m2.fits" in argv
+    assert "--threshold" in argv
+
+
+def test_tigger_convert_positionals_and_repeated_append():
+    cab = dosho.get("tigger-convert")
+    assert cab.name == "tigger-convert"
+    assert cab.policies.repeat_list is True
+    argv = build_argv(
+        cab, {"sky_model": "/in.lsm.html", "output_model": "/out.lsm.html", "append": ["/a.txt", "/b.txt"]}
+    )
+    assert argv[0] == "tigger-convert"
+    assert argv.count("--append") == 2  # append-style optparse option, one flag per value
+    assert argv[-2:] == ["/in.lsm.html", "/out.lsm.html"]
+
+
+def test_tigger_restore_shares_image_with_convert():
+    cab = dosho.get("tigger-restore")
+    assert cab.name == "tigger-restore"
+    assert cab.image == dosho.get("tigger-convert").image
+    argv = build_argv(cab, {"input_image": "/img.fits", "sky_model": "/m.lsm.html", "num_sources": 10})
+    assert argv[0] == "tigger-restore"
+    assert "--num-sources" in argv
+    assert argv[-2:] == ["/img.fits", "/m.lsm.html"]
+
+
+def test_tigger_tag_variadic_positional_selectors():
+    cab = dosho.get("tigger-tag")
+    assert cab.name == "tigger-tag"
+    argv = build_argv(
+        cab, {"sky_model": "/m.lsm.html", "selectors": ["NAME_a", "+outlier"], "force": True}
+    )
+    assert argv[0] == "tigger-tag"
+    assert "--force" in argv
+    # sky_model then the free-form selector tokens, positional and in order
+    assert argv[-3:] == ["/m.lsm.html", "NAME_a", "+outlier"]
+
+
+def test_quartical_backup_positionals_and_plain_argparse_policy():
+    cab = dosho.get("quartical-backup")
+    assert cab.name == "quartical-backup"
+    assert cab.command == "goquartical-backup"
+    assert cab.image == dosho.get("quartical").image
+    argv = build_argv(cab, {"ms_path": "/x.ms", "zarr_dir": "/backups", "column_name": "FLAG"})
+    assert argv[0] == "goquartical-backup"
+    assert argv[-3:] == ["/x.ms", "/backups", "FLAG"]
+
+
+def test_quartical_restore_positionals_and_ms_output():
+    cab = dosho.get("quartical-restore")
+    assert cab.name == "quartical-restore"
+    argv = build_argv(
+        cab, {"zarr_path": "/backups/x.bkp.qc", "ms_path": "/x.ms", "column_name": "FLAG"}
+    )
+    assert argv[-3:] == ["/backups/x.bkp.qc", "/x.ms", "FLAG"]
+    assert "ms_path" in cab.outputs_model.model_fields
+
+
+def test_quartical_plotter_positionals_and_repeated_axes_list():
+    cab = dosho.get("quartical-plotter")
+    assert cab.name == "quartical-plotter"
+    assert cab.command == "goquartical-plot"
+    argv = build_argv(
+        cab, {"input_path": "/gains/G", "output_path": "/plots", "iter_axes": ["antenna", "corr"]}
+    )
+    assert argv.count("--iter-axes") == 1
+    assert "antenna" in argv and "corr" in argv
+    assert argv[-2:] == ["/gains/G", "/plots"]
+
+
 def test_rmclean3d_positionals_and_long_only_flags_get_double_dash():
     cab = dosho.get("rmclean3d")
     assert cab.name == "rmclean3d"

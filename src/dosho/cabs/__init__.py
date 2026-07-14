@@ -28,6 +28,7 @@ from dosho.cabs.aimfast import aimfast
 from dosho.cabs.aoflagger import aoflagger
 from dosho.cabs.breizorro import breizorro
 from dosho.cabs.casaplotms import plotms
+from dosho.cabs.chgcentre import chgcentre
 from dosho.cabs.casatasks import (
     applycal,
     bandpass,
@@ -46,6 +47,7 @@ from dosho.cabs.casatasks import (
 from dosho.cabs.crystalball import crystalball
 from dosho.cabs.cubical import cubical
 from dosho.cabs.eidos import eidos
+from dosho.cabs.flagms import flagms
 from dosho.cabs.mosaic_queen import mosaic_queen
 from dosho.cabs.msutils import (
     addcol,
@@ -56,13 +58,22 @@ from dosho.cabs.msutils import (
     sumcols,
 )
 from dosho.cabs.owlcat_plotelev import owlcat_plotelev
-from dosho.cabs.quartical import quartical
+from dosho.cabs.pyddi import pyddi
+from dosho.cabs.quartical import (
+    quartical,
+    quartical_backup,
+    quartical_plotter,
+    quartical_restore,
+)
 from dosho.cabs.ragavi import gains as ragavi_gains, vis as ragavi_vis
+from dosho.cabs.rfinder import rfinder
 from dosho.cabs.rmtools import rmclean3d, rmsynth1d, rmsynth3d
 from dosho.cabs.shadems import shadems
 from dosho.cabs.simms import primary_beam, simms_classic, skysim, telsim
 from dosho.cabs.smops import smops
 from dosho.cabs.sofia2 import sofia2
+from dosho.cabs.spimple import binterp as spimple_binterp, imconv as spimple_imconv, spifit as spimple_spifit
+from dosho.cabs.tigger import convert as tigger_convert, restore as tigger_restore, tag as tigger_tag
 from dosho.cabs.tricolour import tricolour
 from dosho.cabs.wsclean import wsclean
 
@@ -75,6 +86,7 @@ __all__ = [
     "applycal",
     "bandpass",
     "breizorro",
+    "chgcentre",
     "clearcal",
     "copycol",
     "crystalball",
@@ -83,6 +95,7 @@ __all__ = [
     "fixvis",
     "flagdata",
     "flagmanager",
+    "flagms",
     "flagstats",
     "fluxscale",
     "gaincal",
@@ -94,9 +107,14 @@ __all__ = [
     "plotms",
     "polcal",
     "primary_beam",
+    "pyddi",
     "quartical",
+    "quartical_backup",
+    "quartical_plotter",
+    "quartical_restore",
     "ragavi_gains",
     "ragavi_vis",
+    "rfinder",
     "rmclean3d",
     "rmsynth1d",
     "rmsynth3d",
@@ -106,9 +124,15 @@ __all__ = [
     "skysim",
     "smops",
     "sofia2",
+    "spimple_binterp",
+    "spimple_imconv",
+    "spimple_spifit",
     "summary",
     "sumcols",
     "telsim",
+    "tigger_convert",
+    "tigger_restore",
+    "tigger_tag",
     "tricolour",
     "wsclean",
 ]
