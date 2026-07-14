@@ -243,6 +243,10 @@ images:
       version: "1.4.11"
       base: BASE_ASTRO
       package: "RM-Tools==1.4.11"
+      # do_RMsynth_1D.py unconditionally imports RMutils.util_plotTk (even
+      # for --help), which does `import tkinter.ttk` -- not part of the
+      # pip-installed Python, needs the system package.
+      pre_install: "RUN docker-apt-install python3-tk"
       cmd: "rmsynth1d --help"
       dockerfile: pip/Dockerfile
   RFINDER:
