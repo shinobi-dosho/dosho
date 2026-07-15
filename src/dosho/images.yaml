@@ -45,9 +45,11 @@ images:
     name: simms
     source: "https://github.com/wits-cfa/simms"
     build:
-      version: "3.0b3"
+      # Pinned to the sexagesimal-join sign/wrapping/RA-units fix + primary-beam
+      # --source-schema/--ascii-delimiter support (PR #151), not yet on PyPI.
+      version: "3.0b3-pr151"
       base: BASE_ASTRO
-      package: "simms==3.0b3"
+      package: "git+https://github.com/wits-cfa/simms.git@46c5960"
       cmd: "simms --help"
       dockerfile: pip/Dockerfile
 

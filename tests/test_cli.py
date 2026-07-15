@@ -30,10 +30,10 @@ def test_images_list_shows_build_and_ref_kinds():
 def test_build_dry_run_renders_dockerfile_and_tag():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0b3-pr151-d0.1.0" in result.output
     # simms builds FROM the shared base-astro image (base: resolved to a full ref)
     assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
-    assert "--break-system-packages" in result.output and "simms==3.0b3" in result.output
+    assert "--break-system-packages" in result.output and "git+https://github.com/wits-cfa/simms.git@46c5960" in result.output
 
 
 def test_base_image_builds_from_kern_without_a_base_ref():
@@ -50,7 +50,7 @@ def test_build_package_override_changes_installed_spec_but_not_tag():
     assert result.exit_code == 0, result.output
     assert "simms==3.0b2" in result.output
     # tag still from manifest version
-    assert "ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0b3-pr151-d0.1.0" in result.output
 
 
 def test_registry_override_changes_tag():
@@ -58,7 +58,7 @@ def test_registry_override_changes_tag():
         cli.main, ["images", "build", "SIMMS", "--dry-run", "--registry", "quay.io/dosho"]
     )
     assert result.exit_code == 0, result.output
-    assert "quay.io/dosho/simms:3.0b3-d0.1.0" in result.output
+    assert "quay.io/dosho/simms:3.0b3-pr151-d0.1.0" in result.output
 
 
 def test_build_refuses_a_ref_only_image():
@@ -168,7 +168,7 @@ def test_verify_ok_when_present(monkeypatch):
     monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
     result = CliRunner().invoke(cli.main, ["images", "verify"])
     assert result.exit_code == 0, result.output
-    assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0" in result.output
+    assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0b3-pr151-d0.1.0" in result.output
 
 
 def test_verify_fails_when_missing(monkeypatch):

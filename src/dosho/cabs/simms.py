@@ -53,6 +53,12 @@ _SKYSIM_FIELDS: dict[str, tuple[str, bool, object]] = {
     "input_column": ("str", False, None),
     "mode": ("str", False, "sim"),
     "source_schema": ("File", False, None),
+    "primary_beam": ("File", False, None),
+    "beam_band": ("str", False, "L"),
+    "beam_pa_step": ("float", False, 1.0),
+    "beam_grid_max_gib": ("float", False, 4.0),
+    "beam_jones": ("str", False, "diagonal"),
+    "telescope_name_column": ("str", False, "TELESCOPE_NAME"),
 }
 
 _SKYSIM_FIELD_META: dict[str, ParamMeta] = {
@@ -106,6 +112,40 @@ _SKYSIM_FIELD_META: dict[str, ParamMeta] = {
     "source_schema": ParamMeta(
         nom_de_guerre="source-schema",
         info="Specify a custom source schema via a YAML file that specifies how to map columns in custom sky model to the columns expected by simms. See the bdsf_gaul schema file at 'https://github.com/wits-cfa/simms/tree/main/simms/schemas'",
+    ),
+    "primary_beam": ParamMeta(
+        nom_de_guerre="primary-beam",
+        info='Path to a beam-config YAML mapping each ANTENNA TELESCOPE_NAME to a beam model (e.g. "MK: '
+        '{jimbeam: L}"). Applies a per-antenna, parallactic-rotating primary beam to component skies '
+        "(ASCII/WSClean). Requires a linear pol basis.",
+    ),
+    "beam_band": ParamMeta(
+        nom_de_guerre="beam-band", info="Default band for JimBeam entries that omit an explicit model/CSV."
+    ),
+    "beam_pa_step": ParamMeta(
+        nom_de_guerre="beam-pa-step",
+        info="Spacing (degrees) of the parallactic-angle grid the beam is sampled on and interpolated from. "
+        "Smaller is more accurate but uses more memory/compute.",
+    ),
+    "beam_grid_max_gib": ParamMeta(
+        nom_de_guerre="beam-grid-max-gib",
+        info="Hard ceiling (GiB) on the sampled beam grid, which scales with parallactic-angle samples x sky "
+        "components x channels and is held in memory for the whole run. skysim errors (rather than risking "
+        "an out-of-memory kill) if the grid would exceed this; lower it with a coarser beam-pa-step or fewer "
+        "components.",
+    ),
+    "beam_jones": ParamMeta(
+        nom_de_guerre="beam-jones",
+        info='Primary-beam application for component skies. "diagonal" applies a per-feed voltage (fast, '
+        'linear correlations only). "full" applies the complete 2x2 E-Jones (models cross-hand leakage '
+        "from FITS beam cubes and supports circular correlations); requires 4 correlations. Ignored on the "
+        "FITS-image path.",
+    ),
+    "telescope_name_column": ParamMeta(
+        nom_de_guerre="telescope-name-column",
+        info="Name of the ANTENNA-table column holding the per-antenna telescope/type label that maps to a "
+        "beam model. Must match the column telsim/primary-beam tag-ms wrote. The primary beam requires this "
+        "column; it is never inferred.",
     ),
 }
 
@@ -363,6 +403,8 @@ _PRIMARY_BEAM_FIELDS: dict[str, tuple[str, bool, object]] = {
     "ms": ("MS", False, None),
     "fits_sky": ("File", False, None),
     "ascii_sky": ("File", False, None),
+    "ascii_delimiter": ("str", False, None),
+    "source_schema": ("File", False, None),
     "output": ("File", False, None),
     "telescope_name_column": ("str", False, "TELESCOPE_NAME"),
     "label": ("str", False, None),
@@ -408,6 +450,14 @@ _PRIMARY_BEAM_FIELD_META: dict[str, ParamMeta] = {
         nom_de_guerre="ascii-sky",
         info="Input ASCII component sky model (apply/correct). Exactly one of fits-sky/ascii-sky is "
         "required for those modes.",
+    ),
+    "ascii_delimiter": ParamMeta(
+        nom_de_guerre="ascii-delimiter", info="Delimiter used in the ascii-sky file. Defaults to whitespace."
+    ),
+    "source_schema": ParamMeta(
+        nom_de_guerre="source-schema",
+        info="Custom source schema (YAML) mapping the ascii-sky columns to the fields simms expects, as for "
+        "skysim. Defaults to the built-in simms source schema.",
     ),
     "output": ParamMeta(info="Output path -- FITS beam (to-fits) or beamed/corrected sky model (apply/correct)."),
     "telescope_name_column": ParamMeta(
