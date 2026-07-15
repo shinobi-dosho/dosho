@@ -47,3 +47,13 @@ jobs:
 
       - name: Build docs
         run: uv run sphinx-build -b html docs docs/_build/html -W --keep-going
+
+      # The build regenerates docs/reference/cabs.rst in place from the live
+      # registry (docs/_ext/cab_catalog.py). If that changes the committed
+      # copy, a cab change landed without regenerating the catalog.
+      - name: Check cab catalog is up to date
+        run: |
+          if ! git diff --exit-code docs/reference/cabs.rst; then
+            echo "::error file=docs/reference/cabs.rst::Cab catalog is stale. Regenerate with 'uv run --group docs sphinx-build -b html docs docs/_build/html' and commit docs/reference/cabs.rst."
+            exit 1
+          fi
