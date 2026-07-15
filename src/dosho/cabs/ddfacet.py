@@ -33,6 +33,20 @@ No outputs are modelled: DDFacet's own `Output-Images` letter-code system
 produces a dynamically-named set of FITS files (`{Output-Name}.<code>.fits`
 per requested code) that isn't a single, statically-knowable path -- the
 same "no dynamic-naming implicit" call as `breizorro.py`'s `outfile`.
+
+`parset` is a real, separate thing from any `--Section-Option` flag:
+`DDF.py`'s own `main()` (`DDF.py [parset file] <options>`) treats a lone
+non-flag argument as a parset file to read defaults from before applying
+the rest of the CLI, via `MyOptParse`'s leftover positional args
+(`args = OP.GiveArguments()`; `if len(args) == 1: ParsetFile = args[0]`).
+`optparse`'s leftover-arg collection is order-insensitive (it doesn't
+care where the bare token sits among recognised `--flag value` pairs),
+so either `positional` or `positional_head` would work here -- modelled
+as `ParamMeta(positional_head=True)` anyway, both to match `DDF.py`'s own
+documented `[parset file] <options>` usage order and for consistency
+with `cubical.py`/`killms.py`, whose own tools genuinely require head
+placement (see `cubical.py`'s docstring). Optional: `None` -> omitted,
+per `build_argv`'s `if value is None: continue`.
 """
 
 from __future__ import annotations
@@ -43,6 +57,7 @@ from dosho import images
 from dosho._builder import define_cab
 
 _FIELDS: dict[str, tuple[str, bool, object]] = {
+    "parset": ("File", False, None),
     "data_ms": ("List[MS]", False, None),
     "data_col_name": ("str", False, 'CORRECTED_DATA'),
     "data_chunk_hours": ("float", False, 0.0),
@@ -319,6 +334,11 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
 }
 
 _FIELD_META: dict[str, ParamMeta] = {
+    "parset": ParamMeta(
+        positional_head=True,
+        info="Parset file to read option defaults from, overridden by any of the flags below "
+        "(DDF.py [parset file] <options>)",
+    ),
     "data_ms": ParamMeta(nom_de_guerre="Data-MS", info="Single MS name, or list of comma-separated MSs, or name of *.txt file listing MSs. Note that each MS may also be specified as a glob pattern (e.g. *.MS), and may be suffixed with '//Dx' and/or '//Fy' to select specific DATA_DESC_ID and FIELD_IDs in the MS. 'x' and 'y' can take the form of a single number, a Pythonic range (e.g. '0:16'), an inclusive range ('0~15'), or '*' to select all. E.g. 'foo.MS//D*//F0:2' selects all DDIDs, and fields 0 and 1 from foo.MS. If D and/or F is not specified, --Selection-Field and --Selection-DDID is used as the default."),
     "data_col_name": ParamMeta(nom_de_guerre="Data-ColName", info='MS column to image (Default: CORRECTED_DATA)'),
     "data_chunk_hours": ParamMeta(nom_de_guerre="Data-ChunkHours", info='Process data in chunks of <=N hours. Use 0 for no chunking. (Default: 0.0)'),

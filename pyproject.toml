@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dosho"
-version = "0.1.0a2"
+version = "0.1.0a3"
 description = "A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository"
 readme = "README.md"
 license = "MIT"
@@ -13,7 +13,7 @@ authors = [
     { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
 ]
 dependencies = [
-    "stimela-ninja>=0.1.0b2",
+    "stimela-ninja>=0.1.0b3",
     "pyyaml>=6.0",
     "click>=8.1",
 ]
@@ -30,6 +30,14 @@ docs = [
     "sphinx-copybutton>=0.5",
     "myst-parser>=2.0",
 ]
+
+# Dev-time override: pull stimela-ninja from its origin/main instead of the
+# pinned PyPI release, so dosho and stimela-ninja can be developed together
+# (e.g. the `positional_head` parset support). Ignored when dosho is built
+# for publishing -- consumers still resolve the PyPI `stimela-ninja>=...`
+# constraint above.
+[tool.uv.sources]
+stimela-ninja = { git = "https://github.com/shinobi-dosho/stimela-ninja", branch = "main" }
 
 [project.urls]
 Homepage = "https://github.com/SpheMakh/dosho"
