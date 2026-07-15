@@ -7,6 +7,580 @@ Every tool registered in dosho, with the container image it resolves to and
 its input/output schema. Generated from the live registry and image manifest
 at build time, so it stays in lockstep with the code.
 
+accor
+-----
+
+Normalize visibilities based on auto-correlations (VLA/EVLA-era normalization for non-VLA-corrected data).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``solint``
+     - ``str``
+     - ``'inf'``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``corrdepflags``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``append``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``gaintable``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``gainfield``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``interp``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+aegean
+------
+
+aegean: source finding in radio astronomical images (https://github.com/PaulHancock/Aegean)
+
+:Command: ``aegean``
+:Image: ``ghcr.io/shinobi-dosho/aegean:2.3.5-d0.1.0`` (``AEGEAN`` 2.3.5, build)
+:Source: https://github.com/PaulHancock/Aegean
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``config``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``find``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``hdu_index``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``slice``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``progress``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``cores``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``forcerms``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``forcebkg``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``noise``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``background``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``psf``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``autoload``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``table``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``tformats``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``blankout``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``colprefix``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``maxsummits``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``seedclip``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``floodclip``
+     - ``float | None``
+     - ``4.0``
+     - \-
+   * - ``island``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``nopositive``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``negative``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``region``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``nocov``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``priorized``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``ratio``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``noregroup``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``input``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``catpsf``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``regroup_eps``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``save``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``outbase``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``debug``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``out``
+     - ``Path | None``
+     - \-
+
+aimfast
+-------
+
+aimfast: astronomical image fidelity assessment tool (https://github.com/Athanaseus/aimfast)
+
+:Command: ``aimfast``
+:Image: ``ghcr.io/shinobi-dosho/aimfast:1.3.4-d0.1.0`` (``AIMFAST`` 1.3.4, build)
+:Source: https://github.com/Athanaseus/aimfast
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``compare_models``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``compare_images``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``compare_online``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``compare_residuals``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``compare_residual_subimages``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``tigger_model``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``restored_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``psf_image``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``residual_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``mask_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``fidelity_results``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``input_regions``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``config``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``source_finder``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``online_catalog_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``online_catalog``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``centre_coord``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``width``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``normality_test``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``data_range``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``threshold``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``channels``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``centre_pixels_size``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``data_points``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``flux_plot``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``units``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``decimals``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``only_off_axis``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``area_factor``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``fov_factor``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``tolerance``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``all_source``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``closest``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``shape_limit``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``label``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``x_col_data``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``y_col_data``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``x_col_err_data``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``y_col_err_data``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``x_label``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``y_label``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``plot_title``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``flux_xlabels``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``flux_ylabels``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``flux_plot_titles``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``position_xlabels1``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``position_ylabels1``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``position_plot_title1``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``position_xlabels2``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``position_ylabels2``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``position_plot_title2``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``colorbar_major_labels_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``colorbar_labels_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``xlabels_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``ylabels_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``x_major_labels_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``y_major_labels_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``legend_font_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``plot_title_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``html_prefix``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``outfile``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``save_svg``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+
 aoflagger
 ---------
 
@@ -77,12 +651,181 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``msname``
+     - ``Path | None``
+     - \-
+
+apparentsens
+------------
+
+Estimate imaging sensitivity for a proposed weighting/selection, without actually imaging. Read-only: neither `vis` nor any image is touched. The real task's own return value (a sensitivity dict) is exposed via `ApparentsensOutputs.sensitivity`.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``list``
+     - *required*
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spw``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``intent``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``timerange``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``uvrange``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``scan``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``imsize``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``cell``
+     - ``str``
+     - ``'1arcsec'``
+     - \-
+   * - ``stokes``
+     - ``str``
+     - ``'I'``
+     - \-
+   * - ``specmode``
+     - ``str``
+     - ``'mfs'``
+     - \-
+   * - ``weighting``
+     - ``str``
+     - ``'natural'``
+     - \-
+   * - ``robust``
+     - ``float``
+     - ``0.5``
+     - \-
+   * - ``npixels``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``uvtaper``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``sensitivity``
+     - ``dict | None``
+     - \-
+
+appendantab
+-----------
+
+Append Tsys/gain-curve data from a VLBI antab file into an MS's SYSCAL/GAIN_CURVE subtables.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``antab``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``append_tsys``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``append_gc``
+     - ``bool``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outvis``
+     - ``Path``
+     - \-
 
 applycal
 --------
 
-Applies an accumulated list of calibration tables to `vis`.
+Apply an accumulated list of calibration tables to `vis`.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -109,12 +852,60 @@ Applies an accumulated list of calibration tables to `vis`.
      - ``str``
      - ``''``
      - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
+     - ``str``
+     - ``''``
+     - \-
    * - ``gainfield``
      - ``list[str] | None``
      - ``None``
      - \-
    * - ``interp``
      - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
      - ``None``
      - \-
    * - ``calwt``
@@ -127,7 +918,7 @@ Applies an accumulated list of calibration tables to `vis`.
      - \-
    * - ``applymode``
      - ``str``
-     - ``'calflag'``
+     - ``''``
      - \-
    * - ``flagbackup``
      - ``bool``
@@ -173,14 +964,6 @@ Solve for a bandpass (per-channel gain) calibration table.
      - ``Path``
      - *required*
      - \-
-   * - ``solint``
-     - ``str``
-     - ``'inf'``
-     - \-
-   * - ``combine``
-     - ``str``
-     - ``'scan'``
-     - \-
    * - ``field``
      - ``str``
      - ``''``
@@ -189,9 +972,53 @@ Solve for a bandpass (per-channel gain) calibration table.
      - ``str``
      - ``''``
      - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``solint``
+     - ``str``
+     - ``'inf'``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``'scan'``
+     - \-
    * - ``refant``
      - ``str``
      - ``''``
+     - \-
+   * - ``minblperant``
+     - ``int``
+     - ``4``
      - \-
    * - ``minsnr``
      - ``float``
@@ -201,9 +1028,53 @@ Solve for a bandpass (per-channel gain) calibration table.
      - ``bool``
      - ``False``
      - \-
+   * - ``bandtype``
+     - ``str``
+     - ``'B'``
+     - \-
+   * - ``smodel``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``corrdepflags``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``append``
+     - ``bool``
+     - ``False``
+     - \-
    * - ``fillgaps``
      - ``int``
      - ``0``
+     - \-
+   * - ``degamp``
+     - ``int``
+     - ``3``
+     - \-
+   * - ``degphase``
+     - ``int``
+     - ``3``
+     - \-
+   * - ``visnorm``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``maskcenter``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``maskedge``
+     - ``int``
+     - ``5``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
+     - ``str``
+     - ``''``
      - \-
    * - ``gaintable``
      - ``list[Path] | None``
@@ -215,6 +1086,10 @@ Solve for a bandpass (per-channel gain) calibration table.
      - \-
    * - ``interp``
      - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
      - ``None``
      - \-
    * - ``parang``
@@ -233,6 +1108,452 @@ Solve for a bandpass (per-channel gain) calibration table.
      - Description
    * - ``caltable``
      - ``Path``
+     - \-
+
+bdsf-catalog
+------------
+
+Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/or source catalog (`write_catalog`).
+
+:Image: ``ghcr.io/shinobi-dosho/bdsf:1.14.1-d0.1.0`` (``BDSF`` 1.14.1, build)
+:Source: https://github.com/lofar-astron/PyBDSF
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outfile_gaul``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``outfile_srl``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``catalog_format``
+     - ``str``
+     - ``'bbs'``
+     - \-
+   * - ``detection_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``thresh_isl``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``thresh_pix``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``rms_box``
+     - ``tuple[int, int] | None``
+     - ``None``
+     - \-
+   * - ``rms_map``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``adaptive_rms_box``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``trim_box``
+     - ``tuple[int, int, int, int] | None``
+     - ``None``
+     - \-
+   * - ``flagging_opts``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``flag_maxsize_bm``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``spectralindex_do``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``polarisation_do``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``advanced_opts``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``src_ra_dec``
+     - ``list[tuple[float, float]] | None``
+     - ``None``
+     - \-
+   * - ``src_radius_pix``
+     - ``float | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile_gaul``
+     - ``Path | None``
+     - \-
+   * - ``outfile_srl``
+     - ``Path | None``
+     - \-
+   * - ``outdir``
+     - ``Path``
+     - \-
+
+blcal
+-----
+
+Calculate a baseline-based (non-antenna-based) calibration solution.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``solint``
+     - ``str``
+     - ``'inf'``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``'scan'``
+     - \-
+   * - ``freqdep``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``calmode``
+     - ``str``
+     - ``'ap'``
+     - \-
+   * - ``solnorm``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``gaintable``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``gainfield``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``interp``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``parang``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+breizorro
+---------
+
+breizorro: mask creation and manipulation for radio astronomy images (https://github.com/ratt-ru/breizorro)
+
+:Command: ``breizorro``
+:Image: ``ghcr.io/shinobi-dosho/breizorro:0.2.0-d0.1.0`` (``BREIZORRO`` 0.2.0, build)
+:Source: https://github.com/ratt-ru/breizorro
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``restored_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``mask_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``threshold``
+     - ``float | None``
+     - ``6.5``
+     - \-
+   * - ``boxsize``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``savenoise``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``merge``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``subtract``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``number_islands``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``remove_islands``
+     - ``list[int | str] | None``
+     - ``None``
+     - \-
+   * - ``ignore_missing_islands``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``extract_islands``
+     - ``list[int | str] | None``
+     - ``None``
+     - \-
+   * - ``minimum_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``make_binary``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``invert``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``dilate``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``erode``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``fill_holes``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``sum_peak``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``ncpu``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``beam_size``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``gui``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``outfile``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``outcatalog``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``outregion``
+     - ``Path | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+   * - ``outcatalog``
+     - ``Path | None``
+     - \-
+   * - ``outregion``
+     - ``Path | None``
+     - \-
+
+chgcentre
+---------
+
+chgcentre: recompute UVWs and rotate visibilities to a new phase centre (https://wsclean.readthedocs.io)
+
+:Command: ``chgcentre``
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-d0.1.0`` (``WSCLEAN`` 3.6, build)
+:Source: https://gitlab.com/aroffringa/wsclean
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``geozenith``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``flipuvwsign``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``minw``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``zenith``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``only_uvw``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``shiftback``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``force``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``datacolumn``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``from_ms``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``ra``
+     - ``str``
+     - *required*
+     - \-
+   * - ``dec``
+     - ``str``
+     - *required*
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
      - \-
 
 clearcal
@@ -261,6 +1582,14 @@ Resets MODEL_DATA (and optionally adds scratch columns if they don't exist yet, 
      - ``str``
      - ``''``
      - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
    * - ``addmodel``
      - ``bool``
      - ``False``
@@ -276,6 +1605,138 @@ Resets MODEL_DATA (and optionally adds scratch columns if they don't exist yet, 
      - Type
      - Description
    * - ``vis``
+     - ``Path``
+     - \-
+
+clearstat
+---------
+
+Clear all autolock file locks that might block other tasks from running on the same table/file.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+*(none)*
+
+**Outputs**
+
+*(none)*
+
+concat
+------
+
+Concatenate several MSs into one (additive: appends if `concatvis` already exists).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``list``
+     - *required*
+     - \-
+   * - ``concatvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``freqtol``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``dirtol``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``respectname``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``timesort``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``copypointing``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``visweightscale``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``forcesingleephemfield``
+     - ``str``
+     - ``''``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``concatvis``
+     - ``Path``
+     - \-
+
+conjugatevis
+------------
+
+Change the sign of the phases in every visibility column.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``spwlist``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
      - ``Path``
      - \-
 
@@ -337,7 +1798,16 @@ Crystalball: predict model visibilities from a sky model (https://github.com/car
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
 
 cubical
 -------
@@ -912,10 +2382,10 @@ CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
      - ``Path | None``
      - \-
 
-fixvis
-------
+cvel
+----
 
-`phasecenter=""` (the real CASA default) fixes UVW coordinates without changing the phase centre.
+Regrid an MS to a new spectral window/channel structure or frame (the original, non-multi-MS-aware regridder; see `cvel2` for the modern replacement).
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -938,17 +2408,77 @@ fixvis
      - ``Path``
      - *required*
      - \-
-   * - ``phasecenter``
-     - ``str``
-     - ``''``
+   * - ``passall``
+     - ``bool``
+     - ``False``
      - \-
    * - ``field``
      - ``str``
      - ``''``
      - \-
-   * - ``reuse``
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
      - ``bool``
      - ``True``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``'channel'``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``start``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``width``
+     - ``str``
+     - ``'1'``
+     - \-
+   * - ``interpolation``
+     - ``str``
+     - ``'linear'``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``restfreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``outframe``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``veltype``
+     - ``str``
+     - ``'radio'``
+     - \-
+   * - ``hanning``
+     - ``bool``
+     - ``False``
      - \-
 
 **Outputs**
@@ -964,10 +2494,1854 @@ fixvis
      - ``Path``
      - \-
 
+cvel2
+-----
+
+Regrid an MS or multi-MS to a new spectral window/channel structure or frame (the modern, multi-MS-aware replacement for `cvel`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``keepmms``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``correlation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'all'``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``'channel'``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``start``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``width``
+     - ``str``
+     - ``'1'``
+     - \-
+   * - ``interpolation``
+     - ``str``
+     - ``'linear'``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``restfreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``outframe``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``veltype``
+     - ``str``
+     - ``'radio'``
+     - \-
+   * - ``hanning``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+ddfacet
+-------
+
+DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.com/saopicc/DDFacet)
+
+:Command: ``DDF.py``
+:Image: ``ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-d0.1.0`` (``DDFACET`` 1.0.0.0, build)
+:Source: https://github.com/saopicc/DDFacet
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``data_ms``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``data_col_name``
+     - ``str | None``
+     - ``'CORRECTED_DATA'``
+     - \-
+   * - ``data_chunk_hours``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``data_chunk_rows``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``data_sort``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``data_dask``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``predict_col_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``predict_mask_square``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``predict_from_image``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``predict_init_dico_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``predict_overwrite``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``selection_field``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``selection_ddid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``selection_ta_ql``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_chan_start``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``selection_chan_end``
+     - ``int | None``
+     - ``-1``
+     - \-
+   * - ``selection_chan_step``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``selection_flag_ants``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_uv_range_km``
+     - ``list[float] | None``
+     - ``[0, 2000]``
+     - \-
+   * - ``selection_time_range``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_time_range_from_start_min``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_dist_max_to_core``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_auto_flag_nyquist``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``output_mode``
+     - ``str | None``
+     - ``'Clean'``
+     - \-
+   * - ``output_clobber``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_name``
+     - ``str | None``
+     - ``'image'``
+     - \-
+   * - ``output_shift_facets_file``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_restoring_beam``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_also``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_cubes``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_images``
+     - ``str | None``
+     - ``'DdPAMRIikemz'``
+     - \-
+   * - ``output_stokes_residues``
+     - ``str | None``
+     - ``'I'``
+     - \-
+   * - ``spi_maps_alpha_threshold``
+     - ``int | None``
+     - ``15``
+     - \-
+   * - ``image_n_pix``
+     - ``int | None``
+     - ``5000``
+     - \-
+   * - ``image_cell``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``image_phase_center_radec``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_image_center_radec``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sidelobe_search_window``
+     - ``int | None``
+     - ``200``
+     - \-
+   * - ``image_multi_field_file``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``facets_n_facets``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``facets_cat_nodes``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``facets_diam_max``
+     - ``float | None``
+     - ``180.0``
+     - \-
+   * - ``facets_diam_min``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``facets_mixing_width``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``facets_single_psf``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``facets_psf_oversize``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``facets_psf_facets``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``facets_padding``
+     - ``float | None``
+     - ``1.7``
+     - \-
+   * - ``facets_circumcision``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``facets_flux_padding_app_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``facets_flux_padding_scale``
+     - ``float | None``
+     - ``2.0``
+     - \-
+   * - ``facets_skip_th``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_col_name``
+     - ``str | None``
+     - ``'WEIGHT_SPECTRUM'``
+     - \-
+   * - ``weight_mode``
+     - ``str | None``
+     - ``'Briggs'``
+     - \-
+   * - ``weight_mfs``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``weight_robust``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_super_uniform``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``weight_out_col_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``weight_enable_sigmoid_taper``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``weight_sigmoid_taper_inner_cutoff``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_sigmoid_taper_outer_cutoff``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_sigmoid_taper_inner_rolloff_strength``
+     - ``float | None``
+     - ``0.5``
+     - \-
+   * - ``weight_sigmoid_taper_outer_rolloff_strength``
+     - ``float | None``
+     - ``0.5``
+     - \-
+   * - ``rime_precision``
+     - ``str | None``
+     - ``'S'``
+     - \-
+   * - ``rime_pol_mode``
+     - ``str | None``
+     - ``'I'``
+     - \-
+   * - ``rime_full_m_tilde``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``rime_fft_machine``
+     - ``str | None``
+     - ``'FFTW'``
+     - \-
+   * - ``rime_forward_mode``
+     - ``str | None``
+     - ``'BDA-degrid'``
+     - \-
+   * - ``rime_backward_mode``
+     - ``str | None``
+     - ``'BDA-grid'``
+     - \-
+   * - ``rime_decorr_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``rime_decorr_location``
+     - ``str | None``
+     - ``'Edge'``
+     - \-
+   * - ``cf_over_s``
+     - ``int | None``
+     - ``11``
+     - \-
+   * - ``cf_support``
+     - ``int | None``
+     - ``7``
+     - \-
+   * - ``cf_nw``
+     - ``int | None``
+     - ``100``
+     - \-
+   * - ``cf_wmax``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``comp_grid_decorr``
+     - ``float | None``
+     - ``0.02``
+     - \-
+   * - ``comp_grid_fo_v``
+     - ``str | None``
+     - ``'Facet'``
+     - \-
+   * - ``comp_degrid_decorr``
+     - ``float | None``
+     - ``0.02``
+     - \-
+   * - ``comp_degrid_fo_v``
+     - ``str | None``
+     - ``'Facet'``
+     - \-
+   * - ``comp_sparsification``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``comp_bda_mode``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``comp_bda_jones``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``parallel_ncpu``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``parallel_affinity``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``parallel_main_process_affinity``
+     - ``str | None``
+     - ``'disable'``
+     - \-
+   * - ``cache_reset``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``cache_jones``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_smooth_beam``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_weight``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_psf``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_dirty``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_vis_data``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_last_residual``
+     - ``bool | None``
+     - ``1``
+     - \-
+   * - ``cache_dir``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``cache_dir_wisdom_fftw``
+     - ``str | None``
+     - ``'~/.fftw_wisdom'``
+     - \-
+   * - ``cache_reset_wisdom``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``cache_cf``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``cache_hmp``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``cache_remnant``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_at``
+     - ``str | None``
+     - ``'facet'``
+     - \-
+   * - ``beam_phased_array_mode``
+     - ``str | None``
+     - ``'A'``
+     - \-
+   * - ``beam_force_scalar``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_n_band``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_center_norm``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_smooth``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_smooth_n_pix``
+     - ``int | None``
+     - ``11``
+     - \-
+   * - ``beam_smooth_interp_mode``
+     - ``str | None``
+     - ``'Linear'``
+     - \-
+   * - ``beam_fits_file``
+     - ``str | None``
+     - ``'beam_$(corr)_$(reim).fits'``
+     - \-
+   * - ``beam_fits_feed``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_fits_feed_swap``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_dt_beam_min``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``beam_fits_par_angle_inc_deg``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``beam_fitsl_axis``
+     - ``str | None``
+     - ``'-X'``
+     - \-
+   * - ``beam_fitsm_axis``
+     - ``str | None``
+     - ``'Y'``
+     - \-
+   * - ``beam_fits_verbosity``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_fits_frame``
+     - ``str | None``
+     - ``'altaz'``
+     - \-
+   * - ``beam_feed_angle``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``beam_apply_p_jones``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_flip_visibility_hands``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_pointing_centre``
+     - ``str | None``
+     - ``'PhaseDir'``
+     - \-
+   * - ``beam_rotation_direction``
+     - ``str | None``
+     - ``'North2East'``
+     - \-
+   * - ``freq_band_m_hz``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``freq_degrid_band_m_hz``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``freq_n_band``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``freq_n_degrid_band``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dde_solutions_dd_sols``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dde_solutions_sols_dir``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dde_solutions_global_norm``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dde_solutions_jones_norm_list``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``dde_solutions_jones_mode``
+     - ``str | None``
+     - ``'Full'``
+     - \-
+   * - ``dde_solutions_dd_mode_grid``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``dde_solutions_dd_mode_de_grid``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``dde_solutions_scale_amp_grid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dde_solutions_scale_amp_de_grid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dde_solutions_calib_err``
+     - ``float | None``
+     - ``10.0``
+     - \-
+   * - ``dde_solutions_type``
+     - ``str | None``
+     - ``'Nearest'``
+     - \-
+   * - ``dde_solutions_scale``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``dde_solutions_gamma``
+     - ``float | None``
+     - ``4.0``
+     - \-
+   * - ``dde_solutions_restore_sub``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``dde_solutions_re_weight_snr``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``pointing_solutions_pointing_sols_csv``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``pointing_solutions_interpolation_mode``
+     - ``str | None``
+     - ``'LERP'``
+     - \-
+   * - ``deconv_mode``
+     - ``str | None``
+     - ``'HMP'``
+     - \-
+   * - ``deconv_max_major_iter``
+     - ``int | None``
+     - ``20``
+     - \-
+   * - ``deconv_max_minor_iter``
+     - ``int | None``
+     - ``20000``
+     - \-
+   * - ``deconv_allow_negative``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``deconv_gain``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``deconv_flux_threshold``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_cycle_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_rms_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_peak_factor``
+     - ``float | None``
+     - ``0.15``
+     - \-
+   * - ``deconv_prev_peak_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_num_rms_samples``
+     - ``int | None``
+     - ``10000``
+     - \-
+   * - ``deconv_approximate_psf``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``deconv_psf_box``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``mask_external``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``mask_auto``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``mask_auto_rms_factor``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``mask_sig_th``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``mask_flux_image_type``
+     - ``str | None``
+     - ``'ModelConv'``
+     - \-
+   * - ``mask_th_filter_rfi``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``noise_min_stats``
+     - ``list[float] | None``
+     - ``[60, 2]``
+     - \-
+   * - ``noise_brutal_hmp``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``hmp_alpha``
+     - ``list[float] | None``
+     - ``[-1.0, 1.0, 11]``
+     - \-
+   * - ``hmp_scales``
+     - ``list[float] | None``
+     - ``[0]``
+     - \-
+   * - ``hmp_ratios``
+     - ``list[str] | None``
+     - ``[]``
+     - \-
+   * - ``hmp_n_theta``
+     - ``int | None``
+     - ``6``
+     - \-
+   * - ``hmp_solver_mode``
+     - ``str | None``
+     - ``'PI'``
+     - \-
+   * - ``hmp_allow_resid_increase``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``hmp_major_stall_threshold``
+     - ``float | None``
+     - ``0.8``
+     - \-
+   * - ``hmp_taper``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``hmp_support``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``hmp_peak_weight_image``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``hmp_kappa``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``hmp_outer_space_th``
+     - ``float | None``
+     - ``2.0``
+     - \-
+   * - ``hmp_fraction_random_peak``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``hogbom_poly_fit_order``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``hogbom_linear_peakfinding``
+     - ``str | None``
+     - ``'Joint'``
+     - \-
+   * - ``wscms_num_freq_basis_funcs``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``wscms_multi_scale``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``wscms_multi_scale_bias``
+     - ``float | None``
+     - ``0.55``
+     - \-
+   * - ``wscms_scale_basis``
+     - ``str | None``
+     - ``'Gauss'``
+     - \-
+   * - ``wscms_scales``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``wscms_max_scale``
+     - ``int | None``
+     - ``250``
+     - \-
+   * - ``wscms_n_sub_minor_iter``
+     - ``int | None``
+     - ``250``
+     - \-
+   * - ``wscms_sub_minor_peak_fact``
+     - ``float | None``
+     - ``0.85``
+     - \-
+   * - ``wscms_minor_stall_threshold``
+     - ``float | None``
+     - ``1e-07``
+     - \-
+   * - ``wscms_minor_divergence_factor``
+     - ``float | None``
+     - ``1.3``
+     - \-
+   * - ``wscms_auto_mask``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``wscms_auto_mask_threshold``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``wscms_auto_mask_rms_factor``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``wscms_cache_size``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``wscms_padding``
+     - ``float | None``
+     - ``1.2``
+     - \-
+   * - ``montblanc_tensorflow_server_target``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``montblanc_log_file``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``montblanc_memory_budget``
+     - ``float | None``
+     - ``4.0``
+     - \-
+   * - ``montblanc_log_level``
+     - ``str | None``
+     - ``'WARNING'``
+     - \-
+   * - ``montblanc_solver_d_type``
+     - ``str | None``
+     - ``'double'``
+     - \-
+   * - ``montblanc_driver_version``
+     - ``str | None``
+     - ``'tf'``
+     - \-
+   * - ``ssd_clean_parallel``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ssd_clean_island_deconv_mode``
+     - ``str | None``
+     - ``'GA'``
+     - \-
+   * - ``ssd_clean_ssd_solve_pars``
+     - ``str | None``
+     - ``'[S,Alpha]'``
+     - \-
+   * - ``ssd_clean_ssd_cost_func``
+     - ``str | None``
+     - ``'[Chi2,MinFlux]'``
+     - \-
+   * - ``ssd_clean_bic_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``ssd_clean_artifact_robust``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ssd_clean_conv_fft_switch``
+     - ``int | None``
+     - ``1000``
+     - \-
+   * - ``ssd_clean_n_enlarge_pars``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd_clean_n_enlarge_data``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd_clean_restore_metro_switch``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd_clean_min_max_group_distance``
+     - ``list[float] | None``
+     - ``[10, 50]``
+     - \-
+   * - ``ssd_clean_max_island_size``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd_clean_init_type``
+     - ``str | None``
+     - ``'HMP'``
+     - \-
+   * - ``ssd2_solve_pars``
+     - ``str | None``
+     - ``'[Poly]'``
+     - \-
+   * - ``ssd2_poly_freq_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd2_init_type``
+     - ``str | None``
+     - ``'[HMP,MultiSlice:Orieux]'``
+     - \-
+   * - ``ssd2_convexify_islands``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ssd2_n_last_cycles_deconv_all``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ssd3_poly_freq_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd3_solve_pars``
+     - ``str | None``
+     - ``'[Poly]'``
+     - \-
+   * - ``ssd3_init_type``
+     - ``str | None``
+     - ``'[HMP_0-50,MultiSlice:Orieux]'``
+     - \-
+   * - ``ssd3_ga_isl_size``
+     - ``str | None``
+     - ``'0-50'``
+     - \-
+   * - ``ssd3_run_simple_clean``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ssd3_propagate_prev_gen``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ssd3_alpha_scale_model``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ssd3_convexify_islands``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ssd3_unique_island``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd3_allow_facet_overlap``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd3_n_look_back_models``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd3_posterior``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd3_posterior_n_iter``
+     - ``int | None``
+     - ``100``
+     - \-
+   * - ``ssd3_posterior_n_points``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``ssd3_posterior_alpha``
+     - ``float | None``
+     - ``0.01``
+     - \-
+   * - ``ssd3_force_positive_model``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ssd3_n_last_cycles_deconv_all``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``multi_slice_deconv_type``
+     - ``str | None``
+     - ``'MORESANE'``
+     - \-
+   * - ``multi_slice_deconv_poly_fit_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``multi_slice_deconv_force_positive_model``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``multi_slice_deconv_hyper_smooth``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ga_clean_n_source_kin``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``ga_clean_n_max_gen``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``ga_clean_min_size_init``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``ga_clean_alpha_init_hmp``
+     - ``list[float] | None``
+     - ``[-4.0, 1.0, 6]``
+     - \-
+   * - ``ga_clean_scales_init_hmp``
+     - ``list[float] | None``
+     - ``[0, 1, 2, 4, 8, 16, 24, 32]``
+     - \-
+   * - ``ga_clean_gain_init_hmp``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``ga_clean_ratios_init_hmp``
+     - ``list[str] | None``
+     - ``[]``
+     - \-
+   * - ``ga_clean_n_theta_init_hmp``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``ga_clean_max_minor_iter_init_hmp``
+     - ``int | None``
+     - ``10000``
+     - \-
+   * - ``ga_clean_allow_negative_init_hmp``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ga_clean_rms_factor_init_hmp``
+     - ``float | None``
+     - ``3.0``
+     - \-
+   * - ``ga_clean_parallel_init``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ga_clean_ncpu``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``moresane_n_major_iter``
+     - ``int | None``
+     - ``200``
+     - \-
+   * - ``moresane_n_minor_iter``
+     - ``int | None``
+     - ``200``
+     - \-
+   * - ``moresane_gain``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``moresane_force_positive``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``moresane_sigma_cut_level``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``log_memory``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``log_boring``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``log_append``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``debug_pause_workers``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``debug_facet_phase_shift``
+     - ``list[float] | None``
+     - ``[0.0, 0.0]``
+     - \-
+   * - ``debug_print_minor_cycle_rms``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``debug_dump_clean_solutions``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``debug_dump_clean_postage_stamps``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``debug_clean_stall_threshold``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``debug_memory_greedy``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``debug_app_verbose``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``debug_pdb``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``misc_random_seed``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``misc_conserve_memory``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``misc_ignore_deprecation_marking``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``katdal_apply_cal``
+     - ``str | None``
+     - ``'default'``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+deconvolve
+----------
+
+Image-domain-only minor-cycle deconvolution (no major cycle, no visibility gridding) against existing PSF/residual images.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``imagename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``startmodel``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``deconvolver``
+     - ``str``
+     - ``'hogbom'``
+     - \-
+   * - ``scales``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``smallscalebias``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``nterms``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``fusedthreshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``largestscale``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``restoration``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``restoringbeam``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``100``
+     - \-
+   * - ``gain``
+     - ``float``
+     - ``0.1``
+     - \-
+   * - ``threshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``nsigma``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``interactive``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fullsummary``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fastnoise``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``usemask``
+     - ``str``
+     - ``'user'``
+     - \-
+   * - ``mask``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``pbmask``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``sidelobethreshold``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``noisethreshold``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``lownoisethreshold``
+     - ``float``
+     - ``1.5``
+     - \-
+   * - ``negativethreshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``smoothfactor``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``minbeamfrac``
+     - ``float``
+     - ``0.3``
+     - \-
+   * - ``cutthreshold``
+     - ``float``
+     - ``0.01``
+     - \-
+   * - ``growiterations``
+     - ``int``
+     - ``75``
+     - \-
+   * - ``dogrowprune``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``imagename``
+     - ``str``
+     - \-
+
+defintent
+---------
+
+Manually set (or append to) scan intents.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``outputvis``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``obsid``
+     - ``str``
+     - ``''``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
+delmod
+------
+
+Delete model representations from an MS, in place.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``otf``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scr``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
+eidos
+-----
+
+eidos: create a primary beam model of MeerKAT (https://github.com/ratt-ru/eidos)
+
+:Command: ``eidos``
+:Image: ``ghcr.io/shinobi-dosho/eidos:1.1.2-d0.1.0`` (``EIDOS`` 1.1.2, build)
+:Source: https://github.com/ratt-ru/eidos
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``pixels``
+     - ``int | None``
+     - ``256``
+     - \-
+   * - ``diameter``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``scale``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``freq``
+     - ``list``
+     - *required*
+     - \-
+   * - ``coeff``
+     - ``str``
+     - *required*
+     - \-
+   * - ``coefficients_file``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``prefix``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_eight``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``thresh``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``stokes``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+feather
+-------
+
+Combine a high-resolution (interferometric) and low-resolution (single-dish) image via their Fourier transforms.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``highres``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``lowres``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``imagename``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``sdfactor``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``effdishdiam``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``lowpassfiltersd``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``imagename``
+     - ``Path``
+     - \-
+
+fixplanets
+----------
+
+Change FIELD/SOURCE table entries based on a user-provided direction or the POINTING table, in place, optionally fixing UVW too.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``fixuvw``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``direction``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``refant``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``reftime``
+     - ``str``
+     - ``'first'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
+fixvis
+------
+
+Recompute (u, v, w) and/or change the phase center.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``refcode``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``reuse``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``distances``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'all'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+flagcmd
+-------
+
+Flagging based on batches of flag-commands, from a table, a file, or an SDM Flag.xml (`inpmode='table'/'list'/'xml'`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``inpmode``
+     - ``str``
+     - ``'table'``
+     - \-
+   * - ``inpfile``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``tablerows``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``reason``
+     - ``str``
+     - ``'any'``
+     - \-
+   * - ``useapplied``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``tbuff``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``ants``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``action``
+     - ``str``
+     - ``'apply'``
+     - \-
+   * - ``flagbackup``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``clearall``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``rowlist``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``plotfile``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``savepars``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``outfile``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
 flagdata
 --------
 
-One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`shadow`/`spw`/`time`/`scan`/`antennas`/`summary`/ `tfcrop`/...) -- `mode="summary"` returns the flag-count breakdown via `FlagdataOutputs.summary`, matching the real task's own return value.
+One generic wrapper covers every `mode` (`manual`/`list`/`clip`/ `quack`/`shadow`/`elevation`/`tfcrop`/`rflag`/`antint`/`extend`/ `unflag`/`summary`) -- `mode="summary"` returns the flag-count breakdown via `FlagdataOutputs.summary`, matching the real task's own return value. `rflag`'s own tunables (`winsize`/`timedev`/`freqdev`/ `timedevscale`/`freqdevscale`/`spectralmax`/`spectralmin`) and the whole `antint`/`extend` modes were missing entirely before this audit, even though oxkat's own `1GC_casa_refcal.py` drives `rflag` throughout its residual-reflagging steps.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -988,7 +4362,15 @@ One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`s
      - \-
    * - ``mode``
      - ``str``
-     - *required*
+     - ``'manual'``
+     - \-
+   * - ``action``
+     - ``str``
+     - ``'apply'``
+     - \-
+   * - ``savepars``
+     - ``bool``
+     - ``False``
      - \-
    * - ``field``
      - ``str``
@@ -1002,10 +4384,6 @@ One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`s
      - ``str``
      - ``''``
      - \-
-   * - ``scan``
-     - ``str``
-     - ``''``
-     - \-
    * - ``timerange``
      - ``str``
      - ``''``
@@ -1014,17 +4392,97 @@ One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`s
      - ``str``
      - ``''``
      - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
    * - ``autocorr``
      - ``bool``
      - ``False``
      - \-
-   * - ``quackinterval``
+   * - ``inpfile``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``reason``
+     - ``str``
+     - ``'any'``
+     - \-
+   * - ``tbuff``
      - ``float``
      - ``0.0``
+     - \-
+   * - ``clipminmax``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``clipoutside``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``clipzeros``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'DATA'``
+     - \-
+   * - ``channelavg``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``chanbin``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``timeavg``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``timebin``
+     - ``str``
+     - ``'0s'``
+     - \-
+   * - ``quackinterval``
+     - ``float``
+     - ``1.0``
      - \-
    * - ``quackmode``
      - ``str``
      - ``'beg'``
+     - \-
+   * - ``quackincrement``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``tolerance``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``addantenna``
+     - ``str``
+     - ``''``
      - \-
    * - ``lowerlimit``
      - ``float``
@@ -1034,29 +4492,13 @@ One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`s
      - ``float``
      - ``90.0``
      - \-
-   * - ``tolerance``
-     - ``float``
-     - ``0.0``
-     - \-
    * - ``ntime``
      - ``str``
-     - ``'0s'``
+     - ``'scan'``
      - \-
    * - ``combinescans``
      - ``bool``
      - ``False``
-     - \-
-   * - ``datacolumn``
-     - ``str``
-     - ``'DATA'``
-     - \-
-   * - ``usewindowstats``
-     - ``str``
-     - ``'none'``
-     - \-
-   * - ``flagdimension``
-     - ``str``
-     - ``'freqtime'``
      - \-
    * - ``timecutoff``
      - ``float``
@@ -1066,13 +4508,157 @@ One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`s
      - ``float``
      - ``3.0``
      - \-
-   * - ``clipminmax``
-     - ``list[float] | None``
-     - ``None``
+   * - ``timefit``
+     - ``str``
+     - ``'line'``
+     - \-
+   * - ``freqfit``
+     - ``str``
+     - ``'poly'``
+     - \-
+   * - ``maxnpieces``
+     - ``int``
+     - ``7``
+     - \-
+   * - ``flagdimension``
+     - ``str``
+     - ``'freqtime'``
+     - \-
+   * - ``usewindowstats``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``halfwin``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``extendflags``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``winsize``
+     - ``int``
+     - ``3``
+     - \-
+   * - ``timedev``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``freqdev``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timedevscale``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``freqdevscale``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``spectralmax``
+     - ``float``
+     - ``1000000.0``
+     - \-
+   * - ``spectralmin``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``antint_ref_antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``minchanfrac``
+     - ``float``
+     - ``0.6``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``extendpols``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``growtime``
+     - ``float``
+     - ``50.0``
+     - \-
+   * - ``growfreq``
+     - ``float``
+     - ``50.0``
+     - \-
+   * - ``growaround``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``flagneartime``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``flagnearfreq``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``minrel``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``maxrel``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``minabs``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``maxabs``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``spwchan``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``spwcorr``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``basecnt``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fieldcnt``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``name``
+     - ``str``
+     - ``'Summary'``
+     - \-
+   * - ``display``
+     - ``str``
+     - ``''``
      - \-
    * - ``flagbackup``
      - ``bool``
-     - ``False``
+     - ``True``
+     - \-
+   * - ``cmdreason``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``outfile``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``writeflags``
+     - ``bool``
+     - ``True``
      - \-
 
 **Outputs**
@@ -1094,7 +4680,7 @@ One generic wrapper covers every `mode` (`unflag`/`clip`/ `quack`/`elevation`/`s
 flagmanager
 -----------
 
-Real CASA flag-version management (`mode="save"/"restore"/ "delete"/"list"`). `mode="list"` returns the version list via `FlagmanagerOutputs.versionlist`, matching the real task's own return value for that mode; other modes echo `vis` only. Flag-version bookkeeping conventions (e.g. a "before this worker ran" marker) are pipeline-specific orchestration, not part of this generic wrapper.
+Real CASA flag-version management (`mode="list"/"save"/"restore"/ "delete"/"rename"`). `mode="list"` returns the version list via `FlagmanagerOutputs.versionlist`, matching the real task's own return value for that mode; other modes echo `vis` only. `oldname`/`comment` (for `mode="rename"`/`"save"`) were missing before this audit. Flag- version bookkeeping conventions (e.g. a "before this worker ran" marker) are pipeline-specific orchestration, not part of this generic wrapper.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -1115,9 +4701,17 @@ Real CASA flag-version management (`mode="save"/"restore"/ "delete"/"list"`). `m
      - \-
    * - ``mode``
      - ``str``
-     - *required*
+     - ``'list'``
      - \-
    * - ``versionname``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``oldname``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``comment``
      - ``str``
      - ``''``
      - \-
@@ -1142,10 +4736,190 @@ Real CASA flag-version management (`mode="save"/"restore"/ "delete"/"list"`). `m
      - ``list[str] | None``
      - \-
 
+flagms
+------
+
+flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measurement set
+
+:Command: ``flag-ms.py``
+:Image: ``ghcr.io/shinobi-dosho/owlcat:1.8.1-d0.1.0`` (``OWLCAT`` 1.8.1, build)
+:Source: https://github.com/ratt-ru/owlcat
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``channels``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``timeslots``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``timeslot_multiplier``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``corrs``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``stations``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``ifrs``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``ddid``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``taql``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``above``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``below``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``nan``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``fm_above``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``fm_below``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``data_column``
+     - ``str | None``
+     - ``'CORRECTED_DATA'``
+     - \-
+   * - ``data_flagmask``
+     - ``str | None``
+     - ``'ALL'``
+     - \-
+   * - ``flagged_any``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``flagged_all``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``flag``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``unflag``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``copy_flags``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``copy_legacy``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``fill_legacy``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``create``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``init_bitflags``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``reinit_bitflags``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``incr_stman``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``list_info``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``stats``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``remove``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``export``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``import_``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``restore``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``save``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``force``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``timestamps``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``chunk_size``
+     - ``int | None``
+     - ``200000``
+     - \-
+
+**Outputs**
+
+*(none)*
+
 fluxscale
 ---------
 
-Transfers a reference (flux) calibrator's absolute flux scale onto a gain table solved against a secondary/gain calibrator.
+Bootstrap the flux-density scale from standard calibrators.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -1173,12 +4947,52 @@ Transfers a reference (flux) calibrator's absolute flux scale onto a gain table 
      - *required*
      - \-
    * - ``reference``
-     - ``str``
+     - ``list``
      - *required*
      - \-
    * - ``transfer``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``listfile``
      - ``str``
      - ``''``
+     - \-
+   * - ``append``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``refspwmap``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``gainthreshold``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``incremental``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fitorder``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``display``
+     - ``bool``
+     - ``False``
      - \-
 
 **Outputs**
@@ -1194,10 +5008,266 @@ Transfers a reference (flux) calibrator's absolute flux scale onto a gain table 
      - ``Path``
      - \-
 
+fringefit
+---------
+
+Fringe-fit delay and rate (VLBI-style global fringe fitting).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``solint``
+     - ``str``
+     - ``'inf'``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``refant``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``minsnr``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``zerorates``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``globalsolve``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``100``
+     - \-
+   * - ``delaywindow``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``ratewindow``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``append``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``corrdepflags``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``corrcomb``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``gaintable``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``gainfield``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``interp``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``paramactive``
+     - ``list[bool] | None``
+     - ``None``
+     - \-
+   * - ``concatspws``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``parang``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+ft
+--
+
+Fourier-transform a model image or component list into the MS's model representation, in place (either the virtual/OTF keywords, or the MODEL_DATA column when `usescratch=True`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``model``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``nterms``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``reffreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``complist``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``incremental``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``usescratch``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
 gaincal
 -------
 
-`gaintype` disambiguates the real task's own solve mode (`"K"` delay, `"G"`/`"F"` gain, `"KCROSS"` crosshand delay, ...) -- `gaintable`/`gainfield`/`interp` are previously-solved tables applied on the fly while solving this one.
+Solve for temporal gains from calibrator observations.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -1222,19 +5292,7 @@ gaincal
      - \-
    * - ``gaintype``
      - ``str``
-     - *required*
-     - \-
-   * - ``calmode``
-     - ``str``
-     - ``'ap'``
-     - \-
-   * - ``solint``
-     - ``str``
-     - ``'inf'``
-     - \-
-   * - ``combine``
-     - ``str``
-     - ``''``
+     - ``'G'``
      - \-
    * - ``field``
      - ``str``
@@ -1244,13 +5302,61 @@ gaincal
      - ``str``
      - ``''``
      - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
    * - ``uvrange``
      - ``str``
      - ``''``
      - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``solint``
+     - ``str``
+     - ``'inf'``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``preavg``
+     - ``float``
+     - ``-1.0``
+     - \-
    * - ``refant``
      - ``str``
      - ``''``
+     - \-
+   * - ``refantmode``
+     - ``str``
+     - ``'flex'``
+     - \-
+   * - ``minblperant``
+     - ``int``
+     - ``4``
      - \-
    * - ``minsnr``
      - ``float``
@@ -1259,6 +5365,54 @@ gaincal
    * - ``solnorm``
      - ``bool``
      - ``False``
+     - \-
+   * - ``normtype``
+     - ``str``
+     - ``'mean'``
+     - \-
+   * - ``splinetime``
+     - ``float``
+     - ``3600.0``
+     - \-
+   * - ``npointaver``
+     - ``int``
+     - ``3``
+     - \-
+   * - ``phasewrap``
+     - ``float``
+     - ``180.0``
+     - \-
+   * - ``smodel``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``calmode``
+     - ``str``
+     - ``'ap'``
+     - \-
+   * - ``solmode``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``rmsthresh``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``corrdepflags``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``append``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
+     - ``str``
+     - ``''``
      - \-
    * - ``gaintable``
      - ``list[Path] | None``
@@ -1270,6 +5424,10 @@ gaincal
      - \-
    * - ``interp``
      - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
      - ``None``
      - \-
    * - ``parang``
@@ -1290,10 +5448,410 @@ gaincal
      - ``Path``
      - \-
 
+gencal
+------
+
+Generate a calibration table of manually-specified values, for types without a data-driven solve (`amp`/`ph`/`sbd`/`mbd`/`antpos`/ `antposvla`/`tsys`/`evlagain`/`opac`/`gc`/`gceff`/`eff`/`tecim`/ `jyperk`/`eop`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltype``
+     - ``str``
+     - *required*
+     - \-
+   * - ``infile``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``endpoint``
+     - ``str``
+     - ``'asdm'``
+     - \-
+   * - ``timeout``
+     - ``int``
+     - ``180``
+     - \-
+   * - ``retry``
+     - ``int``
+     - ``3``
+     - \-
+   * - ``retry_wait_time``
+     - ``int``
+     - ``5``
+     - \-
+   * - ``ant_pos_time_limit``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``pol``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``parameter``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``uniform``
+     - ``bool``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+getantposalma
+-------------
+
+Query ALMA's web service for antenna-position corrections and write them to a JSON file (for `gencal caltype='antpos'`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``outfile``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``asdm``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``tw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``snr``
+     - ``str``
+     - ``'default'``
+     - \-
+   * - ``search``
+     - ``str``
+     - ``'both_latest'``
+     - \-
+   * - ``hosts``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``firstintegration``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``nretry``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``rdelay``
+     - ``float``
+     - ``3.0``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path``
+     - \-
+
+getcalmodvla
+------------
+
+Query a VLA web service for a calibrator's brightness-distribution component list (for `setjy standard='fluxscale'`-style use).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``outfile``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``source``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``direction``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``band``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``obsdate``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``refdate``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``hosts``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path``
+     - \-
+
+hanningsmooth
+-------------
+
+Hanning-smooth channel data to remove Gibbs ringing.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``keepmms``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``correlation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``smooth_spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'all'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+impbcor
+-------
+
+Construct a primary-beam-corrected image from an image and a PB pattern image.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``imagename``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``pbimage``
+     - ``str``
+     - *required*
+     - \-
+   * - ``outfile``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``box``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``region``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``chans``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``stokes``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``mask``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``'divide'``
+     - \-
+   * - ``cutoff``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``stretch``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path``
+     - \-
+
 initweights
 -----------
 
-Sets uniform (all-ones) spectral weights.
+Initialize weight-related columns in the MS.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -1314,11 +5872,27 @@ Sets uniform (all-ones) spectral weights.
      - \-
    * - ``wtmode``
      - ``str``
-     - ``'ones'``
+     - ``'nyq'``
+     - \-
+   * - ``tsystable``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``gainfield``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``interp``
+     - ``str``
+     - ``'linear,linear'``
+     - \-
+   * - ``spwmap``
+     - ``list[int] | None``
+     - ``None``
      - \-
    * - ``dowtsp``
      - ``bool``
-     - ``True``
+     - ``False``
      - \-
 
 **Outputs**
@@ -1333,6 +5907,406 @@ Sets uniform (all-ones) spectral weights.
    * - ``vis``
      - ``Path``
      - \-
+
+killms
+------
+
+killMS: direction-dependent calibration for radio interferometric data (https://github.com/saopicc/killMS)
+
+:Command: ``kMS.py``
+:Image: ``ghcr.io/shinobi-dosho/killms:3.3.0-d0.1.0`` (``KILLMS`` 3.3.0, build)
+:Source: https://github.com/saopicc/killMS
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis_data_ms_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``vis_data_t_chunk``
+     - ``int | None``
+     - ``15``
+     - \-
+   * - ``vis_data_in_col``
+     - ``str | None``
+     - ``'CORRECTED_DATA_BACKUP'``
+     - \-
+   * - ``vis_data_out_col``
+     - ``str | None``
+     - ``'CORRECTED_DATA'``
+     - \-
+   * - ``vis_data_free_predict_gain_col_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``vis_data_free_predict_col_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``vis_data_parallel``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``sky_model_sky_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``sky_model_kills``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``sky_model_invert``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``sky_model_decorrelation``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``sky_model_free_full_sub``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``sky_model_sky_model_col``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_beam_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_beam_at``
+     - ``str | None``
+     - ``'facet'``
+     - \-
+   * - ``beam_lofar_beam_mode``
+     - ``str | None``
+     - ``'AE'``
+     - \-
+   * - ``beam_dt_beam_min``
+     - ``int | None``
+     - ``5``
+     - \-
+   * - ``beam_center_norm``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``beam_n_chan_beam_per_ms``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``beam_fits_file``
+     - ``str | None``
+     - ``'beam_$(corr)_$(reim).fits'``
+     - \-
+   * - ``beam_fits_par_angle_inc_deg``
+     - ``int | None``
+     - ``5``
+     - \-
+   * - ``beam_fitsl_axis``
+     - ``str | None``
+     - ``'-X'``
+     - \-
+   * - ``beam_fitsm_axis``
+     - ``str | None``
+     - ``'Y'``
+     - \-
+   * - ``beam_fits_feed``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_fits_verbosity``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``beam_feed_angle``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_apply_p_jones``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_flip_visibility_hands``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_fits_feed_swap``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_fits_frame``
+     - ``str | None``
+     - ``'altaz'``
+     - \-
+   * - ``image_sky_model_base_image_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_dico_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_nodes_file``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_image_predict_parset``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_over_s``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_mask_image``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_wmax``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_max_facet_size``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_min_facet_size``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_remove_ddf_cache``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``image_sky_model_ddf_cache_dir``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sky_model_filter_neg_comp``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``image_sky_model_th_solve``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``data_selection_uv_min_max``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``data_selection_chan_slice``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``data_selection_flag_ants``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``data_selection_dist_max_to_core``
+     - ``float | None``
+     - ``10000.0``
+     - \-
+   * - ``data_selection_fill_factor``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``data_selection_field_id``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``data_selection_ddid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``weighting_resolution``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weighting_weight_in_col``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``weighting_weighting``
+     - ``str | None``
+     - ``'Natural'``
+     - \-
+   * - ``weighting_robust``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weighting_weight_uv_min_max``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``weighting_wtuv``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``actions_do_plot``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``actions_sub_only``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``actions_ncpu``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``actions_do_bar``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``actions_n_thread``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``actions_debug_pdb``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``actions_update_weights``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``pre_apply_pre_apply_sols``
+     - ``list[str] | None``
+     - ``[]``
+     - \-
+   * - ``pre_apply_pre_apply_mode``
+     - ``list[str] | None``
+     - ``[]``
+     - \-
+   * - ``solutions_ext_sols``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``solutions_clip_method``
+     - ``str | None``
+     - ``'[ResidAnt]'``
+     - \-
+   * - ``solutions_out_sols_name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``solutions_apply_to_dir``
+     - ``int | None``
+     - ``-2``
+     - \-
+   * - ``solutions_merge_beam_to_applied_sol``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``solutions_apply_mode``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``solutions_skip_existing_sols``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``solutions_sols_dir``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``compression_compression_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``compression_compression_dir_file``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``compression_merge_stations``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``solvers_solver_type``
+     - ``str | None``
+     - ``'CohJones'``
+     - \-
+   * - ``solvers_precision_dot``
+     - ``str | None``
+     - ``'D'``
+     - \-
+   * - ``solvers_pol_mode``
+     - ``str | None``
+     - ``'Scalar'``
+     - \-
+   * - ``solvers_dt``
+     - ``int | None``
+     - ``30``
+     - \-
+   * - ``solvers_n_chan_sols``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``coh_jones_n_iter_lm``
+     - ``int | None``
+     - ``7``
+     - \-
+   * - ``coh_jones_lambda_lm``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``coh_jones_lambda_tk``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``kafca_n_iter_kf``
+     - ``int | None``
+     - ``6``
+     - \-
+   * - ``kafca_lambda_kf``
+     - ``float | None``
+     - ``0.5``
+     - \-
+   * - ``kafca_init_lm``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``kafca_init_l_mdt``
+     - ``int | None``
+     - ``5``
+     - \-
+   * - ``kafca_cov_p``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``kafca_cov_q``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``kafca_power_smooth``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``kafca_ev_p_step``
+     - ``int | None``
+     - ``120``
+     - \-
+   * - ``kafca_ev_p_step_start``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``kafca_evolution_sol_file``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
 
 listobs
 -------
@@ -1360,6 +6334,70 @@ Write a CASA `listobs` text summary of a measurement set.
      - ``Path``
      - *required*
      - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``correlation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``listunfl``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``cachesize``
+     - ``float``
+     - ``50.0``
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
 
 **Outputs**
 
@@ -1372,6 +6410,66 @@ Write a CASA `listobs` text summary of a measurement set.
      - Description
    * - ``listfile``
      - ``Path``
+     - \-
+
+makemask
+--------
+
+Make and manipulate image masks (`mode='list'/'copy'/'expand'/ 'delete'/'setdefaultmask'`). For `mode='copy'`/`'expand'`, `output` (an image name, or `imagename:internal_maskname`) is the real output product -- it may point back into `inpimage` itself for an internal T/F mask, which is exactly why it's classified as this step's output rather than treated as a side effect.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``mode``
+     - ``str``
+     - ``'list'``
+     - \-
+   * - ``inpimage``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``inpmask``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``output``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``inpfreqs``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``outfreqs``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output``
+     - ``str``
      - \-
 
 mosaic-queen
@@ -1482,7 +6580,7 @@ mosaic-queen: FITS image mosaicking (https://github.com/caracal-pipeline/mosaic-
 mstransform
 -----------
 
-`regridms`/`mode`/`nchan`/`start`/`width`/`interpolation`/ `restfreq`/`outframe`/`veltype` are Doppler regridding; `douvcontsub`/`fitspw`/`fitorder` are uv-plane continuum subtraction -- both left at the real task's own defaults unless a caller passes them.
+Split/combine/regrid an MS and optionally average in channel/time.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -1507,29 +6605,13 @@ mstransform
      - \-
    * - ``field``
      - ``str``
-     - *required*
-     - \-
-   * - ``datacolumn``
-     - ``str``
-     - ``'corrected'``
-     - \-
-   * - ``timeaverage``
-     - ``bool``
-     - ``False``
-     - \-
-   * - ``timebin``
-     - ``str``
-     - ``'0s'``
-     - \-
-   * - ``chanaverage``
-     - ``bool``
-     - ``False``
-     - \-
-   * - ``chanbin``
-     - ``int``
-     - ``1``
+     - ``''``
      - \-
    * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
      - ``str``
      - ``''``
      - \-
@@ -1541,17 +6623,81 @@ mstransform
      - ``str``
      - ``''``
      - \-
-   * - ``scan``
+   * - ``timerange``
      - ``str``
      - ``''``
      - \-
-   * - ``usewtspectrum``
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'corrected'``
+     - \-
+   * - ``realmodelcol``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``keepflags``
      - ``bool``
      - ``True``
      - \-
-   * - ``nthreads``
+   * - ``usewtspectrum``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``createmms``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``tileshape``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``separationaxis``
+     - ``str``
+     - ``'auto'``
+     - \-
+   * - ``numsubms``
+     - ``str``
+     - ``'auto'``
+     - \-
+   * - ``taql``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``combinespws``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``chanaverage``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``chanbin``
      - ``int``
      - ``1``
+     - \-
+   * - ``hanning``
+     - ``bool``
+     - ``False``
      - \-
    * - ``regridms``
      - ``bool``
@@ -1573,9 +6719,17 @@ mstransform
      - ``str``
      - ``'1'``
      - \-
+   * - ``nspw``
+     - ``int``
+     - ``1``
+     - \-
    * - ``interpolation``
      - ``str``
      - ``'linear'``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
      - \-
    * - ``restfreq``
      - ``str``
@@ -1589,6 +6743,34 @@ mstransform
      - ``str``
      - ``'radio'``
      - \-
+   * - ``preaverage``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``timeaverage``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``timebin``
+     - ``str``
+     - ``'0s'``
+     - \-
+   * - ``timespan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``maxuvwdistance``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
+     - ``str``
+     - ``''``
+     - \-
    * - ``douvcontsub``
      - ``bool``
      - ``False``
@@ -1600,6 +6782,22 @@ mstransform
    * - ``fitorder``
      - ``int``
      - ``0``
+     - \-
+   * - ``want_cont``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``denoising_lib``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``nthreads``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``1``
      - \-
 
 **Outputs**
@@ -1916,6 +7114,150 @@ msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)
      - ``Path | None``
      - \-
 
+msuvbin
+-------
+
+Grid visibility data onto a defined uniform uv-grid, stored as an MS (additive: bins into `outputvis` if it already exists).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``taql``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``imsize``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``cell``
+     - ``str``
+     - ``'1arcsec'``
+     - \-
+   * - ``ncorr``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``start``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``width``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``wproject``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``memfrac``
+     - ``float``
+     - ``0.5``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``'bin'``
+     - \-
+   * - ``flagbackup``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+msuvbinflag
+-----------
+
+Identify UV-plane outliers in a `msuvbin`-binned MS and flag them.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``binnedvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``method``
+     - ``str``
+     - ``'radial_per_plane'``
+     - \-
+   * - ``nsigma``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``doplot``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``binnedvis``
+     - ``Path``
+     - \-
+
 owlcat_plotelev
 ---------------
 
@@ -1959,6 +7301,258 @@ Owlcat plot-elevation-tracks.py: plot target elevation over time
      - Description
    * - ``output_name``
      - ``Path | None``
+     - \-
+
+partition
+---------
+
+Produce a multi-MS from an MS, for parallelized processing.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``createmms``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``separationaxis``
+     - ``str``
+     - ``'auto'``
+     - \-
+   * - ``numsubms``
+     - ``str``
+     - ``'auto'``
+     - \-
+   * - ``flagbackup``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'all'``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``correlation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``taql``
+     - ``str``
+     - ``''``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+pccor
+-----
+
+Generate Pulse-Cal corrections for VLBA data.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``pccor_caltable``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``refant``
+     - ``str``
+     - *required*
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``cablecal_correction``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``ff_table``
+     - ``str``
+     - ``'none'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+phaseshift
+----------
+
+Rotate an MS to a new phase center.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - *required*
+     - \-
+   * - ``keepmms``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'all'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
      - \-
 
 plotms
@@ -2052,7 +7646,7 @@ Render a CASA `plotms` diagnostic plot.
 polcal
 ------
 
-A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g. `"Xf"` crosshand phase, `"Df"` leakage -- not a variation on the `gaincal` wrapper above).
+Determine instrumental polarization calibration. A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g. `"Xf"` crosshand phase, `"Df"` leakage -- not a variation on the `gaincal` wrapper above).
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -2087,7 +7681,35 @@ A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g.
      - ``str``
      - ``''``
      - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
    * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
      - ``str``
      - ``''``
      - \-
@@ -2097,9 +7719,37 @@ A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g.
      - \-
    * - ``combine``
      - ``str``
-     - ``''``
+     - ``'obs,scan'``
+     - \-
+   * - ``preavg``
+     - ``float``
+     - ``300.0``
      - \-
    * - ``refant``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``minblperant``
+     - ``int``
+     - ``4``
+     - \-
+   * - ``minsnr``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``smodel``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``append``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``docallib``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``callib``
      - ``str``
      - ``''``
      - \-
@@ -2115,6 +7765,10 @@ A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g.
      - ``list[str] | None``
      - ``None``
      - \-
+   * - ``spwmap``
+     - ``list[int] | None``
+     - ``None``
+     - \-
 
 **Outputs**
 
@@ -2128,6 +7782,222 @@ A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g.
    * - ``caltable``
      - ``Path``
      - \-
+
+polfromgain
+-----------
+
+Derive linear polarization (Q, U) from the ratio of a gain table's parallel-hand amplitudes across parallactic-angle coverage.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``tablein``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``paoffset``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``minpacov``
+     - ``float``
+     - ``30.0``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path | None``
+     - \-
+
+predictcomp
+-----------
+
+Build a component list for a known calibrator (e.g. a solar-system object via a flux-density standard).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``objname``
+     - ``str``
+     - *required*
+     - \-
+   * - ``prefix``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``standard``
+     - ``str``
+     - ``'Butler-JPL-Horizons 2010'``
+     - \-
+   * - ``epoch``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``minfreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``maxfreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``nfreqs``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``antennalist``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``showplot``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``savefig``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``symb``
+     - ``str``
+     - ``'.'``
+     - \-
+   * - ``include0amp``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``include0bl``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``blunit``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``showbl0flux``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``prefix``
+     - ``Path``
+     - \-
+
+pyddi
+-----
+
+pyddi: finds directions subject to direction-dependent effects (https://github.com/IanHeywood/pyddi)
+
+:Command: ``pyddi``
+:Image: ``ghcr.io/shinobi-dosho/pyddi:0.0.4-d0.1.0`` (``PYDDI`` 0.0.4, build)
+:Source: https://github.com/IanHeywood/pyddi
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``psf_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``catalog``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``flux_thresh``
+     - ``float | None``
+     - ``10.0``
+     - \-
+   * - ``variance_thresh``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``variance_size``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``correlation_thresh``
+     - ``float | None``
+     - ``0.5``
+     - \-
+   * - ``correlation_size``
+     - ``int | None``
+     - ``5``
+     - \-
+   * - ``group_pixels``
+     - ``int | None``
+     - ``20``
+     - \-
+   * - ``exclude_radius``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``use_catalog``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``output_prefix``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
 
 quartical
 ---------
@@ -2365,8 +8235,289 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
      - ``Path | None``
      - \-
 
-ragavi
-------
+quartical-backup
+----------------
+
+goquartical-backup: back up a measurement set column to zarr
+
+:Command: ``goquartical-backup``
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Source: https://github.com/ratt-ru/QuartiCal
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms_path``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``zarr_dir``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``column_name``
+     - ``str``
+     - *required*
+     - \-
+   * - ``label``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``nthread``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``field_id``
+     - ``int | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+quartical-plotter
+-----------------
+
+goquartical-plot: rudimentary plotter for QuartiCal gain solutions
+
+:Command: ``goquartical-plot``
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Source: https://github.com/ratt-ru/QuartiCal
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``input_path``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output_path``
+     - ``str``
+     - *required*
+     - \-
+   * - ``plot_var``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``flag_var``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``xaxis``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``transform``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``iter_attrs``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``iter_axes``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``mean_axis``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``colourize_axis``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``time_range``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``freq_range``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``nworker``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``colourmap``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``fig_size``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+quartical-restore
+-----------------
+
+goquartical-restore: restore a zarr column backup into a measurement set
+
+:Command: ``goquartical-restore``
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Source: https://github.com/ratt-ru/QuartiCal
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``zarr_path``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``ms_path``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``column_name``
+     - ``str``
+     - *required*
+     - \-
+   * - ``nthread``
+     - ``int | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms_path``
+     - ``Path | None``
+     - \-
+
+ragavi-gains
+------------
+
+ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)
+
+:Command: ``ragavi-gains``
+:Image: ``ghcr.io/shinobi-dosho/ragavi:0.5.2-d0.1.0`` (``RAGAVI`` 0.5.2, build)
+:Source: https://github.com/ratt-ru/ragavi
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``table``
+     - ``list``
+     - *required*
+     - \-
+   * - ``ant``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``corr``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``cmap``
+     - ``str | None``
+     - ``'coolwarm'``
+     - \-
+   * - ``ddid``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``debug``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``doplot``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``gaintype``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``logfile``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``xaxis``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``t0``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``t1``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``taql``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``htmlname``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``plotname``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``htmlname``
+     - ``str | None``
+     - \-
+   * - ``plotname``
+     - ``str | None``
+     - \-
+
+ragavi-vis
+----------
 
 ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthedocs.io)
 
@@ -2500,6 +8651,10 @@ ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthed
      - ``float | None``
      - ``None``
      - \-
+   * - ``htmlname``
+     - ``Path | None``
+     - ``None``
+     - \-
 
 **Outputs**
 
@@ -2511,13 +8666,867 @@ ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthed
      - Type
      - Description
    * - ``htmlname``
+     - ``Path | None``
+     - \-
+
+rerefant
+--------
+
+Re-reference an existing gain table to a different reference antenna, without re-solving.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``tablein``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``refantmode``
+     - ``str``
+     - ``'flex'``
+     - \-
+   * - ``refant``
+     - ``str``
+     - ``''``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+rfinder
+-------
+
+rfinder: visualize flagged RFI in a measurement set (https://github.com/Fil8/RFInder)
+
+:Command: ``rfinder``
+:Image: ``ghcr.io/shinobi-dosho/rfinder:1.1.0-d0.1.0`` (``RFINDER`` 1.1.0, build)
+:Source: https://github.com/Fil8/RFInder
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``config``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``input_dir``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``output_dir``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``label``
      - ``str | None``
+     - ``None``
+     - \-
+   * - ``input``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``telescope``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``rfimode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``polarization``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``frequency_interval``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``spw_av``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``time_step``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``sigma_clip``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``baseline_cut``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``no_chunks``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``yes_chunks``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_movies``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_spw_av``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``yes_spw_av``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_cleanup``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``yes_cleanup``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``plot_details``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``plot_summary``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``summary_options``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``freq_bin``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``ncpu``
+     - ``int | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+rmclean3d
+---------
+
+RM-Tools rmclean3d: RM-CLEAN on a cube of Faraday dispersion functions
+
+:Command: ``rmclean3d``
+:Image: ``ghcr.io/shinobi-dosho/rm-tools:1.4.11-d0.1.0`` (``RM_TOOLS`` 1.4.11, build)
+:Source: https://github.com/CIRADA-Tools/RM-Tools
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fdf_dirty``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``rmsf``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``cutoff``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``window``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``max_iter``
+     - ``int | None``
+     - ``1000``
+     - \-
+   * - ``gain``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``prefix_out``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``fits_extensions``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``ncores``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``chunk``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``mpi``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+rmsynth1d
+---------
+
+RM-Tools rmsynth1d: RM-synthesis on Stokes I/Q/U spectra (1D, ASCII)
+
+:Command: ``rmsynth1d``
+:Image: ``ghcr.io/shinobi-dosho/rm-tools:1.4.11-d0.1.0`` (``RM_TOOLS`` 1.4.11, build)
+:Source: https://github.com/CIRADA-Tools/RM-Tools
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``data_file``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``fit_rmsf_gaussian``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``max_faraday_depth``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dphi_radm2``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``nsamples``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``weight_type``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``fit_function``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``poly_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ignore_stokes_i``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``use_64bit``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``show_plots``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``save_outputs``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``debug``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``units``
+     - ``str | None``
+     - ``'Jy/beam'``
+     - \-
+   * - ``super_resolution``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+rmsynth3d
+---------
+
+RM-Tools rmsynth3d: RM-synthesis on Stokes Q/U cubes (3D)
+
+:Command: ``rmsynth3d``
+:Image: ``ghcr.io/shinobi-dosho/rm-tools:1.4.11-d0.1.0`` (``RM_TOOLS`` 1.4.11, build)
+:Source: https://github.com/CIRADA-Tools/RM-Tools
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``stokes_q``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``stokes_u``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``freqs``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``stokes_i_model``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``noise_file``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``weight_type``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``fit_rmsf_gaussian``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``max_faraday_depth``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dphi_radm2``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``prefix_out``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``nsamples``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``fits_extensions``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``skip_rmsf``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``super_resolution``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+rmtables
+--------
+
+Remove CASA tables cleanly (use this instead of `rm -rf`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``tablenames``
+     - ``list``
+     - *required*
+     - \-
+
+**Outputs**
+
+*(none)*
+
+sdintimaging
+------------
+
+Joint deconvolution of interferometric visibilities and a single-dish image cube into one sky model (`tclean` plus an SD term; see `TcleanOutputs`/`tclean`'s own docstring for the shared parameter groups' conditional structure).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``list``
+     - *required*
+     - \-
+   * - ``imagename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``usedata``
+     - ``str``
+     - ``'sdint'``
+     - \-
+   * - ``sdimage``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``sdpsf``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``sdgain``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``dishdia``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spw``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``timerange``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``uvrange``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``scan``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'corrected'``
+     - \-
+   * - ``imsize``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``cell``
+     - ``str``
+     - ``'1arcsec'``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``stokes``
+     - ``str``
+     - ``'I'``
+     - \-
+   * - ``projection``
+     - ``str``
+     - ``'SIN'``
+     - \-
+   * - ``startmodel``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``specmode``
+     - ``str``
+     - ``'mfs'``
+     - \-
+   * - ``reffreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``start``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``width``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``outframe``
+     - ``str``
+     - ``'LSRK'``
+     - \-
+   * - ``veltype``
+     - ``str``
+     - ``'radio'``
+     - \-
+   * - ``restfreq``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``interpolation``
+     - ``str``
+     - ``'linear'``
+     - \-
+   * - ``perchanweightdensity``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``gridder``
+     - ``str``
+     - ``'standard'``
+     - \-
+   * - ``facets``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``psfphasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``wprojplanes``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``vptable``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``mosweight``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``aterm``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``psterm``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``wbawp``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``cfcache``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``usepointing``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``computepastep``
+     - ``float``
+     - ``360.0``
+     - \-
+   * - ``rotatepastep``
+     - ``float``
+     - ``360.0``
+     - \-
+   * - ``pointingoffsetsigdev``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``pblimit``
+     - ``float``
+     - ``0.2``
+     - \-
+   * - ``deconvolver``
+     - ``str``
+     - ``'hogbom'``
+     - \-
+   * - ``scales``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``nterms``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``smallscalebias``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``restoration``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``restoringbeam``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``pbcor``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``weighting``
+     - ``str``
+     - ``'natural'``
+     - \-
+   * - ``robust``
+     - ``float``
+     - ``0.5``
+     - \-
+   * - ``noise``
+     - ``str``
+     - ``'1.0Jy'``
+     - \-
+   * - ``npixels``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``uvtaper``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``gain``
+     - ``float``
+     - ``0.1``
+     - \-
+   * - ``threshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``nsigma``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``cycleniter``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``cyclefactor``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``minpsffraction``
+     - ``float``
+     - ``0.05``
+     - \-
+   * - ``maxpsffraction``
+     - ``float``
+     - ``0.8``
+     - \-
+   * - ``nmajor``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``interactive``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fullsummary``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``usemask``
+     - ``str``
+     - ``'user'``
+     - \-
+   * - ``mask``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``pbmask``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``sidelobethreshold``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``noisethreshold``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``lownoisethreshold``
+     - ``float``
+     - ``1.5``
+     - \-
+   * - ``negativethreshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``smoothfactor``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``minbeamfrac``
+     - ``float``
+     - ``0.3``
+     - \-
+   * - ``cutthreshold``
+     - ``float``
+     - ``0.01``
+     - \-
+   * - ``growiterations``
+     - ``int``
+     - ``75``
+     - \-
+   * - ``dogrowprune``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``minpercentchange``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fastnoise``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``restart``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``calcres``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``calcpsf``
+     - ``bool``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``imagename``
+     - ``str``
+     - \-
+   * - ``image``
+     - ``Path``
+     - \-
+   * - ``residual``
+     - ``Path``
+     - \-
+   * - ``model``
+     - ``Path``
+     - \-
+   * - ``psf``
+     - ``Path``
+     - \-
+   * - ``image_pbcor``
+     - ``Path | None``
      - \-
 
 setjy
 -----
 
-`fluxdensity=[-1.0]` (the real CASA default) uses the standard's own flux model; `spix`/`reffreq`/`polindex`/`polangle`/`rotmeas` are for a manual polarized-calibrator model, defaulting to the real task's own no-op values.
+Fill MODEL_DATA (or the model representation) for a calibrator.
 
 :Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
 :Source: https://casadocs.readthedocs.io
@@ -2540,16 +9549,52 @@ setjy
      - ``str``
      - ``''``
      - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scalebychan``
+     - ``bool``
+     - ``True``
+     - \-
    * - ``standard``
      - ``str``
-     - ``'Perley-Butler 2010'``
+     - ``'Perley-Butler 2017'``
+     - \-
+   * - ``model``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``listmodels``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``interpolation``
+     - ``str``
+     - ``'nearest'``
      - \-
    * - ``fluxdensity``
      - ``list[float] | None``
-     - ``None``
-     - \-
-   * - ``model``
-     - ``str | None``
      - ``None``
      - \-
    * - ``spix``
@@ -2558,7 +9603,7 @@ setjy
      - \-
    * - ``reffreq``
      - ``str``
-     - ``''``
+     - ``'1GHz'``
      - \-
    * - ``polindex``
      - ``list[float] | None``
@@ -2572,13 +9617,21 @@ setjy
      - ``float``
      - ``0.0``
      - \-
-   * - ``scalebychan``
+   * - ``fluxdict``
+     - ``dict | None``
+     - ``None``
+     - \-
+   * - ``useephemdir``
      - ``bool``
-     - ``True``
+     - ``False``
      - \-
    * - ``usescratch``
      - ``bool``
      - ``True``
+     - \-
+   * - ``ismms``
+     - ``bool``
+     - ``False``
      - \-
 
 **Outputs**
@@ -2937,7 +9990,16 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``msname``
+     - ``Path | None``
+     - \-
 
 simms-primary-beam
 ------------------
@@ -3098,7 +10160,16 @@ simms skysim: simulate visibilities from a sky model (simms 3.0)
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
 
 simms-telsim
 ------------
@@ -3217,6 +10288,131 @@ simms telsim: simulate telescope noise/sensitivity (simms 3.0)
      - \-
    * - ``fit_order``
      - ``int | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+smoothcal
+---------
+
+Smooth an existing calibration table in time.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``tablein``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``smoothtype``
+     - ``str``
+     - ``'median'``
+     - \-
+   * - ``smoothtime``
+     - ``float``
+     - ``60.0``
+     - \-
+   * - ``ratesmooth``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
+     - \-
+
+smops
+-----
+
+smops: Smooth Operator, frequency axis upsampling for WSClean-derived model images (https://github.com/ratt-ru/smops)
+
+:Command: ``smops``
+:Image: ``ghcr.io/shinobi-dosho/smops:0.1.7-d0.1.0`` (``SMOPS`` 0.1.7, build)
+:Source: https://github.com/ratt-ru/smops
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``input_prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``channels_out``
+     - ``int``
+     - *required*
+     - \-
+   * - ``polynomial_order``
+     - ``int``
+     - *required*
+     - \-
+   * - ``max_mem``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``num_threads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``output_prefix``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``stokes``
+     - ``str | None``
      - ``None``
      - \-
 
@@ -3581,11 +10777,11 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - \-
    * - ``output_directory``
      - ``str | None``
-     - ``None``
+     - ``'.'``
      - \-
    * - ``output_filename``
      - ``str | None``
-     - ``None``
+     - ``'sofia'``
      - \-
    * - ``output_marginCubelets``
      - ``int | None``
@@ -3642,6 +10838,1319 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
    * - ``port2tigger``
      - ``bool | None``
      - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``cat_ascii``
+     - ``Path | None``
+     - \-
+   * - ``cat_sql``
+     - ``Path | None``
+     - \-
+   * - ``cat_xml``
+     - ``Path | None``
+     - \-
+   * - ``cubelets``
+     - ``Path | None``
+     - \-
+   * - ``filtered``
+     - ``Path | None``
+     - \-
+   * - ``mask``
+     - ``Path | None``
+     - \-
+   * - ``mask_2d``
+     - ``Path | None``
+     - \-
+   * - ``mask_raw``
+     - ``Path | None``
+     - \-
+   * - ``mom0``
+     - ``Path | None``
+     - \-
+   * - ``mom1``
+     - ``Path | None``
+     - \-
+   * - ``mom2``
+     - ``Path | None``
+     - \-
+   * - ``chan_map``
+     - ``Path | None``
+     - \-
+   * - ``noise``
+     - ``Path | None``
+     - \-
+   * - ``noise_txt``
+     - ``Path | None``
+     - \-
+
+spimple-binterp
+---------------
+
+spimple-binterp: beam interpolation tool (https://github.com/ratt-ru/spimple)
+
+:Command: ``spimple-binterp``
+:Image: ``ghcr.io/shinobi-dosho/spimple:0.0.5-d0.1.0`` (``SPIMPLE`` 0.0.5, build)
+:Source: https://github.com/ratt-ru/spimple
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``ms``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``output_filename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``beam_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``sparsify_time``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``nthreads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``corr_type``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+spimple-imconv
+--------------
+
+spimple-imconv: convolve images to a common resolution (https://github.com/ratt-ru/spimple)
+
+:Command: ``spimple-imconv``
+:Image: ``ghcr.io/shinobi-dosho/spimple:0.0.5-d0.1.0`` (``SPIMPLE`` 0.0.5, build)
+:Source: https://github.com/ratt-ru/spimple
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output_filename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``products``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``psf_pars``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``nthreads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``circ_psf``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``dilate``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``beam_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``band``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``pb_min``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``padding_frac``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``out_dtype``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+spimple-spifit
+--------------
+
+spimple-spifit: simple spectral index fitting tool (https://github.com/ratt-ru/spimple)
+
+:Command: ``spimple-spifit``
+:Image: ``ghcr.io/shinobi-dosho/spimple:0.0.5-d0.1.0`` (``SPIMPLE`` 0.0.5, build)
+:Source: https://github.com/ratt-ru/spimple
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``model``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``residual``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``output_filename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``psf_pars``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``circ_psf``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``threshold``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``maxDR``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``nthreads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``pb_min``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``products``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``padding_frac``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``dont_convolve``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``channel_weights``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``channel_freqs``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``ref_freq``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``out_dtype``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``add_convolved_residuals``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``ms``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``beam_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``sparsify_time``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``corr_type``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``band``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``deselect_bands``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+split
+-----
+
+Create a visibility subset from an existing MS, with optional channel/time averaging.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``keepmms``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``correlation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``feed``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'corrected'``
+     - \-
+   * - ``keepflags``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``width``
+     - ``str``
+     - ``'1'``
+     - \-
+   * - ``timebin``
+     - ``str``
+     - ``'0s'``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``''``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+statwt
+------
+
+Compute and set visibility weights from the data's own variance, in place (WEIGHT/WEIGHT_SPECTRUM columns, and flags data outside `wtrange` unless `preview=True`).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``timebin``
+     - ``str``
+     - ``'1'``
+     - \-
+   * - ``slidetimebin``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``chanbin``
+     - ``str``
+     - ``'spw'``
+     - \-
+   * - ``minsamp``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``statalg``
+     - ``str``
+     - ``'classic'``
+     - \-
+   * - ``fence``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``center``
+     - ``str``
+     - ``'mean'``
+     - \-
+   * - ``lside``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``zscore``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``maxiter``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``fitspw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``excludechans``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``wtrange``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``flagbackup``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``preview``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'corrected'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
+tclean
+------
+
+Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CASA's flagship imager. One flat wrapper covers every `specmode`/`gridder`/`deconvolver`/`weighting`/`usemask` combination, same convention as `flagdata`'s modes; see the `Args` groupings below for which parameters are conditional on which selector.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``list``
+     - *required*
+     - \-
+   * - ``imagename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spw``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``timerange``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``uvrange``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``scan``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'corrected'``
+     - \-
+   * - ``imsize``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``cell``
+     - ``str``
+     - ``'1arcsec'``
+     - \-
+   * - ``phasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``stokes``
+     - ``str``
+     - ``'I'``
+     - \-
+   * - ``projection``
+     - ``str``
+     - ``'SIN'``
+     - \-
+   * - ``startmodel``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``specmode``
+     - ``str``
+     - ``'mfs'``
+     - \-
+   * - ``reffreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``start``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``width``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``outframe``
+     - ``str``
+     - ``'LSRK'``
+     - \-
+   * - ``veltype``
+     - ``str``
+     - ``'radio'``
+     - \-
+   * - ``restfreq``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``interpolation``
+     - ``str``
+     - ``'linear'``
+     - \-
+   * - ``perchanweightdensity``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``gridder``
+     - ``str``
+     - ``'standard'``
+     - \-
+   * - ``pblimit``
+     - ``float``
+     - ``0.2``
+     - \-
+   * - ``vptable``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``wprojplanes``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``facets``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``normtype``
+     - ``str``
+     - ``'flatnoise'``
+     - \-
+   * - ``usepointing``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``mosweight``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``conjbeams``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``psfphasecenter``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``psterm``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``aterm``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``cfcache``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``computepastep``
+     - ``float``
+     - ``360.0``
+     - \-
+   * - ``rotatepastep``
+     - ``float``
+     - ``360.0``
+     - \-
+   * - ``pointingoffsetsigdev``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``wbawp``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``deconvolver``
+     - ``str``
+     - ``'hogbom'``
+     - \-
+   * - ``scales``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``smallscalebias``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``nterms``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``fusedthreshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``largestscale``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``restoration``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``restoringbeam``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``pbcor``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``outlierfile``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``weighting``
+     - ``str``
+     - ``'natural'``
+     - \-
+   * - ``robust``
+     - ``float``
+     - ``0.5``
+     - \-
+   * - ``noise``
+     - ``str``
+     - ``'1.0Jy'``
+     - \-
+   * - ``npixels``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``uvtaper``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``gain``
+     - ``float``
+     - ``0.1``
+     - \-
+   * - ``threshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``nsigma``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``cycleniter``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``cyclefactor``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``minpsffraction``
+     - ``float``
+     - ``0.05``
+     - \-
+   * - ``maxpsffraction``
+     - ``float``
+     - ``0.8``
+     - \-
+   * - ``interactive``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``nmajor``
+     - ``int``
+     - ``-1``
+     - \-
+   * - ``fullsummary``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``usemask``
+     - ``str``
+     - ``'user'``
+     - \-
+   * - ``mask``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``pbmask``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``sidelobethreshold``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``noisethreshold``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``lownoisethreshold``
+     - ``float``
+     - ``1.5``
+     - \-
+   * - ``negativethreshold``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``smoothfactor``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``minbeamfrac``
+     - ``float``
+     - ``0.3``
+     - \-
+   * - ``cutthreshold``
+     - ``float``
+     - ``0.01``
+     - \-
+   * - ``growiterations``
+     - ``int``
+     - ``75``
+     - \-
+   * - ``dogrowprune``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``minpercentchange``
+     - ``float``
+     - ``-1.0``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``fastnoise``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``restart``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``savemodel``
+     - ``str``
+     - ``'none'``
+     - \-
+   * - ``calcres``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``calcpsf``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``psfcutoff``
+     - ``float``
+     - ``0.35``
+     - \-
+   * - ``parallel``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``imagename``
+     - ``str``
+     - \-
+   * - ``image``
+     - ``Path``
+     - \-
+   * - ``residual``
+     - ``Path``
+     - \-
+   * - ``model``
+     - ``Path``
+     - \-
+   * - ``psf``
+     - ``Path``
+     - \-
+   * - ``pb``
+     - ``Path``
+     - \-
+   * - ``image_pbcor``
+     - ``Path | None``
+     - \-
+   * - ``mutated_vis``
+     - ``list[Path] | None``
+     - \-
+
+tigger-convert
+--------------
+
+tigger-convert: convert sky models into Tigger format (https://github.com/ska-sa/tigger-lsm)
+
+:Command: ``tigger-convert``
+:Image: ``ghcr.io/shinobi-dosho/tigger-lsm:1.8.0-d0.1.0`` (``TIGGER_LSM`` 1.8.0, build)
+:Source: https://github.com/ska-sa/tigger-lsm
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``sky_model``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output_model``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``force``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``type``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``output_type``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``append``
+     - ``list[Path] | None``
+     - ``None``
+     - \-
+   * - ``append_type``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``format``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``append_format``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_format``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``help_format``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``min_extent``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``tags``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``select``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``remove_nans``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``app_to_int``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``int_to_app``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``newstar_app_to_int``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``newstar_int_to_app``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``center``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``refresh_r``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``ref_freq``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``primary_beam``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``linear_pol``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``fits_l_axis``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``fits_m_axis``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_freq``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``beam_clip``
+     - ``float | None``
+     - ``0.001``
+     - \-
+   * - ``beam_spi``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``force_beam_spi_wo_spectrum``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``beam_nopol``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``beam_diag``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``pa``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``pa_range``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``pa_from_ms``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_average_jones``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``cluster_dist``
+     - ``float | None``
+     - ``60.0``
+     - \-
+   * - ``rename``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``radial_step``
+     - ``float | None``
+     - ``10.0``
+     - \-
+   * - ``merge_clusters``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``prefix``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``remove_source``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``add_brick``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``recenter``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``debug``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``enable_plots``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+tigger-restore
+--------------
+
+tigger-restore: restore sky-model sources into a FITS image (https://github.com/ska-sa/tigger-lsm)
+
+:Command: ``tigger-restore``
+:Image: ``ghcr.io/shinobi-dosho/tigger-lsm:1.8.0-d0.1.0`` (``TIGGER_LSM`` 1.8.0, build)
+:Source: https://github.com/ska-sa/tigger-lsm
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``input_image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``sky_model``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``type``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``format``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``num_sources``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``scale``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``restoring_beam``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``psf_file``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``clear``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``pb``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``beamgain``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``ignore_nobeam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``freq``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``force``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``timestamps``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+tigger-tag
+----------
+
+tigger-tag: set or change tags of selected sources in a sky model (https://github.com/ska-sa/tigger-lsm)
+
+:Command: ``tigger-tag``
+:Image: ``ghcr.io/shinobi-dosho/tigger-lsm:1.8.0-d0.1.0`` (``TIGGER_LSM`` 1.8.0, build)
+:Source: https://github.com/ska-sa/tigger-lsm
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``sky_model``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``selectors``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``list_sources``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``output``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``force``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``transfer_tags``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``debug``
+     - ``list[str] | None``
+     - ``None``
      - \-
 
 **Outputs**
@@ -3730,7 +12239,445 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+uvcontsub
+---------
+
+Continuum subtraction in the uv domain.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outputvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``intent``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``array``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``observation``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``datacolumn``
+     - ``str``
+     - ``'data'``
+     - \-
+   * - ``fitspec``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``fitmethod``
+     - ``str``
+     - ``'gsl'``
+     - \-
+   * - ``fitorder``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``writemodel``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outputvis``
+     - ``Path``
+     - \-
+
+uvcontsub_old
+-------------
+
+Continuum fitting and subtraction in the uv plane (the deprecated, pre-`uvcontsub` implementation). Output naming is fixed by CASA itself, not a caller-supplied path -- `{vis}.contsub` (overwritten if it already exists), plus `{vis}.cont` when `want_cont=True`.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``fitspw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``excludechans``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``combine``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``solint``
+     - ``str``
+     - ``'int'``
+     - \-
+   * - ``fitorder``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``want_cont``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``contsub_vis``
+     - ``Path``
+     - \-
+   * - ``cont_vis``
+     - ``Path | None``
+     - \-
+
+uvmodelfit
+----------
+
+Fit a single-component source model (point/Gaussian/disk) to the uv data. Read-only w.r.t. `vis`; the fitted parameters are the actual output product, optionally also written to `outfile` as a component list.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``selectdata``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``timerange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``uvrange``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``antenna``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scan``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``msselect``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``5``
+     - \-
+   * - ``comptype``
+     - ``str``
+     - ``'P'``
+     - \-
+   * - ``sourcepar``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``varypar``
+     - ``list[bool] | None``
+     - ``None``
+     - \-
+   * - ``outfile``
+     - ``str``
+     - ``''``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+   * - ``result``
+     - ``list[float] | None``
+     - \-
+
+uvsub
+-----
+
+Subtract (or, `reverse=True`, add) MODEL_DATA from/to CORRECTED_DATA, in place.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``reverse``
+     - ``bool``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
+virtualconcat
+-------------
+
+Concatenate several MSs into one multi-MS, without copying the underlying data (a "virtual" concat).
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``list``
+     - *required*
+     - \-
+   * - ``concatvis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``freqtol``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``dirtol``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``respectname``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``visweightscale``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``keepcopy``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``copypointing``
+     - ``bool``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``concatvis``
+     - ``Path``
+     - \-
+   * - ``moved_vis``
+     - ``list[Path] | None``
+     - \-
+
+widebandpbcor
+-------------
+
+Wideband primary-beam correction on the output of MS-MFS (`tclean` with `deconvolver='mtmfs'`) imaging.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``imagename``
+     - ``str``
+     - *required*
+     - \-
+   * - ``nterms``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``threshold``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``action``
+     - ``str``
+     - ``'pbcor'``
+     - \-
+   * - ``reffreq``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``pbmin``
+     - ``float``
+     - ``0.2``
+     - \-
+   * - ``field``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``spwlist``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``chanlist``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``weightlist``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``imagename``
+     - ``str``
+     - \-
 
 wsclean
 -------
@@ -4468,5 +13415,133 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``temp_dir``
      - ``Path | None``
+     - \-
+
+wvrgcal
+-------
+
+Generate a gain table from ALMA Water Vapour Radiometer data.
+
+:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
+:Source: https://casadocs.readthedocs.io
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``caltable``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``toffset``
+     - ``float``
+     - ``0.0``
+     - \-
+   * - ``segsource``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``sourceflag``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``tie``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``nsol``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``disperse``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``wvrflag``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``statfield``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``statsource``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``smooth``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``scale``
+     - ``float``
+     - ``1.0``
+     - \-
+   * - ``spw``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``wvrspw``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``reversespw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``cont``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``maxdistm``
+     - ``float``
+     - ``500.0``
+     - \-
+   * - ``minnumants``
+     - ``int``
+     - ``2``
+     - \-
+   * - ``mingoodfrac``
+     - ``float``
+     - ``0.8``
+     - \-
+   * - ``usefieldtab``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``refant``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``offsetstable``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``rseed``
+     - ``int``
+     - ``0``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``caltable``
+     - ``Path``
      - \-
 
