@@ -15,6 +15,18 @@ the same `ast.literal_eval`-or-string fallback DDFacet's own parser uses.
 No outputs are modelled: killMS's real output (a `.sols.npz` solutions
 file) is named from `--SkyModel-SkyModel`/`--SkyModel-Kills`-derived
 defaults inside the tool itself, not a single flag-controlled path.
+
+`parset` is source-verified against `killMS/kMS.py`'s own `driver()`:
+`ParsetFile=sys.argv[1]` -- read unconditionally (no `.startswith('-')`
+guard the way CubiCal has), and `driver()` never checks leftover-arg
+count the way `DDF.py`/CubiCal's `main()` do. So pairing a tail
+`positional` parset with any other override flag wouldn't crash killMS --
+it would just silently fail to read the parset at all (`sys.argv[1]`
+would be the first `--flag` instead, `ReadCFG.Parset("--flag")` fails to
+open a nonexistent file, `TestParset.Success` stays `False`, and the
+trailing parset token is left as an unvalidated, silently-ignored
+leftover). `ParamMeta(positional_head=True)` -- same as `cubical.py` --
+makes sure it actually lands at `sys.argv[1]`.
 """
 
 from __future__ import annotations
@@ -25,6 +37,7 @@ from dosho import images
 from dosho._builder import define_cab
 
 _FIELDS: dict[str, tuple[str, bool, object]] = {
+    "parset": ("File", False, None),
     "vis_data_ms_name": ("str", False, None),
     "vis_data_t_chunk": ("int", False, 15),
     "vis_data_in_col": ("str", False, 'CORRECTED_DATA_BACKUP'),
@@ -122,6 +135,11 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
 }
 
 _FIELD_META: dict[str, ParamMeta] = {
+    "parset": ParamMeta(
+        positional_head=True,
+        info="Parset file to read option defaults from, overridden by any of the flags below "
+        "(kMS.py's own driver() reads sys.argv[1] as the parset unconditionally)",
+    ),
     "vis_data_ms_name": ParamMeta(nom_de_guerre="VisData-MSName", info=''),
     "vis_data_t_chunk": ParamMeta(nom_de_guerre="VisData-TChunk", info=''),
     "vis_data_in_col": ParamMeta(nom_de_guerre="VisData-InCol", info=''),

@@ -28,6 +28,19 @@ QuartiCal writes corrected visibilities back into the *same* input MS
 (via `output.products`/`output.columns`) and gain tables into
 `output.gain_directory` -- both declared as real passthrough output
 fields (`ms`, `gain_directory`), not synthetic hacks.
+
+`parset` is real, source-verified against `quartical/config/parser.py`'s
+own `parse_inputs`: it scans the *whole* `sys.argv` for any bare token
+ending in `.yaml`/`.yml` (`if arg.endswith(('.yaml', '.yml')):
+config_files.append(arg)`), strips every match out before the rest of
+argv is parsed as hydra-style `section.param=value` overrides -- unlike
+CubiCal/killMS (see `cubical.py`'s docstring), position genuinely doesn't
+matter here. Modelled as `ParamMeta(positional_head=True)` anyway (not
+plain `positional`) purely for consistency with the other three parset
+fields, and because `build_argv`'s positional handling bypasses this
+cab's own `key_value=True` policy either way (a positional is emitted as
+a bare `_format_value` token, never `name=value`), so head vs. tail
+changes nothing observable for QuartiCal itself.
 """
 
 from __future__ import annotations
@@ -38,6 +51,7 @@ from dosho import images
 from dosho._builder import define_cab
 
 _FIELDS: dict[str, tuple[str, bool, object]] = {
+    "parset": ("File", False, None),
     "input_ms.path": ("URI", True, None),
     "input_ms.data_column": ("str", False, "DATA"),
     "input_ms.sigma_column": ("str", False, None),
@@ -126,6 +140,11 @@ quartical = define_cab(
     field_meta={
         "ms": ParamMeta(implicit="{input_ms_path}"),
         "gain_directory": ParamMeta(implicit="{output_gain_directory}"),
+        "parset": ParamMeta(
+            positional_head=True,
+            info="Optional YAML config file to load before applying all other parameters "
+            "(any bare *.yaml/*.yml argv token, per goquartical's own parser.py)",
+        ),
     },
     policies=Policies(key_value=True, repeat="[]", prefix=""),
     input_patterns=[_GAIN_TERM_PATTERN],

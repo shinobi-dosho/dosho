@@ -20,7 +20,9 @@ def test_registered_under_its_own_name():
 
 
 def test_real_param_count_not_a_hand_picked_subset():
-    assert len(_cab().inputs_model.model_fields) == 50
+    # 50 real flattened argument_schema.yaml params, plus 1 for the
+    # head-positional `parset` field
+    assert len(_cab().inputs_model.model_fields) == 51
 
 
 def test_sections_flatten_to_real_dotted_cli_names():
@@ -66,6 +68,22 @@ def test_build_argv_matches_real_quartical_hydra_style_cli():
     assert "G.type=complex" in argv
     # never the two-token --flag value shape
     assert not any(a.startswith("--") for a in argv)
+
+
+def test_parset_is_a_bare_positional_not_a_key_value_token():
+    # goquartical's own parser.py scans the whole argv for a bare
+    # *.yaml/*.yml token -- never a "parset=..." hydra-style token, unlike
+    # every other field on this cab (key_value=True).
+    cab = _cab()
+    argv = build_argv(cab, {"parset": "base.yaml", "input_ms_path": "/x.ms"})
+    assert argv == ["goquartical", "base.yaml", "input_ms.path=/x.ms"]
+
+
+def test_parset_omitted_when_not_given():
+    cab = _cab()
+    argv = build_argv(cab, {"input_ms_path": "/x.ms"})
+    assert "base.yaml" not in argv
+    assert argv == ["goquartical", "input_ms.path=/x.ms"]
 
 
 def test_ms_and_gain_directory_outputs_are_real_passthroughs():

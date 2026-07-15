@@ -22,7 +22,8 @@ def test_registered_under_its_own_name():
 
 
 def test_real_param_count_not_a_hand_picked_subset():
-    assert len(_cab().inputs_model.model_fields) == 135
+    # 135 real flattened schema.yaml params, plus 1 for the head-positional `parset` field
+    assert len(_cab().inputs_model.model_fields) == 136
 
 
 def test_sections_flatten_to_real_cli_flag_names():
@@ -44,6 +45,24 @@ def test_jones_term_pattern_matches_real_attrs_only():
     assert cab.match_pattern("g-time-int") is not None
     assert cab.match_pattern("dE-update-type") is not None
     assert cab.match_pattern("g-not-a-real-attr") is None
+
+
+def test_parset_is_a_bare_head_positional_at_argv_1():
+    # cubical/main.py's own main() checks sys.argv[1] literally to detect a
+    # parset -- it must land immediately after "gocubical", before every
+    # --flag, or CubiCal's own leftover-arg-count check rejects the run.
+    cab = _cab()
+    argv = build_argv(cab, {"parset": "base.parset", "data_ms": "/x.ms", "out_overwrite": True})
+    assert argv[0] == "gocubical"
+    assert argv[1] == "base.parset"
+    assert "--parset" not in argv
+
+
+def test_parset_omitted_when_not_given():
+    cab = _cab()
+    argv = build_argv(cab, {"data_ms": "/x.ms"})
+    assert "base.parset" not in argv
+    assert argv[1] == "--data-ms"
 
 
 def test_build_argv_matches_real_cubical_cli_shape():

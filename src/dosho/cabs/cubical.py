@@ -35,6 +35,25 @@ visibilities written back into the *same* input MS, not a new file --
 CubiCal's actual in-place-mutation behaviour), so a downstream step can
 wire a real dependency on "this MS has been calibrated" instead of the
 `allow_extra`/synthetic-field workaround the pre-dosho port used.
+
+`parset` mirrors real cult-cargo's own `cubical.yml` (`parset: {dtype:
+File, policies: {positional_head: true}}`) -- and for the same real
+reason: `cubical/main.py`'s own `main()` checks `sys.argv[1]` literally
+(`if len(sys.argv) > 1 and not sys.argv[1][0].startswith('-'):
+custom_parset_file = sys.argv[1]`), not "any leftover non-flag token"
+the way `DDF.py`'s optparse-based leftover-arg collection does (see
+`ddfacet.py`'s docstring). A plain tail `positional` (shinobi's default,
+always emitted after every flag) would only be seen as the parset when
+it's the *sole* argument -- pair it with any other override flag and
+`sys.argv[1]` is that flag instead, `custom_parset_file` stays unset, and
+CubiCal's own leftover-arg-count check (`if len(parser.get_arguments())
+!= (1 if custom_parset_file else 0): raise UserInputError("Unexpected
+number of arguments...")`) then rejects the run outright, since the
+trailing parset token is still there as an unrecognised leftover.
+`ParamMeta(positional_head=True)` (shinobi's scabha-derived `policies:
+{positional_head: true}` equivalent -- see `shinobi.steps.schema.ParamMeta`)
+emits it before every flag instead, which is what `sys.argv[1]` actually
+needs.
 """
 
 from __future__ import annotations
@@ -45,6 +64,7 @@ from dosho import images
 from dosho._builder import define_cab
 
 _FIELDS: dict[str, tuple[str, bool, object]] = {
+    "parset": ("File", False, None),
     "data-ms": ("MS", True, None),
     "data-column": ("str", False, None),
     "data-time-chunk": ("str", False, None),
@@ -240,7 +260,14 @@ cubical = define_cab(
     images.CUBICAL,
     _FIELDS,
     outputs=_OUTPUTS,
-    field_meta={"ms": ParamMeta(implicit="{data_ms}")},
+    field_meta={
+        "ms": ParamMeta(implicit="{data_ms}"),
+        "parset": ParamMeta(
+            positional_head=True,
+            info="Optional parset to load before applying all other parameters "
+            "(cult-cargo's own cubical.yml wording)",
+        ),
+    },
     # real cubical.yml: policies: {prefix: '--', explicit_true: true,
     # explicit_false: false} -- gocubical's optparse-derived CLI expects
     # every boolean option to always take an explicit value token; a bare
