@@ -10020,7 +10020,7 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
 simms-primary-beam
 ------------------
 
-simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-name labels (simms 3.0)
+simms primary-beam: PB utilities -- to-fits/tag-ms/apply/correct (simms 3.0)
 
 :Command: ``simms primary-beam``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0`` (``SIMMS`` 3.0b3, build)
@@ -10036,9 +10036,37 @@ simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-n
      - Type
      - Default
      - Description
-   * - ``ms``
-     - ``Path``
+   * - ``mode``
+     - ``str``
      - *required*
+     - \-
+   * - ``beam_pattern``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_band``
+     - ``str | None``
+     - ``'L'``
+     - \-
+   * - ``beam_pa_step``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``ms``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``fits_sky``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``ascii_sky``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``output``
+     - ``Path | None``
+     - ``None``
      - \-
    * - ``telescope_name_column``
      - ``str | None``
@@ -10056,9 +10084,41 @@ simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-n
      - ``str | None``
      - ``None``
      - \-
-   * - ``action``
+   * - ``pb_cutoff``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``field_id``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``spw_id``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``pixel_size``
      - ``str | None``
-     - ``'tag-ms'``
+     - ``'1arcmin'``
+     - \-
+   * - ``npix``
+     - ``int | None``
+     - ``256``
+     - \-
+   * - ``start_freq``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``chan_width``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``nchan``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``nworkers``
+     - ``int | None``
+     - ``4``
      - \-
 
 **Outputs**
@@ -10071,6 +10131,9 @@ simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-n
      - Type
      - Description
    * - ``ms``
+     - ``Path | None``
+     - \-
+   * - ``output``
      - ``Path | None``
      - \-
 
@@ -10190,7 +10253,7 @@ simms skysim: simulate visibilities from a sky model (simms 3.0)
 simms-telsim
 ------------
 
-simms telsim: simulate telescope noise/sensitivity (simms 3.0)
+simms telsim: simulate a telescope MS from scratch, optionally with noise (simms 3.0)
 
 :Command: ``simms telsim``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0b3-d0.1.0`` (``SIMMS`` 3.0b3, build)

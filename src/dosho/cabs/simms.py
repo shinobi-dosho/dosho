@@ -6,14 +6,23 @@ All three transcribed field-by-field from cult-cargo's simms.yml:
 * `skysim` -- simms 3.0's sky-model visibility simulator, replacing
   caracal 1.x's separate simulator worker (see stimela-ninja/caracal
   migration notes: simulator -> simms 3.0 skysim).
-* `telsim` -- simms 3.0's telescope/noise-only simulator (`simms telsim`,
-  same `simms` image as `skysim` -- a sibling sub-command of the same
-  binary, not a separate tool).
+* `telsim` -- simms 3.0's telescope simulator (`simms telsim`, same `simms`
+  image as `skysim` -- a sibling sub-command of the same binary, not a
+  separate tool). Despite the name, it creates a brand-new MS from scratch
+  given `telescope`/`direction`/timing/frequency parameters
+  (`simms.telescope.generate_ms.create_ms`, real source verified in
+  `simms/src/simms/apps/telsim.py`) -- SEFD/Tsys noise injection is an
+  *optional* extra those parameters enable, not telsim's core job. Known
+  `telescope` values include `"meerkat"`/`"meerkat-plus"` (real vendored
+  subarrays of `simms/src/simms/telescope/layouts/skamid.geodetic.yaml` --
+  MeerKAT/MeerKAT+ are modelled as SKA-Mid subarrays there).
 * `simms_classic` -- the original (pre-3.0) `simms` command, a genuinely
   different tool from `skysim`/`telsim` (own `simms-classic` image, no
   sub-command in its `command`) -- exported as `simms_classic` rather
   than `simms` to avoid shadowing this module's own name in
-  `from dosho.cabs.simms import simms_classic`.
+  `from dosho.cabs.simms import simms_classic`. Its backing image is
+  flagged deprecated in `images.yaml` ("unused by any worker -- slated for
+  removal"); prefer `telsim` for new MS-creation use (see above).
 """
 
 from __future__ import annotations
@@ -215,12 +224,13 @@ telsim = define_cab(
     "simms telsim",
     images.SIMMS,
     _TELSIM_FIELDS,
-    # telsim writes noise into column in place -- re-declare ms as an
-    # output so a dependent step can chain onto it.
+    # telsim creates `ms` fresh (see module docstring) -- re-declare it as
+    # an output (same-named passthrough of the input path) so a dependent
+    # step can chain onto the newly-created MS.
     outputs={"ms": ("MS", False, None)},
     field_meta=_TELSIM_FIELD_META,
     policies=Policies(),
-    info="simms telsim: simulate telescope noise/sensitivity (simms 3.0)",
+    info="simms telsim: simulate a telescope MS from scratch, optionally with noise (simms 3.0)",
 )
 
 _SIMMS_CLASSIC_FIELDS: dict[str, tuple[str, bool, object]] = {
@@ -327,49 +337,124 @@ simms_classic = define_cab(
 )
 
 # `simms` is a click *chained* multicommand (`simms COMMAND [ARGS] COMMAND
-# [ARGS] ...`), so `primary-beam`'s action selector (`tag-ms`) is a trailing
-# *positional* argument that must come AFTER primary-beam's options -- putting
-# `tag-ms` before the options ends the sub-command early and the flags leak
-# back to the top-level `simms` parser ("No such option"). Hence the command
-# stops at `simms primary-beam` and `action` (default "tag-ms") is a positional
-# field, which `build_argv` emits last.
-_PRIMARY_BEAM_TAG_MS_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "ms": ("MS", True, None),
+# [ARGS] ...`), so `primary-beam`'s mode selector is a trailing *positional*
+# argument that must come AFTER primary-beam's options -- putting the mode
+# before the options ends the sub-command early and the flags leak back to
+# the top-level `simms` parser ("No such option"). Hence the command stops
+# at `simms primary-beam` and `mode` (required, no default -- matches the
+# real CLI, which has no default either) is a positional field, which
+# `build_argv` emits last.
+#
+# Real `simms primary-beam` has four modes (`to-fits`/`tag-ms`/`apply`/
+# `correct`), each using a subset of this flat field set (enforced by
+# simms's own runtime `_require()` checks per mode, not by this schema --
+# same "no choices=, no conditional-required" convention every other
+# multi-valued field in this file follows): `tag-ms` uses
+# `telescope_name_column`/`label`/`label_map`/`from_layout`; `apply`/
+# `correct` use `beam_pattern`/`beam_band`/`beam_pa_step`/`ascii_sky`/
+# `fits_sky`/`output`/`field_id`/`spw_id` (`correct` additionally uses
+# `pb_cutoff`); `to-fits` uses `beam_pattern`/`beam_band`/`output`/
+# `pixel_size`/`npix`/`start_freq`/`chan_width`/`nchan`/`nworkers`.
+_PRIMARY_BEAM_FIELDS: dict[str, tuple[str, bool, object]] = {
+    "mode": ("str", True, None),
+    "beam_pattern": ("str", False, None),
+    "beam_band": ("str", False, "L"),
+    "beam_pa_step": ("float", False, 1.0),
+    "ms": ("MS", False, None),
+    "fits_sky": ("File", False, None),
+    "ascii_sky": ("File", False, None),
+    "output": ("File", False, None),
     "telescope_name_column": ("str", False, "TELESCOPE_NAME"),
     "label": ("str", False, None),
     "label_map": ("File", False, None),
     "from_layout": ("str", False, None),
-    "action": ("str", False, "tag-ms"),
+    "pb_cutoff": ("float", False, 0.1),
+    "field_id": ("int", False, 0),
+    "spw_id": ("int", False, 0),
+    "pixel_size": ("str", False, "1arcmin"),
+    "npix": ("int", False, 256),
+    "start_freq": ("str", False, None),
+    "chan_width": ("str", False, None),
+    "nchan": ("int", False, None),
+    "nworkers": ("int", False, 4),
 }
 
-_PRIMARY_BEAM_TAG_MS_FIELD_META: dict[str, ParamMeta] = {
-    "ms": ParamMeta(info="Measurement set whose ANTENNA table to tag"),
+_PRIMARY_BEAM_FIELD_META: dict[str, ParamMeta] = {
+    "mode": ParamMeta(
+        positional=True,
+        info="Operation to perform: to-fits/tag-ms/apply/correct (trailing positional -- see the comment above).",
+    ),
+    "beam_pattern": ParamMeta(
+        nom_de_guerre="beam-pattern",
+        info="Beam model: a cosine-taper CSV path, a built-in name (e.g. MKAT-AA-L-JIM-2020), a band "
+        "shorthand (L/UHF), or a FITS beam cube (.fits). Used by to-fits/apply/correct; required for "
+        "those modes (enforced by simms itself, not this schema).",
+    ),
+    "beam_band": ParamMeta(
+        nom_de_guerre="beam-band", info="Default band for a built-in beam when beam-pattern omits one."
+    ),
+    "beam_pa_step": ParamMeta(
+        nom_de_guerre="beam-pa-step", info="Parallactic-angle sampling step (degrees) for the time-averaged beam."
+    ),
+    "ms": ParamMeta(
+        info="Measurement set (time/PA range, array position, frequencies). Required for tag-ms/apply/correct."
+    ),
+    "fits_sky": ParamMeta(
+        nom_de_guerre="fits-sky",
+        info="Input FITS image sky model (apply/correct). Exactly one of fits-sky/ascii-sky is required "
+        "for those modes.",
+    ),
+    "ascii_sky": ParamMeta(
+        nom_de_guerre="ascii-sky",
+        info="Input ASCII component sky model (apply/correct). Exactly one of fits-sky/ascii-sky is "
+        "required for those modes.",
+    ),
+    "output": ParamMeta(info="Output path -- FITS beam (to-fits) or beamed/corrected sky model (apply/correct)."),
     "telescope_name_column": ParamMeta(
         nom_de_guerre="telescope-name-column",
-        info="Name of the ANTENNA-table column to store the per-antenna telescope-name labels in.",
+        info="ANTENNA-table column holding the per-antenna telescope/type label (tag-ms).",
     ),
-    "label": ParamMeta(info="Apply a single telescope-name label uniformly to all antennas."),
+    "label": ParamMeta(info="Single telescope-name label applied to all antennas (tag-ms)."),
     "label_map": ParamMeta(
-        nom_de_guerre="label-map",
-        info="YAML file mapping antenna names to telescope-name labels.",
+        nom_de_guerre="label-map", info="YAML mapping antenna NAME -> telescope-name label (tag-ms)."
     ),
     "from_layout": ParamMeta(
         nom_de_guerre="from-layout",
-        info="Name of a simms layout; per-antenna telescope names are matched against the MS antenna names.",
+        info="simms layout whose per-antenna telescope_name is matched to the MS antenna names (tag-ms).",
     ),
-    "action": ParamMeta(
-        positional=True,
-        info="primary-beam action selector (trailing positional); 'tag-ms' tags the ANTENNA table.",
+    "pb_cutoff": ParamMeta(
+        nom_de_guerre="pb-cutoff",
+        info="In correct mode, drop sources whose averaged beam value falls below this level.",
     ),
+    "field_id": ParamMeta(
+        nom_de_guerre="field-id", info="FIELD_ID whose phase centre and time span define the beam (apply/correct)."
+    ),
+    "spw_id": ParamMeta(
+        nom_de_guerre="spw-id", info="Spectral-window (DATA_DESC_ID) whose frequencies define the beam (apply/correct)."
+    ),
+    "pixel_size": ParamMeta(
+        nom_de_guerre="pixel-size", info='Angular pixel size for the to-fits grid, e.g. "1arcmin" or "0.02deg".'
+    ),
+    "npix": ParamMeta(info="Number of pixels per side for the to-fits grid."),
+    "start_freq": ParamMeta(
+        nom_de_guerre="start-freq", info="Start frequency of the to-fits cube. Defaults to the beam's own range."
+    ),
+    "chan_width": ParamMeta(
+        nom_de_guerre="chan-width", info="Channel width of the to-fits cube. Defaults to spanning --nchan."
+    ),
+    "nchan": ParamMeta(info="Number of output channels in the to-fits cube. Defaults to the beam's own tabulation."),
+    "nworkers": ParamMeta(info="Number of worker threads."),
 }
 
 primary_beam = define_cab(
     "simms-primary-beam",
     "simms primary-beam",
     images.SIMMS,
-    _PRIMARY_BEAM_TAG_MS_FIELDS,
-    outputs={"ms": ("MS", False, None)},
-    field_meta=_PRIMARY_BEAM_TAG_MS_FIELD_META,
+    _PRIMARY_BEAM_FIELDS,
+    # tag-ms echoes `ms` back; apply/correct write to `output` -- both are
+    # real same-named passthrough outputs (no `implicit=` needed).
+    outputs={"ms": ("MS", False, None), "output": ("File", False, None)},
+    field_meta=_PRIMARY_BEAM_FIELD_META,
     policies=Policies(),
-    info="simms primary-beam tag-ms: tag the MS ANTENNA table with per-antenna telescope-name labels (simms 3.0)",
+    info="simms primary-beam: PB utilities -- to-fits/tag-ms/apply/correct (simms 3.0)",
 )
