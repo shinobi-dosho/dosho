@@ -143,24 +143,42 @@ def test_ragavi_gains_registered_and_passes_gain_flags():
 def test_simms_primary_beam_tag_ms_flags_and_passthrough_output():
     cab = dosho.get("simms-primary-beam")
     assert cab.name == "simms-primary-beam"
-    # `simms` is a chained multicommand: the action ("tag-ms") is a trailing
+    # `simms` is a chained multicommand: the mode ("tag-ms") is a trailing
     # positional emitted AFTER primary-beam's options, so it is NOT part of the
     # command string (see the cab's own comment).
     assert cab.command == "simms primary-beam"
     assert cab.image == dosho.get("simms-skysim").image  # same simms 3.0 binary
-    # model_dump() fills the `action` default ("tag-ms"), mirroring dispatch's
-    # _prepare_inputs (which build_argv actually receives at runtime).
+    # `mode` has no default (matches the real CLI, a required positional) --
+    # pass it explicitly, mirroring dispatch's _prepare_inputs (which
+    # build_argv actually receives at runtime).
     prepared = cab.inputs_model(
-        ms="/x.ms", telescope_name_column="TEL", from_layout="meerkat"
+        mode="tag-ms", ms="/x.ms", telescope_name_column="TEL", from_layout="meerkat"
     ).model_dump()
     argv = build_argv(cab, prepared)
     assert argv[:2] == ["simms", "primary-beam"]
-    assert argv[-1] == "tag-ms"  # action positional, after the options
+    assert argv[-1] == "tag-ms"  # mode positional, after the options
     assert "--ms" in argv  # tag-ms takes --ms, not a positional
     assert "--telescope-name-column" in argv
     assert "--from-layout" in argv
-    assert argv.index("--from-layout") < argv.index("tag-ms")  # options precede the action
+    assert argv.index("--from-layout") < argv.index("tag-ms")  # options precede the mode
     assert "ms" in cab.outputs_model.model_fields  # passthrough output
+
+
+def test_simms_primary_beam_correct_mode_flags_and_output_field():
+    cab = dosho.get("simms-primary-beam")
+    prepared = cab.inputs_model(
+        mode="correct",
+        ms="/x.ms",
+        ascii_sky="/x.lsm",
+        beam_pattern="MKAT-AA-L-JIM-2020",
+        output="/x.intrinsic.lsm",
+    ).model_dump()
+    argv = build_argv(cab, prepared)
+    assert argv[-1] == "correct"  # mode positional, after the options
+    assert "--beam-pattern" in argv
+    assert "--ascii-sky" in argv
+    assert "--output" in argv
+    assert "output" in cab.outputs_model.model_fields  # passthrough output
 
 
 def test_simms_classic_is_a_genuinely_different_tool_and_image():

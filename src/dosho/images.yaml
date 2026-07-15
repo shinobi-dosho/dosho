@@ -45,9 +45,9 @@ images:
     name: simms
     source: "https://github.com/wits-cfa/simms"
     build:
-      version: "3.0b3"
+      version: "3.0.0"
       base: BASE_ASTRO
-      package: "simms==3.0b3"
+      package: "simms==3.0.0"
       cmd: "simms --help"
       dockerfile: pip/Dockerfile
 
