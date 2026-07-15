@@ -1828,6 +1828,10 @@ CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
      - Type
      - Default
      - Description
+   * - ``parset``
+     - ``Path | None``
+     - ``None``
+     - \-
    * - ``data_ms``
      - ``Path``
      - *required*
@@ -2645,6 +2649,10 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - Type
      - Default
      - Description
+   * - ``parset``
+     - ``Path | None``
+     - ``None``
+     - \-
    * - ``data_ms``
      - ``list[Path] | None``
      - ``None``
@@ -5927,6 +5935,10 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - Type
      - Default
      - Description
+   * - ``parset``
+     - ``Path | None``
+     - ``None``
+     - \-
    * - ``vis_data_ms_name``
      - ``str | None``
      - ``None``
@@ -8018,6 +8030,10 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
      - Type
      - Default
      - Description
+   * - ``parset``
+     - ``Path | None``
+     - ``None``
+     - \-
    * - ``input_ms_path``
      - ``Path``
      - *required*
