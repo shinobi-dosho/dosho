@@ -681,7 +681,7 @@ Estimate imaging sensitivity for a proposed weighting/selection, without actuall
      - Default
      - Description
    * - ``vis``
-     - ``list``
+     - ``list[str]``
      - *required*
      - \-
    * - ``selectdata``
@@ -845,7 +845,7 @@ Apply an accumulated list of calibration tables to `vis`.
      - *required*
      - \-
    * - ``gaintable``
-     - ``list``
+     - ``list[Path]``
      - *required*
      - \-
    * - ``field``
@@ -1643,7 +1643,7 @@ Concatenate several MSs into one (additive: appends if `concatvis` already exist
      - Default
      - Description
    * - ``vis``
-     - ``list``
+     - ``list[Path]``
      - *required*
      - \-
    * - ``concatvis``
@@ -4042,7 +4042,7 @@ eidos: create a primary beam model of MeerKAT (https://github.com/ratt-ru/eidos)
      - ``None``
      - \-
    * - ``freq``
-     - ``list``
+     - ``list[float]``
      - *required*
      - \-
    * - ``coeff``
@@ -4964,7 +4964,7 @@ Bootstrap the flux-density scale from standard calibrators.
      - *required*
      - \-
    * - ``reference``
-     - ``list``
+     - ``list[str]``
      - *required*
      - \-
    * - ``transfer``
@@ -6520,7 +6520,7 @@ mosaic-queen: FITS image mosaicking (https://github.com/caracal-pipeline/mosaic-
      - *required*
      - \-
    * - ``target_images``
-     - ``list``
+     - ``list[Path]``
      - *required*
      - \-
    * - ``name``
@@ -7068,7 +7068,7 @@ msutils sumcols: sum (or, with --subtract, difference) MS columns into a new col
      - *required*
      - \-
    * - ``cols``
-     - ``list``
+     - ``list[str]``
      - *required*
      - \-
    * - ``out``
@@ -8467,7 +8467,7 @@ ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)
      - Default
      - Description
    * - ``table``
-     - ``list``
+     - ``list[Path]``
      - *required*
      - \-
    * - ``ant``
@@ -9143,7 +9143,7 @@ Remove CASA tables cleanly (use this instead of `rm -rf`).
      - Default
      - Description
    * - ``tablenames``
-     - ``list``
+     - ``list[str]``
      - *required*
      - \-
 
@@ -9170,7 +9170,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - Default
      - Description
    * - ``vis``
-     - ``list``
+     - ``list[str]``
      - *required*
      - \-
    * - ``imagename``
@@ -11525,7 +11525,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - Default
      - Description
    * - ``vis``
-     - ``list``
+     - ``list[str]``
      - *required*
      - \-
    * - ``imagename``
@@ -12681,7 +12681,7 @@ Concatenate several MSs into one multi-MS, without copying the underlying data (
      - Default
      - Description
    * - ``vis``
-     - ``list``
+     - ``list[Path]``
      - *required*
      - \-
    * - ``concatvis``
@@ -12825,7 +12825,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Default
      - Description
    * - ``ms``
-     - ``list``
+     - ``list[Path]``
      - *required*
      - \-
    * - ``prefix``

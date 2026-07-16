@@ -15,6 +15,7 @@ underlying ``.step``. ``_schema_obj`` resolves whichever it is.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -48,8 +49,23 @@ def _summary(info: str | None) -> str:
 
 
 def _type_name(annotation: Any) -> str:
-    name = getattr(annotation, "__name__", None) or str(annotation)
-    return name.replace("typing.", "").replace("pathlib.", "")
+    """Version-stable rendering of a field annotation. `__name__` is only
+    trusted for plain classes: for parameterized/union annotations it
+    varies by Python version (3.10 presents `list[X] | None` as
+    `typing.Optional[list[X]]`, whose `__name__` is just "Optional"),
+    and the catalog text must not depend on which interpreter generated
+    it -- the committed copy is diffed against a fresh regeneration by
+    the freshness gates (CI, pre-commit, pytest). `Optional[X]` is
+    normalised to the `X | None` spelling 3.11+ produces natively.
+    """
+    # The __args__ guard matters on <=3.10, where a parameterized generic
+    # like `list[Path]` still passes isinstance(..., type) (its __name__ is
+    # a bare "list"); 3.11+ made those fail the isinstance check.
+    if isinstance(annotation, type) and not getattr(annotation, "__args__", None):
+        return annotation.__name__
+    text = str(annotation).replace("typing.", "").replace("pathlib.", "")
+    match = re.fullmatch(r"Optional\[(.*)\]", text)
+    return f"{match.group(1)} | None" if match else text
 
 
 def _rst_cell(text: str) -> str:
