@@ -87,6 +87,18 @@ discarding whatever the caller passed -- which is exactly what happens if
 `ms`'s own `field_meta` entry (the real positional input) picks up an
 `implicit`, whether or not a same-named or different-named output field
 also references it.
+
+**Output hygiene**: every pystep body starts with `_quiet_casa(ctx)` (see
+its docstring), so CASA's `casa-<timestamp>.log` cwd junk is prevented at
+the source rather than mopped up after. None of these pysteps sets
+`sandbox=True` on its own scope, deliberately: several tasks take
+`str`-typed side-output paths that are *not* declared output fields
+(`flagdata`'s `outfile`, `fluxscale`'s `listfile`, ...), and a sandboxed
+run only lets declared outputs survive -- forcing the sandbox here would
+silently delete those files. Promoting them to real declared outputs
+(after which per-scope sandboxing becomes safe) is a follow-up audit;
+until then a caller/recipe/config that enables sandboxing does so knowing
+its own parameter usage.
 """
 
 from __future__ import annotations
@@ -109,6 +121,48 @@ def _normalize_caltables(
     expect, defaulting `None` to an empty list.
     """
     return [str(g) for g in (gaintable or [])], gainfield or [], interp or []
+
+
+def _quiet_casa(ctx) -> None:
+    """Stop CASA littering the working directory with `casa-<timestamp>.log`
+    (stdout/stderr are captured on the `StepResult` anyway, so the file is
+    pure junk). Called as the first statement of every pystep body here,
+    *before* its `ctx.import_func(..., "casatasks")` -- the log file is
+    created as an import side effect, so redirecting after the fact can only
+    silence it, not prevent it.
+
+    Two layers, both best-effort:
+
+    * a `casaconfig` site-config file (`nologfile = True`, plus telemetry/
+      crashreporter off -- more `~/.casa` droppings) pointed at via
+      `$CASASITECONFIG` before the first `casatasks` import, so no log file
+      is ever created (CASA >= 6.5; the pinned CASA6 image is 6.7);
+    * `casalog.setlogfile(os.devnull)` after import, for any CASA that
+      ignored the site config -- the stray file then still appears but stays
+      empty.
+
+    Runs inside the container (the runner loads only this source file, with
+    the `dosho` package stubbed -- see `shinobi.steps.pyfunc`), so it uses
+    nothing but the stdlib and `ctx`: local imports, no dosho helpers.
+    `casaplotms.py` carries its own copy for exactly that reason -- a
+    cross-module import of this function would silently resolve to the
+    in-container stub and do nothing.
+    """
+    import os
+    import tempfile
+
+    if "CASASITECONFIG" not in os.environ:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix="_casasiteconfig.py", delete=False
+        ) as config:
+            config.write(
+                "nologfile = True\n"
+                "telemetry_enabled = False\n"
+                "crashreporter_enabled = False\n"
+            )
+        os.environ["CASASITECONFIG"] = config.name
+    casalog = ctx.import_func("casalog", "casatasks")
+    casalog.setlogfile(os.devnull)
 
 
 class ListobsOutputs(BaseModel):
@@ -168,6 +222,7 @@ def listobs(
     Returns:
         `ListobsOutputs` with the written `listfile`.
     """
+    _quiet_casa(ctx)
     listobs_fn = ctx.import_func("listobs", "casatasks")
     listobs_fn(
         vis=str(vis),
@@ -332,6 +387,7 @@ def mstransform(
     Returns:
         `MstransformOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     mstransform_fn = ctx.import_func("mstransform", "casatasks")
     mstransform_fn(
         vis=str(vis),
@@ -429,6 +485,7 @@ def fixvis(
     Returns:
         `FixvisOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     fixvis_fn = ctx.import_func("fixvis", "casatasks")
     fixvis_fn(
         vis=str(vis),
@@ -469,6 +526,7 @@ def clearcal(
     Returns:
         `ClearcalOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     clearcal_fn = ctx.import_func("clearcal", "casatasks")
     clearcal_fn(vis=str(vis), field=field, spw=spw, intent=intent, addmodel=addmodel)
     return ClearcalOutputs(vis=vis)
@@ -508,6 +566,7 @@ def initweights(
     Returns:
         `InitweightsOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     initweights_fn = ctx.import_func("initweights", "casatasks")
     initweights_fn(
         vis=str(vis),
@@ -723,6 +782,7 @@ def flagdata(
     Returns:
         `FlagdataOutputs` echoing `vis`, plus `summary` when `mode="summary"`.
     """
+    _quiet_casa(ctx)
     flagdata_fn = ctx.import_func("flagdata", "casatasks")
     result = flagdata_fn(
         vis=str(vis),
@@ -872,6 +932,7 @@ def setjy(
     Returns:
         `SetjyOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     setjy_fn = ctx.import_func("setjy", "casatasks")
     setjy_fn(
         vis=str(vis),
@@ -1004,6 +1065,7 @@ def gaincal(
     Returns:
         `GaincalOutputs` with the solved `caltable`.
     """
+    _quiet_casa(ctx)
     gaincal_fn = ctx.import_func("gaincal", "casatasks")
     gaintable_s, gainfield_s, interp_s = _normalize_caltables(gaintable, gainfield, interp)
     gaincal_fn(
@@ -1125,6 +1187,7 @@ def polcal(
     Returns:
         `PolcalOutputs` with the solved `caltable`.
     """
+    _quiet_casa(ctx)
     polcal_fn = ctx.import_func("polcal", "casatasks")
     gaintable_s, gainfield_s, interp_s = _normalize_caltables(gaintable, gainfield, interp)
     polcal_fn(
@@ -1255,6 +1318,7 @@ def bandpass(
     Returns:
         `BandpassOutputs` with the solved `caltable`.
     """
+    _quiet_casa(ctx)
     bandpass_fn = ctx.import_func("bandpass", "casatasks")
     gaintable_s, gainfield_s, interp_s = _normalize_caltables(gaintable, gainfield, interp)
     bandpass_fn(
@@ -1364,6 +1428,7 @@ def applycal(
     Returns:
         `ApplycalOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     applycal_fn = ctx.import_func("applycal", "casatasks")
     tables = [str(g) for g in gaintable]
     applycal_fn(
@@ -1452,6 +1517,7 @@ def fluxscale(
     Returns:
         `FluxscaleOutputs` with the written `fluxtable`.
     """
+    _quiet_casa(ctx)
     fluxscale_fn = ctx.import_func("fluxscale", "casatasks")
     fluxscale_fn(
         vis=str(vis),
@@ -1517,6 +1583,7 @@ def flagmanager(
         `FlagmanagerOutputs` echoing `vis`, plus `versionlist` when
         `mode="list"`.
     """
+    _quiet_casa(ctx)
     flagmanager_fn = ctx.import_func("flagmanager", "casatasks")
     result = flagmanager_fn(
         vis=str(vis), mode=mode, versionname=versionname, oldname=oldname, comment=comment, merge=merge
@@ -1581,6 +1648,7 @@ def flagcmd(
     Returns:
         `FlagcmdOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     flagcmd_fn = ctx.import_func("flagcmd", "casatasks")
     flagcmd_fn(
         vis=str(vis),
@@ -1631,6 +1699,7 @@ def msuvbinflag(
     Returns:
         `MsuvbinflagOutputs` echoing `binnedvis`.
     """
+    _quiet_casa(ctx)
     msuvbinflag_fn = ctx.import_func("msuvbinflag", "casatasks")
     msuvbinflag_fn(binnedvis=str(binnedvis), method=method, nsigma=nsigma, doplot=doplot)
     return MsuvbinflagOutputs(binnedvis=binnedvis)
@@ -1704,6 +1773,7 @@ def accor(
     Returns:
         `AccorOutputs` with the solved `caltable`.
     """
+    _quiet_casa(ctx)
     accor_fn = ctx.import_func("accor", "casatasks")
     gaintable_s, gainfield_s, interp_s = _normalize_caltables(gaintable, gainfield, interp)
     accor_fn(
@@ -1763,6 +1833,7 @@ def appendantab(
     Returns:
         `AppendantabOutputs` with the written `outvis`.
     """
+    _quiet_casa(ctx)
     appendantab_fn = ctx.import_func("appendantab", "casatasks")
     appendantab_fn(
         vis=str(vis),
@@ -1837,6 +1908,7 @@ def blcal(
     Returns:
         `BlcalOutputs` with the solved `caltable`.
     """
+    _quiet_casa(ctx)
     blcal_fn = ctx.import_func("blcal", "casatasks")
     gaintable_s, gainfield_s, interp_s = _normalize_caltables(gaintable, gainfield, interp)
     blcal_fn(
@@ -1898,6 +1970,7 @@ def defintent(
     Returns:
         `DefintentOutputs` with `outputvis` if given, else `vis`.
     """
+    _quiet_casa(ctx)
     defintent_fn = ctx.import_func("defintent", "casatasks")
     defintent_fn(
         vis=str(vis), intent=intent, mode=mode, outputvis=outputvis, scan=scan, field=field, obsid=obsid
@@ -1990,6 +2063,7 @@ def fringefit(
     Returns:
         `FringefitOutputs` with the solved `caltable`.
     """
+    _quiet_casa(ctx)
     fringefit_fn = ctx.import_func("fringefit", "casatasks")
     gaintable_s, gainfield_s, interp_s = _normalize_caltables(gaintable, gainfield, interp)
     fringefit_fn(
@@ -2081,6 +2155,7 @@ def gencal(
     Returns:
         `GencalOutputs` with the written `caltable`.
     """
+    _quiet_casa(ctx)
     gencal_fn = ctx.import_func("gencal", "casatasks")
     gencal_fn(
         vis=str(vis),
@@ -2141,6 +2216,7 @@ def getantposalma(
     Returns:
         `GetantposalmaOutputs` with the written `outfile`.
     """
+    _quiet_casa(ctx)
     getantposalma_fn = ctx.import_func("getantposalma", "casatasks")
     getantposalma_fn(
         outfile=str(outfile),
@@ -2193,6 +2269,7 @@ def getcalmodvla(
     Returns:
         `GetcalmodvlaOutputs` with the written `outfile`.
     """
+    _quiet_casa(ctx)
     getcalmodvla_fn = ctx.import_func("getcalmodvla", "casatasks")
     getcalmodvla_fn(
         outfile=str(outfile),
@@ -2245,6 +2322,7 @@ def pccor(
     Returns:
         `PccorOutputs` with the solved `pccor_caltable`.
     """
+    _quiet_casa(ctx)
     pccor_fn = ctx.import_func("pccor", "casatasks")
     pccor_fn(
         vis=str(vis),
@@ -2290,6 +2368,7 @@ def polfromgain(
     Returns:
         `PolfromgainOutputs` with `caltable` if one was written.
     """
+    _quiet_casa(ctx)
     polfromgain_fn = ctx.import_func("polfromgain", "casatasks")
     polfromgain_fn(vis=str(vis), tablein=str(tablein), caltable=caltable, paoffset=paoffset, minpacov=minpacov)
     return PolfromgainOutputs(caltable=Path(caltable) if caltable else None)
@@ -2325,6 +2404,7 @@ def rerefant(
         `RerefantOutputs` with the written `caltable` (or `tablein`, if
         `caltable` was left empty).
     """
+    _quiet_casa(ctx)
     rerefant_fn = ctx.import_func("rerefant", "casatasks")
     rerefant_fn(vis=str(vis), tablein=str(tablein), caltable=caltable, refantmode=refantmode, refant=refant)
     return RerefantOutputs(caltable=Path(caltable) if caltable else tablein)
@@ -2363,6 +2443,7 @@ def smoothcal(
         `SmoothcalOutputs` with the written `caltable` (or `tablein`, if
         `caltable` was left empty).
     """
+    _quiet_casa(ctx)
     smoothcal_fn = ctx.import_func("smoothcal", "casatasks")
     smoothcal_fn(
         vis=str(vis),
@@ -2444,6 +2525,7 @@ def wvrgcal(
     Returns:
         `WvrgcalOutputs` with the written `caltable`.
     """
+    _quiet_casa(ctx)
     wvrgcal_fn = ctx.import_func("wvrgcal", "casatasks")
     wvrgcal_fn(
         vis=str(vis),
@@ -2536,6 +2618,7 @@ def apparentsens(
     Returns:
         `ApparentsensOutputs` with the computed `sensitivity` dict.
     """
+    _quiet_casa(ctx)
     apparentsens_fn = ctx.import_func("apparentsens", "casatasks")
     result = apparentsens_fn(
         vis=vis,
@@ -2647,6 +2730,7 @@ def deconvolve(
     Returns:
         `DeconvolveOutputs` echoing `imagename`.
     """
+    _quiet_casa(ctx)
     deconvolve_fn = ctx.import_func("deconvolve", "casatasks")
     deconvolve_fn(
         imagename=imagename,
@@ -2704,6 +2788,7 @@ def delmod(ctx, vis: Path, otf: bool = True, field: str = "", scr: bool = False)
     Returns:
         `DelmodOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     delmod_fn = ctx.import_func("delmod", "casatasks")
     delmod_fn(vis=str(vis), otf=otf, field=field, scr=scr)
     return DelmodOutputs(vis=vis)
@@ -2741,6 +2826,7 @@ def feather(
     Returns:
         `FeatherOutputs` with the written `imagename`.
     """
+    _quiet_casa(ctx)
     feather_fn = ctx.import_func("feather", "casatasks")
     feather_fn(
         highres=str(highres),
@@ -2804,6 +2890,7 @@ def ft(
     Returns:
         `FtOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     ft_fn = ctx.import_func("ft", "casatasks")
     ft_fn(
         vis=str(vis),
@@ -2869,6 +2956,7 @@ def impbcor(
     Returns:
         `ImpbcorOutputs` with the written `outfile`.
     """
+    _quiet_casa(ctx)
     impbcor_fn = ctx.import_func("impbcor", "casatasks")
     impbcor_fn(
         imagename=str(imagename),
@@ -2927,6 +3015,7 @@ def makemask(
     Returns:
         `MakemaskOutputs` echoing `output`.
     """
+    _quiet_casa(ctx)
     makemask_fn = ctx.import_func("makemask", "casatasks")
     makemask_fn(
         mode=mode,
@@ -2990,6 +3079,7 @@ def predictcomp(
     Returns:
         `PredictcompOutputs` echoing `prefix`.
     """
+    _quiet_casa(ctx)
     predictcomp_fn = ctx.import_func("predictcomp", "casatasks")
     predictcomp_fn(
         objname=objname,
@@ -3058,6 +3148,7 @@ def widebandpbcor(
     Returns:
         `WidebandpbcorOutputs` echoing `imagename`.
     """
+    _quiet_casa(ctx)
     widebandpbcor_fn = ctx.import_func("widebandpbcor", "casatasks")
     widebandpbcor_fn(
         vis=str(vis),
@@ -3320,6 +3411,7 @@ def tclean(
         `TcleanOutputs` with the image family under `imagename`, plus
         `mutated_vis` when `savemodel != 'none'`.
     """
+    _quiet_casa(ctx)
     tclean_fn = ctx.import_func("tclean", "casatasks")
     tclean_fn(
         vis=vis,
@@ -3636,6 +3728,7 @@ def sdintimaging(
     Returns:
         `SdintimagingOutputs` with the image family under `imagename`.
     """
+    _quiet_casa(ctx)
     sdintimaging_fn = ctx.import_func("sdintimaging", "casatasks")
     sdintimaging_fn(
         vis=vis,
@@ -3760,6 +3853,7 @@ def clearstat(ctx) -> ClearstatOutputs:
     Returns:
         `ClearstatOutputs` (no fields).
     """
+    _quiet_casa(ctx)
     clearstat_fn = ctx.import_func("clearstat", "casatasks")
     clearstat_fn()
     return ClearstatOutputs()
@@ -3805,6 +3899,7 @@ def concat(
     Returns:
         `ConcatOutputs` with the written `concatvis`.
     """
+    _quiet_casa(ctx)
     concat_fn = ctx.import_func("concat", "casatasks")
     concat_fn(
         vis=[str(v) for v in vis],
@@ -3842,6 +3937,7 @@ def conjugatevis(
     Returns:
         `ConjugatevisOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     conjugatevis_fn = ctx.import_func("conjugatevis", "casatasks")
     conjugatevis_fn(vis=str(vis), spwlist=spwlist or "", outputvis=str(outputvis), overwrite=overwrite)
     return ConjugatevisOutputs(outputvis=outputvis)
@@ -3907,6 +4003,7 @@ def cvel(
     Returns:
         `CvelOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     cvel_fn = ctx.import_func("cvel", "casatasks")
     cvel_fn(
         vis=str(vis),
@@ -4002,6 +4099,7 @@ def cvel2(
     Returns:
         `Cvel2Outputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     cvel2_fn = ctx.import_func("cvel2", "casatasks")
     cvel2_fn(
         vis=str(vis),
@@ -4065,6 +4163,7 @@ def fixplanets(
     Returns:
         `FixplanetsOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     fixplanets_fn = ctx.import_func("fixplanets", "casatasks")
     fixplanets_fn(vis=str(vis), field=field, fixuvw=fixuvw, direction=direction, refant=refant, reftime=reftime)
     return FixplanetsOutputs(vis=vis)
@@ -4121,6 +4220,7 @@ def hanningsmooth(
     Returns:
         `HanningsmoothOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     hanningsmooth_fn = ctx.import_func("hanningsmooth", "casatasks")
     hanningsmooth_fn(
         vis=str(vis),
@@ -4194,6 +4294,7 @@ def msuvbin(
     Returns:
         `MsuvbinOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     msuvbin_fn = ctx.import_func("msuvbin", "casatasks")
     msuvbin_fn(
         vis=str(vis),
@@ -4272,6 +4373,7 @@ def partition(
     Returns:
         `PartitionOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     partition_fn = ctx.import_func("partition", "casatasks")
     partition_fn(
         vis=str(vis),
@@ -4337,6 +4439,7 @@ def phaseshift(
     Returns:
         `PhaseshiftOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     phaseshift_fn = ctx.import_func("phaseshift", "casatasks")
     phaseshift_fn(
         vis=str(vis),
@@ -4373,6 +4476,7 @@ def rmtables(ctx, tablenames: list[str]) -> RmtablesOutputs:
     Returns:
         `RmtablesOutputs` (no fields).
     """
+    _quiet_casa(ctx)
     rmtables_fn = ctx.import_func("rmtables", "casatasks")
     rmtables_fn(tablenames=tablenames)
     return RmtablesOutputs()
@@ -4435,6 +4539,7 @@ def split(
     Returns:
         `SplitOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     split_fn = ctx.import_func("split", "casatasks")
     split_fn(
         vis=str(vis),
@@ -4535,6 +4640,7 @@ def statwt(
     Returns:
         `StatwtOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     statwt_fn = ctx.import_func("statwt", "casatasks")
     statwt_fn(
         vis=str(vis),
@@ -4611,6 +4717,7 @@ def uvcontsub(
     Returns:
         `UvcontsubOutputs` with the written `outputvis`.
     """
+    _quiet_casa(ctx)
     uvcontsub_fn = ctx.import_func("uvcontsub", "casatasks")
     uvcontsub_fn(
         vis=str(vis),
@@ -4677,6 +4784,7 @@ def uvcontsub_old(
         `UvcontsubOldOutputs` with `contsub_vis` (always) and `cont_vis`
         (when `want_cont=True`).
     """
+    _quiet_casa(ctx)
     uvcontsub_old_fn = ctx.import_func("uvcontsub_old", "casatasks")
     uvcontsub_old_fn(
         vis=str(vis),
@@ -4746,6 +4854,7 @@ def uvmodelfit(
         `UvmodelfitOutputs` with the fitted `result` and `outfile` if one
         was written.
     """
+    _quiet_casa(ctx)
     uvmodelfit_fn = ctx.import_func("uvmodelfit", "casatasks")
     result = uvmodelfit_fn(
         vis=str(vis),
@@ -4788,6 +4897,7 @@ def uvsub(ctx, vis: Path, reverse: bool = False) -> UvsubOutputs:
     Returns:
         `UvsubOutputs` echoing `vis`.
     """
+    _quiet_casa(ctx)
     uvsub_fn = ctx.import_func("uvsub", "casatasks")
     uvsub_fn(vis=str(vis), reverse=reverse)
     return UvsubOutputs(vis=vis)
@@ -4838,6 +4948,7 @@ def virtualconcat(
         `VirtualconcatOutputs` with `concatvis`, plus `moved_vis` echoing
         the inputs when `keepcopy=False`.
     """
+    _quiet_casa(ctx)
     virtualconcat_fn = ctx.import_func("virtualconcat", "casatasks")
     virtualconcat_fn(
         vis=[str(v) for v in vis],

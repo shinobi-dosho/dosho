@@ -20,6 +20,32 @@ from pydantic import BaseModel
 from dosho import images
 
 
+def _quiet_casa(ctx) -> None:
+    """Verbatim copy of `dosho.cabs.casatasks._quiet_casa` (see that
+    docstring for the mechanism): prevent/neuter CASA's `casa-*.log` cwd
+    junk before the first CASA import of this process. Deliberately
+    duplicated rather than imported -- this function executes *inside the
+    container*, where the runner loads only this source file and stubs the
+    `dosho` package, so a cross-module import would silently resolve to a
+    do-nothing stub (see `shinobi.steps.pyfunc`).
+    """
+    import os
+    import tempfile
+
+    if "CASASITECONFIG" not in os.environ:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix="_casasiteconfig.py", delete=False
+        ) as config:
+            config.write(
+                "nologfile = True\n"
+                "telemetry_enabled = False\n"
+                "crashreporter_enabled = False\n"
+            )
+        os.environ["CASASITECONFIG"] = config.name
+    casalog = ctx.import_func("casalog", "casatasks")
+    casalog.setlogfile(os.devnull)
+
+
 class PlotmsOutputs(BaseModel):
     """Outputs of the `plotms` step."""
 
@@ -67,6 +93,7 @@ def plotms(
     Returns:
         `PlotmsOutputs` with the written `plotfile`.
     """
+    _quiet_casa(ctx)
     plotms_fn = ctx.import_func("plotms", "casaplotms")
     plotms_fn(
         vis=str(vis),

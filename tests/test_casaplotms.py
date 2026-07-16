@@ -68,3 +68,14 @@ def test_minimal_elevation_track_shape_wires_into_a_recipe():
         overwrite=True,
     )
     assert [s.name for s in recipe.steps] == ["plotelev"]
+
+
+def test_plotms_body_quiets_casa_logging_before_importing_plotms():
+    # Same hygiene rule as every casatasks pystep; casaplotms.py carries its
+    # own _quiet_casa copy because the in-container runner stubs the dosho
+    # package (a cross-module import would resolve to a do-nothing stub).
+    import inspect
+
+    src = inspect.getsource(plotms.func.__wrapped__)
+    assert "_quiet_casa(ctx)" in src
+    assert src.index("_quiet_casa(ctx)") < src.index("ctx.import_func(")

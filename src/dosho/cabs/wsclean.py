@@ -292,5 +292,15 @@ wsclean = define_cab(
     field_meta=_FIELD_META,
     policies=Policies(prefix="-", replace={"_": "-"}),
     output_patterns=_OUTPUT_PATTERNS,
+    # Sandboxed-run keep-glob (shinobi.sandbox): every file wsclean writes
+    # into its cwd is named `{prefix}-...` -- the declared single/MFS fields
+    # above plus the combinatorial per-band/per-interval/per-Stokes families
+    # that `_OUTPUT_PATTERNS` can only *name*, not resolve to paths (and
+    # `-save-source-list`'s `{prefix}-sources.txt`). This one glob makes the
+    # cab safe to run sandboxed without losing any of them; what it leaves
+    # behind (reordering temp files from an interrupted run, etc.) is exactly
+    # the junk a sandbox should mop. Sandboxing itself stays a caller/config
+    # decision -- a cab declares what must survive, not execution policy.
+    harvest=["{prefix}-*"],
     info="WSClean imager (https://wsclean.readthedocs.io)",
 )
