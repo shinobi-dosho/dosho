@@ -160,3 +160,69 @@ def test_a_pystep_wires_into_a_recipe_like_a_cab():
     recipe.add_step("listobs", dosho.get("listobs"), vis=recipe.inputs.ms, listfile=Path("obs.txt"))
     assert [s.name for s in recipe.steps] == ["listobs"]
     assert recipe.steps[0].wiring == {"vis": recipe.inputs.ms}
+
+
+def test_every_pystep_body_quiets_casa_logging_before_importing_casatasks():
+    """Output hygiene: each pystep must call `_quiet_casa(ctx)` *before* its
+    `ctx.import_func(..., "casatasks")` -- the casa-*.log is created as an
+    import side effect, so ordering is the whole point (see the module
+    docstring). Checked over every StepRef in the module, not just the
+    handful imported at the top of this file.
+    """
+    import inspect
+
+    from shinobi.steps.schema import StepRef
+
+    from dosho.cabs import casatasks as module
+
+    refs = [v for v in vars(module).values() if isinstance(v, StepRef)]
+    assert len(refs) >= 50  # the full audited task set, not a subset
+    for ref in refs:
+        src = inspect.getsource(ref.func.__wrapped__)
+        assert "_quiet_casa(ctx)" in src, ref.name
+        assert src.index("_quiet_casa(ctx)") < src.index("ctx.import_func("), ref.name
+
+
+def test_quiet_casa_writes_site_config_and_redirects_casalog():
+    import os
+
+    from dosho.cabs.casatasks import _quiet_casa
+
+    class FakeLog:
+        def __init__(self):
+            self.logfile = None
+
+        def setlogfile(self, path):
+            self.logfile = path
+
+    class FakeCtx:
+        def __init__(self):
+            self.log = FakeLog()
+
+        def import_func(self, name, module):
+            assert (name, module) == ("casalog", "casatasks")
+            return self.log
+
+    had = os.environ.pop("CASASITECONFIG", None)
+    config = None
+    try:
+        ctx = FakeCtx()
+        _quiet_casa(ctx)
+        config = os.environ["CASASITECONFIG"]
+        with open(config) as f:
+            content = f.read()
+        assert "nologfile = True" in content
+        assert "telemetry_enabled = False" in content
+        assert ctx.log.logfile == os.devnull
+        # idempotent: a second call must not clobber an existing config
+        _quiet_casa(FakeCtx())
+        assert os.environ["CASASITECONFIG"] == config
+    finally:
+        os.environ.pop("CASASITECONFIG", None)
+        if config is not None:
+            try:
+                os.remove(config)
+            except FileNotFoundError:
+                pass
+        if had is not None:
+            os.environ["CASASITECONFIG"] = had

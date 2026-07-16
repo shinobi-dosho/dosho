@@ -36,6 +36,8 @@ def define_cab(
     flavour: str = "binary",
     wranglers: dict[str, list[str]] | None = None,
     info: str | None = None,
+    sandbox: bool | None = None,
+    harvest: list[str] | None = None,
 ) -> Cab:
     """Build a `Cab` from a flat `{raw_param_name: (dtype, required,
     default)}` dict -- the shape a tool's own `--help`/docs naturally give
@@ -50,6 +52,13 @@ def define_cab(
     the auto-derived `nom_de_guerre`s; an explicit entry that doesn't set
     its own `nom_de_guerre` keeps the auto-derived one rather than losing
     it.
+
+    `sandbox`/`harvest` pass straight through to the `Cab` (see
+    stimela-ninja's `shinobi.sandbox` and the fields on `Scope`): `harvest`
+    declares the keep-globs for dynamically-named output *files* a
+    sandboxed run must rescue (e.g. wsclean's `"{prefix}-*"` family) --
+    note this is a different thing from `output_patterns`, which match
+    dynamic output parameter *names* for wiring validation only.
     """
     resolved_fields: dict[str, tuple[str, bool, Any]] = {}
     resolved_meta: dict[str, ParamMeta] = {}
@@ -81,4 +90,6 @@ def define_cab(
         input_patterns=input_patterns or [],
         output_patterns=output_patterns or [],
         wranglers=wranglers or {},
+        sandbox=sandbox,
+        harvest=harvest or [],
     )

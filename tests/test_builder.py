@@ -73,3 +73,20 @@ def test_policies_pass_through():
     )
     assert cab.policies.key_value is True
     assert cab.policies.repeat == "[]"
+
+
+def test_sandbox_and_harvest_pass_through():
+    cab = define_cab(
+        "tool",
+        "tool",
+        "quay.io/example/tool:1.0",
+        {"prefix": ("str", True, None)},
+        sandbox=True,
+        harvest=["{prefix}-*"],
+    )
+    assert cab.sandbox is True
+    assert cab.harvest == ["{prefix}-*"]
+    # unset stays None (defer to recipe/config), not False
+    plain = define_cab("t2", "t2", "quay.io/example/tool:1.0", {})
+    assert plain.sandbox is None
+    assert plain.harvest == []

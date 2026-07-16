@@ -88,3 +88,14 @@ def test_output_patterns_validate_combinatorial_names_without_resolving_them():
     assert cab.match_output_pattern("dirty.per-band") is not None
     assert cab.match_output_pattern("restored.i.per-interval.mfs") is not None
     assert cab.match_output_pattern("totally-unknown-shape") is None
+
+
+def test_harvest_declares_the_full_prefix_family():
+    # Everything wsclean writes into its cwd is `{prefix}-...` -- the
+    # declared single/MFS outputs plus the per-band/per-interval/per-Stokes
+    # combinations `output_patterns` can only name. This keep-glob is what
+    # makes the cab safe to run sandboxed (shinobi.sandbox) without losing
+    # any of them; sandboxing itself is deliberately NOT forced on the cab.
+    cab = _cab()
+    assert cab.harvest == ["{prefix}-*"]
+    assert cab.sandbox is None
