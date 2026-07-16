@@ -109,6 +109,7 @@ own scope: a cab declares what must survive, not execution policy.
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import shinobi
@@ -253,6 +254,16 @@ def listobs(
     return ListobsOutputs(listfile=listfile)
 
 
+def _remove_existing_output(outputvis: Path | str) -> None:
+    """Delete a pre-existing output MS -- and its `.flagversions` twin,
+    which would otherwise pair stale flag versions with the fresh MS --
+    so the calling task can rewrite it (see the `overwrite` convenience
+    parameter on `mstransform`/`fixvis`)."""
+    for stale in (Path(outputvis), Path(f"{outputvis}.flagversions")):
+        if stale.exists():
+            shutil.rmtree(stale)
+
+
 class MstransformOutputs(BaseModel):
     """Outputs of the `mstransform` step."""
 
@@ -313,6 +324,7 @@ def mstransform(
     denoising_lib: bool = True,
     nthreads: int = 1,
     niter: int = 1,
+    overwrite: bool = False,
 ) -> MstransformOutputs:
     """Split/combine/regrid an MS and optionally average in channel/time.
 
@@ -389,11 +401,20 @@ def mstransform(
         denoising_lib: Use the GSL denoising library instead of casacore.
         nthreads: OMP thread count for `douvcontsub`.
         niter: Re-weighted-linear-fit iteration count for `douvcontsub`.
+        overwrite: Delete a pre-existing `outputvis` (and its
+            `.flagversions` twin) before running. NOT a real CASA
+            parameter -- the real task has no overwrite option and
+            unconditionally fails on an existing output; this
+            wrapper-level convenience is what lets a pipeline rerun be
+            idempotent. Default `False` keeps CASA's own
+            refuse-to-clobber behaviour.
 
     Returns:
         `MstransformOutputs` with the written `outputvis`.
     """
     _quiet_casa(ctx)
+    if overwrite:
+        _remove_existing_output(outputvis)
     mstransform_fn = ctx.import_func("mstransform", "casatasks")
     mstransform_fn(
         vis=str(vis),
@@ -468,6 +489,7 @@ def fixvis(
     phasecenter: str = "",
     distances: str = "",
     datacolumn: str = "all",
+    overwrite: bool = False,
 ) -> FixvisOutputs:
     """Recompute (u, v, w) and/or change the phase center.
 
@@ -487,11 +509,17 @@ def fixvis(
             refocusing.
         datacolumn: Which visibility column(s) a phase-center shift
             modifies.
+        overwrite: Delete a pre-existing `outputvis` (and its
+            `.flagversions` twin) before running. NOT a real CASA
+            parameter -- same wrapper-level rerun-idempotency convenience
+            as `mstransform`'s own `overwrite`.
 
     Returns:
         `FixvisOutputs` with the written `outputvis`.
     """
     _quiet_casa(ctx)
+    if overwrite:
+        _remove_existing_output(outputvis)
     fixvis_fn = ctx.import_func("fixvis", "casatasks")
     fixvis_fn(
         vis=str(vis),
