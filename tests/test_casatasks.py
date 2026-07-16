@@ -204,11 +204,13 @@ def test_quiet_casa_writes_site_config_and_redirects_casalog():
             return self.log
 
     had = os.environ.pop("CASASITECONFIG", None)
+    config = None
     try:
         ctx = FakeCtx()
         _quiet_casa(ctx)
         config = os.environ["CASASITECONFIG"]
-        content = open(config).read()
+        with open(config) as f:
+            content = f.read()
         assert "nologfile = True" in content
         assert "telemetry_enabled = False" in content
         assert ctx.log.logfile == os.devnull
@@ -217,5 +219,10 @@ def test_quiet_casa_writes_site_config_and_redirects_casalog():
         assert os.environ["CASASITECONFIG"] == config
     finally:
         os.environ.pop("CASASITECONFIG", None)
+        if config is not None:
+            try:
+                os.remove(config)
+            except FileNotFoundError:
+                pass
         if had is not None:
             os.environ["CASASITECONFIG"] = had
