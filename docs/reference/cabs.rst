@@ -94,19 +94,19 @@ Normalize visibilities based on auto-correlations (VLA/EVLA-era normalization fo
      - ``''``
      - \-
    * - ``gaintable``
-     - ``list[Path] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -689,31 +689,31 @@ Estimate imaging sensitivity for a proposed weighting/selection, without actuall
      - ``True``
      - \-
    * - ``field``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spw``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``intent``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``timerange``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``uvrange``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``antenna``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``scan``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``observation``
@@ -721,7 +721,7 @@ Estimate imaging sensitivity for a proposed weighting/selection, without actuall
      - ``''``
      - \-
    * - ``imsize``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``cell``
@@ -749,7 +749,7 @@ Estimate imaging sensitivity for a proposed weighting/selection, without actuall
      - ``0``
      - \-
    * - ``uvtaper``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -897,19 +897,19 @@ Apply an accumulated list of calibration tables to `vis`.
      - ``''``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``calwt``
-     - ``list[bool] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``parang``
@@ -1033,7 +1033,7 @@ Solve for a bandpass (per-channel gain) calibration table.
      - ``'B'``
      - \-
    * - ``smodel``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``corrdepflags``
@@ -1077,19 +1077,19 @@ Solve for a bandpass (per-channel gain) calibration table.
      - ``''``
      - \-
    * - ``gaintable``
-     - ``list[Path] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``parang``
@@ -1133,11 +1133,11 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - *required*
      - \-
    * - ``outfile_gaul``
-     - ``Path | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``outfile_srl``
-     - ``Path | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``catalog_format``
@@ -1145,7 +1145,7 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - ``'bbs'``
      - \-
    * - ``detection_image``
-     - ``Path | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``thresh_isl``
@@ -1157,11 +1157,11 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - ``5.0``
      - \-
    * - ``rms_box``
-     - ``tuple[int, int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``rms_map``
-     - ``bool | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``adaptive_rms_box``
@@ -1169,7 +1169,7 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - ``False``
      - \-
    * - ``trim_box``
-     - ``tuple[int, int, int, int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``flagging_opts``
@@ -1177,7 +1177,7 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - ``False``
      - \-
    * - ``flag_maxsize_bm``
-     - ``float | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spectralindex_do``
@@ -1193,11 +1193,11 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - ``False``
      - \-
    * - ``src_ra_dec``
-     - ``list[tuple[float, float]] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``src_radius_pix``
-     - ``float | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -1307,19 +1307,19 @@ Calculate a baseline-based (non-antenna-based) calibration solution.
      - ``False``
      - \-
    * - ``gaintable``
-     - ``list[Path] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``parang``
@@ -1671,7 +1671,7 @@ Concatenate several MSs into one (additive: appends if `concatvis` already exist
      - ``True``
      - \-
    * - ``visweightscale``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``forcesingleephemfield``
@@ -1719,7 +1719,7 @@ Change the sign of the phases in every visibility column.
      - *required*
      - \-
    * - ``spwlist``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``overwrite``
@@ -3781,7 +3781,7 @@ Image-domain-only minor-cycle deconvolution (no major cycle, no visibility gridd
      - ``'hogbom'``
      - \-
    * - ``scales``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``smallscalebias``
@@ -3805,7 +3805,7 @@ Image-domain-only minor-cycle deconvolution (no major cycle, no visibility gridd
      - ``True``
      - \-
    * - ``restoringbeam``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``niter``
@@ -3841,7 +3841,7 @@ Image-domain-only minor-cycle deconvolution (no major cycle, no visibility gridd
      - ``'user'``
      - \-
    * - ``mask``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``pbmask``
@@ -4236,6 +4236,10 @@ Recompute (u, v, w) and/or change the phase center.
      - ``str``
      - ``'all'``
      - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
+     - \-
 
 **Outputs**
 
@@ -4277,11 +4281,11 @@ Flagging based on batches of flag-commands, from a table, a file, or an SDM Flag
      - ``'table'``
      - \-
    * - ``inpfile``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``tablerows``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``reason``
@@ -4313,7 +4317,7 @@ Flagging based on batches of flag-commands, from a table, a file, or an SDM Flag
      - ``False``
      - \-
    * - ``rowlist``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``plotfile``
@@ -4429,7 +4433,7 @@ One generic wrapper covers every `mode` (`manual`/`list`/`clip`/ `quack`/`shadow
      - ``False``
      - \-
    * - ``inpfile``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``reason``
@@ -4441,7 +4445,7 @@ One generic wrapper covers every `mode` (`manual`/`list`/`clip`/ `quack`/`shadow
      - ``0.0``
      - \-
    * - ``clipminmax``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``clipoutside``
@@ -4959,7 +4963,7 @@ Bootstrap the flux-density scale from standard calibrators.
      - *required*
      - \-
    * - ``transfer``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``listfile``
@@ -4971,7 +4975,7 @@ Bootstrap the flux-density scale from standard calibrators.
      - ``False``
      - \-
    * - ``refspwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainthreshold``
@@ -5111,11 +5115,11 @@ Fringe-fit delay and rate (VLBI-style global fringe fitting).
      - ``100``
      - \-
    * - ``delaywindow``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``ratewindow``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``append``
@@ -5139,23 +5143,23 @@ Fringe-fit delay and rate (VLBI-style global fringe fitting).
      - ``''``
      - \-
    * - ``gaintable``
-     - ``list[Path] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``paramactive``
-     - ``list[bool] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``concatspws``
@@ -5235,7 +5239,7 @@ Fourier-transform a model image or component list into the MS's model representa
      - ``''``
      - \-
    * - ``model``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``nterms``
@@ -5391,7 +5395,7 @@ Solve for temporal gains from calibrator observations.
      - ``180.0``
      - \-
    * - ``smodel``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``calmode``
@@ -5403,7 +5407,7 @@ Solve for temporal gains from calibrator observations.
      - ``''``
      - \-
    * - ``rmsthresh``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``corrdepflags``
@@ -5423,19 +5427,19 @@ Solve for temporal gains from calibrator observations.
      - ``''``
      - \-
    * - ``gaintable``
-     - ``list[Path] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``parang``
@@ -5523,7 +5527,7 @@ Generate a calibration table of manually-specified values, for types without a d
      - ``''``
      - \-
    * - ``parameter``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``uniform``
@@ -5587,7 +5591,7 @@ Query ALMA's web service for antenna-position corrections and write them to a JS
      - ``'both_latest'``
      - \-
    * - ``hosts``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``firstintegration``
@@ -5663,7 +5667,7 @@ Query a VLA web service for a calibrator's brightness-distribution component lis
      - ``'0'``
      - \-
    * - ``hosts``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -5883,7 +5887,7 @@ Initialize weight-related columns in the MS.
      - ``'nyq'``
      - \-
    * - ``tsystable``
-     - ``Path | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
@@ -5895,7 +5899,7 @@ Initialize weight-related columns in the MS.
      - ``'linear,linear'``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``dowtsp``
@@ -6447,11 +6451,11 @@ Make and manipulate image masks (`mode='list'/'copy'/'expand'/ 'delete'/'setdefa
      - ``'list'``
      - \-
    * - ``inpimage``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``inpmask``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``output``
@@ -6463,11 +6467,11 @@ Make and manipulate image masks (`mode='list'/'copy'/'expand'/ 'delete'/'setdefa
      - ``False``
      - \-
    * - ``inpfreqs``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``outfreqs``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -6680,7 +6684,7 @@ Split/combine/regrid an MS and optionally average in channel/time.
      - ``False``
      - \-
    * - ``tileshape``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``separationaxis``
@@ -6810,6 +6814,10 @@ Split/combine/regrid an MS and optionally average in channel/time.
    * - ``niter``
      - ``int``
      - ``1``
+     - \-
+   * - ``overwrite``
+     - ``bool``
+     - ``False``
      - \-
 
 **Outputs**
@@ -7169,7 +7177,7 @@ Grid visibility data onto a defined uniform uv-grid, stored as an MS (additive: 
      - ``''``
      - \-
    * - ``imsize``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``cell``
@@ -7750,7 +7758,7 @@ Determine instrumental polarization calibration. A genuinely different CASA task
      - ``3.0``
      - \-
    * - ``smodel``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``append``
@@ -7766,19 +7774,19 @@ Determine instrumental polarization calibration. A genuinely different CASA task
      - ``''``
      - \-
    * - ``gaintable``
-     - ``list[Path] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``gainfield``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interp``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spwmap``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -9187,27 +9195,27 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``True``
      - \-
    * - ``field``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spw``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``timerange``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``uvrange``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``antenna``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``scan``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``observation``
@@ -9215,7 +9223,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``''``
      - \-
    * - ``intent``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``datacolumn``
@@ -9223,7 +9231,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``'corrected'``
      - \-
    * - ``imsize``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``cell``
@@ -9275,7 +9283,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``'radio'``
      - \-
    * - ``restfreq``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interpolation``
@@ -9339,7 +9347,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``360.0``
      - \-
    * - ``pointingoffsetsigdev``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``pblimit``
@@ -9351,7 +9359,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``'hogbom'``
      - \-
    * - ``scales``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``nterms``
@@ -9367,7 +9375,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``True``
      - \-
    * - ``restoringbeam``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``pbcor``
@@ -9391,7 +9399,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``0``
      - \-
    * - ``uvtaper``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``niter``
@@ -9443,7 +9451,7 @@ Joint deconvolution of interferometric visibilities and a single-dish image cube
      - ``'user'``
      - \-
    * - ``mask``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``pbmask``
@@ -9610,11 +9618,11 @@ Fill MODEL_DATA (or the model representation) for a calibrator.
      - ``'nearest'``
      - \-
    * - ``fluxdensity``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spix``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``reffreq``
@@ -9622,11 +9630,11 @@ Fill MODEL_DATA (or the model representation) for a calibrator.
      - ``'1GHz'``
      - \-
    * - ``polindex``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``polangle``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``rotmeas``
@@ -9634,7 +9642,7 @@ Fill MODEL_DATA (or the model representation) for a calibrator.
      - ``0.0``
      - \-
    * - ``fluxdict``
-     - ``dict | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``useephemdir``
@@ -10446,7 +10454,7 @@ Smooth an existing calibration table in time.
      - ``''``
      - \-
    * - ``field``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``smoothtype``
@@ -11462,7 +11470,7 @@ Compute and set visibility weights from the data's own variance, in place (WEIGH
      - ``False``
      - \-
    * - ``wtrange``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``flagbackup``
@@ -11522,27 +11530,27 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``True``
      - \-
    * - ``field``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``spw``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``timerange``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``uvrange``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``antenna``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``scan``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``observation``
@@ -11550,7 +11558,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``''``
      - \-
    * - ``intent``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``datacolumn``
@@ -11558,7 +11566,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``'corrected'``
      - \-
    * - ``imsize``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``cell``
@@ -11610,7 +11618,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``'radio'``
      - \-
    * - ``restfreq``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``interpolation``
@@ -11682,7 +11690,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``360.0``
      - \-
    * - ``pointingoffsetsigdev``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``wbawp``
@@ -11694,7 +11702,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``'hogbom'``
      - \-
    * - ``scales``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``smallscalebias``
@@ -11718,7 +11726,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``True``
      - \-
    * - ``restoringbeam``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``pbcor``
@@ -11746,7 +11754,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``0``
      - \-
    * - ``uvtaper``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``niter``
@@ -11798,7 +11806,7 @@ Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CA
      - ``'user'``
      - \-
    * - ``mask``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``pbmask``
@@ -12468,7 +12476,7 @@ Continuum fitting and subtraction in the uv plane (the deprecated, pre-`uvcontsu
      - *required*
      - \-
    * - ``field``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``fitspw``
@@ -12579,11 +12587,11 @@ Fit a single-component source model (point/Gaussian/disk) to the uv data. Read-o
      - ``'P'``
      - \-
    * - ``sourcepar``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``varypar``
-     - ``list[bool] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``outfile``
@@ -12686,7 +12694,7 @@ Concatenate several MSs into one multi-MS, without copying the underlying data (
      - ``True``
      - \-
    * - ``visweightscale``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``keepcopy``
@@ -12765,15 +12773,15 @@ Wideband primary-beam correction on the output of MS-MFS (`tclean` with `deconvo
      - ``''``
      - \-
    * - ``spwlist``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``chanlist``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``weightlist``
-     - ``list[float] | None``
+     - ``Optional``
      - ``None``
      - \-
 
@@ -13563,11 +13571,11 @@ Generate a gain table from ALMA Water Vapour Radiometer data.
      - ``True``
      - \-
    * - ``sourceflag``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``tie``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``nsol``
@@ -13579,7 +13587,7 @@ Generate a gain table from ALMA Water Vapour Radiometer data.
      - ``False``
      - \-
    * - ``wvrflag``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``statfield``
@@ -13599,11 +13607,11 @@ Generate a gain table from ALMA Water Vapour Radiometer data.
      - ``1.0``
      - \-
    * - ``spw``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``wvrspw``
-     - ``list[int] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``reversespw``
@@ -13631,7 +13639,7 @@ Generate a gain table from ALMA Water Vapour Radiometer data.
      - ``False``
      - \-
    * - ``refant``
-     - ``list[str] | None``
+     - ``Optional``
      - ``None``
      - \-
    * - ``offsetstable``
