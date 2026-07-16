@@ -64,3 +64,28 @@ def test_generate_writes_catalog_with_cabs_and_image_linkage(tmp_path):
     assert "ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0" in text  # listobs' image
     # schema tables rendered
     assert "**Inputs**" in text and ".. list-table::" in text
+
+
+def test_committed_catalog_is_fresh(tmp_path):
+    """The same staleness gate CI applies, but at `pytest` speed: the
+    committed docs/reference/cabs.rst must match what the live registry
+    generates. If this fails, run `uv run python docs/_ext/cab_catalog.py`
+    and commit the result (the pre-commit hook does exactly that for you).
+    """
+    app = types.SimpleNamespace(srcdir=str(tmp_path))
+    cab_catalog._generate(app)
+    generated = (tmp_path / "reference" / "cabs.rst").read_text()
+    committed = (Path(__file__).resolve().parents[1] / "docs" / "reference" / "cabs.rst").read_text()
+    assert generated == committed, (
+        "docs/reference/cabs.rst is stale -- regenerate with "
+        "`uv run python docs/_ext/cab_catalog.py` and commit it"
+    )
+
+
+def test_main_reports_fresh_catalog():
+    # After the freshness test above, main() must agree and exit 0 -- and
+    # must not have modified the file (idempotent regeneration).
+    committed = Path(__file__).resolve().parents[1] / "docs" / "reference" / "cabs.rst"
+    before = committed.read_text()
+    assert cab_catalog.main() == 0
+    assert committed.read_text() == before

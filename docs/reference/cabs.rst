@@ -4345,6 +4345,12 @@ Flagging based on batches of flag-commands, from a table, a file, or an SDM Flag
    * - ``vis``
      - ``Path``
      - \-
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+   * - ``plotfile``
+     - ``Path | None``
+     - \-
 
 flagdata
 --------
@@ -4684,6 +4690,9 @@ One generic wrapper covers every `mode` (`manual`/`list`/`clip`/ `quack`/`shadow
    * - ``summary``
      - ``dict | None``
      - \-
+   * - ``outfile``
+     - ``Path | None``
+     - \-
 
 flagmanager
 -----------
@@ -5014,6 +5023,9 @@ Bootstrap the flux-density scale from standard calibrators.
      - Description
    * - ``fluxtable``
      - ``Path``
+     - \-
+   * - ``listfile``
+     - ``Path | None``
      - \-
 
 fringefit
@@ -7937,6 +7949,9 @@ Build a component list for a known calibrator (e.g. a solar-system object via a 
      - Description
    * - ``prefix``
      - ``Path``
+     - \-
+   * - ``savefig``
+     - ``Path | None``
      - \-
 
 pyddi

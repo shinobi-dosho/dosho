@@ -160,3 +160,27 @@ def _generate(app: Any) -> None:
 def setup(app: Any) -> dict[str, Any]:
     app.connect("builder-inited", _generate)
     return {"version": "0.1", "parallel_read_safe": True, "parallel_write_safe": True}
+
+
+def main() -> int:
+    """Standalone regeneration, for the pre-commit hook (and anyone who wants
+    the catalog refreshed without a full sphinx build): rewrite
+    ``docs/reference/cabs.rst`` in place from the live registry. Exits 1 when
+    that changed the file -- the pre-commit convention for "I fixed it, stage
+    the result and commit again" -- and 0 when it was already fresh.
+    """
+    import types
+
+    docs_dir = Path(__file__).resolve().parents[1]
+    out = docs_dir / "reference" / "cabs.rst"
+    before = out.read_text() if out.exists() else None
+    _generate(types.SimpleNamespace(srcdir=str(docs_dir)))
+    if out.read_text() != before:
+        print(f"{out}: cab catalog was stale -- regenerated; stage it and commit again")
+        return 1
+    print("cab catalog is up to date")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
