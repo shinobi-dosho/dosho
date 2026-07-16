@@ -7321,6 +7321,10 @@ Owlcat plot-elevation-tracks.py: plot target elevation over time
      - ``bool | None``
      - ``False``
      - \-
+   * - ``output_name``
+     - ``Path | None``
+     - ``None``
+     - \-
 
 **Outputs**
 

@@ -16,6 +16,11 @@ _FIELDS: dict[str, tuple[str, bool, object]] = {
     "msname": ("MS", True, None),
     "list": ("bool", False, None),
     "display": ("bool", False, False),
+    # Output plot name, passed on the CLI (`--output-name`). File-typed so the
+    # container binds its parent dir -- as an output-only field it was never
+    # emitted, and the script fell back to `lst-elev.png` in the cwd (same
+    # trap as ragavi-vis's `htmlname`).
+    "output_name": ("File", False, None),
 }
 
 _FIELD_META: dict[str, ParamMeta] = {

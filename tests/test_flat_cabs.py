@@ -57,6 +57,20 @@ def test_owlcat_plotelev_output_field_has_real_default():
     assert "/x.ms" in argv
 
 
+def test_owlcat_plotelev_output_name_is_a_file_input_emitted_on_the_cli():
+    # `output_name` must be an *input* (File-typed, so containers bind its
+    # parent dir) as well as a passthrough output -- output-only fields are
+    # never emitted, and the script then writes lst-elev.png into the cwd.
+    cab = dosho.get("owlcat_plotelev")
+    assert "output_name" in cab.inputs_model.model_fields
+    argv = build_argv(cab, {"msname": "/x.ms", "output_name": "/plots/elev.png"})
+    assert "--output-name" in argv
+    assert "/plots/elev.png" in argv
+    # omitted: not emitted at all (script falls back to its own default)
+    argv_default = build_argv(cab, {"msname": "/x.ms"})
+    assert "--output-name" not in argv_default
+
+
 def test_shadems_union_dtypes_resolve_to_real_python_types():
     cab = dosho.get("shadems")
     assert cab.name == "shadems"
