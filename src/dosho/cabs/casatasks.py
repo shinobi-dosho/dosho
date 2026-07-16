@@ -90,15 +90,21 @@ also references it.
 
 **Output hygiene**: every pystep body starts with `_quiet_casa(ctx)` (see
 its docstring), so CASA's `casa-<timestamp>.log` cwd junk is prevented at
-the source rather than mopped up after. None of these pysteps sets
-`sandbox=True` on its own scope, deliberately: several tasks take
-`str`-typed side-output paths that are *not* declared output fields
-(`flagdata`'s `outfile`, `fluxscale`'s `listfile`, ...), and a sandboxed
-run only lets declared outputs survive -- forcing the sandbox here would
-silently delete those files. Promoting them to real declared outputs
-(after which per-scope sandboxing becomes safe) is a follow-up audit;
-until then a caller/recipe/config that enables sandboxing does so knowing
-its own parameter usage.
+the source rather than mopped up after. Every parameter naming a file a
+task *writes* has been audited against sandboxed execution
+(`shinobi.sandbox`, where only declared outputs survive): the side-output
+files are declared optional output fields (`flagdata`/`flagcmd`'s
+`outfile`, `flagcmd`'s `plotfile`, `fluxscale`'s `listfile`,
+`predictcomp`'s `savefig`), and the imaging product families that can't
+be enumerated statically carry a `harvest` keep-glob (`tclean`/
+`sdintimaging`, `"{imagename}.*"` -- see each decorator's comment).
+Reviewed and left alone: `deconvolve`/`widebandpbcor` *mutate* an
+existing `{imagename}.*` family in place, so a sandboxed run with a
+relative prefix fails loudly at read time (nothing is silently lost),
+and `flagdata`'s `timedev`/`freqdev` are variant-typed (number/array/
+"write the deviations here" filename in `action='calculate'`) -- too
+ambiguous to declare as outputs. No pystep sets `sandbox=True` on its
+own scope: a cab declares what must survive, not execution policy.
 """
 
 from __future__ import annotations
@@ -586,10 +592,14 @@ class FlagdataOutputs(BaseModel):
     Attributes:
         vis: The (in-place-flagged) measurement set.
         summary: Flag-count breakdown, populated only when `mode="summary"`.
+        outfile: The saved flag-commands file, populated only when
+            `savepars=True` wrote to a real file (an empty `outfile`
+            saves to the MS's own FLAG_CMD table instead).
     """
 
     vis: Path
     summary: dict | None = None
+    outfile: Path | None = None
 
 
 @shinobi.pystep(image=images.CASA6)
@@ -780,7 +790,8 @@ def flagdata(
         writeflags: Write flags to the MS (`savepars=True`).
 
     Returns:
-        `FlagdataOutputs` echoing `vis`, plus `summary` when `mode="summary"`.
+        `FlagdataOutputs` echoing `vis`, plus `summary` when `mode="summary"`
+        and `outfile` when `savepars=True` wrote to a real file.
     """
     _quiet_casa(ctx)
     flagdata_fn = ctx.import_func("flagdata", "casatasks")
@@ -862,7 +873,11 @@ def flagdata(
         overwrite=overwrite,
         writeflags=writeflags,
     )
-    return FlagdataOutputs(vis=vis, summary=result if mode == "summary" else None)
+    return FlagdataOutputs(
+        vis=vis,
+        summary=result if mode == "summary" else None,
+        outfile=Path(outfile) if savepars and outfile else None,
+    )
 
 
 class SetjyOutputs(BaseModel):
@@ -1458,9 +1473,16 @@ def applycal(
 
 
 class FluxscaleOutputs(BaseModel):
-    """Outputs of the `fluxscale` step."""
+    """Outputs of the `fluxscale` step.
+
+    Attributes:
+        fluxtable: The written flux-scaled calibration table.
+        listfile: The written fit/flux-density results file, populated
+            only when a `listfile` was requested.
+    """
 
     fluxtable: Path
+    listfile: Path | None = None
 
 
 @shinobi.pystep(image=images.CASA6)
@@ -1515,7 +1537,8 @@ def fluxscale(
         display: Show flux-scaling statistics/histograms.
 
     Returns:
-        `FluxscaleOutputs` with the written `fluxtable`.
+        `FluxscaleOutputs` with the written `fluxtable`, plus `listfile`
+        when one was requested.
     """
     _quiet_casa(ctx)
     fluxscale_fn = ctx.import_func("fluxscale", "casatasks")
@@ -1536,7 +1559,9 @@ def fluxscale(
         fitorder=fitorder,
         display=display,
     )
-    return FluxscaleOutputs(fluxtable=fluxtable)
+    return FluxscaleOutputs(
+        fluxtable=fluxtable, listfile=Path(listfile) if listfile else None
+    )
 
 
 class FlagmanagerOutputs(BaseModel):
@@ -1597,9 +1622,20 @@ def flagmanager(
 
 
 class FlagcmdOutputs(BaseModel):
-    """Outputs of the `flagcmd` step."""
+    """Outputs of the `flagcmd` step.
+
+    Attributes:
+        vis: The (in-place-flagged) MS or caltable.
+        outfile: The saved flag-commands file, populated only when
+            `savepars=True` wrote to a real file (an empty `outfile`
+            saves to the MS's own FLAG_CMD table instead).
+        plotfile: The written plot, populated only when `action="plot"`
+            was given a `plotfile` to write.
+    """
 
     vis: Path
+    outfile: Path | None = None
+    plotfile: Path | None = None
 
 
 @shinobi.pystep(image=images.CASA6)
@@ -1646,7 +1682,8 @@ def flagcmd(
         overwrite: Overwrite an existing `outfile` (`savepars=True`).
 
     Returns:
-        `FlagcmdOutputs` echoing `vis`.
+        `FlagcmdOutputs` echoing `vis`, plus `outfile` when `savepars=True`
+        wrote to a real file and `plotfile` when `action="plot"` wrote one.
     """
     _quiet_casa(ctx)
     flagcmd_fn = ctx.import_func("flagcmd", "casatasks")
@@ -1668,7 +1705,11 @@ def flagcmd(
         outfile=outfile,
         overwrite=overwrite,
     )
-    return FlagcmdOutputs(vis=vis)
+    return FlagcmdOutputs(
+        vis=vis,
+        outfile=Path(outfile) if savepars and outfile else None,
+        plotfile=Path(plotfile) if action == "plot" and plotfile else None,
+    )
 
 
 class MsuvbinflagOutputs(BaseModel):
@@ -3030,9 +3071,16 @@ def makemask(
 
 
 class PredictcompOutputs(BaseModel):
-    """Outputs of the `predictcomp` step."""
+    """Outputs of the `predictcomp` step.
+
+    Attributes:
+        prefix: Echoed prefix the component-list directory was written under.
+        savefig: The written amplitude-vs-uv-distance plot, populated only
+            when a `savefig` was requested.
+    """
 
     prefix: Path
+    savefig: Path | None = None
 
 
 @shinobi.pystep(image=images.CASA6)
@@ -3077,7 +3125,8 @@ def predictcomp(
         showbl0flux: Print the zero-baseline flux.
 
     Returns:
-        `PredictcompOutputs` echoing `prefix`.
+        `PredictcompOutputs` echoing `prefix`, plus `savefig` when a plot
+        file was requested.
     """
     _quiet_casa(ctx)
     predictcomp_fn = ctx.import_func("predictcomp", "casatasks")
@@ -3098,7 +3147,7 @@ def predictcomp(
         blunit=blunit,
         showbl0flux=showbl0flux,
     )
-    return PredictcompOutputs(prefix=prefix)
+    return PredictcompOutputs(prefix=prefix, savefig=Path(savefig) if savefig else None)
 
 
 class WidebandpbcorOutputs(BaseModel):
@@ -3194,7 +3243,13 @@ class TcleanOutputs(BaseModel):
     mutated_vis: list[Path] | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+# harvest: tclean's product family is `{imagename}.<suffix>` and only its
+# common members are declared output fields above -- `.sumwt` (always),
+# `.mask`, `.weight`, and the whole mtmfs shape (`.image.tt0`/`.alpha`/...,
+# where the declared `.image` doesn't even exist) can't be enumerated
+# statically. One keep-glob covers every mode, same pattern as wsclean's
+# `{prefix}-*` (see shinobi.sandbox; inert unless the step runs sandboxed).
+@shinobi.pystep(image=images.CASA6, harvest=["{imagename}.*"])
 def tclean(
     ctx,
     vis: list[str],
@@ -3533,7 +3588,10 @@ class SdintimagingOutputs(BaseModel):
     image_pbcor: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+# harvest: same reasoning as tclean's, and stronger -- sdintimaging writes
+# its products under `{imagename}.joint.*`/`.int.*`/`.sd.*` sub-prefixes,
+# so the declared fields cover even less of the real on-disk family.
+@shinobi.pystep(image=images.CASA6, harvest=["{imagename}.*"])
 def sdintimaging(
     ctx,
     vis: list[str],
