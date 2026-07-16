@@ -54,6 +54,19 @@ If you're working against an unreleased `stimela-ninja` change, clone
 it next to this repo and layer it in for the duration of a command with
 `uv run --with-editable ../stimela-ninja -- <command>` instead.
 
+Install the pre-commit hooks once:
+
+```bash
+uv run pre-commit install
+```
+
+The `cab-catalog` hook regenerates `docs/reference/cabs.rst` (generated
+from the live registry -- CI rejects a PR whose committed copy is stale)
+whenever a commit touches cab sources, so you never hit the CI staleness
+error after a schema change: if the catalog changed, the commit stops,
+and you `git add` the regenerated file and commit again. To refresh it
+by hand at any time: `uv run python docs/_ext/cab_catalog.py`.
+
 ## Testing
 
 ```bash

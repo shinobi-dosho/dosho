@@ -15,6 +15,7 @@ underlying ``.step``. ``_schema_obj`` resolves whichever it is.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -48,8 +49,23 @@ def _summary(info: str | None) -> str:
 
 
 def _type_name(annotation: Any) -> str:
-    name = getattr(annotation, "__name__", None) or str(annotation)
-    return name.replace("typing.", "").replace("pathlib.", "")
+    """Version-stable rendering of a field annotation. `__name__` is only
+    trusted for plain classes: for parameterized/union annotations it
+    varies by Python version (3.10 presents `list[X] | None` as
+    `typing.Optional[list[X]]`, whose `__name__` is just "Optional"),
+    and the catalog text must not depend on which interpreter generated
+    it -- the committed copy is diffed against a fresh regeneration by
+    the freshness gates (CI, pre-commit, pytest). `Optional[X]` is
+    normalised to the `X | None` spelling 3.11+ produces natively.
+    """
+    # The __args__ guard matters on <=3.10, where a parameterized generic
+    # like `list[Path]` still passes isinstance(..., type) (its __name__ is
+    # a bare "list"); 3.11+ made those fail the isinstance check.
+    if isinstance(annotation, type) and not getattr(annotation, "__args__", None):
+        return annotation.__name__
+    text = str(annotation).replace("typing.", "").replace("pathlib.", "")
+    match = re.fullmatch(r"Optional\[(.*)\]", text)
+    return f"{match.group(1)} | None" if match else text
 
 
 def _rst_cell(text: str) -> str:
@@ -160,3 +176,27 @@ def _generate(app: Any) -> None:
 def setup(app: Any) -> dict[str, Any]:
     app.connect("builder-inited", _generate)
     return {"version": "0.1", "parallel_read_safe": True, "parallel_write_safe": True}
+
+
+def main() -> int:
+    """Standalone regeneration, for the pre-commit hook (and anyone who wants
+    the catalog refreshed without a full sphinx build): rewrite
+    ``docs/reference/cabs.rst`` in place from the live registry. Exits 1 when
+    that changed the file -- the pre-commit convention for "I fixed it, stage
+    the result and commit again" -- and 0 when it was already fresh.
+    """
+    import types
+
+    docs_dir = Path(__file__).resolve().parents[1]
+    out = docs_dir / "reference" / "cabs.rst"
+    before = out.read_text() if out.exists() else None
+    _generate(types.SimpleNamespace(srcdir=str(docs_dir)))
+    if out.read_text() != before:
+        print(f"{out}: cab catalog was stale -- regenerated; stage it and commit again")
+        return 1
+    print("cab catalog is up to date")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

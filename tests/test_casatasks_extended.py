@@ -175,3 +175,90 @@ def test_a_new_pystep_wires_into_a_recipe_like_a_cab():
     recipe.add_step("delmod", dosho.get("delmod"), vis=recipe.inputs.ms)
     assert [s.name for s in recipe.steps] == ["delmod"]
     assert recipe.steps[0].wiring == {"vis": recipe.inputs.ms}
+
+
+# --- output-hygiene audit: side-output files & product-family harvest -------
+
+
+class _StubLog:
+    def setlogfile(self, path):
+        self.logfile = path
+
+
+class _FakeCtx:
+    """Enough of an ExecContext to drive a pystep body in-process: hands
+    `_quiet_casa` a stub casalog and every task a kwargs-swallowing stub.
+    """
+
+    def __init__(self, task_result=None):
+        self.task_kwargs = None
+        self._task_result = task_result
+
+    def import_func(self, name, module):
+        if name == "casalog":
+            return _StubLog()
+
+        def task_fn(**kwargs):
+            self.task_kwargs = kwargs
+            return self._task_result
+
+        return task_fn
+
+
+def test_flagdata_declares_saved_params_file_as_output(monkeypatch):
+    # preset so _quiet_casa doesn't write a site-config file into the env
+    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+    from dosho.cabs.casatasks import flagdata
+
+    body = flagdata.func.__wrapped__
+    out = body(_FakeCtx(), vis=Path("x.ms"), savepars=True, outfile="cmds.txt")
+    assert out.outfile == Path("cmds.txt")
+    # empty outfile saves to FLAG_CMD in the MS: no file output to declare
+    assert body(_FakeCtx(), vis=Path("x.ms"), savepars=True).outfile is None
+    assert body(_FakeCtx(), vis=Path("x.ms"), outfile="cmds.txt").outfile is None
+
+
+def test_flagcmd_declares_saved_params_and_plot_files_as_outputs(monkeypatch):
+    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+    from dosho.cabs.casatasks import flagcmd
+
+    body = flagcmd.func.__wrapped__
+    out = body(_FakeCtx(), vis=Path("x.ms"), action="plot", plotfile="flags.png")
+    assert out.plotfile == Path("flags.png")
+    assert out.outfile is None
+    out = body(_FakeCtx(), vis=Path("x.ms"), savepars=True, outfile="cmds.txt")
+    assert out.outfile == Path("cmds.txt")
+    assert out.plotfile is None
+
+
+def test_fluxscale_declares_listfile_as_output(monkeypatch):
+    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+    from dosho.cabs.casatasks import fluxscale
+
+    body = fluxscale.func.__wrapped__
+    kwargs = dict(
+        vis=Path("x.ms"), caltable=Path("c.tbl"), fluxtable=Path("f.tbl"),
+        reference=["3C286"],
+    )
+    assert body(_FakeCtx(), listfile="fit.txt", **kwargs).listfile == Path("fit.txt")
+    assert body(_FakeCtx(), **kwargs).listfile is None
+
+
+def test_predictcomp_declares_savefig_as_output(monkeypatch):
+    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+    from dosho.cabs.casatasks import predictcomp
+
+    body = predictcomp.func.__wrapped__
+    out = body(_FakeCtx(), objname="Jupiter", prefix=Path("jup"), savefig="amp.png")
+    assert out.savefig == Path("amp.png")
+    assert body(_FakeCtx(), objname="Jupiter", prefix=Path("jup")).savefig is None
+
+
+def test_imaging_family_pysteps_declare_the_harvest_keep_glob():
+    # tclean/sdintimaging write `{imagename}.<suffix>` families the declared
+    # output fields can't enumerate (sumwt/mask/mtmfs .tt*); the keep-glob is
+    # what makes them safe to run sandboxed. Sandboxing itself is not forced.
+    assert tclean.step.harvest == ["{imagename}.*"]
+    assert sdintimaging.step.harvest == ["{imagename}.*"]
+    assert tclean.step.sandbox is None
+    assert sdintimaging.step.sandbox is None

@@ -8,7 +8,7 @@ version = "0.1.0a3"
 description = "A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
 ]
@@ -22,6 +22,7 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "ruff>=0.5",
+    "pre-commit>=3.5",
 ]
 # Documentation build (Sphinx + Furo + autodoc). `uv sync --group docs`.
 docs = [

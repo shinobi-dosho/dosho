@@ -1,0 +1,14 @@
+# Install once with `uv run pre-commit install` (or `pipx run pre-commit install`).
+repos:
+  - repo: local
+    hooks:
+      # docs/reference/cabs.rst is generated from the live registry; CI fails
+      # a PR whose committed copy is stale. Catch that at commit time instead:
+      # this regenerates the catalog in place and fails the commit if it
+      # changed, so you just `git add docs/reference/cabs.rst` and retry.
+      - id: cab-catalog
+        name: cab catalog is fresh (docs/reference/cabs.rst)
+        entry: uv run python docs/_ext/cab_catalog.py
+        language: system
+        pass_filenames: false
+        files: ^(src/dosho/|docs/_ext/cab_catalog\.py|uv\.lock)
