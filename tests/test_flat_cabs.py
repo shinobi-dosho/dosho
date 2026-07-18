@@ -152,6 +152,16 @@ def test_ragavi_gains_registered_and_passes_gain_flags():
     # htmlname/plotname are also same-named passthrough outputs
     assert "htmlname" in cab.outputs_model.model_fields
     assert "plotname" in cab.outputs_model.model_fields
+    # ...and must be File-typed (Path), not str: only path-typed fields get
+    # absolutized back to the workspace + their parent dir pre-created under a
+    # sandbox, so a str type makes ragavi-gains crash writing a relative path
+    # into the empty scratch cwd (same reason ragavi-vis' htmlname is File).
+    from pathlib import Path
+    from typing import get_args
+
+    for field in ("htmlname", "plotname"):
+        assert Path in get_args(cab.inputs_model.model_fields[field].annotation)
+        assert Path in get_args(cab.outputs_model.model_fields[field].annotation)
 
 
 def test_simms_primary_beam_tag_ms_flags_and_passthrough_output():
