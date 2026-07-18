@@ -130,7 +130,11 @@ vis = define_cab(
 
 # ragavi-gains: plot gain tables. `htmlname`/`plotname` are output filenames
 # passed on the CLI, so they are inputs (emitted as flags) AND same-named
-# passthrough outputs.
+# passthrough outputs. File-typed (not str) so they behave like ragavi-vis'
+# `htmlname`: the container binds their parent dir, and under a sandbox they
+# get absolutized back to the workspace / their parent dir pre-created --
+# str-typed write targets get neither, so ragavi crashes writing a relative
+# path into the empty sandbox cwd (no `mkdir -p` of its own output stem).
 _GAINS_FIELDS: dict[str, tuple[str, bool, object]] = {
     "table": ("List[File]", True, None),
     "ant": ("str", False, None),
@@ -146,8 +150,8 @@ _GAINS_FIELDS: dict[str, tuple[str, bool, object]] = {
     "t0": ("float", False, None),
     "t1": ("float", False, None),
     "taql": ("str", False, None),
-    "htmlname": ("str", False, None),
-    "plotname": ("str", False, None),
+    "htmlname": ("File", False, None),
+    "plotname": ("File", False, None),
 }
 
 _GAINS_FIELD_META: dict[str, ParamMeta] = {
@@ -180,8 +184,10 @@ _GAINS_FIELD_META: dict[str, ParamMeta] = {
 }
 
 _GAINS_OUTPUTS: dict[str, tuple[str, bool, object]] = {
-    "htmlname": ("str", False, None),
-    "plotname": ("str", False, None),
+    # File to match the same-named File inputs they pass through (filled from
+    # the input Path value), mirroring ragavi-vis' `htmlname` output.
+    "htmlname": ("File", False, None),
+    "plotname": ("File", False, None),
 }
 
 gains = define_cab(
