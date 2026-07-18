@@ -8535,11 +8535,11 @@ ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)
      - ``None``
      - \-
    * - ``htmlname``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``plotname``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
 
@@ -8553,10 +8553,10 @@ ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)
      - Type
      - Description
    * - ``htmlname``
-     - ``str | None``
+     - ``Path | None``
      - \-
    * - ``plotname``
-     - ``str | None``
+     - ``Path | None``
      - \-
 
 ragavi-vis
