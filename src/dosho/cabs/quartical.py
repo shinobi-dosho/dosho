@@ -48,10 +48,19 @@ from __future__ import annotations
 from shinobi.steps.schema import ParamMeta, ParamPattern, ParamSegment, Policies
 
 from dosho import images
-from dosho._builder import define_cab
+from dosho._builder import FieldSpec, define_cab
 
-_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "parset": ("File", False, None),
+_FIELDS: dict[str, FieldSpec] = {
+    "parset": (
+        "File",
+        False,
+        None,
+        ParamMeta(
+            positional_head=True,
+            info="Optional YAML config file to load before applying all other parameters "
+            "(any bare *.yaml/*.yml argv token, per goquartical's own parser.py)",
+        ),
+    ),
     "input_ms.path": ("URI", True, None),
     "input_ms.data_column": ("str", False, "DATA"),
     "input_ms.sigma_column": ("str", False, None),
@@ -126,9 +135,9 @@ _GAIN_TERM_PATTERN = ParamPattern(
     ],
 )
 
-_OUTPUTS: dict[str, tuple[str, bool, object]] = {
-    "ms": ("MS", False, None),
-    "gain_directory": ("Directory", False, None),
+_OUTPUTS: dict[str, FieldSpec] = {
+    "ms": ("MS", False, None, ParamMeta(implicit="{input_ms_path}")),
+    "gain_directory": ("Directory", False, None, ParamMeta(implicit="{output_gain_directory}")),
 }
 
 quartical = define_cab(
@@ -137,15 +146,6 @@ quartical = define_cab(
     images.QUARTICAL,
     _FIELDS,
     outputs=_OUTPUTS,
-    field_meta={
-        "ms": ParamMeta(implicit="{input_ms_path}"),
-        "gain_directory": ParamMeta(implicit="{output_gain_directory}"),
-        "parset": ParamMeta(
-            positional_head=True,
-            info="Optional YAML config file to load before applying all other parameters "
-            "(any bare *.yaml/*.yml argv token, per goquartical's own parser.py)",
-        ),
-    },
     policies=Policies(key_value=True, repeat="[]", prefix=""),
     input_patterns=[_GAIN_TERM_PATTERN],
     info="QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)",
@@ -160,27 +160,45 @@ quartical = define_cab(
 # stale field names for these three -- e.g. `quartical-plotter` there
 # doesn't match `goquartical-plot`'s real flags).
 
-_BACKUP_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "ms_path": ("MS", True, None),
-    "zarr_dir": ("Directory", True, None),
-    "column_name": ("str", True, None),
-    "label": ("str", False, None),
-    "nthread": ("int", False, None),
-    "field_id": ("int", False, None),
-}
-
-_BACKUP_FIELD_META: dict[str, ParamMeta] = {
-    "ms_path": ParamMeta(info="Path to the input measurement set (also accepts s3 URLs)", positional=True),
-    "zarr_dir": ParamMeta(
-        info="Directory for the backup location (not the zarr name itself; also accepts s3 URLs)",
-        positional=True,
+_BACKUP_FIELDS: dict[str, FieldSpec] = {
+    "ms_path": (
+        "MS",
+        True,
+        None,
+        ParamMeta(info="Path to the input measurement set (also accepts s3 URLs)", positional=True),
     ),
-    "column_name": ParamMeta(info="Name of the column to back up", positional=True),
-    "label": ParamMeta(
-        info="Explicit label for the backup name [default: datetime]; full name is [label]-[msname]-[column].bkp.qc"
+    "zarr_dir": (
+        "Directory",
+        True,
+        None,
+        ParamMeta(
+            info="Directory for the backup location (not the zarr name itself; "
+            "also accepts s3 URLs)",
+            positional=True,
+        ),
     ),
-    "nthread": ParamMeta(info="Number of threads to use"),
-    "field_id": ParamMeta(nom_de_guerre="field-id", info="Field ID to back up"),
+    "column_name": (
+        "str",
+        True,
+        None,
+        ParamMeta(info="Name of the column to back up", positional=True),
+    ),
+    "label": (
+        "str",
+        False,
+        None,
+        ParamMeta(
+            info="Explicit label for the backup name [default: datetime]; full name is "
+            "[label]-[msname]-[column].bkp.qc"
+        ),
+    ),
+    "nthread": ("int", False, None, ParamMeta(info="Number of threads to use")),
+    "field_id": (
+        "int",
+        False,
+        None,
+        ParamMeta(nom_de_guerre="field-id", info="Field ID to back up"),
+    ),
 }
 
 quartical_backup = define_cab(
@@ -188,29 +206,38 @@ quartical_backup = define_cab(
     "goquartical-backup",
     images.QUARTICAL,
     _BACKUP_FIELDS,
-    field_meta=_BACKUP_FIELD_META,
     policies=Policies(prefix="--"),
     info="goquartical-backup: back up a measurement set column to zarr",
 )
 
-_RESTORE_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "zarr_path": ("Directory", True, None),
-    "ms_path": ("MS", True, None),
-    "column_name": ("str", True, None),
-    "nthread": ("int", False, None),
-}
-
-_RESTORE_FIELD_META: dict[str, ParamMeta] = {
-    "zarr_path": ParamMeta(
-        info="Path to the backup zarr column, e.g. path/to/dir/20211201-154457-foo.MS-FLAG.bkp.qc",
-        positional=True,
+_RESTORE_FIELDS: dict[str, FieldSpec] = {
+    "zarr_path": (
+        "Directory",
+        True,
+        None,
+        ParamMeta(
+            info="Path to the backup zarr column, e.g. "
+            "path/to/dir/20211201-154457-foo.MS-FLAG.bkp.qc",
+            positional=True,
+        ),
     ),
-    "ms_path": ParamMeta(info="Path to the measurement set to restore into", positional=True),
-    "column_name": ParamMeta(
-        info="Column to populate from the backup (need not match the column the backup was made from)",
-        positional=True,
+    "ms_path": (
+        "MS",
+        True,
+        None,
+        ParamMeta(info="Path to the measurement set to restore into", positional=True),
     ),
-    "nthread": ParamMeta(info="Number of threads to use"),
+    "column_name": (
+        "str",
+        True,
+        None,
+        ParamMeta(
+            info="Column to populate from the backup "
+            "(need not match the column the backup was made from)",
+            positional=True,
+        ),
+    ),
+    "nthread": ("int", False, None, ParamMeta(info="Number of threads to use")),
 }
 
 quartical_restore = define_cab(
@@ -219,56 +246,119 @@ quartical_restore = define_cab(
     images.QUARTICAL,
     _RESTORE_FIELDS,
     outputs={"ms_path": ("MS", False, None)},
-    field_meta=_RESTORE_FIELD_META,
     policies=Policies(prefix="--"),
     info="goquartical-restore: restore a zarr column backup into a measurement set",
 )
 
-_PLOTTER_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "input_path": ("Directory", True, None),
-    "output_path": ("str", True, None),
-    "plot_var": ("str", False, None),
-    "flag_var": ("str", False, None),
-    "xaxis": ("str", False, None),
-    "transform": ("str", False, None),
-    "iter_attrs": ("List[str]", False, None),
-    "iter_axes": ("List[str]", False, None),
-    "mean_axis": ("str", False, None),
-    "colourize_axis": ("str", False, None),
-    "time_range": ("List[float]", False, None),
-    "freq_range": ("List[float]", False, None),
-    "nworker": ("int", False, None),
-    "colourmap": ("str", False, None),
-    "fig_size": ("List[float]", False, None),
-}
-
-_PLOTTER_FIELD_META: dict[str, ParamMeta] = {
-    "input_path": ParamMeta(info="Path to input gains, e.g. path/to/dir/G (also accepts s3 URLs)", positional=True),
-    "output_path": ParamMeta(info="Path to the desired output location", positional=True),
-    "plot_var": ParamMeta(nom_de_guerre="plot-var", info="Name of the data variable to plot"),
-    "flag_var": ParamMeta(nom_de_guerre="flag-var", info="Name of the data variable to use as flags"),
-    "xaxis": ParamMeta(info="Coordinate to use for the x-axis: gain_time, gain_freq, param_time, param_freq"),
-    "transform": ParamMeta(info="Transform to apply before plotting: raw, amplitude, phase, real, imag"),
-    "iter_attrs": ParamMeta(
-        nom_de_guerre="iter-attrs",
-        info="Attributes (datasets) to iterate over; omitting one concatenates across it",
-        repeat_as_tokens=True,
+_PLOTTER_FIELDS: dict[str, FieldSpec] = {
+    "input_path": (
+        "Directory",
+        True,
+        None,
+        ParamMeta(
+            info="Path to input gains, e.g. path/to/dir/G (also accepts s3 URLs)",
+            positional=True,
+        ),
     ),
-    "iter_axes": ParamMeta(
-        nom_de_guerre="iter-axes",
-        info="Axes to iterate over, producing one plot per unique combination",
-        repeat_as_tokens=True,
+    "output_path": (
+        "str",
+        True,
+        None,
+        ParamMeta(info="Path to the desired output location", positional=True),
     ),
-    "mean_axis": ParamMeta(
-        nom_de_guerre="mean-axis", info="If set, plot a heavier line for the mean along this axis"
+    "plot_var": (
+        "str",
+        False,
+        None,
+        ParamMeta(nom_de_guerre="plot-var", info="Name of the data variable to plot"),
     ),
-    "colourize_axis": ParamMeta(nom_de_guerre="colourize-axis", info="Axis to colour by"),
-    "time_range": ParamMeta(nom_de_guerre="time-range", info="Time range to plot", repeat_as_tokens=True),
-    "freq_range": ParamMeta(nom_de_guerre="freq-range", info="Frequency range to plot", repeat_as_tokens=True),
-    "nworker": ParamMeta(info="Number of processes to use while plotting"),
-    "colourmap": ParamMeta(info="Matplotlib colourmap to use with --colourize-axis"),
-    "fig_size": ParamMeta(
-        nom_de_guerre="fig-size", info="Figure size in inches: width height", repeat_as_tokens=True
+    "flag_var": (
+        "str",
+        False,
+        None,
+        ParamMeta(nom_de_guerre="flag-var", info="Name of the data variable to use as flags"),
+    ),
+    "xaxis": (
+        "str",
+        False,
+        None,
+        ParamMeta(
+            info="Coordinate to use for the x-axis: gain_time, gain_freq, param_time, param_freq"
+        ),
+    ),
+    "transform": (
+        "str",
+        False,
+        None,
+        ParamMeta(info="Transform to apply before plotting: raw, amplitude, phase, real, imag"),
+    ),
+    "iter_attrs": (
+        "List[str]",
+        False,
+        None,
+        ParamMeta(
+            nom_de_guerre="iter-attrs",
+            info="Attributes (datasets) to iterate over; omitting one concatenates across it",
+            repeat_as_tokens=True,
+        ),
+    ),
+    "iter_axes": (
+        "List[str]",
+        False,
+        None,
+        ParamMeta(
+            nom_de_guerre="iter-axes",
+            info="Axes to iterate over, producing one plot per unique combination",
+            repeat_as_tokens=True,
+        ),
+    ),
+    "mean_axis": (
+        "str",
+        False,
+        None,
+        ParamMeta(
+            nom_de_guerre="mean-axis",
+            info="If set, plot a heavier line for the mean along this axis",
+        ),
+    ),
+    "colourize_axis": (
+        "str",
+        False,
+        None,
+        ParamMeta(nom_de_guerre="colourize-axis", info="Axis to colour by"),
+    ),
+    "time_range": (
+        "List[float]",
+        False,
+        None,
+        ParamMeta(nom_de_guerre="time-range", info="Time range to plot", repeat_as_tokens=True),
+    ),
+    "freq_range": (
+        "List[float]",
+        False,
+        None,
+        ParamMeta(
+            nom_de_guerre="freq-range",
+            info="Frequency range to plot",
+            repeat_as_tokens=True,
+        ),
+    ),
+    "nworker": ("int", False, None, ParamMeta(info="Number of processes to use while plotting")),
+    "colourmap": (
+        "str",
+        False,
+        None,
+        ParamMeta(info="Matplotlib colourmap to use with --colourize-axis"),
+    ),
+    "fig_size": (
+        "List[float]",
+        False,
+        None,
+        ParamMeta(
+            nom_de_guerre="fig-size",
+            info="Figure size in inches: width height",
+            repeat_as_tokens=True,
+        ),
     ),
 }
 
@@ -277,7 +367,6 @@ quartical_plotter = define_cab(
     "goquartical-plot",
     images.QUARTICAL,
     _PLOTTER_FIELDS,
-    field_meta=_PLOTTER_FIELD_META,
     policies=Policies(prefix="--"),
     info="goquartical-plot: rudimentary plotter for QuartiCal gain solutions",
 )

@@ -61,10 +61,19 @@ from __future__ import annotations
 from shinobi.steps.schema import ParamMeta, ParamPattern, ParamSegment, Policies
 
 from dosho import images
-from dosho._builder import define_cab
+from dosho._builder import FieldSpec, define_cab
 
-_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "parset": ("File", False, None),
+_FIELDS: dict[str, FieldSpec] = {
+    "parset": (
+        "File",
+        False,
+        None,
+        ParamMeta(
+            positional_head=True,
+            info="Optional parset to load before applying all other parameters "
+            "(cult-cargo's own cubical.yml wording)",
+        ),
+    ),
     "data-ms": ("MS", True, None),
     "data-column": ("str", False, None),
     "data-time-chunk": ("str", False, None),
@@ -250,8 +259,8 @@ _JONES_TERM_PATTERN = ParamPattern(
     ],
 )
 
-_OUTPUTS: dict[str, tuple[str, bool, object]] = {
-    "ms": ("MS", False, None),
+_OUTPUTS: dict[str, FieldSpec] = {
+    "ms": ("MS", False, None, ParamMeta(implicit="{data_ms}")),
 }
 
 cubical = define_cab(
@@ -260,14 +269,6 @@ cubical = define_cab(
     images.CUBICAL,
     _FIELDS,
     outputs=_OUTPUTS,
-    field_meta={
-        "ms": ParamMeta(implicit="{data_ms}"),
-        "parset": ParamMeta(
-            positional_head=True,
-            info="Optional parset to load before applying all other parameters "
-            "(cult-cargo's own cubical.yml wording)",
-        ),
-    },
     # real cubical.yml: policies: {prefix: '--', explicit_true: true,
     # explicit_false: false} -- gocubical's optparse-derived CLI expects
     # every boolean option to always take an explicit value token; a bare

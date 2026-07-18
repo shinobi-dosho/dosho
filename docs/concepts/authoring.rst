@@ -49,19 +49,32 @@ tool's own ``--help``/docs naturally give you:
 
 .. code-block:: python
 
+    from shinobi.steps.schema import ParamMeta
+
     from dosho import define_cab, images
 
     cab = define_cab(
         "mytool",
         "mytool",
         images.MYTOOL,
-        {"data-ms": ("MS", True, None), "out-name": ("str", False, "out")},
+        {
+            "data-ms": ("MS", True, None),
+            "out-name": ("str", False, "out"),
+            # a field whose CLI needs more than the bare triple carries its
+            # ParamMeta as the spec's optional 4th element:
+            "prefix": ("str", True, None, ParamMeta(nom_de_guerre="name")),
+        },
+        outputs={
+            "image": ("File", False, None, ParamMeta(implicit="{prefix}-image.fits")),
+        },
     )
 
 Hyphenated/dotted raw names are sanitised to valid pydantic field names,
 with the original kept as a ``nom_de_guerre`` so the built cab's argv
-still uses the tool's real flag. Raw ``Cab(...)`` construction stays
-fully available for anything the helper doesn't cover.
+still uses the tool's real flag; an explicit ``ParamMeta`` that doesn't
+set its own ``nom_de_guerre`` keeps the auto-derived one. Raw
+``Cab(...)`` construction stays fully available for anything the helper
+doesn't cover.
 
 Dynamic per-instance parameter families
 ------------------------------------------

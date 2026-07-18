@@ -10,41 +10,52 @@ from __future__ import annotations
 from shinobi.steps.schema import ParamMeta, Policies
 
 from dosho import images
-from dosho._builder import define_cab
+from dosho._builder import FieldSpec, define_cab
 
-_FIELDS: dict[str, tuple[str, bool, object]] = {
-    "ms": ("MS", True, None),
-    "input_prefix": ("str", True, None),
-    "channels_out": ("int", True, None),
-    "polynomial_order": ("int", True, None),
-    "max_mem": ("int", False, None),
-    "num_threads": ("int", False, None),
-    "output_prefix": ("str", False, None),
-    "stokes": ("str", False, None),
-}
-
-_FIELD_META: dict[str, ParamMeta] = {
-    "ms": ParamMeta(info="Input MS. Used for getting reference frequency"),
-    "input_prefix": ParamMeta(
-        nom_de_guerre="input-prefix", info="The input image prefix, same as the one used for wsclean"
+_FIELDS: dict[str, FieldSpec] = {
+    "ms": ("MS", True, None, ParamMeta(info="Input MS. Used for getting reference frequency")),
+    "input_prefix": (
+        "str", True, None,
+        ParamMeta(
+            nom_de_guerre="input-prefix",
+            info="The input image prefix, same as the one used for wsclean",
+        ),
     ),
-    "channels_out": ParamMeta(nom_de_guerre="channels-out", info="Number of channels to generate out"),
-    "polynomial_order": ParamMeta(
-        nom_de_guerre="polynomial-order", info="Order of the spectral polynomial"
+    "channels_out": (
+        "int", True, None,
+        ParamMeta(nom_de_guerre="channels-out", info="Number of channels to generate out"),
     ),
-    "max_mem": ParamMeta(
-        nom_de_guerre="max-mem",
-        info="Approximate memory cap in GB. Default is 10% of available memory.",
+    "polynomial_order": (
+        "int", True, None,
+        ParamMeta(nom_de_guerre="polynomial-order", info="Order of the spectral polynomial"),
     ),
-    "num_threads": ParamMeta(
-        nom_de_guerre="num-threads", info="Number of threads to use while writing out output images"
+    "max_mem": (
+        "int", False, None,
+        ParamMeta(
+            nom_de_guerre="max-mem",
+            info="Approximate memory cap in GB. Default is 10% of available memory.",
+        ),
     ),
-    "output_prefix": ParamMeta(
-        nom_de_guerre="output-prefix", info="What to prefix the new interpolated model name with"
+    "num_threads": (
+        "int", False, None,
+        ParamMeta(
+            nom_de_guerre="num-threads",
+            info="Number of threads to use while writing out output images",
+        ),
     ),
-    "stokes": ParamMeta(
-        info="Which stokes model to extrapolate, e.g. 'IQUV'. Required when there are "
-        "multiple Stokes images in a directory. Default I."
+    "output_prefix": (
+        "str", False, None,
+        ParamMeta(
+            nom_de_guerre="output-prefix",
+            info="What to prefix the new interpolated model name with",
+        ),
+    ),
+    "stokes": (
+        "str", False, None,
+        ParamMeta(
+            info="Which stokes model to extrapolate, e.g. 'IQUV'. Required when there are "
+            "multiple Stokes images in a directory. Default I.",
+        ),
     ),
 }
 
@@ -53,7 +64,6 @@ smops = define_cab(
     "smops",
     images.SMOPS,
     _FIELDS,
-    field_meta=_FIELD_META,
     policies=Policies(prefix="--"),
     info="smops: Smooth Operator, frequency axis upsampling for WSClean-derived model images "
     "(https://github.com/ratt-ru/smops)",
