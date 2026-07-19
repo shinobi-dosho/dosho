@@ -141,9 +141,18 @@ def _plan_missing_only(monkeypatch, exists, *changed):
         args += ["--changed", c]
     result = CliRunner().invoke(cli.main, args)
     assert result.exit_code == 0, result.output
-    # the JSON plan is the last stdout line (the exclusion notice goes to
-    # stderr, which CliRunner may merge into .output)
-    return json.loads(result.output.strip().splitlines()[-1]), result
+
+    # Click versions differ: some merge stderr into .output, others capture it
+    # separately as .stderr. Ensure we parse JSON from stdout and still expose a
+    # merged output string for assertions.
+    stderr = getattr(result, "stderr", "")
+    if stderr:
+        plan = json.loads(result.output)
+        result.output = stderr + result.output
+    else:
+        plan = json.loads(result.output.strip().splitlines()[-1])
+
+    return plan, result
 
 
 def test_build_plan_missing_only_empty_when_all_tags_present(monkeypatch):
