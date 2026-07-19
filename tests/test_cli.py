@@ -142,15 +142,11 @@ def _plan_missing_only(monkeypatch, exists, *changed):
     result = CliRunner().invoke(cli.main, args)
     assert result.exit_code == 0, result.output
 
-    # Click versions differ: some merge stderr into .output, others capture it
-    # separately as .stderr. Ensure we parse JSON from stdout and still expose a
-    # merged output string for assertions.
-    stderr = getattr(result, "stderr", "")
-    if stderr:
-        plan = json.loads(result.output)
-        result.output = stderr + result.output
-    else:
-        plan = json.loads(result.output.strip().splitlines()[-1])
+    # The plan JSON is always the final echo (to stdout); any "excluded from
+    # plan" notice is echoed to stderr beforehand. Across Click versions
+    # result.output is the merged stderr+stdout stream, so the last line is the
+    # JSON and the whole string still carries the notice for assertions.
+    plan = json.loads(result.output.strip().splitlines()[-1])
 
     return plan, result
 
