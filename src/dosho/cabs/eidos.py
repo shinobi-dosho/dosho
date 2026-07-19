@@ -24,34 +24,46 @@ _FIELDS: dict[str, FieldSpec] = {
     "diameter": ("float", False, None, ParamMeta(info="Diameter of the required beam")),
     "scale": ("float", False, None, ParamMeta(info="Pixel scale in degrees")),
     "freq": (
-        "List[float]", True, None,
+        "List[float]",
+        True,
+        None,
         ParamMeta(
             info="A single freq, or the start, end freqs, and channel width in MHz",
             repeat_as_tokens=True,
         ),
     ),
     "coeff": (
-        "str", True, None,
+        "str",
+        True,
+        None,
         ParamMeta(
             info="Which coefficients to use: mh for MeerKAT holography, me for MeerKAT EM "
             "simulation, vh for VLA holography",
         ),
     ),
     "coefficients_file": (
-        "File", False, None,
+        "File",
+        False,
+        None,
         ParamMeta(nom_de_guerre="coefficients-file", info="Coefficients file"),
     ),
     "prefix": ("str", False, None, ParamMeta(info="Prefix of output beam file(s)")),
     "output_eight": (
-        "bool", False, None,
+        "bool",
+        False,
+        None,
         ParamMeta(nom_de_guerre="output-eight", info="Output complex voltage beams (8 files)"),
     ),
     "thresh": (
-        "int", False, None,
+        "int",
+        False,
+        None,
         ParamMeta(info="How many Zernike coefficients to use. Must be <=20."),
     ),
     "stokes": (
-        "str", False, None,
+        "str",
+        False,
+        None,
         ParamMeta(
             nom_de_guerre="Stokes",
             info="Output in Stokes (Mueller) formalism instead of the default Jones formalism: "

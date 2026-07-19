@@ -163,9 +163,7 @@ def _quiet_casa(ctx) -> None:
             mode="w", suffix="_casasiteconfig.py", delete=False
         ) as config:
             config.write(
-                "nologfile = True\n"
-                "telemetry_enabled = False\n"
-                "crashreporter_enabled = False\n"
+                "nologfile = True\ntelemetry_enabled = False\ncrashreporter_enabled = False\n"
             )
         os.environ["CASASITECONFIG"] = config.name
     casalog = ctx.import_func("casalog", "casatasks")
@@ -1587,9 +1585,7 @@ def fluxscale(
         fitorder=fitorder,
         display=display,
     )
-    return FluxscaleOutputs(
-        fluxtable=fluxtable, listfile=Path(listfile) if listfile else None
-    )
+    return FluxscaleOutputs(fluxtable=fluxtable, listfile=Path(listfile) if listfile else None)
 
 
 class FlagmanagerOutputs(BaseModel):
@@ -1639,7 +1635,12 @@ def flagmanager(
     _quiet_casa(ctx)
     flagmanager_fn = ctx.import_func("flagmanager", "casatasks")
     result = flagmanager_fn(
-        vis=str(vis), mode=mode, versionname=versionname, oldname=oldname, comment=comment, merge=merge
+        vis=str(vis),
+        mode=mode,
+        versionname=versionname,
+        oldname=oldname,
+        comment=comment,
+        merge=merge,
     )
     return FlagmanagerOutputs(vis=vis, versionlist=result if mode == "list" else None)
 
@@ -2042,7 +2043,13 @@ def defintent(
     _quiet_casa(ctx)
     defintent_fn = ctx.import_func("defintent", "casatasks")
     defintent_fn(
-        vis=str(vis), intent=intent, mode=mode, outputvis=outputvis, scan=scan, field=field, obsid=obsid
+        vis=str(vis),
+        intent=intent,
+        mode=mode,
+        outputvis=outputvis,
+        scan=scan,
+        field=field,
+        obsid=obsid,
     )
     return DefintentOutputs(vis=Path(outputvis) if outputvis else vis)
 
@@ -2294,7 +2301,10 @@ def getantposalma(
         tw=tw,
         snr=snr,
         search=search,
-        hosts=hosts or ["https://asa.alma.cl/uncertainties-service/uncertainties/versions/last/measurements/casa/"],
+        hosts=hosts
+        or [
+            "https://asa.alma.cl/uncertainties-service/uncertainties/versions/last/measurements/casa/"
+        ],
         firstintegration=firstintegration,
         nretry=nretry,
         rdelay=rdelay,
@@ -2439,7 +2449,9 @@ def polfromgain(
     """
     _quiet_casa(ctx)
     polfromgain_fn = ctx.import_func("polfromgain", "casatasks")
-    polfromgain_fn(vis=str(vis), tablein=str(tablein), caltable=caltable, paoffset=paoffset, minpacov=minpacov)
+    polfromgain_fn(
+        vis=str(vis), tablein=str(tablein), caltable=caltable, paoffset=paoffset, minpacov=minpacov
+    )
     return PolfromgainOutputs(caltable=Path(caltable) if caltable else None)
 
 
@@ -2475,7 +2487,9 @@ def rerefant(
     """
     _quiet_casa(ctx)
     rerefant_fn = ctx.import_func("rerefant", "casatasks")
-    rerefant_fn(vis=str(vis), tablein=str(tablein), caltable=caltable, refantmode=refantmode, refant=refant)
+    rerefant_fn(
+        vis=str(vis), tablein=str(tablein), caltable=caltable, refantmode=refantmode, refant=refant
+    )
     return RerefantOutputs(caltable=Path(caltable) if caltable else tablein)
 
 
@@ -4025,7 +4039,9 @@ def conjugatevis(
     """
     _quiet_casa(ctx)
     conjugatevis_fn = ctx.import_func("conjugatevis", "casatasks")
-    conjugatevis_fn(vis=str(vis), spwlist=spwlist or "", outputvis=str(outputvis), overwrite=overwrite)
+    conjugatevis_fn(
+        vis=str(vis), spwlist=spwlist or "", outputvis=str(outputvis), overwrite=overwrite
+    )
     return ConjugatevisOutputs(outputvis=outputvis)
 
 
@@ -4251,7 +4267,14 @@ def fixplanets(
     """
     _quiet_casa(ctx)
     fixplanets_fn = ctx.import_func("fixplanets", "casatasks")
-    fixplanets_fn(vis=str(vis), field=field, fixuvw=fixuvw, direction=direction, refant=refant, reftime=reftime)
+    fixplanets_fn(
+        vis=str(vis),
+        field=field,
+        fixuvw=fixuvw,
+        direction=direction,
+        refant=refant,
+        reftime=reftime,
+    )
     return FixplanetsOutputs(vis=vis)
 
 

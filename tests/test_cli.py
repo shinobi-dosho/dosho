@@ -170,8 +170,9 @@ def test_build_plan_missing_only_selects_just_the_absent_tag(monkeypatch):
 def test_build_plan_missing_only_after_manifest_change(monkeypatch):
     # the smart trigger: a manifest edit makes everything a candidate, but only
     # tags that moved (or were never published) actually build
-    plan, _ = _plan_missing_only(monkeypatch, lambda tag: "/cubical:" not in tag,
-                                 "src/dosho/images.yaml")
+    plan, _ = _plan_missing_only(
+        monkeypatch, lambda tag: "/cubical:" not in tag, "src/dosho/images.yaml"
+    )
     assert plan == {"bases": [], "tools": ["CUBICAL"]}
     # a bundle_version bump moves every tag -> all missing -> full rebuild
     plan, _ = _plan_missing_only(monkeypatch, lambda tag: False, "src/dosho/images.yaml")

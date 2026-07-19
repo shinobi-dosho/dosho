@@ -36,7 +36,10 @@ def test_build_entry_composes_registry_name_version_bundle():
 def test_build_entry_honours_explicit_name():
     metadata = {"registry": "ghcr.io/dosho", "bundle_version": "d0.1.0"}
     entry = {"name": "mosaic-queen", "build": {"version": "1.0"}}
-    assert images._resolve_ref("MOSAIC_QUEEN", entry, metadata) == "ghcr.io/dosho/mosaic-queen:1.0-d0.1.0"
+    assert (
+        images._resolve_ref("MOSAIC_QUEEN", entry, metadata)
+        == "ghcr.io/dosho/mosaic-queen:1.0-d0.1.0"
+    )
 
 
 def test_entry_with_neither_ref_nor_build_raises():

@@ -99,7 +99,8 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="psf-image", info="Name of the point spread function file or psf size in arcsec"
+            nom_de_guerre="psf-image",
+            info="Name of the point spread function file or psf size in arcsec",
         ),
     ),
     "residual_image": (
@@ -176,7 +177,8 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="normality-test", info="Name of model to use for normality testing (shapiro, normaltest)"
+            nom_de_guerre="normality-test",
+            info="Name of model to use for normality testing (shapiro, normaltest)",
         ),
     ),
     "data_range": (
@@ -255,7 +257,8 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="fov-factor", info="Factor to multiply the field of view for random points (0.0-1.0)"
+            nom_de_guerre="fov-factor",
+            info="Factor to multiply the field of view for random points (0.0-1.0)",
         ),
     ),
     "tolerance": (
@@ -284,7 +287,8 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="shape-limit", info="Cross-match only sources with a maj-axis equal or less than this value"
+            nom_de_guerre="shape-limit",
+            info="Cross-match only sources with a maj-axis equal or less than this value",
         ),
     ),
     "label": (
@@ -368,7 +372,9 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="flux-plot-title", info="Title labels for the Flux plots", repeat_as_tokens=True
+            nom_de_guerre="flux-plot-title",
+            info="Title labels for the Flux plots",
+            repeat_as_tokens=True,
         ),
     ),
     "position_xlabels1": (
@@ -406,7 +412,9 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="position-xlabels2", info="x-axis labels for the overlay position plots", repeat_as_tokens=True
+            nom_de_guerre="position-xlabels2",
+            info="x-axis labels for the overlay position plots",
+            repeat_as_tokens=True,
         ),
     ),
     "position_ylabels2": (
@@ -414,7 +422,9 @@ _FIELDS: dict[str, FieldSpec] = {
         False,
         None,
         ParamMeta(
-            nom_de_guerre="position-ylabels2", info="y-axis labels for the overlay position plots", repeat_as_tokens=True
+            nom_de_guerre="position-ylabels2",
+            info="y-axis labels for the overlay position plots",
+            repeat_as_tokens=True,
         ),
     ),
     "position_plot_title2": (

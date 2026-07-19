@@ -125,18 +125,14 @@ _IMCONV_FIELDS: dict[str, FieldSpec] = {
         "str",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="beam-model", info="FITS beam model to use (see power_beam_maker)"
-        ),
+        ParamMeta(nom_de_guerre="beam-model", info="FITS beam model to use (see power_beam_maker)"),
     ),
     "band": ("str", False, None, ParamMeta(info="Band to use with JimBeam: L, UHF or S")),
     "pb_min": (
         "float",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="pb-min", info="Set image to zero where pb falls below this value"
-        ),
+        ParamMeta(nom_de_guerre="pb-min", info="Set image to zero where pb falls below this value"),
     ),
     "padding_frac": (
         "float",
@@ -218,9 +214,7 @@ _SPIFIT_FIELDS: dict[str, FieldSpec] = {
         "float",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="pb-min", info="Set image to zero where pb falls below this value"
-        ),
+        ParamMeta(nom_de_guerre="pb-min", info="Set image to zero where pb falls below this value"),
     ),
     "products": (
         "str",
@@ -242,9 +236,7 @@ _SPIFIT_FIELDS: dict[str, FieldSpec] = {
         "bool",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="dont-convolve", info="Bypass the convolution by the clean beam"
-        ),
+        ParamMeta(nom_de_guerre="dont-convolve", info="Bypass the convolution by the clean beam"),
     ),
     "channel_weights": (
         "List[float]",
@@ -268,9 +260,7 @@ _SPIFIT_FIELDS: dict[str, FieldSpec] = {
         "float",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="ref-freq", info="Reference frequency where the I0 map is sought"
-        ),
+        ParamMeta(nom_de_guerre="ref-freq", info="Reference frequency where the I0 map is sought"),
     ),
     "out_dtype": (
         "str",

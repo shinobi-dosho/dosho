@@ -15,43 +15,57 @@ from dosho._builder import FieldSpec, define_cab
 _FIELDS: dict[str, FieldSpec] = {
     "ms": ("MS", True, None, ParamMeta(info="Input MS. Used for getting reference frequency")),
     "input_prefix": (
-        "str", True, None,
+        "str",
+        True,
+        None,
         ParamMeta(
             nom_de_guerre="input-prefix",
             info="The input image prefix, same as the one used for wsclean",
         ),
     ),
     "channels_out": (
-        "int", True, None,
+        "int",
+        True,
+        None,
         ParamMeta(nom_de_guerre="channels-out", info="Number of channels to generate out"),
     ),
     "polynomial_order": (
-        "int", True, None,
+        "int",
+        True,
+        None,
         ParamMeta(nom_de_guerre="polynomial-order", info="Order of the spectral polynomial"),
     ),
     "max_mem": (
-        "int", False, None,
+        "int",
+        False,
+        None,
         ParamMeta(
             nom_de_guerre="max-mem",
             info="Approximate memory cap in GB. Default is 10% of available memory.",
         ),
     ),
     "num_threads": (
-        "int", False, None,
+        "int",
+        False,
+        None,
         ParamMeta(
             nom_de_guerre="num-threads",
             info="Number of threads to use while writing out output images",
         ),
     ),
     "output_prefix": (
-        "str", False, None,
+        "str",
+        False,
+        None,
         ParamMeta(
             nom_de_guerre="output-prefix",
             info="What to prefix the new interpolated model name with",
         ),
     ),
     "stokes": (
-        "str", False, None,
+        "str",
+        False,
+        None,
         ParamMeta(
             info="Which stokes model to extrapolate, e.g. 'IQUV'. Required when there are "
             "multiple Stokes images in a directory. Default I.",

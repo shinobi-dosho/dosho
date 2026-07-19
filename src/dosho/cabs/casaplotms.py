@@ -37,9 +37,7 @@ def _quiet_casa(ctx) -> None:
             mode="w", suffix="_casasiteconfig.py", delete=False
         ) as config:
             config.write(
-                "nologfile = True\n"
-                "telemetry_enabled = False\n"
-                "crashreporter_enabled = False\n"
+                "nologfile = True\ntelemetry_enabled = False\ncrashreporter_enabled = False\n"
             )
         os.environ["CASASITECONFIG"] = config.name
     casalog = ctx.import_func("casalog", "casatasks")

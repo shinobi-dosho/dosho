@@ -52,9 +52,7 @@ _RMSYNTH1D_FIELDS: dict[str, FieldSpec] = {
         "str",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="l", info="Absolute max Faraday depth sampled [Auto if not set]"
-        ),
+        ParamMeta(nom_de_guerre="l", info="Absolute max Faraday depth sampled [Auto if not set]"),
     ),
     "dphi_radm2": (
         "str",
@@ -107,9 +105,7 @@ _RMSYNTH1D_FIELDS: dict[str, FieldSpec] = {
         "bool",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="b", info="Use 64-bit floating point precision [default: 32-bit]"
-        ),
+        ParamMeta(nom_de_guerre="b", info="Use 64-bit floating point precision [default: 32-bit]"),
     ),
     "show_plots": ("bool", False, None, ParamMeta(nom_de_guerre="p", info="Show the plots")),
     "verbose": ("bool", False, None, ParamMeta(nom_de_guerre="v", info="Verbose output")),
@@ -135,9 +131,7 @@ _RMSYNTH1D_FIELDS: dict[str, FieldSpec] = {
         "bool",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="r", info="Optimise the resolution of the RMSF (Rudnick & Cotton)"
-        ),
+        ParamMeta(nom_de_guerre="r", info="Optimise the resolution of the RMSF (Rudnick & Cotton)"),
     ),
 }
 
@@ -186,9 +180,7 @@ _RMSYNTH3D_FIELDS: dict[str, FieldSpec] = {
         "str",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="w", info="Weighting: 'uniform' [default] (all 1s) or 'variance'"
-        ),
+        ParamMeta(nom_de_guerre="w", info="Weighting: 'uniform' [default] (all 1s) or 'variance'"),
     ),
     "fit_rmsf_gaussian": (
         "bool",
@@ -243,9 +235,7 @@ _RMSYNTH3D_FIELDS: dict[str, FieldSpec] = {
         "bool",
         False,
         None,
-        ParamMeta(
-            nom_de_guerre="r", info="Optimise the resolution of the RMSF (Rudnick & Cotton)"
-        ),
+        ParamMeta(nom_de_guerre="r", info="Optimise the resolution of the RMSF (Rudnick & Cotton)"),
     ),
 }
 
