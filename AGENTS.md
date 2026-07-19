@@ -97,9 +97,11 @@ changed base included) to `ghcr.io/shinobi-dosho`, modelled on cult-cargo
 and stimela-classic but with CI-automated push. Every tool is dosho-built
 except the deprecated `SIMMS_CLASSIC` (kept as a `ref:` until removal);
 bumping a tool is editing one manifest entry. Note any `images.yaml` edit
-makes CI rebuild *all* images (by design -- shared metadata like
-`bundle_version` may have moved), though the immutability guard skips
-re-pushing existing tags.
+makes every image a rebuild *candidate* in CI (shared metadata like
+`bundle_version` may have moved), but `build-plan --missing-only` filters
+candidates to tags actually absent from the registry -- so editing one
+entry's version rebuilds just that image, a `bundle_version` bump rebuilds
+everything (every tag moved), and a no-op manifest edit builds nothing.
 
 ## Repo layout
 

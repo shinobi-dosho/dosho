@@ -10,8 +10,12 @@
 # only the images that diff touched, plus dependents of any changed base
 # (`build-plan --changed`) -- so editing one tool's Dockerfile doesn't rebuild
 # the heavy CASA6 image, while editing base-astro rebuilds everything FROM it.
-# A manifest change rebuilds everything; a change to this workflow alone builds
-# nothing (it can't alter image contents).
+# A manifest change makes every image a *candidate* (shared metadata like
+# bundle_version may have moved), but `--missing-only` then filters candidates
+# to tags actually absent from the registry: bumping one entry's version
+# rebuilds just that image, a bundle_version bump rebuilds all (every tag
+# moved), and a no-op manifest edit rebuilds nothing. A change to this
+# workflow alone builds nothing (it can't alter image contents).
 #
 # Two-stage build: shared base images (those referenced via `base:`) build and
 # push FIRST, then the tools that build FROM them (which pull the base from ghcr).
@@ -54,6 +58,13 @@ jobs:
         with:
           fetch-depth: 0 # need history to diff before..after for changed-image selection
       - uses: astral-sh/setup-uv@v5
+      # --missing-only inspects registry tags; log in (anonymous works for
+      # public packages but is rate-limited).
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - id: plan
         env:
           BEFORE: ${{ github.event.before }}
@@ -73,7 +84,7 @@ jobs:
                 args="$args --changed $f"
               done
             fi
-            plan="$(uv run dosho images build-plan $args)"
+            plan="$(uv run dosho images build-plan --missing-only $args)"
             bases="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["bases"]))')"
             tools="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["tools"]))')"
           fi

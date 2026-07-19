@@ -134,6 +134,45 @@ def test_build_plan_changed_manifest_rebuilds_everything():
     assert plan == full
 
 
+def _plan_missing_only(monkeypatch, exists, *changed):
+    monkeypatch.setattr(cli, "_image_exists", exists)
+    args = ["images", "build-plan", "--missing-only"]
+    for c in changed:
+        args += ["--changed", c]
+    result = CliRunner().invoke(cli.main, args)
+    assert result.exit_code == 0, result.output
+    # the JSON plan is the last stdout line (the exclusion notice goes to
+    # stderr, which CliRunner may merge into .output)
+    return json.loads(result.output.strip().splitlines()[-1]), result
+
+
+def test_build_plan_missing_only_empty_when_all_tags_present(monkeypatch):
+    plan, result = _plan_missing_only(monkeypatch, lambda tag: True)
+    assert plan == {"bases": [], "tools": []}
+    assert "excluded from plan" in result.output
+
+
+def test_build_plan_missing_only_full_when_registry_empty(monkeypatch):
+    plan, _ = _plan_missing_only(monkeypatch, lambda tag: False)
+    assert plan == json.loads(CliRunner().invoke(cli.main, ["images", "build-plan"]).output)
+
+
+def test_build_plan_missing_only_selects_just_the_absent_tag(monkeypatch):
+    plan, _ = _plan_missing_only(monkeypatch, lambda tag: "/simms:" not in tag)
+    assert plan == {"bases": [], "tools": ["SIMMS"]}
+
+
+def test_build_plan_missing_only_after_manifest_change(monkeypatch):
+    # the smart trigger: a manifest edit makes everything a candidate, but only
+    # tags that moved (or were never published) actually build
+    plan, _ = _plan_missing_only(monkeypatch, lambda tag: "/cubical:" not in tag,
+                                 "src/dosho/images.yaml")
+    assert plan == {"bases": [], "tools": ["CUBICAL"]}
+    # a bundle_version bump moves every tag -> all missing -> full rebuild
+    plan, _ = _plan_missing_only(monkeypatch, lambda tag: False, "src/dosho/images.yaml")
+    assert plan == json.loads(CliRunner().invoke(cli.main, ["images", "build-plan"]).output)
+
+
 def test_build_plan_changed_unrelated_file_selects_nothing():
     plan = _plan("README.md")
     assert plan == {"bases": [], "tools": []}
