@@ -6,9 +6,10 @@
 [shinobi](https://github.com/SpheMakh/stimela-ninja) (stimela-ninja,
 Stimela 3.0). Every tool is authored directly in Python -- a
 `shinobi.Cab` object for a real binary, or a `@shinobi.pystep`-produced
-`StepRef` for a Python-package tool with no standalone binary (CASA
-tasks) -- instead of a YAML dialect, so there's no `dynamic_schema`-style
-Python-execution step at cab-load time and no dtype coverage gaps.
+`StepRef` for a Python-package tool with no standalone binary (CASA tasks,
+simms 3.0's `skysim`/`telsim`/`primary-beam`) -- instead of a YAML dialect,
+so there's no `dynamic_schema`-style Python-execution step at cab-load time
+and no dtype coverage gaps.
 
 See [`AGENTS.md`](./AGENTS.md) for the design rationale and
 tool-authoring conventions.
@@ -40,12 +41,12 @@ $ ninja cabs show wsclean
 
 ## Status
 
-`dosho` currently hosts 14 real-binary `Cab`s (`wsclean`, `cubical`,
-`quartical`, `aoflagger`, `tricolour`, `crystalball`, `owlcat_plotelev`,
-`shadems`, `ragavi`, `sofia2`, `mosaic-queen`, and all three of `simms`'s
-sub-commands -- `skysim`/`telsim`/classic `simms`) and 14
-`@shinobi.pystep` CASA-task wrappers (`listobs`, `mstransform`, `fixvis`,
-`clearcal`, `initweights`, `flagdata`, `setjy`, `gaincal`, `polcal`,
-`bandpass`, `applycal`, `fluxscale`, `flagmanager`, `plotms`) -- the full
-set a real pipeline ([caracal2](https://github.com/caracal-pipeline/caracal2))
-needs.
+`dosho` currently hosts 42 real-binary `Cab`s (`wsclean`, `cubical`,
+`quartical`, `ddfacet`, `killms`, `aoflagger`, `tricolour`, `crystalball`,
+`shadems`, `ragavi`, `sofia2`, `mosaic-queen`, classic `simms`, ...) and 62
+`@shinobi.pystep` wrappers around Python-package tools with no standalone
+binary -- CASA tasks (`listobs`, `mstransform`, `gaincal`, `bandpass`,
+`applycal`, `tclean`, ...) and simms 3.0's `skysim`/`telsim`/`primary-beam`
+(pysteps as of simms 3.0, no longer a `simms` sub-command binary) -- the
+set a real pipeline
+([caracal2](https://github.com/caracal-pipeline/caracal2)) needs.
