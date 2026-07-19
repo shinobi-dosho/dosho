@@ -40,7 +40,7 @@ images:
       cmd: "python3 --version"
       dockerfile: base-astro/Dockerfile
 
-  # ---- dosho-built ----
+  # ---- dosho-built (everything except the deprecated SIMMS_CLASSIC ref: below) ----
   SIMMS:
     name: simms
     source: "https://github.com/wits-cfa/simms"
@@ -63,7 +63,6 @@ images:
       cmd: "msutils --help"
       dockerfile: pip/Dockerfile
 
-  # ---- still referencing existing published images (onboarded incrementally) ----
   WSCLEAN:
     source: "https://gitlab.com/aroffringa/wsclean"
     name: wsclean
@@ -73,9 +72,17 @@ images:
       package_version: "3.6"
       cmd: "wsclean --version"
       dockerfile: wsclean/Dockerfile
+  # cubical 1.6.4 predates Python 3.10 (`from collections import Iterator` in
+  # its own source) -- built on a dedicated era-correct Python 3.9 base, same
+  # as the stimela2 image it replaces; see cargo/cubical/Dockerfile.
   CUBICAL:
     source: "https://github.com/ratt-ru/CubiCal"
-    ref: "quay.io/stimela2/cubical:1.6.4-cc0.2.1"
+    name: cubical
+    build:
+      version: "1.6.4"
+      python_version: "3.9"
+      cmd: "gocubical --help"
+      dockerfile: cubical/Dockerfile
   QUARTICAL:
     source: "https://github.com/ratt-ru/QuartiCal"
     name: quartical

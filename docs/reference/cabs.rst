@@ -1815,7 +1815,7 @@ cubical
 CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
 
 :Command: ``gocubical``
-:Image: ``quay.io/stimela2/cubical:1.6.4-cc0.2.1`` (``CUBICAL`` 1.6.4-cc0.2.1, ref)
+:Image: ``ghcr.io/shinobi-dosho/cubical:1.6.4-d0.1.0`` (``CUBICAL`` 1.6.4, build)
 :Source: https://github.com/ratt-ru/CubiCal
 
 **Inputs**
