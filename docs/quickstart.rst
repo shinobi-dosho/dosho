@@ -12,7 +12,7 @@ tasks, simms) export one object per sub-command from a shared module:
 
     from dosho.cabs import wsclean, cubical
     from dosho.cabs.casatasks import listobs, gaincal
-    from dosho.cabs.simms import skysim, telsim, simms_classic
+    from dosho.cabs.simms import skysim, telsim, primary_beam, simms_classic
 
 Only know the name at runtime (e.g. it came from a config file)? Use the
 string-keyed registry instead -- the same objects, looked up by name:

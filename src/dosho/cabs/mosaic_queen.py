@@ -18,11 +18,15 @@ from dosho._builder import FieldSpec, define_cab
 
 _FIELDS: dict[str, FieldSpec] = {
     "input": (
-        "Directory", True, None,
+        "Directory",
+        True,
+        None,
         ParamMeta(info="Directory containing the (2D or 3D) images and beams.", positional=True),
     ),
     "target_images": (
-        "List[File]", True, None,
+        "List[File]",
+        True,
+        None,
         ParamMeta(
             nom_de_guerre="target-images",
             info="Space-separated list of images to be mosaicked; 'image.fits' automatically "
@@ -31,18 +35,24 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "name": (
-        "str", True, None,
+        "str",
+        True,
+        None,
         ParamMeta(info="Prefix to be used for output files.", positional=True),
     ),
     "num_workers": (
-        "int", False, 0,
+        "int",
+        False,
+        0,
         ParamMeta(
             nom_de_guerre="num-workers",
             info="Number of worker threads; 0 uses all available threads.",
         ),
     ),
     "associated_mosaics": (
-        "List[File]", False, None,
+        "List[File]",
+        False,
+        None,
         ParamMeta(
             nom_de_guerre="associated-mosaics",
             info="Also make mosaics of associated files; space-separated list. e.g masks, models "
@@ -51,21 +61,27 @@ _FIELDS: dict[str, FieldSpec] = {
     ),
     "regrid": ("bool", False, None, ParamMeta(info="Use montage for regridding images and beams.")),
     "force_regrid": (
-        "bool", False, None,
+        "bool",
+        False,
+        None,
         ParamMeta(
             nom_de_guerre="force-regrid",
             info="Force newly-regridded files even if they exist.",
         ),
     ),
     "beam_cutoff": (
-        "float", False, 0.1,
+        "float",
+        False,
+        0.1,
         ParamMeta(
             nom_de_guerre="beam-cutoff",
             info="Cutoff in the primary beam (e.g., 0.1 = 10% level).",
         ),
     ),
     "mosaic_cutoff": (
-        "float", False, 0.2,
+        "float",
+        False,
+        0.2,
         ParamMeta(
             nom_de_guerre="mosaic-cutoff",
             info="Sensitivity cutoff in final mosaic; pixels with noise > min_noise / cutoff are "
@@ -73,30 +89,42 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "unity_weights": (
-        "bool", False, None,
+        "bool",
+        False,
+        None,
         ParamMeta(nom_de_guerre="unity-weights", info="Use weight=1 instead of weight=1/noise**2."),
     ),
     "statistic": (
-        "str", False, "mad",
+        "str",
+        False,
+        "mad",
         ParamMeta(info="Statistic to use for estimating noise in input images."),
     ),
     "guess_std": (
-        "float", False, 0.02,
+        "float",
+        False,
+        0.02,
         ParamMeta(
             nom_de_guerre="guess-std",
             info="Initial guess of noise level for '--statistic fit'.",
         ),
     ),
     "ra": (
-        "float", False, None,
+        "float",
+        False,
+        None,
         ParamMeta(info="Central RA (deg) of output mosaic if not imaging full FoV."),
     ),
     "dec": (
-        "float", False, None,
+        "float",
+        False,
+        None,
         ParamMeta(info="Central Dec (deg) of output mosaic if not imaging full FoV."),
     ),
     "velocity": (
-        "float", False, None,
+        "float",
+        False,
+        None,
         ParamMeta(info="Central velocity/frequency of output mosaic cube."),
     ),
     "dra": ("float", False, None, ParamMeta(info="RA range of output mosaic image/cube.")),
@@ -106,7 +134,9 @@ _FIELDS: dict[str, FieldSpec] = {
 
 _OUTPUTS: dict[str, FieldSpec] = {
     "output": (
-        "Directory", True, None,
+        "Directory",
+        True,
+        None,
         ParamMeta(info="Directory for all output files.", positional=True),
     ),
 }

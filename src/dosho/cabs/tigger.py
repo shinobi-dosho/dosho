@@ -381,7 +381,6 @@ _CONVERT_FIELDS: dict[str, FieldSpec] = {
         None,
         ParamMeta(nom_de_guerre="enable-plots", info="Enable various diagnostic plots"),
     ),
-
 }
 
 convert = define_cab(
@@ -498,7 +497,6 @@ _RESTORE_FIELDS: dict[str, FieldSpec] = {
         ParamMeta(info="Verbosity level (0 is silent, higher is more verbose)"),
     ),
     "timestamps": ("bool", False, None, ParamMeta(info="Enable timestamps in debug messages")),
-
 }
 
 restore = define_cab(

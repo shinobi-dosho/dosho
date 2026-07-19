@@ -1,3 +1,7 @@
+from typing import get_args
+
+import pytest
+from pydantic import ValidationError
 from shinobi.policies import build_argv
 from shinobi.steps.schema import ParamMeta, ParamPattern, ParamSegment, Policies
 
@@ -93,6 +97,46 @@ def test_policies_pass_through():
     )
     assert cab.policies.key_value is True
     assert cab.policies.repeat == "[]"
+
+
+def test_param_meta_choices_narrow_the_model_to_a_literal():
+    # A ParamMeta.choices is threaded into build_model, narrowing the field's
+    # real annotation to typing.Literal so an out-of-set value fails pydantic
+    # validation -- not merely documented in info text.
+    cab = define_cab(
+        "tool",
+        "tool",
+        "quay.io/example/tool:1.0",
+        {"mode": ("str", True, None, ParamMeta(choices=["dirty", "clean", "predict"]))},
+    )
+    field = cab.inputs_model.model_fields["mode"]
+    assert get_args(field.annotation) == ("dirty", "clean", "predict")
+    cab.inputs_model(mode="dirty")  # in-set accepted
+    with pytest.raises(ValidationError):
+        cab.inputs_model(mode="bogus")  # out-of-set rejected
+
+
+def test_param_meta_abbreviation_lands_in_json_schema_extra():
+    # A ParamMeta.abbreviation is carried onto the field's json_schema_extra so
+    # shinobi's clickutil.build_options can emit a `-<abbrev>` CLI short flag.
+    cab = define_cab(
+        "tool",
+        "tool",
+        "quay.io/example/tool:1.0",
+        {
+            "ascii_sky": (
+                "File",
+                False,
+                None,
+                ParamMeta(nom_de_guerre="ascii-sky", abbreviation="as"),
+            )
+        },
+    )
+    field = cab.inputs_model.model_fields["ascii_sky"]
+    assert field.json_schema_extra == {"abbreviation": "as"}
+    # the CLI flag itself is still driven by nom_de_guerre, unaffected
+    argv = build_argv(cab, {"ascii_sky": "/m.txt"})
+    assert "--ascii-sky" in argv
 
 
 def test_sandbox_and_harvest_pass_through():

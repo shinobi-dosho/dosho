@@ -76,6 +76,27 @@ set its own ``nom_de_guerre`` keeps the auto-derived one. Raw
 ``Cab(...)`` construction stays fully available for anything the helper
 doesn't cover.
 
+Choices and CLI abbreviations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A field's ``ParamMeta`` can also carry ``choices`` and ``abbreviation``,
+both threaded through :func:`shinobi.loaders.build_model` by
+``define_cab``:
+
+* ``choices=[...]`` narrows the built model's field to
+  ``typing.Literal[*choices]``, so an out-of-set value fails real pydantic
+  validation rather than only being documented in ``info`` text. Every
+  field default must be a member of the set (or ``None``).
+* ``abbreviation="xy"`` attaches a ``json_schema_extra`` hint so
+  ``ninja run`` can offer a single-dash short alias (``--long-flag/-xy``)
+  alongside the generated long flag. It never changes the argv the tool
+  itself receives -- that still uses ``nom_de_guerre``.
+
+.. code-block:: python
+
+    "mode": ("str", False, "clean", ParamMeta(choices=["dirty", "clean", "predict"])),
+    "ascii-sky": ("File", False, None, ParamMeta(abbreviation="as")),
+
 Dynamic per-instance parameter families
 ------------------------------------------
 

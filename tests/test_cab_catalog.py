@@ -75,7 +75,9 @@ def test_committed_catalog_is_fresh(tmp_path):
     app = types.SimpleNamespace(srcdir=str(tmp_path))
     cab_catalog._generate(app)
     generated = (tmp_path / "reference" / "cabs.rst").read_text()
-    committed = (Path(__file__).resolve().parents[1] / "docs" / "reference" / "cabs.rst").read_text()
+    committed = (
+        Path(__file__).resolve().parents[1] / "docs" / "reference" / "cabs.rst"
+    ).read_text()
     assert generated == committed, (
         "docs/reference/cabs.rst is stale -- regenerate with "
         "`uv run python docs/_ext/cab_catalog.py` and commit it"

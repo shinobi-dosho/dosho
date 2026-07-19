@@ -2746,7 +2746,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0``
      - \-
    * - ``output_mode``
-     - ``str | None``
+     - ``Literal['Dirty', 'Clean', 'Predict', 'PSF'] | None``
      - ``'Clean'``
      - \-
    * - ``output_clobber``
@@ -2778,7 +2778,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'DdPAMRIikemz'``
      - \-
    * - ``output_stokes_residues``
-     - ``str | None``
+     - ``Literal['I', 'IQ', 'IV', 'QU', 'IQUV'] | None``
      - ``'I'``
      - \-
    * - ``spi_maps_alpha_threshold``
@@ -2866,7 +2866,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'WEIGHT_SPECTRUM'``
      - \-
    * - ``weight_mode``
-     - ``str | None``
+     - ``Literal['Natural', 'Uniform', 'Robust', 'Briggs'] | None``
      - ``'Briggs'``
      - \-
    * - ``weight_mfs``
@@ -2906,11 +2906,11 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0.5``
      - \-
    * - ``rime_precision``
-     - ``str | None``
+     - ``Literal['S', 'D'] | None``
      - ``'S'``
      - \-
    * - ``rime_pol_mode``
-     - ``str | None``
+     - ``Literal['I', 'IQ', 'IU', 'IV', 'IQU', 'IQUV'] | None``
      - ``'I'``
      - \-
    * - ``rime_full_m_tilde``
@@ -2922,11 +2922,11 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'FFTW'``
      - \-
    * - ``rime_forward_mode``
-     - ``str | None``
+     - ``Literal['BDA-degrid', 'Classic', 'Montblanc'] | None``
      - ``'BDA-degrid'``
      - \-
    * - ``rime_backward_mode``
-     - ``str | None``
+     - ``Literal['BDA-grid', 'Classic'] | None``
      - ``'BDA-grid'``
      - \-
    * - ``rime_decorr_mode``
@@ -2934,7 +2934,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``None``
      - \-
    * - ``rime_decorr_location``
-     - ``str | None``
+     - ``Literal['Center', 'Edge'] | None``
      - ``'Edge'``
      - \-
    * - ``cf_over_s``
@@ -2958,7 +2958,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0.02``
      - \-
    * - ``comp_grid_fo_v``
-     - ``str | None``
+     - ``Literal['Full', 'Facet'] | None``
      - ``'Facet'``
      - \-
    * - ``comp_degrid_decorr``
@@ -2966,7 +2966,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0.02``
      - \-
    * - ``comp_degrid_fo_v``
-     - ``str | None``
+     - ``Literal['Full', 'Facet'] | None``
      - ``'Facet'``
      - \-
    * - ``comp_sparsification``
@@ -2974,7 +2974,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0``
      - \-
    * - ``comp_bda_mode``
-     - ``int | None``
+     - ``Literal[1, 2] | None``
      - ``1``
      - \-
    * - ``comp_bda_jones``
@@ -2998,27 +2998,27 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``False``
      - \-
    * - ``cache_jones``
-     - ``str | None``
+     - ``Literal['reset', 'auto'] | None``
      - ``'auto'``
      - \-
    * - ``cache_smooth_beam``
-     - ``str | None``
+     - ``Literal['reset', 'auto', 'force'] | None``
      - ``'auto'``
      - \-
    * - ``cache_weight``
-     - ``str | None``
+     - ``Literal['reset', 'auto'] | None``
      - ``'auto'``
      - \-
    * - ``cache_psf``
-     - ``str | None``
+     - ``Literal['off', 'reset', 'auto', 'force'] | None``
      - ``'auto'``
      - \-
    * - ``cache_dirty``
-     - ``str | None``
+     - ``Literal['off', 'reset', 'auto', 'forcedirty', 'forceresidual'] | None``
      - ``'auto'``
      - \-
    * - ``cache_vis_data``
-     - ``str | None``
+     - ``Literal['off', 'auto', 'force'] | None``
      - ``'auto'``
      - \-
    * - ``cache_last_residual``
@@ -3050,15 +3050,15 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``False``
      - \-
    * - ``beam_model``
-     - ``str | None``
+     - ``Literal['None', 'LOFAR', 'FITS', 'GMRT', 'ATCA', 'NENUFAR', 'Everybeam'] | None``
      - ``None``
      - \-
    * - ``beam_at``
-     - ``str | None``
+     - ``Literal['facet', 'tessel'] | None``
      - ``'facet'``
      - \-
    * - ``beam_phased_array_mode``
-     - ``str | None``
+     - ``Literal['A', 'AE'] | None``
      - ``'A'``
      - \-
    * - ``beam_force_scalar``
@@ -3090,7 +3090,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'beam_$(corr)_$(reim).fits'``
      - \-
    * - ``beam_fits_feed``
-     - ``str | None``
+     - ``Literal['None', 'xy', 'XY', 'rl', 'RL'] | None``
      - ``None``
      - \-
    * - ``beam_fits_feed_swap``
@@ -3118,7 +3118,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0``
      - \-
    * - ``beam_fits_frame``
-     - ``str | None``
+     - ``Literal['altaz', 'altazgeo', 'equatorial', 'zenith'] | None``
      - ``'altaz'``
      - \-
    * - ``beam_feed_angle``
@@ -3174,7 +3174,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'AP'``
      - \-
    * - ``dde_solutions_jones_mode``
-     - ``str | None``
+     - ``Literal['Scalar', 'Diag', 'Full'] | None``
      - ``'Full'``
      - \-
    * - ``dde_solutions_dd_mode_grid``
@@ -3198,7 +3198,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``10.0``
      - \-
    * - ``dde_solutions_type``
-     - ``str | None``
+     - ``Literal['Krigging', 'Nearest'] | None``
      - ``'Nearest'``
      - \-
    * - ``dde_solutions_scale``
@@ -3222,11 +3222,11 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``None``
      - \-
    * - ``pointing_solutions_interpolation_mode``
-     - ``str | None``
+     - ``Literal['LERP'] | None``
      - ``'LERP'``
      - \-
    * - ``deconv_mode``
-     - ``str | None``
+     - ``Literal['HMP', 'Hogbom', 'SSD', 'WSCMS', 'SSD2'] | None``
      - ``'HMP'``
      - \-
    * - ``deconv_max_major_iter``
@@ -3326,7 +3326,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``6``
      - \-
    * - ``hmp_solver_mode``
-     - ``str | None``
+     - ``Literal['PI', 'NNLS'] | None``
      - ``'PI'``
      - \-
    * - ``hmp_allow_resid_increase``
@@ -3366,7 +3366,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``4``
      - \-
    * - ``hogbom_linear_peakfinding``
-     - ``str | None``
+     - ``Literal['Joint', 'Separate'] | None``
      - ``'Joint'``
      - \-
    * - ``wscms_num_freq_basis_funcs``
@@ -3442,15 +3442,15 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``4.0``
      - \-
    * - ``montblanc_log_level``
-     - ``str | None``
+     - ``Literal['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] | None``
      - ``'WARNING'``
      - \-
    * - ``montblanc_solver_d_type``
-     - ``str | None``
+     - ``Literal['single', 'double'] | None``
      - ``'double'``
      - \-
    * - ``montblanc_driver_version``
-     - ``str | None``
+     - ``Literal['tf'] | None``
      - ``'tf'``
      - \-
    * - ``ssd_clean_parallel``
@@ -3726,7 +3726,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0``
      - \-
    * - ``debug_pdb``
-     - ``str | None``
+     - ``Literal['never', 'always', 'auto'] | None``
      - ``'auto'``
      - \-
    * - ``misc_random_seed``
@@ -10047,9 +10047,8 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
 simms-primary-beam
 ------------------
 
-simms primary-beam: PB utilities -- to-fits/tag-ms/apply/correct (simms 3.0)
+Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simms 3.0).
 
-:Command: ``simms primary-beam``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0`` (``SIMMS`` 3.0.0, build)
 :Source: https://github.com/wits-cfa/simms
 
@@ -10064,97 +10063,101 @@ simms primary-beam: PB utilities -- to-fits/tag-ms/apply/correct (simms 3.0)
      - Default
      - Description
    * - ``mode``
-     - ``str``
+     - ``Literal['to-fits', 'tag-ms', 'apply', 'correct']``
      - *required*
      - \-
    * - ``beam_pattern``
      - ``str | None``
      - ``None``
-     - \-
+     - Beam model: a cosine-taper CSV path, a built-in name, a band shorthand (L/UHF), or a FITS cube.
    * - ``beam_band``
-     - ``str | None``
+     - ``Literal['UHF', 'L']``
      - ``'L'``
-     - \-
+     - Default band for a built-in beam when beam-pattern omits one.
    * - ``beam_pa_step``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Parallactic-angle sampling step (degrees) for the time-averaged beam.
    * - ``ms``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - Measurement set (time/PA range, array position and frequencies). Required for tag-ms/apply/correct.
    * - ``fits_sky``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - Input FITS image sky model (apply/correct).
    * - ``ascii_sky``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - Input ASCII component sky model (apply/correct).
    * - ``ascii_delimiter``
      - ``str | None``
      - ``None``
-     - \-
+     - Delimiter used in the ascii-sky file. Defaults to whitespace.
    * - ``source_schema``
-     - ``Path | None``
-     - ``None``
-     - \-
-   * - ``output``
-     - ``Path | None``
-     - ``None``
-     - \-
-   * - ``telescope_name_column``
      - ``str | None``
+     - ``None``
+     - Custom source schema (YAML) mapping the ascii-sky columns to the fields simms expects.
+   * - ``output``
+     - ``str | None``
+     - ``None``
+     - Output path - FITS beam (to-fits) or beamed/corrected sky model (apply/correct).
+   * - ``telescope_name_column``
+     - ``str``
      - ``'TELESCOPE_NAME'``
-     - \-
+     - ANTENNA-table column holding the per-antenna telescope/type label (tag-ms).
    * - ``label``
      - ``str | None``
      - ``None``
-     - \-
+     - Single telescope-name label applied to all antennas (tag-ms).
    * - ``label_map``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - YAML mapping antenna NAME -> telescope-name label (tag-ms).
    * - ``from_layout``
      - ``str | None``
      - ``None``
-     - \-
+     - simms layout whose per-antenna telescope\_name is matched to the MS antenna names (tag-ms).
    * - ``pb_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - In correct mode, blank (NaN) where the beam is below this level.
    * - ``field_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - FIELD\_ID whose phase centre and time span define the beam (apply/correct).
    * - ``spw_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spectral-window (DATA\_DESC\_ID) whose frequencies define the beam (apply/correct).
    * - ``pixel_size``
-     - ``str | None``
+     - ``str``
      - ``'1arcmin'``
-     - \-
+     - Angular pixel size for the to-fits grid, e.g. '1arcmin'.
    * - ``npix``
-     - ``int | None``
+     - ``int``
      - ``256``
-     - \-
+     - Number of pixels per side for the to-fits grid.
    * - ``start_freq``
      - ``str | None``
      - ``None``
-     - \-
+     - Start frequency of the to-fits cube, e.g. '856MHz'. Defaults to the beam's first frequency.
    * - ``chan_width``
      - ``str | None``
      - ``None``
-     - \-
+     - Channel width of the to-fits cube, e.g. '10MHz'. Defaults to spanning the beam range across nchan.
    * - ``nchan``
      - ``int | None``
      - ``None``
-     - \-
+     - Number of output channels in the to-fits cube. Defaults to the beam's channel count.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of worker threads.
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Logging verbosity.
 
 **Outputs**
 
@@ -10165,19 +10168,15 @@ simms primary-beam: PB utilities -- to-fits/tag-ms/apply/correct (simms 3.0)
    * - Field
      - Type
      - Description
-   * - ``ms``
-     - ``Path | None``
-     - \-
    * - ``output``
-     - ``Path | None``
+     - ``str | None``
      - \-
 
 simms-skysim
 ------------
 
-simms skysim: simulate visibilities from a sky model (simms 3.0)
+Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
 
-:Command: ``simms skysim``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0`` (``SIMMS`` 3.0.0, build)
 :Source: https://github.com/wits-cfa/simms
 
@@ -10192,109 +10191,145 @@ simms skysim: simulate visibilities from a sky model (simms 3.0)
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``str``
      - *required*
      - \-
    * - ``ascii_sky``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - Catalogue of sources. See the documentation for accepted units.
    * - ``fits_sky``
-     - ``Path | list[Path] | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - FITS file (or directory of Stokes cubes) containing the sky model.
+   * - ``wsclean_sky``
+     - ``str | None``
+     - ``None``
+     - WSClean component list (point and Gaussian components, Stokes I).
    * - ``fits_sky_interp``
-     - ``str | None``
-     - ``'nearest'``
-     - \-
-   * - ``polarisation``
-     - ``bool | None``
-     - ``True``
-     - \-
-   * - ``pol_basis``
-     - ``str | None``
+     - ``Literal['nearest', 'linear', 'cubic']``
      - ``'linear'``
-     - \-
-   * - ``pixel_tol``
-     - ``float | None``
-     - ``'1e-7'``
-     - \-
-   * - ``fft_precision``
-     - ``str | None``
-     - ``'double'``
-     - \-
-   * - ``do_wstacking``
-     - ``bool | None``
+     - Interpolation method when the MS and FITS frequency grids do not match and the cube is kept.
+   * - ``polarisation``
+     - ``bool``
      - ``True``
-     - \-
+     - Simulate all available Stokes parameters. If false, only Stokes I.
+   * - ``pol_basis``
+     - ``Literal['linear', 'circular']``
+     - ``'linear'``
+     - Polarization basis for the simulation.
+   * - ``pixel_tol``
+     - ``float``
+     - ``1e-07``
+     - Minimum brightness for a pixel to be considered in direct Fourier transform.
+   * - ``fits_spectrum``
+     - ``Literal['auto', 'flat', 'poly', 'cube']``
+     - ``'auto'``
+     - How the FITS sky model varies with frequency.
+   * - ``fits_spi``
+     - ``list[str] | None``
+     - ``None``
+     - Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
+   * - ``fits_ref_freq``
+     - ``float | None``
+     - ``None``
+     - Reference frequency (Hz) of an analytic FITS spectrum. Defaults to the MS band centre.
+   * - ``fits_spectrum_order``
+     - ``int``
+     - ``2``
+     - Order of the fitted log-polynomial spectrum. 1 is a plain spectral index.
+   * - ``predict_backend``
+     - ``Literal['auto', 'dft', 'fft', 'perchan']``
+     - ``'auto'``
+     - Backend for FITS sky model prediction.
+   * - ``fft_precision``
+     - ``Literal['single', 'double']``
+     - ``'double'``
+     - Precision of the FFT calculation.
+   * - ``do_wstacking``
+     - ``bool``
+     - ``True``
+     - Whether to use w-stacking for FFT-based visibility prediction.
    * - ``ascii_delimiter``
      - ``str | None``
      - ``None``
-     - \-
+     - Delimiter used in the ascii-sky.
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - Data column for simulation.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of workers (one per CPU).
    * - ``row_chunks``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - Number of rows per chunk. Controls the row-wise task/memory granularity.
+   * - ``chan_chunks``
+     - ``int | None``
+     - ``None``
+     - Number of channels per chunk. Defaults to all channels in one chunk.
+   * - ``primary_beam``
+     - ``str | None``
+     - ``None``
+     - Beam-config YAML mapping each ANTENNA telescope name to a beam model. Requires a linear pol basis.
+   * - ``beam_band``
+     - ``Literal['UHF', 'L']``
+     - ``'L'``
+     - Default band for JimBeam entries that omit an explicit model/CSV.
+   * - ``beam_pa_step``
+     - ``float``
+     - ``1.0``
+     - Spacing (degrees) of the parallactic-angle grid the beam is sampled on.
+   * - ``beam_grid_max_gib``
+     - ``float``
+     - ``4.0``
+     - Hard ceiling (GiB) on the sampled beam grid held in memory for the whole run.
+   * - ``beam_jones``
+     - ``Literal['diagonal', 'full']``
+     - ``'diagonal'``
+     - Primary-beam application for component skies: per-feed voltage or full 2x2 E-Jones.
+   * - ``telescope_name_column``
+     - ``str``
+     - ``'TELESCOPE_NAME'``
+     - ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
    * - ``field_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Field ID.
    * - ``spw_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spectral Window ID.
    * - ``sefd``
      - ``float | None``
      - ``None``
-     - \-
-   * - ``ascii_species``
-     - ``str | None``
+     - Add noise using this SEFD value.
+   * - ``seed``
+     - ``int | None``
      - ``None``
-     - \-
+     - Random seed for the thermal noise. Omit for a non-reproducible run.
+   * - ``ascii_species``
+     - ``Literal['bdsf_gaul', 'aegean', 'wsclean'] | None``
+     - ``None``
+     - Non-simms sky model type.
    * - ``input_column``
      - ``str | None``
      - ``None``
-     - \-
+     - Input column (see --mode).
    * - ``mode``
-     - ``str | None``
+     - ``Literal['sim', 'add', 'subtract']``
      - ``'sim'``
-     - \-
+     - Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it.
    * - ``source_schema``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
-   * - ``primary_beam``
-     - ``Path | None``
-     - ``None``
-     - \-
-   * - ``beam_band``
-     - ``str | None``
-     - ``'L'``
-     - \-
-   * - ``beam_pa_step``
-     - ``float | None``
-     - ``1.0``
-     - \-
-   * - ``beam_grid_max_gib``
-     - ``float | None``
-     - ``4.0``
-     - \-
-   * - ``beam_jones``
-     - ``str | None``
-     - ``'diagonal'``
-     - \-
-   * - ``telescope_name_column``
-     - ``str | None``
-     - ``'TELESCOPE_NAME'``
-     - \-
+     - Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects.
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Logging verbosity.
 
 **Outputs**
 
@@ -10306,15 +10341,14 @@ simms skysim: simulate visibilities from a sky model (simms 3.0)
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``str | None``
      - \-
 
 simms-telsim
 ------------
 
-simms telsim: simulate a telescope MS from scratch, optionally with noise (simms 3.0)
+Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
 
-:Command: ``simms telsim``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0`` (``SIMMS`` 3.0.0, build)
 :Source: https://github.com/wits-cfa/simms
 
@@ -10329,105 +10363,113 @@ simms telsim: simulate a telescope MS from scratch, optionally with noise (simms
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``str``
      - *required*
      - \-
    * - ``telescope``
      - ``str``
      - *required*
-     - \-
+     - Name of telescope you are simulating.
    * - ``subarray_list``
      - ``list[str] | None``
      - ``None``
-     - \-
+     - Custom list of antennas to use, e.g. M000,M005,SKA009. Must be a subarray of the given telescope.
    * - ``subarray_range``
      - ``list[int] | None``
      - ``None``
-     - \-
+     - Custom range of antenna indices to use, e.g. start,end,step (step optional). Must be a subarray of the given telescope.
    * - ``subarray_file``
-     - ``Path | None``
-     - ``None``
-     - \-
-   * - ``direction``
      - ``str | None``
+     - ``None``
+     - File listing custom antennas to use (antnames key, e.g. [M000,M005,SKA009]). Must be a subarray of the given telescope.
+   * - ``telescope_name_column``
+     - ``str``
+     - ``'TELESCOPE_NAME'``
+     - Name of the ANTENNA-table column that holds the per-antenna telescope/type label (used by skysim to select a primary beam).
+   * - ``direction``
+     - ``str``
      - ``'J2000,1h0m0s,-31d0m0s'``
-     - \-
+     - Direction of field centre for MS, e.g. J2000,0h24m20s,-30d12m33s.
    * - ``starttime``
      - ``str | None``
      - ``None``
-     - \-
+     - Observation start time in UTC, e.g. '2024-03-14T06:15:10'. Default is the current machine time.
    * - ``startha``
      - ``float | None``
      - ``None``
-     - \-
+     - Hour angle at start of observation. Can be used instead of date.
    * - ``dtime``
-     - ``float | None``
+     - ``float``
      - ``8``
-     - \-
+     - Integration/exposure time in seconds.
    * - ``ntime``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Number of time slots for MS.
    * - ``startfreq``
-     - ``str | float | None``
+     - ``str | float``
      - ``'1420MHz'``
-     - \-
+     - Centre of first frequency channel, e.g 0.55GHz. Hertz assumed if no units.
    * - ``dfreq``
-     - ``str | float | None``
+     - ``str | float``
      - ``'1MHz'``
-     - \-
+     - Channel width, e.g 2.4MHz. Hertz assumed if no units.
    * - ``nchan``
-     - ``int | None``
+     - ``int``
      - ``9``
-     - \-
+     - Number of frequency channels.
    * - ``correlations``
-     - ``str | None``
+     - ``str``
      - ``'XX,YY'``
-     - \-
+     - Feed correlations for MS, e.g. 'XX,YY'.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of workers (one per CPU).
    * - ``rowchunks``
-     - ``int | None``
+     - ``int``
      - ``50000``
-     - \-
+     - Number of chunks to divide the data into; more chunks improves computation speed.
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'MODEL_DATA'``
-     - \-
+     - The column in which to corrupt the visibilities with noise.
    * - ``sefd``
      - ``float | None``
      - ``None``
-     - \-
+     - Antenna SEFD (one value for all frequencies).
    * - ``tsys_over_eta``
      - ``float | None``
      - ``None``
-     - \-
+     - Antenna system temperature over aperture efficiency (one value for all frequencies).
    * - ``sensitivity_file``
-     - ``Path | None``
+     - ``str | None``
      - ``None``
-     - \-
+     - File with antenna spectral sensitivity info. Keys: 'freq, tsys, sefd, tsys\_over\_eta'.
    * - ``low_source_limit``
      - ``float | None``
      - ``None``
-     - \-
+     - Minimum reliable source elevation (deg); data below this is flagged.
    * - ``high_source_limit``
      - ``float | None``
      - ``None``
-     - \-
+     - Maximum reliable source elevation (deg); data above this is flagged.
    * - ``freq_range``
      - ``str | None``
      - ``None``
-     - \-
+     - A list of start frequency, end frequency, and number of channels, e.g. startfreq,endfreq,nchan.
    * - ``smooth``
      - ``str | None``
      - ``None``
-     - \-
+     - SEFD fitting option when a sensitivity file is given: 'polyn' or 'spline'.
    * - ``fit_order``
      - ``int | None``
      - ``None``
-     - \-
+     - Fitting order used when approximating the MS-frequency SEFDs.
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Logging verbosity.
 
 **Outputs**
 
@@ -10439,7 +10481,7 @@ simms telsim: simulate a telescope MS from scratch, optionally with noise (simms
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``str | None``
      - \-
 
 smoothcal

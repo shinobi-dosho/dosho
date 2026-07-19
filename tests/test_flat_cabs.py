@@ -1,8 +1,8 @@
 """The remaining mechanically-ported flat cabs (aoflagger, tricolour,
-crystalball, owlcat_plotelev, shadems, ragavi-vis/gains, sofia2, simms-skysim,
-simms-telsim, simms (classic), mosaic-queen, breizorro, aimfast, eidos,
-smops, aegean, rmsynth1d, rmsynth3d, rmclean3d) -- no `dynamic_schema`, no
-unloadable package-scoped `_include`, so porting them is a field-by-field
+crystalball, owlcat_plotelev, shadems, ragavi-vis/gains, sofia2, simms
+(classic), mosaic-queen, breizorro, aimfast, eidos, smops, aegean,
+rmsynth1d, rmsynth3d, rmclean3d) -- no `dynamic_schema`, no unloadable
+package-scoped `_include`, so porting them is a field-by-field
 transcription rather than a structural fix. Most loaded cleanly via
 cult-cargo's own YAML; a few of the later additions (aimfast, eidos,
 rmsynth1d/3d, rmclean3d) instead needed transcription from the real tool's
@@ -10,10 +10,23 @@ own `--help` because cult-cargo's YAML for them had gone stale (missing
 flags, or -- for rm-tools -- flags mapped to the wrong meaning). One
 targeted test per cab: registration + a representative build_argv shape
 check against the real tool's CLI.
+
+`simms`'s 3.0 sub-commands (`simms-skysim`/`simms-telsim`/
+`simms-primary-beam`) are no longer binary cabs -- as of simms 3.0 they are
+`@shinobi.pystep` functions (`simms.apps.*`) that dosho wraps (see
+`dosho/cabs/simms.py`), so their tests check the pystep's `inputs_model`
+schema shape (Literal choices, `json_schema_extra` abbreviations) and that
+they wire into a `Recipe`, not a `build_argv` shape. `simms` (classic) is
+still a real binary and keeps its binary-cab test below.
 """
 
+import pytest
+
 import dosho
+from shinobi import StepRef
 from shinobi.policies import build_argv
+
+from dosho import images
 
 
 def test_aoflagger_single_dash_cli():
@@ -94,7 +107,9 @@ def test_ragavi_vis_emits_htmlname_so_the_caller_controls_the_output_path():
     # it ragavi-vis writes an auto-named .html into the cwd.
     cab = dosho.get("ragavi-vis")
     assert "htmlname" in cab.inputs_model.model_fields
-    argv = build_argv(cab, {"ms": "/x.ms", "xaxis": "chan", "yaxis": "amp", "htmlname": "/out/plots/p-amp_chan"})
+    argv = build_argv(
+        cab, {"ms": "/x.ms", "xaxis": "chan", "yaxis": "amp", "htmlname": "/out/plots/p-amp_chan"}
+    )
     assert "--htmlname" in argv
     assert argv[argv.index("--htmlname") + 1] == "/out/plots/p-amp_chan"
 
@@ -105,35 +120,36 @@ def test_sofia2_real_param_count():
     assert len(cab.inputs_model.model_fields) == 100
 
 
-def test_simms_skysim_registered_under_hyphenated_name():
-    cab = dosho.get("simms-skysim")
-    assert cab.name == "simms-skysim"
-    assert cab.command == "simms skysim"
-    argv = build_argv(cab, {})
-    assert argv[:2] == ["simms", "skysim"]
+def test_simms_skysim_is_a_pystep_with_choices_and_abbreviations():
+    from typing import get_args
+
+    step = dosho.get("simms-skysim")
+    assert isinstance(step, StepRef)
+    assert step.name == "simms-skysim"
+    assert step.step.image == images.SIMMS
+    fields = step.step.inputs_model.model_fields
+    assert fields["ms"].is_required()  # the MS is the one required input
+    # `choices` reach real pydantic validation as a Literal, not just info text
+    assert get_args(fields["mode"].annotation) == ("sim", "add", "subtract")
+    step.step.inputs_model(ms="/x.ms", mode="add")  # in-set value accepted
+    with pytest.raises(Exception):
+        step.step.inputs_model(ms="/x.ms", mode="bogus")  # out-of-set rejected
+    # `abbreviation` is carried onto json_schema_extra for `ninja run`'s short flag
+    assert fields["ascii_sky"].json_schema_extra == {"abbreviation": "as"}
+    assert "ms" in step.step.outputs_model.model_fields  # passthrough MS output
 
 
-def test_simms_skysim_multiword_flags_are_hyphenated():
-    # every multi-word skysim flag must be hyphenated (e.g. --source-schema,
-    # not --source_schema, which simms rejects)
-    cab = dosho.get("simms-skysim")
-    argv = build_argv(
-        cab, {"ms": "/x.ms", "ascii_sky": "/m.txt", "source_schema": "/s.yaml", "field_id": 0}
-    )
-    assert not [a for a in argv if a.startswith("--") and "_" in a]
-    assert "--source-schema" in argv
-    assert "--ascii-sky" in argv
-
-
-def test_simms_telsim_sibling_subcommand_of_skysim():
-    cab = dosho.get("simms-telsim")
-    assert cab.name == "simms-telsim"
-    assert cab.command == "simms telsim"
-    assert cab.image == dosho.get("simms-skysim").image  # same simms binary
-    argv = build_argv(cab, {"ms": "/x.ms", "telescope": "meerkat"})
-    assert argv[:2] == ["simms", "telsim"]
-    assert "--telescope" in argv
-    assert argv[-1] == "/x.ms"  # positional
+def test_simms_telsim_is_a_pystep_sharing_the_skysim_image():
+    step = dosho.get("simms-telsim")
+    assert isinstance(step, StepRef)
+    assert step.name == "simms-telsim"
+    assert step.step.image == dosho.get("simms-skysim").step.image  # same simms 3.0 image
+    fields = step.step.inputs_model.model_fields
+    assert fields["ms"].is_required()
+    assert fields["telescope"].is_required()
+    assert fields["telescope"].json_schema_extra == {"abbreviation": "tel"}
+    assert fields["nchan"].json_schema_extra == {"abbreviation": "nc"}
+    assert "ms" in step.step.outputs_model.model_fields  # passthrough MS output
 
 
 def test_ragavi_gains_registered_and_passes_gain_flags():
@@ -164,52 +180,42 @@ def test_ragavi_gains_registered_and_passes_gain_flags():
         assert Path in get_args(cab.outputs_model.model_fields[field].annotation)
 
 
-def test_simms_primary_beam_tag_ms_flags_and_passthrough_output():
-    cab = dosho.get("simms-primary-beam")
-    assert cab.name == "simms-primary-beam"
-    # `simms` is a chained multicommand: the mode ("tag-ms") is a trailing
-    # positional emitted AFTER primary-beam's options, so it is NOT part of the
-    # command string (see the cab's own comment).
-    assert cab.command == "simms primary-beam"
-    assert cab.image == dosho.get("simms-skysim").image  # same simms 3.0 binary
-    # `mode` has no default (matches the real CLI, a required positional) --
-    # pass it explicitly, mirroring dispatch's _prepare_inputs (which
-    # build_argv actually receives at runtime).
-    prepared = cab.inputs_model(
-        mode="tag-ms", ms="/x.ms", telescope_name_column="TEL", from_layout="meerkat"
-    ).model_dump()
-    argv = build_argv(cab, prepared)
-    assert argv[:2] == ["simms", "primary-beam"]
-    assert argv[-1] == "tag-ms"  # mode positional, after the options
-    assert "--ms" in argv  # tag-ms takes --ms, not a positional
-    assert "--telescope-name-column" in argv
-    assert "--from-layout" in argv
-    assert argv.index("--from-layout") < argv.index("tag-ms")  # options precede the mode
-    assert "ms" in cab.outputs_model.model_fields  # passthrough output
+def test_simms_primary_beam_is_a_pystep_with_mode_choices():
+    from typing import get_args
+
+    step = dosho.get("simms-primary-beam")
+    assert isinstance(step, StepRef)
+    assert step.name == "simms-primary-beam"
+    assert step.step.image == dosho.get("simms-skysim").step.image  # same simms 3.0 image
+    fields = step.step.inputs_model.model_fields
+    # the operation selector is a required Literal choice field
+    assert get_args(fields["mode"].annotation) == ("to-fits", "tag-ms", "apply", "correct")
+    assert fields["mode"].is_required()
+    with pytest.raises(Exception):
+        step.step.inputs_model(mode="bogus")  # out-of-set rejected
+    assert fields["beam_pattern"].json_schema_extra == {"abbreviation": "bp"}
+    assert "output" in step.step.outputs_model.model_fields  # passthrough output
 
 
-def test_simms_primary_beam_correct_mode_flags_and_output_field():
-    cab = dosho.get("simms-primary-beam")
-    prepared = cab.inputs_model(
-        mode="correct",
-        ms="/x.ms",
-        ascii_sky="/x.lsm",
-        beam_pattern="MKAT-AA-L-JIM-2020",
-        output="/x.intrinsic.lsm",
-    ).model_dump()
-    argv = build_argv(cab, prepared)
-    assert argv[-1] == "correct"  # mode positional, after the options
-    assert "--beam-pattern" in argv
-    assert "--ascii-sky" in argv
-    assert "--output" in argv
-    assert "output" in cab.outputs_model.model_fields  # passthrough output
+def test_simms_pysteps_wire_into_a_recipe():
+    import shinobi
+    from pydantic import create_model
+
+    recipe = shinobi.Recipe(
+        name="sim", inputs_model=create_model("I"), outputs_model=create_model("O")
+    )
+    recipe.add_step("mk", dosho.get("simms-telsim"), ms="out.ms", telescope="meerkat")
+    recipe.add_step("sky", dosho.get("simms-skysim"), ms="out.ms", ascii_sky="sky.txt", mode="sim")
+    assert [s.name for s in recipe.steps] == ["mk", "sky"]
+    # the StepRef carries its pystep orchestration func into the recipe step
+    assert recipe.steps[1].func is not None
 
 
 def test_simms_classic_is_a_genuinely_different_tool_and_image():
     cab = dosho.get("simms")
     assert cab.name == "simms"
     assert cab.command == "simms"
-    assert cab.image != dosho.get("simms-skysim").image
+    assert cab.image != dosho.get("simms-skysim").step.image
     assert cab.field_meta["msname"].nom_de_guerre == "name"
     argv = build_argv(cab, {"msname": "/x.ms", "telescope": "meerkat"})
     assert argv[0] == "simms"
@@ -405,7 +411,9 @@ def test_chgcentre_positionals_and_reused_wsclean_image():
     assert cab.name == "chgcentre"
     assert cab.command == "chgcentre"
     assert cab.image == dosho.get("wsclean").image  # companion binary, same build
-    argv = build_argv(cab, {"ms": "/x.ms", "ra": "00h00m00.0s", "dec": "00d00m00.0s", "force": True})
+    argv = build_argv(
+        cab, {"ms": "/x.ms", "ra": "00h00m00.0s", "dec": "00d00m00.0s", "force": True}
+    )
     assert argv[0] == "chgcentre"
     assert "-f" in argv
     assert argv[-3:] == ["/x.ms", "00h00m00.0s", "00d00m00.0s"]
@@ -483,7 +491,12 @@ def test_tigger_convert_positionals_and_repeated_append():
     assert cab.name == "tigger-convert"
     assert cab.policies.repeat_list is True
     argv = build_argv(
-        cab, {"sky_model": "/in.lsm.html", "output_model": "/out.lsm.html", "append": ["/a.txt", "/b.txt"]}
+        cab,
+        {
+            "sky_model": "/in.lsm.html",
+            "output_model": "/out.lsm.html",
+            "append": ["/a.txt", "/b.txt"],
+        },
     )
     assert argv[0] == "tigger-convert"
     assert argv.count("--append") == 2  # append-style optparse option, one flag per value
@@ -494,7 +507,9 @@ def test_tigger_restore_shares_image_with_convert():
     cab = dosho.get("tigger-restore")
     assert cab.name == "tigger-restore"
     assert cab.image == dosho.get("tigger-convert").image
-    argv = build_argv(cab, {"input_image": "/img.fits", "sky_model": "/m.lsm.html", "num_sources": 10})
+    argv = build_argv(
+        cab, {"input_image": "/img.fits", "sky_model": "/m.lsm.html", "num_sources": 10}
+    )
     assert argv[0] == "tigger-restore"
     assert "--num-sources" in argv
     assert argv[-2:] == ["/img.fits", "/m.lsm.html"]

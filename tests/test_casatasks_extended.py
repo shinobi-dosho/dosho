@@ -29,14 +29,50 @@ from dosho.cabs.casatasks import (
 )
 
 _NEW_TASK_NAMES = [
-    "accor", "appendantab", "blcal", "defintent", "fringefit", "gencal",
-    "getantposalma", "getcalmodvla", "pccor", "polfromgain", "rerefant",
-    "smoothcal", "wvrgcal", "flagcmd", "msuvbinflag", "apparentsens",
-    "deconvolve", "delmod", "feather", "ft", "impbcor", "makemask",
-    "predictcomp", "widebandpbcor", "tclean", "sdintimaging", "clearstat",
-    "concat", "conjugatevis", "cvel", "cvel2", "fixplanets", "hanningsmooth",
-    "msuvbin", "partition", "phaseshift", "rmtables", "split", "statwt",
-    "uvcontsub", "uvcontsub_old", "uvmodelfit", "uvsub", "virtualconcat",
+    "accor",
+    "appendantab",
+    "blcal",
+    "defintent",
+    "fringefit",
+    "gencal",
+    "getantposalma",
+    "getcalmodvla",
+    "pccor",
+    "polfromgain",
+    "rerefant",
+    "smoothcal",
+    "wvrgcal",
+    "flagcmd",
+    "msuvbinflag",
+    "apparentsens",
+    "deconvolve",
+    "delmod",
+    "feather",
+    "ft",
+    "impbcor",
+    "makemask",
+    "predictcomp",
+    "widebandpbcor",
+    "tclean",
+    "sdintimaging",
+    "clearstat",
+    "concat",
+    "conjugatevis",
+    "cvel",
+    "cvel2",
+    "fixplanets",
+    "hanningsmooth",
+    "msuvbin",
+    "partition",
+    "phaseshift",
+    "rmtables",
+    "split",
+    "statwt",
+    "uvcontsub",
+    "uvcontsub_old",
+    "uvmodelfit",
+    "uvsub",
+    "virtualconcat",
 ]
 
 
@@ -136,7 +172,16 @@ def test_rmtables_tablenames_is_a_required_list():
 
 def test_tclean_image_family_derives_from_imagename():
     fields = tclean.step.outputs_model.model_fields
-    assert set(fields) == {"imagename", "image", "residual", "model", "psf", "pb", "image_pbcor", "mutated_vis"}
+    assert set(fields) == {
+        "imagename",
+        "image",
+        "residual",
+        "model",
+        "psf",
+        "pb",
+        "image_pbcor",
+        "mutated_vis",
+    }
     assert not fields["image_pbcor"].is_required()
     assert not fields["mutated_vis"].is_required()
 
@@ -237,7 +282,9 @@ def test_fluxscale_declares_listfile_as_output(monkeypatch):
 
     body = fluxscale.func.__wrapped__
     kwargs = dict(
-        vis=Path("x.ms"), caltable=Path("c.tbl"), fluxtable=Path("f.tbl"),
+        vis=Path("x.ms"),
+        caltable=Path("c.tbl"),
+        fluxtable=Path("f.tbl"),
         reference=["3C286"],
     )
     assert body(_FakeCtx(), listfile="fit.txt", **kwargs).listfile == Path("fit.txt")

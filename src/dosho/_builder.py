@@ -24,11 +24,16 @@ from shinobi.steps.schema import ParamMeta, ParamPattern, Policies
 # A field spec as a tool's own `--help`/docs give it to you -- `(dtype,
 # required, default)` -- plus an optional 4th element carrying the field's
 # `ParamMeta` (`nom_de_guerre`, `positional`, `repeat_as_tokens`,
-# `implicit`, `info`, ...) when the CLI needs more than the bare triple.
+# `implicit`, `info`, `choices`, `abbreviation`, ...) when the CLI needs more
+# than the bare triple. `choices`/`abbreviation` are threaded through to
+# `build_model` (real `Literal` validation / a `-<abbrev>` CLI short flag),
+# not just stored on `field_meta` -- see `define_cab`.
 FieldSpec = tuple[str, bool, Any] | tuple[str, bool, Any, ParamMeta]
 
 
-def _resolve(specs: dict[str, FieldSpec]) -> tuple[dict[str, tuple[str, bool, Any]], dict[str, ParamMeta]]:
+def _resolve(
+    specs: dict[str, FieldSpec],
+) -> tuple[dict[str, tuple[str, bool, Any]], dict[str, ParamMeta]]:
     """Split raw `{name: spec}` into build_model-ready fields and field_meta.
 
     Sanitises each raw name to a valid pydantic field name; a raw name that
@@ -50,6 +55,23 @@ def _resolve(specs: dict[str, FieldSpec]) -> tuple[dict[str, tuple[str, bool, An
         if meta is not None:
             resolved_meta[field] = meta
     return resolved_fields, resolved_meta
+
+
+def _choices(metas: dict[str, ParamMeta]) -> dict[str, list[Any]]:
+    """Per-field allowed-value lists for `build_model(choices=...)`, so a
+    `ParamMeta.choices` narrows the model's field to `Literal[*choices]`."""
+    return {field: meta.choices for field, meta in metas.items() if meta.choices}
+
+
+def _extras(metas: dict[str, ParamMeta]) -> dict[str, dict[str, Any]]:
+    """Per-field `json_schema_extra` dicts for `build_model(extras=...)`,
+    carrying a `ParamMeta.abbreviation` onto the field so `ninja run` can
+    emit a `-<abbrev>` short flag (mirrors `cultcargo._build_cabdef`)."""
+    return {
+        field: {"abbreviation": meta.abbreviation}
+        for field, meta in metas.items()
+        if meta.abbreviation
+    }
 
 
 def define_cab(
@@ -82,6 +104,14 @@ def define_cab(
     `implicit` path template. An explicit meta that doesn't set its own
     `nom_de_guerre` keeps the auto-derived one rather than losing it.
 
+    A `ParamMeta`'s `choices`/`abbreviation` are honoured, not just stored:
+    `choices` narrows the built model's field to `typing.Literal[*choices]`
+    (an out-of-set value fails pydantic validation, same as shinobi's own
+    scabha-dialect loaders -- see `narrow_choices`), and `abbreviation` is
+    carried onto the field's `json_schema_extra` so `ninja run` can emit a
+    `-<abbrev>` short flag. Both are threaded into `build_model` below,
+    mirroring `shinobi.loaders.cultcargo._build_cabdef`.
+
     `sandbox`/`harvest` pass straight through to the `Cab` (see
     stimela-ninja's `shinobi.sandbox` and the fields on `Scope`): `harvest`
     declares the keep-globs for dynamically-named output *files* a
@@ -99,9 +129,18 @@ def define_cab(
         info=info,
         flavour=flavour,
         inputs_model=build_model(
-            f"{name}_Inputs", input_fields, allow_extra=bool(input_patterns)
+            f"{name}_Inputs",
+            input_fields,
+            allow_extra=bool(input_patterns),
+            choices=_choices(input_meta),
+            extras=_extras(input_meta),
         ),
-        outputs_model=build_model(f"{name}_Outputs", output_fields),
+        outputs_model=build_model(
+            f"{name}_Outputs",
+            output_fields,
+            choices=_choices(output_meta),
+            extras=_extras(output_meta),
+        ),
         field_meta={**input_meta, **output_meta},
         policies=policies or Policies(),
         input_patterns=input_patterns or [],

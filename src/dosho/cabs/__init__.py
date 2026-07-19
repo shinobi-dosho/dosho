@@ -119,8 +119,16 @@ from dosho.cabs.shadems import shadems
 from dosho.cabs.simms import primary_beam, simms_classic, skysim, telsim
 from dosho.cabs.smops import smops
 from dosho.cabs.sofia2 import sofia2
-from dosho.cabs.spimple import binterp as spimple_binterp, imconv as spimple_imconv, spifit as spimple_spifit
-from dosho.cabs.tigger import convert as tigger_convert, restore as tigger_restore, tag as tigger_tag
+from dosho.cabs.spimple import (
+    binterp as spimple_binterp,
+    imconv as spimple_imconv,
+    spifit as spimple_spifit,
+)
+from dosho.cabs.tigger import (
+    convert as tigger_convert,
+    restore as tigger_restore,
+    tag as tigger_tag,
+)
 from dosho.cabs.tricolour import tricolour
 from dosho.cabs.wsclean import wsclean
 

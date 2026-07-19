@@ -76,7 +76,9 @@ def test_listobs_schema_shape():
 def test_mstransform_has_real_defaults_for_optional_regridding_kwargs():
     fields = mstransform.step.inputs_model.model_fields
     assert fields["vis"].is_required()
-    assert not fields["field"].is_required()  # CASA's own default ('') is now exposed, not hardcoded
+    assert not fields[
+        "field"
+    ].is_required()  # CASA's own default ('') is now exposed, not hardcoded
     assert not fields["regridms"].is_required()
     assert fields["regridms"].default is False
     assert fields["datacolumn"].default == "corrected"

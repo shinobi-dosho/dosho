@@ -23,7 +23,9 @@ _FIELDS: dict[str, FieldSpec] = {
     # emitted, and the script fell back to `lst-elev.png` in the cwd (same
     # trap as ragavi-vis's `htmlname`).
     "output_name": (
-        "File", False, None,
+        "File",
+        False,
+        None,
         ParamMeta(nom_de_guerre="output-name", info="Output filename"),
     ),
 }
