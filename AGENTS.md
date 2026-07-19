@@ -86,13 +86,22 @@ dosho, via (lowest→highest precedence) the manifest, a YAML file named by
 applied at import time (a cab's `image` is baked when the cab is constructed),
 so set them *before* the process starts.
 
-dosho **is** growing image build/maintenance infrastructure (a `dosho images`
-CLI + a `cargo/` Dockerfile tree + CI that builds and pushes to
-`ghcr.io/shinobi-dosho`, with an auto-generated readthedocs catalog) so cabs, images,
-registry, and docs stay linked off this one manifest -- modelled on cult-cargo
-and stimela-classic but with CI-automated push. It lands incrementally; until a
-tool is dosho-built, its manifest entry `ref:`s an existing image. Bumping a
-tool is editing one manifest entry.
+The build/maintenance infrastructure around the manifest is landed: a
+`dosho images` CLI (`list`/`build`/`push`/`build-plan`/`verify` -- see
+`src/dosho/cli.py`), a `src/dosho/cargo/` Dockerfile tree (a shared
+`pip/Dockerfile` template for pip-installable tools on `BASE_ASTRO`, plus a
+dedicated per-tool dir where a tool needs one -- e.g. an era-pinned
+interpreter, as for `ragavi`/`cubical`), and the `images.yml` CI workflow
+that rebuilds+pushes exactly the images a push touched (dependents of a
+changed base included) to `ghcr.io/shinobi-dosho`, modelled on cult-cargo
+and stimela-classic but with CI-automated push. Every tool is dosho-built
+except the deprecated `SIMMS_CLASSIC` (kept as a `ref:` until removal);
+bumping a tool is editing one manifest entry. Note any `images.yaml` edit
+makes every image a rebuild *candidate* in CI (shared metadata like
+`bundle_version` may have moved), but `build-plan --missing-only` filters
+candidates to tags actually absent from the registry -- so editing one
+entry's version rebuilds just that image, a `bundle_version` bump rebuilds
+everything (every tag moved), and a no-op manifest edit builds nothing.
 
 ## Repo layout
 
@@ -104,8 +113,11 @@ src/dosho/
                      # registered under the "shinobi.cabs" entry-point group
                      # -- for a caller that only knows the tool's name at
                      # *runtime* (the CLI, shinobi.cabs discovery)
-  images.yaml       # pinned {tool: "quay.io/stimela2/<tool>:<tag>"} data
+  images.yaml       # image manifest: metadata (registry, bundle_version) +
+                     # per-tool `build:` recipe (or `ref:` for external images)
   images.py         # loads images.yaml, exposes each key as a module constant
+  cli.py            # `dosho images` build/push/plan/verify driver over the manifest
+  cargo/            # Dockerfile templates: shared pip/ one + per-tool dirs
   _builder.py        # define_cab() helper over Cab(...) + shinobi.loaders.build_model
   cabs/
     __init__.py      # re-exports every tool-level object by name, so

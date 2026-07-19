@@ -44,10 +44,14 @@ def _build_keys(manifest: dict[str, Any]) -> list[str]:
     return [key for key, entry in manifest["images"].items() if "build" in entry]
 
 
-# Repo-relative path whose change invalidates *every* build image: the manifest
-# (metadata like bundle_version, or any entry's version/base, can move). A CI
-# workflow change is deliberately NOT here -- it orchestrates builds but can't
-# change image contents, so it shouldn't force a full (cacheless) rebuild.
+# Repo-relative path whose change makes *every* build image a rebuild
+# candidate: the manifest (metadata like bundle_version, or any entry's
+# version/base, can move). CI pairs this with `build-plan --missing-only`,
+# which then filters the candidates to tags actually absent from the
+# registry -- so bumping one entry's version rebuilds just that image,
+# while a bundle_version bump (every tag moves) still rebuilds the world.
+# A CI workflow change is deliberately NOT here -- it orchestrates builds
+# but can't change image contents, so it shouldn't force a full rebuild.
 _GLOBAL_TRIGGERS = frozenset({"src/dosho/images.yaml"})
 _CARGO_PREFIX = "src/dosho/cargo/"
 
@@ -236,7 +240,17 @@ def images_build_keys() -> None:
     help="Repo-relative changed file (repeatable). If given, restrict the plan "
     "to images affected by those changes plus dependents of any changed base.",
 )
-def images_build_plan(changed: tuple[str, ...]) -> None:
+@click.option(
+    "--missing-only",
+    is_flag=True,
+    help="Further restrict the plan to images whose resolved tag is absent "
+    "from the registry (needs docker registry access). Published tags are "
+    "immutable, so an existing tag never needs rebuilding: on a manifest "
+    "change this turns the rebuild-everything candidate set into just the "
+    "images whose tags moved (or were never built), and self-heals a "
+    "deleted/corrupt registry entry.",
+)
+def images_build_plan(changed: tuple[str, ...], missing_only: bool) -> None:
     """Print JSON {bases, tools} -- base images (those referenced via `base:` by
     another entry) must build before the tools that build FROM them (for a
     two-stage CI build).
@@ -249,6 +263,17 @@ def images_build_plan(changed: tuple[str, ...]) -> None:
     images_ = manifest["images"]
     build = _build_keys(manifest)
     keys = _affected_keys(manifest, list(changed)) if changed else set(build)
+
+    if missing_only:
+        present = {
+            k for k in keys if _image_exists(_tag(k, images_[k], manifest["metadata"], None))
+        }
+        if present:
+            click.echo(
+                f"already published, excluded from plan: {', '.join(sorted(present))}",
+                err=True,
+            )
+        keys -= present
 
     # A base is any KEY referenced via `base:`; it builds in the first stage.
     all_bases = {images_[k]["build"]["base"] for k in build if "base" in images_[k]["build"]}

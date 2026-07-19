@@ -18,29 +18,49 @@ def test_hyphenated_names_get_sanitised_with_nom_de_guerre():
     assert "--out-name" in argv
 
 
-def test_explicit_field_meta_merges_and_keeps_auto_nom_de_guerre():
+def test_meta_as_fourth_tuple_element_on_output():
     cab = define_cab(
         "wsclean",
         "wsclean",
         "quay.io/example/wsclean:1.0",
         {"prefix": ("str", True, None)},
-        outputs={"image": ("str", False, None)},
-        field_meta={"image": ParamMeta(implicit="{prefix}-MFS-image.fits")},
+        outputs={"image": ("File", False, None, ParamMeta(implicit="{prefix}-MFS-image.fits"))},
     )
     assert cab.field_meta["image"].implicit == "{prefix}-MFS-image.fits"
 
 
-def test_field_meta_on_a_sanitised_field_keeps_its_nom_de_guerre():
+def test_meta_on_a_sanitised_field_keeps_its_nom_de_guerre():
     cab = define_cab(
         "tool",
         "tool",
         "quay.io/example/tool:1.0",
-        {"out-name": ("str", False, "out")},
-        field_meta={"out_name": ParamMeta(positional=True)},
+        {"out-name": ("str", False, "out", ParamMeta(positional=True))},
     )
     meta = cab.field_meta["out_name"]
     assert meta.positional is True
     assert meta.nom_de_guerre == "out-name"
+
+
+def test_explicit_nom_de_guerre_wins_over_auto_derived():
+    cab = define_cab(
+        "tool",
+        "tool",
+        "quay.io/example/tool:1.0",
+        {"prefix": ("str", True, None, ParamMeta(nom_de_guerre="name"))},
+    )
+    assert cab.field_meta["prefix"].nom_de_guerre == "name"
+
+
+def test_hyphenated_output_names_are_sanitised_too():
+    cab = define_cab(
+        "tool",
+        "tool",
+        "quay.io/example/tool:1.0",
+        {"prefix": ("str", True, None)},
+        outputs={"source-list": ("File", False, None)},
+    )
+    assert "source_list" in cab.outputs_model.model_fields
+    assert cab.field_meta["source_list"].nom_de_guerre == "source-list"
 
 
 def test_input_patterns_allow_extra_and_are_attached():
