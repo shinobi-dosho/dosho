@@ -194,6 +194,14 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     with pytest.raises(Exception):
         step.step.inputs_model(mode="bogus")  # out-of-set rejected
     assert fields["beam_pattern"].json_schema_extra == {"abbreviation": "bp"}
+    # the cattery/DDFacet to-fits knobs (simms' heterogeneous-beam support):
+    # these transcribe simms field-for-field, so drift here silently makes a
+    # whole simms mode unreachable from dosho
+    assert get_args(fields["fits_format"].annotation) == ("simms", "cattery")
+    assert get_args(fields["beam_l_axis"].annotation) == ("-X", "X")
+    assert get_args(fields["beam_m_axis"].annotation) == ("Y", "-Y")
+    beam_axes = dosho.get("simms-skysim").step.inputs_model.model_fields
+    assert "beam_l_axis" in beam_axes and "beam_m_axis" in beam_axes
     # both passthrough outputs: `output` for to-fits/apply/correct, and `ms`
     # for tag-ms, which mutates the MS in place and is otherwise unwireable
     assert "output" in step.step.outputs_model.model_fields

@@ -10065,7 +10065,7 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
    * - ``mode``
      - ``Literal['to-fits', 'tag-ms', 'apply', 'correct']``
      - *required*
-     - \-
+     - Operation to perform.
    * - ``beam_pattern``
      - ``str | None``
      - ``None``
@@ -10078,6 +10078,22 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
      - ``float``
      - ``1.0``
      - Parallactic-angle sampling step (degrees) for the time-averaged beam.
+   * - ``fits_format``
+     - ``Literal['simms', 'cattery']``
+     - ``'simms'``
+     - to-fits output layout: simms's own single-file 4-plane HH/VV cube, or the Cattery/DDFacet 8-file per-Jones-element schema (--Beam-Model FITS).
+   * - ``pol_basis``
+     - ``Literal['linear', 'circular']``
+     - ``'linear'``
+     - Correlation basis for the cattery fits-format output (xx/xy/yx/yy vs rr/rl/lr/ll); must match the target MS's feed basis.
+   * - ``beam_l_axis``
+     - ``Literal['-X', 'X']``
+     - ``'-X'``
+     - Sign convention for the cattery fits-format L axis, matching DDFacet's --Beam-FITSLAxis (pass the same value to both).
+   * - ``beam_m_axis``
+     - ``Literal['Y', '-Y']``
+     - ``'Y'``
+     - Sign convention for the cattery fits-format M axis, matching DDFacet's --Beam-FITSMAxis (pass the same value to both).
    * - ``ms``
      - ``str | None``
      - ``None``
@@ -10101,7 +10117,7 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
    * - ``output``
      - ``str | None``
      - ``None``
-     - Output path - FITS beam (to-fits) or beamed/corrected sky model (apply/correct).
+     - Output path - FITS beam (to-fits, or filename prefix when --fits-format cattery) or beamed/corrected sky model (apply/correct).
    * - ``telescope_name_column``
      - ``str``
      - ``'TELESCOPE_NAME'``
@@ -10196,7 +10212,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
    * - ``ms``
      - ``str``
      - *required*
-     - \-
+     - Measurement set.
    * - ``ascii_sky``
      - ``str | None``
      - ``None``
@@ -10276,7 +10292,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
    * - ``primary_beam``
      - ``str | None``
      - ``None``
-     - Beam-config YAML mapping each ANTENNA telescope name to a beam model. Requires a linear pol basis.
+     - Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when --beam-jones full is selected.
    * - ``beam_band``
      - ``Literal['UHF', 'L']``
      - ``'L'``
@@ -10297,6 +10313,14 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - ``str``
      - ``'TELESCOPE_NAME'``
      - ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
+   * - ``beam_l_axis``
+     - ``Literal['-X', 'X']``
+     - ``'-X'``
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSLAxis.
+   * - ``beam_m_axis``
+     - ``Literal['Y', '-Y']``
+     - ``'Y'``
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSMAxis.
    * - ``field_id``
      - ``int``
      - ``0``
@@ -10320,7 +10344,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
    * - ``input_column``
      - ``str | None``
      - ``None``
-     - Input column (see --mode).
+     - Input column (see option --mode).
    * - ``mode``
      - ``Literal['sim', 'add', 'subtract']``
      - ``'sim'``
@@ -10368,7 +10392,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
    * - ``ms``
      - ``str``
      - *required*
-     - \-
+     - Observation name/id/label
    * - ``telescope``
      - ``str``
      - *required*
