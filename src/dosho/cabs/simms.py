@@ -65,8 +65,12 @@ class TelsimOutputs(BaseModel):
 
 
 class PrimaryBeamOutputs(BaseModel):
-    """Passthrough output path of the primary-beam operation."""
+    """Passthrough paths of the primary-beam operation: `tag-ms` mutates
+    `ms` in place and echoes it back, `to-fits`/`apply`/`correct` write
+    `output`. Both are declared so either mode can be wired into a Recipe --
+    a `tag-ms` step is otherwise a dead end with no edge to chain from."""
 
+    ms: str | None = None
     output: str | None = None
 
 
@@ -77,7 +81,7 @@ class PrimaryBeamOutputs(BaseModel):
 )
 def skysim(
     ctx,
-    ms: str,
+    ms: str = Field(..., description="Measurement set."),
     ascii_sky: str | None = Field(
         None,
         description="Catalogue of sources. See the documentation for accepted units.",
@@ -158,7 +162,10 @@ def skysim(
     ),
     primary_beam: str | None = Field(
         None,
-        description="Beam-config YAML mapping each ANTENNA telescope name to a beam model. Requires a linear pol basis.",
+        description="Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a "
+        "beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by "
+        "ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may "
+        "be used when --beam-jones full is selected.",
         json_schema_extra={"abbreviation": "pb"},
     ),
     beam_band: Literal["UHF", "L"] = Field(
@@ -180,6 +187,20 @@ def skysim(
         description="ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.",
         json_schema_extra={"abbreviation": "tnc"},
     ),
+    beam_l_axis: Literal["-X", "X"] = Field(
+        "-X",
+        description="Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; "
+        "ignored for YAML beam configs, which specify their own axis convention. "
+        "Matches DDFacet's --Beam-FITSLAxis.",
+        json_schema_extra={"abbreviation": "bla"},
+    ),
+    beam_m_axis: Literal["Y", "-Y"] = Field(
+        "Y",
+        description="Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; "
+        "ignored for YAML beam configs, which specify their own axis convention. "
+        "Matches DDFacet's --Beam-FITSMAxis.",
+        json_schema_extra={"abbreviation": "bma"},
+    ),
     field_id: int = Field(0, description="Field ID.", json_schema_extra={"abbreviation": "fi"}),
     spw_id: int = Field(0, description="Spectral Window ID."),
     sefd: float | None = Field(None, description="Add noise using this SEFD value."),
@@ -190,7 +211,9 @@ def skysim(
         None, description="Non-simms sky model type.", json_schema_extra={"abbreviation": "asp"}
     ),
     input_column: str | None = Field(
-        None, description="Input column (see --mode).", json_schema_extra={"abbreviation": "ic"}
+        None,
+        description="Input column (see option --mode).",
+        json_schema_extra={"abbreviation": "ic"},
     ),
     mode: Literal["sim", "add", "subtract"] = Field(
         "sim",
@@ -219,7 +242,7 @@ def skysim(
 )
 def telsim(
     ctx,
-    ms: str,
+    ms: str = Field(..., description="Observation name/id/label"),
     telescope: str = Field(
         ...,
         description="Name of telescope you are simulating.",
@@ -517,7 +540,9 @@ simms_classic = define_cab(
 )
 def primary_beam(
     ctx,
-    mode: Literal["to-fits", "tag-ms", "apply", "correct"],
+    mode: Literal["to-fits", "tag-ms", "apply", "correct"] = Field(
+        ..., description="Operation to perform."
+    ),
     beam_pattern: str | None = Field(
         None,
         description="Beam model: a cosine-taper CSV path, a built-in name, a band shorthand (L/UHF), or a FITS cube.",
@@ -528,6 +553,30 @@ def primary_beam(
     ),
     beam_pa_step: float = Field(
         1.0, description="Parallactic-angle sampling step (degrees) for the time-averaged beam."
+    ),
+    fits_format: Literal["simms", "cattery"] = Field(
+        "simms",
+        description="to-fits output layout: simms's own single-file 4-plane HH/VV cube, or "
+        "the Cattery/DDFacet 8-file per-Jones-element schema (--Beam-Model FITS).",
+        json_schema_extra={"abbreviation": "ff"},
+    ),
+    pol_basis: Literal["linear", "circular"] = Field(
+        "linear",
+        description="Correlation basis for the cattery fits-format output (xx/xy/yx/yy vs "
+        "rr/rl/lr/ll); must match the target MS's feed basis.",
+        json_schema_extra={"abbreviation": "pol"},
+    ),
+    beam_l_axis: Literal["-X", "X"] = Field(
+        "-X",
+        description="Sign convention for the cattery fits-format L axis, matching DDFacet's "
+        "--Beam-FITSLAxis (pass the same value to both).",
+        json_schema_extra={"abbreviation": "bla"},
+    ),
+    beam_m_axis: Literal["Y", "-Y"] = Field(
+        "Y",
+        description="Sign convention for the cattery fits-format M axis, matching DDFacet's "
+        "--Beam-FITSMAxis (pass the same value to both).",
+        json_schema_extra={"abbreviation": "bma"},
     ),
     ms: str | None = Field(
         None,
@@ -554,7 +603,8 @@ def primary_beam(
     ),
     output: str | None = Field(
         None,
-        description="Output path - FITS beam (to-fits) or beamed/corrected sky model (apply/correct).",
+        description="Output path - FITS beam (to-fits, or filename prefix when --fits-format cattery) "
+        "or beamed/corrected sky model (apply/correct).",
         json_schema_extra={"abbreviation": "o"},
     ),
     telescope_name_column: str = Field(
@@ -613,4 +663,4 @@ def primary_beam(
     """
     opts = SimpleNamespace(**{k: v for k, v in locals().items() if k != "ctx"})
     ctx.import_func("runit", "simms.apps.primary_beam")(opts)
-    return PrimaryBeamOutputs(output=output)
+    return PrimaryBeamOutputs(ms=ms, output=output)
