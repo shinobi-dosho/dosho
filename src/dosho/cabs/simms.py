@@ -41,6 +41,7 @@ straight off the namespace, just as simms' own pystep does with
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Literal
 
@@ -55,13 +56,13 @@ from shinobi.steps.schema import ParamMeta, Policies
 class SkysimOutputs(BaseModel):
     """Passthrough MS path, so `skysim` can be wired into a shinobi Recipe."""
 
-    ms: str | None = None
+    ms: Path | None = None
 
 
 class TelsimOutputs(BaseModel):
     """Passthrough MS path, so `telsim` can be wired into a shinobi Recipe."""
 
-    ms: str | None = None
+    ms: Path | None = None
 
 
 class PrimaryBeamOutputs(BaseModel):
@@ -70,8 +71,23 @@ class PrimaryBeamOutputs(BaseModel):
     `output`. Both are declared so either mode can be wired into a Recipe --
     a `tag-ms` step is otherwise a dead end with no edge to chain from."""
 
-    ms: str | None = None
-    output: str | None = None
+    ms: Path | None = None
+    output: Path | None = None
+
+
+def _opts(local_vars: dict) -> SimpleNamespace:
+    """The `SimpleNamespace` simms' `runit` expects, from a wrapper's locals().
+
+    Drops `ctx`, and renders every `Path` back to `str`. The Path types on the
+    fields below exist for *shinobi's* benefit -- only path-typed fields get
+    absolutized into the workspace and their parents bound into the container
+    (see the ragavi cabs for the same rule) -- while simms' own apps are
+    written against the plain strings its CLI parses. This wrapper is the
+    adaptation layer between the two, so neither side has to compromise.
+    """
+    return SimpleNamespace(
+        **{k: (str(v) if isinstance(v, Path) else v) for k, v in local_vars.items() if k != "ctx"}
+    )
 
 
 @shinobi.pystep(
@@ -81,18 +97,18 @@ class PrimaryBeamOutputs(BaseModel):
 )
 def skysim(
     ctx,
-    ms: str = Field(..., description="Measurement set."),
-    ascii_sky: str | None = Field(
+    ms: Path = Field(..., description="Measurement set."),
+    ascii_sky: Path | None = Field(
         None,
         description="Catalogue of sources. See the documentation for accepted units.",
         json_schema_extra={"abbreviation": "as"},
     ),
-    fits_sky: str | None = Field(
+    fits_sky: Path | None = Field(
         None,
         description="FITS file (or directory of Stokes cubes) containing the sky model.",
         json_schema_extra={"abbreviation": "fs"},
     ),
-    wsclean_sky: str | None = Field(
+    wsclean_sky: Path | None = Field(
         None,
         description="WSClean component list (point and Gaussian components, Stokes I).",
         json_schema_extra={"abbreviation": "ws"},
@@ -120,7 +136,7 @@ def skysim(
         description="How the FITS sky model varies with frequency.",
         json_schema_extra={"abbreviation": "fsp"},
     ),
-    fits_spi: list[str] | None = Field(
+    fits_spi: list[Path] | None = Field(
         None,
         description="Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.",
     ),
@@ -160,7 +176,7 @@ def skysim(
         description="Number of channels per chunk. Defaults to all channels in one chunk.",
         json_schema_extra={"abbreviation": "ccs"},
     ),
-    primary_beam: str | None = Field(
+    primary_beam: Path | None = Field(
         None,
         description="Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a "
         "beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by "
@@ -219,7 +235,7 @@ def skysim(
         "sim",
         description="Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it.",
     ),
-    source_schema: str | None = Field(
+    source_schema: Path | None = Field(
         None,
         description="Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects.",
     ),
@@ -230,7 +246,7 @@ def skysim(
     Transcribed from `simms.apps.skysim.skysim`; runs simms' own
     `simms.apps.skysim.runit` inside the simms container.
     """
-    opts = SimpleNamespace(**{k: v for k, v in locals().items() if k != "ctx"})
+    opts = _opts(locals())
     ctx.import_func("runit", "simms.apps.skysim")(opts)
     return SkysimOutputs(ms=ms)
 
@@ -242,7 +258,7 @@ def skysim(
 )
 def telsim(
     ctx,
-    ms: str = Field(..., description="Observation name/id/label"),
+    ms: Path = Field(..., description="Observation name/id/label"),
     telescope: str = Field(
         ...,
         description="Name of telescope you are simulating.",
@@ -362,7 +378,7 @@ def telsim(
     Transcribed from `simms.apps.telsim.telsim`; runs simms' own
     `simms.apps.telsim.runit` inside the simms container.
     """
-    opts = SimpleNamespace(**{k: v for k, v in locals().items() if k != "ctx"})
+    opts = _opts(locals())
     ctx.import_func("runit", "simms.apps.telsim")(opts)
     return TelsimOutputs(ms=ms)
 
@@ -578,16 +594,16 @@ def primary_beam(
         "--Beam-FITSMAxis (pass the same value to both).",
         json_schema_extra={"abbreviation": "bma"},
     ),
-    ms: str | None = Field(
+    ms: Path | None = Field(
         None,
         description="Measurement set (time/PA range, array position and frequencies). Required for tag-ms/apply/correct.",
     ),
-    fits_sky: str | None = Field(
+    fits_sky: Path | None = Field(
         None,
         description="Input FITS image sky model (apply/correct).",
         json_schema_extra={"abbreviation": "fits"},
     ),
-    ascii_sky: str | None = Field(
+    ascii_sky: Path | None = Field(
         None,
         description="Input ASCII component sky model (apply/correct).",
         json_schema_extra={"abbreviation": "ascii"},
@@ -597,11 +613,11 @@ def primary_beam(
         description="Delimiter used in the ascii-sky file. Defaults to whitespace.",
         json_schema_extra={"abbreviation": "ad"},
     ),
-    source_schema: str | None = Field(
+    source_schema: Path | None = Field(
         None,
         description="Custom source schema (YAML) mapping the ascii-sky columns to the fields simms expects.",
     ),
-    output: str | None = Field(
+    output: Path | None = Field(
         None,
         description="Output path - FITS beam (to-fits, or filename prefix when --fits-format cattery) "
         "or beamed/corrected sky model (apply/correct).",
@@ -615,7 +631,7 @@ def primary_beam(
     label: str | None = Field(
         None, description="Single telescope-name label applied to all antennas (tag-ms)."
     ),
-    label_map: str | None = Field(
+    label_map: Path | None = Field(
         None, description="YAML mapping antenna NAME -> telescope-name label (tag-ms)."
     ),
     from_layout: str | None = Field(
@@ -661,6 +677,6 @@ def primary_beam(
     Transcribed from `simms.apps.primary_beam.primary_beam`; runs simms' own
     `simms.apps.primary_beam.runit` inside the simms container.
     """
-    opts = SimpleNamespace(**{k: v for k, v in locals().items() if k != "ctx"})
+    opts = _opts(locals())
     ctx.import_func("runit", "simms.apps.primary_beam")(opts)
     return PrimaryBeamOutputs(ms=ms, output=output)

@@ -10095,15 +10095,15 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
      - ``'Y'``
      - Sign convention for the cattery fits-format M axis, matching DDFacet's --Beam-FITSMAxis (pass the same value to both).
    * - ``ms``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Measurement set (time/PA range, array position and frequencies). Required for tag-ms/apply/correct.
    * - ``fits_sky``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Input FITS image sky model (apply/correct).
    * - ``ascii_sky``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Input ASCII component sky model (apply/correct).
    * - ``ascii_delimiter``
@@ -10111,11 +10111,11 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
      - ``None``
      - Delimiter used in the ascii-sky file. Defaults to whitespace.
    * - ``source_schema``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Custom source schema (YAML) mapping the ascii-sky columns to the fields simms expects.
    * - ``output``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Output path - FITS beam (to-fits, or filename prefix when --fits-format cattery) or beamed/corrected sky model (apply/correct).
    * - ``telescope_name_column``
@@ -10127,7 +10127,7 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
      - ``None``
      - Single telescope-name label applied to all antennas (tag-ms).
    * - ``label_map``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - YAML mapping antenna NAME -> telescope-name label (tag-ms).
    * - ``from_layout``
@@ -10185,10 +10185,10 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
      - Type
      - Description
    * - ``ms``
-     - ``str | None``
+     - ``Path | None``
      - \-
    * - ``output``
-     - ``str | None``
+     - ``Path | None``
      - \-
 
 simms-skysim
@@ -10210,19 +10210,19 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - Default
      - Description
    * - ``ms``
-     - ``str``
+     - ``Path``
      - *required*
      - Measurement set.
    * - ``ascii_sky``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Catalogue of sources. See the documentation for accepted units.
    * - ``fits_sky``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - FITS file (or directory of Stokes cubes) containing the sky model.
    * - ``wsclean_sky``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - WSClean component list (point and Gaussian components, Stokes I).
    * - ``fits_sky_interp``
@@ -10246,7 +10246,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - ``'auto'``
      - How the FITS sky model varies with frequency.
    * - ``fits_spi``
-     - ``list[str] | None``
+     - ``list[Path] | None``
      - ``None``
      - Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
    * - ``fits_ref_freq``
@@ -10290,7 +10290,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - ``None``
      - Number of channels per chunk. Defaults to all channels in one chunk.
    * - ``primary_beam``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when --beam-jones full is selected.
    * - ``beam_band``
@@ -10350,7 +10350,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - ``'sim'``
      - Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it.
    * - ``source_schema``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects.
    * - ``log_level``
@@ -10368,7 +10368,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - Type
      - Description
    * - ``ms``
-     - ``str | None``
+     - ``Path | None``
      - \-
 
 simms-telsim
@@ -10390,7 +10390,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
      - Default
      - Description
    * - ``ms``
-     - ``str``
+     - ``Path``
      - *required*
      - Observation name/id/label
    * - ``telescope``
@@ -10508,7 +10508,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
      - Type
      - Description
    * - ``ms``
-     - ``str | None``
+     - ``Path | None``
      - \-
 
 smoothcal

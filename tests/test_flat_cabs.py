@@ -202,6 +202,19 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     assert get_args(fields["beam_m_axis"].annotation) == ("Y", "-Y")
     beam_axes = dosho.get("simms-skysim").step.inputs_model.model_fields
     assert "beam_l_axis" in beam_axes and "beam_m_axis" in beam_axes
+    # path-valued fields must be Path-typed, not str: only path-typed fields
+    # are absolutized into the workspace and have their parents bound into the
+    # container (same rule as the ragavi cabs). A str `ms`/`label_map` makes
+    # the step fail pydantic validation the moment a caller passes a real Path.
+    from pathlib import Path
+
+    for field in ("ms", "label_map", "output", "ascii_sky", "fits_sky", "source_schema"):
+        assert Path in get_args(fields[field].annotation), field
+    for field in ("ms", "ascii_sky", "primary_beam", "source_schema"):
+        assert Path in get_args(beam_axes[field].annotation) or beam_axes[field].annotation is Path, field
+    # ...but NOT beam_pattern: it takes a built-in model NAME or a band
+    # shorthand as well as a path, and absolutizing a name would corrupt it
+    assert fields["beam_pattern"].annotation == (str | None)
     # both passthrough outputs: `output` for to-fits/apply/correct, and `ms`
     # for tag-ms, which mutates the MS in place and is otherwise unwireable
     assert "output" in step.step.outputs_model.model_fields
