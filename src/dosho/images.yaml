@@ -7,6 +7,7 @@
 #   metadata:
 #     registry: <host>/<namespace>   # where dosho-built images publish
 #     bundle_version: dX.Y.Z         # tag suffix for dosho-built images
+#     dev_deps: "<pip specs>"        # appended to every dev image's extra_deps
 #   images:
 #     <KEY>:
 #       source: "<upstream repo URL>" # provenance (documentary)
@@ -19,7 +20,18 @@
 #         dockerfile: <path under cargo/>
 #         cmd: "<sanity command>"
 #         # ...arbitrary extra vars consumed by the tool's Dockerfile template
+#       dev:                          # optional: a `dosho images build --dev`
+#         package: "git+<repo>@main"  #   variant, i.e. the `build:` vars above
+#         # ...any build: var to override #   overlaid with these
 #       name: <repo>                   # optional; defaults to <KEY>.lower()
+#
+# Dev images (`dev:` above) exist for tools we develop against `main` rather
+# than waiting on a release. They publish to the *mutable* tag
+# `{registry}/{name}:dev` -- deliberately outside the immutable
+# `{version}-{bundle_version}` scheme, and outside the release build plan, so a
+# dev push can never overwrite a release tag. `metadata.dev_deps` is appended to
+# every dev build (see its comment), and consumers should pin the resulting
+# *digest*, not the tag -- see `dosho images build --dev`'s help for why.
 #
 # Per-deployment overrides (highest precedence last):
 #   manifest  <  the YAML file named by $DOSHO_IMAGES  <  per-tool $DOSHO_IMAGE_<KEY>
@@ -27,6 +39,14 @@
 metadata:
   registry: ghcr.io/shinobi-dosho
   bundle_version: d0.1.0
+  # Appended to every `dev:` image's extra_deps. shinobi's API moves between
+  # releases (it is on PyPI, but a release lags `main`), and a tool built from
+  # its own `main` is written against shinobi `main` -- while `pip install`
+  # would resolve the plain `stimela-ninja` dependency from PyPI, because a
+  # tool's `[tool.uv.sources]` git pin is uv-only and stripped from the
+  # published metadata. Injecting it here rather than per-entry means a new dev
+  # image cannot forget it.
+  dev_deps: "git+https://github.com/shinobi-dosho/stimela-ninja@main"
 
 images:
   # Shared base image: KERN suite base + python + casacore + common astro stack.
@@ -50,6 +70,8 @@ images:
       package: "simms==3.0.0"
       cmd: "simms --help"
       dockerfile: pip/Dockerfile
+    dev:
+      package: "git+https://github.com/wits-cfa/simms@main"
 
   MSUTILS:
     name: msutils
