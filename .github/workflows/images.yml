@@ -117,7 +117,12 @@ jobs:
   build-tools:
     needs: [discover, build-base]
     # run after the base(s); a skipped build-base (no bases changed) is fine.
-    if: always() && needs.discover.outputs.tools != '[]' && needs.build-base.result != 'failure' && !cancelled()
+    # `discover.result == 'success'` is load-bearing, not belt-and-braces: on
+    # the weekly schedule `discover` is skipped, so its `tools` output is the
+    # empty string -- and `always()` overrides skip-propagation, so without this
+    # the `!= '[]'` test passes, this job starts with an empty matrix, and the
+    # whole run is marked failed even though `verify` passed.
+    if: always() && needs.discover.result == 'success' && needs.discover.outputs.tools != '[]' && needs.build-base.result != 'failure' && !cancelled()
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
