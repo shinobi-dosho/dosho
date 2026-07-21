@@ -10168,6 +10168,9 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
    * - Field
      - Type
      - Description
+   * - ``ms``
+     - ``str | None``
+     - \-
    * - ``output``
      - ``str | None``
      - \-

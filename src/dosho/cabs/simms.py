@@ -65,8 +65,12 @@ class TelsimOutputs(BaseModel):
 
 
 class PrimaryBeamOutputs(BaseModel):
-    """Passthrough output path of the primary-beam operation."""
+    """Passthrough paths of the primary-beam operation: `tag-ms` mutates
+    `ms` in place and echoes it back, `to-fits`/`apply`/`correct` write
+    `output`. Both are declared so either mode can be wired into a Recipe --
+    a `tag-ms` step is otherwise a dead end with no edge to chain from."""
 
+    ms: str | None = None
     output: str | None = None
 
 
@@ -613,4 +617,4 @@ def primary_beam(
     """
     opts = SimpleNamespace(**{k: v for k, v in locals().items() if k != "ctx"})
     ctx.import_func("runit", "simms.apps.primary_beam")(opts)
-    return PrimaryBeamOutputs(output=output)
+    return PrimaryBeamOutputs(ms=ms, output=output)

@@ -194,7 +194,10 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     with pytest.raises(Exception):
         step.step.inputs_model(mode="bogus")  # out-of-set rejected
     assert fields["beam_pattern"].json_schema_extra == {"abbreviation": "bp"}
-    assert "output" in step.step.outputs_model.model_fields  # passthrough output
+    # both passthrough outputs: `output` for to-fits/apply/correct, and `ms`
+    # for tag-ms, which mutates the MS in place and is otherwise unwireable
+    assert "output" in step.step.outputs_model.model_fields
+    assert "ms" in step.step.outputs_model.model_fields
 
 
 def test_simms_pysteps_wire_into_a_recipe():
