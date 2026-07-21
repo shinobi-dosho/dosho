@@ -221,3 +221,69 @@ def test_verify_fails_when_missing(monkeypatch):
     result = CliRunner().invoke(cli.main, ["images", "verify"])
     assert result.exit_code != 0
     assert "MISSING" in result.output
+
+
+# -- dev images --
+
+
+def test_dev_build_installs_from_the_branch_and_tags_dev():
+    result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dev", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    # mutable pointer tag, deliberately outside the {version}-{bundle} scheme
+    assert "# tag: ghcr.io/shinobi-dosho/simms:dev" in result.output
+    assert "git+https://github.com/wits-cfa/simms@main" in result.output
+    assert "simms==3.0.0" not in result.output  # the release spec is replaced
+    # ...on the same base, from the same `build:` block
+    assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
+
+
+def test_dev_build_injects_the_framework_dev_pin():
+    # a tool built from its own `main` is written against shinobi `main`, but
+    # `pip install` would resolve the plain dependency from PyPI (a tool's
+    # [tool.uv.sources] git pin is uv-only, stripped from published metadata)
+    result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dev", "--dry-run"])
+    assert "git+https://github.com/shinobi-dosho/stimela-ninja@main" in result.output
+    # ...on the same pip line as the tool, so the resolver prefers both URLs
+    # over the PyPI fallback instead of installing it and stepping on it
+    install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
+    assert "simms@main" in install and "stimela-ninja@main" in install
+
+
+def test_release_build_is_untouched_by_the_dev_block():
+    result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
+    assert "ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0" in result.output
+    assert "simms==3.0.0" in result.output
+    assert "@main" not in result.output
+
+
+def test_dev_build_requires_a_dev_block():
+    key = next(k for k, e in _images.manifest["images"].items() if "build" in e and "dev" not in e)
+    result = CliRunner().invoke(cli.main, ["images", "build", key, "--dev", "--dry-run"])
+    assert result.exit_code != 0
+    assert "no `dev:` block" in result.output
+
+
+def test_dev_keys_are_a_subset_of_build_keys():
+    dev = json.loads(CliRunner().invoke(cli.main, ["images", "build-keys", "--dev"]).output)
+    all_keys = json.loads(CliRunner().invoke(cli.main, ["images", "build-keys"]).output)
+    assert dev and set(dev) <= set(all_keys)
+    assert all("dev" in _images.manifest["images"][k] for k in dev)
+
+
+def test_dev_push_overwrites_the_mutable_tag_without_force(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)  # :dev always exists after first
+    monkeypatch.setattr(cli, "_run", lambda argv, **k: calls.append(argv))
+    result = CliRunner().invoke(cli.main, ["images", "push", "SIMMS", "--dev"])
+    assert result.exit_code == 0, result.output
+    assert ["docker", "push", "ghcr.io/shinobi-dosho/simms:dev"] in calls
+    assert "already published" not in result.output
+
+
+def test_dev_images_never_enter_the_release_build_plan():
+    # dev tags are mutable and must not be reachable from the automated
+    # release path, or a dev push could overwrite a published release tag
+    plan = json.loads(CliRunner().invoke(cli.main, ["images", "build-plan"]).output)
+    assert "SIMMS" in plan["tools"]  # the release image, at its release tag
+    result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
+    assert ":dev" not in result.output

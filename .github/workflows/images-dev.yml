@@ -1,0 +1,104 @@
+# Build dosho's *dev* images -- a tool installed from its development branch
+# (its manifest `dev:` block) rather than from a release, published to the
+# mutable tag `ghcr.io/shinobi-dosho/<name>:dev`.
+#
+# Why this is a separate workflow from images.yml, rather than a flag on it:
+#
+# * The release path is built on immutable tags -- `dosho images push` skips an
+#   already-published tag, and `build-plan --missing-only` filters candidates to
+#   tags absent from the registry. A `:dev` tag is a moving pointer, so it is
+#   the exact opposite: it must be overwritten on every build, and would be
+#   filtered out of every plan after its first push.
+# * Keeping the paths disjoint means a dev build can never overwrite a release
+#   tag, whatever it is handed as an input.
+#
+# Triggers are deliberately explicit -- nothing here fires on a dosho push,
+# because a dev image tracks the *tool's* repo, not this one:
+#
+# * `workflow_dispatch` -- build one KEY (or every KEY declaring `dev:`).
+# * `repository_dispatch` (type: tool-updated, payload {"image": "<KEY>"}) --
+#   for the tool's own repo to call on a push to its default branch, e.g.
+#     gh api repos/shinobi-dosho/dosho/dispatches -f event_type=tool-updated \
+#        -f 'client_payload[image]=SIMMS'
+#
+# Consumers should pin the *digest* this prints, not the `:dev` tag: shinobi's
+# step-cache key hashes the image reference as a string, so a moving tag keeps
+# serving cache hits produced by the code you just changed (and a digest also
+# makes a dev run reproducible after the fact).
+name: images-dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Image KEY to build (blank = every KEY with a dev: block)"
+        required: false
+        default: ""
+  repository_dispatch:
+    types: [tool-updated]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.plan.outputs.images }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - id: plan
+        env:
+          # workflow_dispatch input, or the repository_dispatch payload
+          REQUESTED: ${{ github.event.inputs.image || github.event.client_payload.image }}
+        run: |
+          if [ -n "$REQUESTED" ]; then
+            images="[\"$REQUESTED\"]"
+          else
+            images="$(uv run dosho images build-keys --dev)"
+          fi
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+          echo "dev images: $images"
+
+  build:
+    needs: discover
+    if: needs.discover.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.images) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # --no-cache: the whole point is to pick up new commits on the tool's
+      # branch, and the pip layer's cache key (the git URL) does not move when
+      # the branch does.
+      - name: build + push dev image
+        id: build
+        run: |
+          uv run dosho images build "${{ matrix.image }}" --dev --push --no-cache | tee build.log
+      - name: report the digest to pin
+        run: |
+          digest="$(docker inspect --format '{{index .RepoDigests 0}}' \
+            "ghcr.io/shinobi-dosho/$(uv run python -c "
+          from dosho import images
+          e = images.manifest['images']['${{ matrix.image }}']
+          print(e.get('name', '${{ matrix.image }}'.lower()))
+          "):dev")"
+          {
+            echo "### ${{ matrix.image }} dev image"
+            echo
+            echo 'Pin this digest (not the `:dev` tag) in a `DOSHO_IMAGES` overlay:'
+            echo
+            echo '```yaml'
+            echo "${{ matrix.image }}: $digest"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

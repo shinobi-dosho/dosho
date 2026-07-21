@@ -10,6 +10,12 @@ images (used verbatim) and are not built here.
 The resolved tag is ``{registry}/{name}:{version}-{bundle_version}`` (the same
 reference `dosho.images.<KEY>` exposes to cabs), so a built+pushed image is
 exactly what the cabs consume.
+
+An entry may also declare a ``dev:`` block -- its `build:` vars overlaid to
+install the tool from its development branch -- built with ``build --dev`` and
+published to the mutable tag ``{registry}/{name}:dev``. Dev images are *not*
+part of the release build plan (`build-plan` never selects them) and never
+share a tag with a release, so the two publish paths cannot collide.
 """
 
 from __future__ import annotations
@@ -114,10 +120,54 @@ def _get_build_entry(key: str) -> tuple[dict[str, Any], dict[str, Any]]:
     return entry, manifest["metadata"]
 
 
-def _tag(key: str, entry: dict[str, Any], metadata: dict[str, Any], registry: str | None) -> str:
+def _tag(
+    key: str,
+    entry: dict[str, Any],
+    metadata: dict[str, Any],
+    registry: str | None,
+    dev: bool = False,
+) -> str:
     registry = registry or metadata["registry"]
     name = entry.get("name", key.lower())
+    if dev:
+        # Deliberately outside the immutable {version}-{bundle} scheme: a dev
+        # tag is a moving pointer at the tool's `main`, so it carries no version
+        # to imply otherwise, and can never collide with a release tag.
+        return f"{registry}/{name}:dev"
     return f"{registry}/{name}:{entry['build']['version']}-{metadata['bundle_version']}"
+
+
+def _dev_entry(key: str, entry: dict[str, Any], metadata: dict[str, Any]) -> dict[str, Any]:
+    """`entry` with its `dev:` block overlaid onto `build:` -- i.e. the same
+    build recipe, but installing the tool from its development branch.
+
+    `metadata.dev_deps` is appended to the result's `extra_deps` (see the
+    manifest's comment on it): a tool built from its own `main` is written
+    against its framework dependency's `main` too, which a plain `pip install`
+    would resolve from PyPI instead.
+    """
+    dev = entry.get("dev")
+    if dev is None:
+        raise click.ClickException(
+            f"image {key!r} has no `dev:` block in the manifest -- add one "
+            f"(e.g. `dev: {{package: 'git+<repo>@main'}}`) to build a dev image for it"
+        )
+    build = {**entry["build"], **dev}
+    pins = metadata.get("dev_deps", "")
+    if pins:
+        build["extra_deps"] = f"{build.get('extra_deps', '')} {pins}".strip()
+    return {**entry, "build": build}
+
+
+def _digest(tag: str) -> str | None:
+    """The pushed image's `name@sha256:...` reference, or None if docker
+    doesn't report one. Callers pin *this*, not the mutable `:dev` tag."""
+    proc = subprocess.run(
+        ["docker", "inspect", "--format", "{{index .RepoDigests 0}}", tag],
+        capture_output=True,
+        text=True,
+    )
+    return proc.stdout.strip() or None if proc.returncode == 0 else None
 
 
 _OPTIONAL_TEMPLATE_VARS = ("pre_install", "post_install", "extra_deps", "pip_install_flags")
@@ -171,6 +221,15 @@ def images_list() -> None:
 )
 @click.option("--force", is_flag=True, help="on --push, overwrite an already-published tag.")
 @click.option(
+    "--dev",
+    is_flag=True,
+    help="build the entry's `dev:` variant (the tool from its development "
+    "branch) and tag it `{name}:dev`. The tag is mutable, so --push always "
+    "overwrites it; the digest is printed afterwards, and consumers should pin "
+    "that -- shinobi's step-cache key hashes the image *string*, so a moving "
+    "tag would keep serving cache hits produced by the code you just changed.",
+)
+@click.option(
     "--dry-run", is_flag=True, help="render and print the Dockerfile + tag; do not build."
 )
 def images_build(
@@ -180,11 +239,14 @@ def images_build(
     registry: str | None,
     package: str | None,
     force: bool,
+    dev: bool,
     dry_run: bool,
 ) -> None:
     """Build (and optionally --push) the image for KEY."""
     entry, metadata = _get_build_entry(key)
-    tag = _tag(key, entry, metadata, registry)
+    if dev:
+        entry = _dev_entry(key, entry, metadata)
+    tag = _tag(key, entry, metadata, registry, dev)
     dockerfile, context = _render_dockerfile(entry, metadata, package)
 
     if dry_run:
@@ -202,19 +264,27 @@ def images_build(
 
     pushed = False
     if do_push:
-        pushed = _push(tag, force)
+        # A dev tag is mutable by design -- the immutability guard would skip
+        # every push after the first, which is exactly the wrong behaviour here.
+        pushed = _push(tag, force or dev)
 
     click.echo(click.style(f"built {tag}" + (" and pushed" if pushed else ""), fg="green"))
+    if pushed and dev:
+        digest = _digest(tag)
+        click.echo(
+            click.style(f"pin this digest, not the tag: {digest or '<unknown>'}", fg="yellow")
+        )
 
 
 @images.command("push")
 @click.argument("key")
 @click.option("--registry", default=None, help="override the manifest registry for the tag.")
 @click.option("--force", is_flag=True, help="overwrite an already-published tag.")
-def images_push(key: str, registry: str | None, force: bool) -> None:
+@click.option("--dev", is_flag=True, help="push the `{name}:dev` tag (always overwrites).")
+def images_push(key: str, registry: str | None, force: bool, dev: bool) -> None:
     """Push the already-built image for KEY (skips an already-published tag)."""
     entry, metadata = _get_build_entry(key)
-    _push(_tag(key, entry, metadata, registry), force)
+    _push(_tag(key, entry, metadata, registry, dev), force or dev)
 
 
 def _push(tag: str, force: bool) -> bool:
@@ -227,9 +297,14 @@ def _push(tag: str, force: bool) -> bool:
 
 
 @images.command("build-keys")
-def images_build_keys() -> None:
+@click.option("--dev", is_flag=True, help="list only KEYs that declare a `dev:` variant.")
+def images_build_keys(dev: bool) -> None:
     """Print the JSON list of `build:` image KEYs (for a CI build matrix)."""
-    click.echo(json.dumps(_build_keys(_images.manifest)))
+    manifest = _images.manifest
+    keys = _build_keys(manifest)
+    if dev:
+        keys = [k for k in keys if "dev" in manifest["images"][k]]
+    click.echo(json.dumps(keys))
 
 
 @images.command("build-plan")
