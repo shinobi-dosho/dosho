@@ -73,3 +73,26 @@ consider_namespace_packages = true
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+# `select`, not `extend-select` and not the implicit default. This list is the
+# repo's *whole* ruleset, stated outright rather than inherited from whatever
+# ruff happens to enable this month.
+#
+# There was no [lint] section at all before, which meant "whatever ruff
+# defaults to" -- and ruff 0.16.0 widened that default. `uv.lock` is untracked
+# and the dev group asks for `ruff>=0.5`, so CI resolves a fresh ruff every
+# run and picked the change up immediately: 30 findings across nine files
+# nobody had touched, turning the next PR red with nothing in it to blame.
+# (0.15.0 on the same tree: clean.) The set below is what this repo has
+# actually been enforcing all along.
+#
+# Adopting a broader ruleset is a fine thing to decide -- but it should be
+# decided, not inherited from a dependency bump. Add rules here deliberately.
+# (caracal2's own ruff.toml carries this same fix, for the same reason.)
+select = [
+    "E4",  # pycodestyle: imports
+    "E7",  # pycodestyle: statements
+    "E9",  # pycodestyle: runtime/syntax errors
+    "F",   # pyflakes
+]

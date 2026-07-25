@@ -152,6 +152,22 @@ images:
       package: "owlcat==1.8.1"
       cmd: "plot-elevation-tracks.py --help"
       dockerfile: pip/Dockerfile
+  # shadems needs dask's *legacy* dataframe, so the two dask specs below are
+  # both load-bearing and neither is cosmetic:
+  #   - plain `dask`, NOT `dask[dataframe]`. The extra pulls in `dask-expr`,
+  #     and dask 2024.3+ switches `dd.DataFrame` to dask-expr's `FrameBase`
+  #     whenever it is importable. shadems (0.5.4, and master) builds its
+  #     dataframes with the legacy low-level constructor
+  #     `dd.DataFrame(graph, name, meta=..., divisions=...)`, which FrameBase
+  #     rejects -- so *every* plot died with `TypeError: FrameBase.__init__()
+  #     got an unexpected keyword argument 'meta'`. Without the extra, dask
+  #     falls back to the legacy implementation and shadems works. This
+  #     matches shadeMS's own tested lock, which resolves dask 2024.12.1 with
+  #     no dask-expr. pandas and pyarrow (the extra's other two members) are
+  #     requested explicitly below so dropping it costs nothing.
+  #   - `<2025.1`, because 2025.1 deletes the legacy implementation outright
+  #     (dask warns "this will raise in a future version"). Bumping past it
+  #     needs an upstream shadems fix first, not a pin change here.
   SHADEMS:
     source: "https://github.com/ratt-ru/shadeMS"
     name: shadems
@@ -159,7 +175,7 @@ images:
       version: "0.5.4"
       base: BASE_ASTRO
       package: "shadems==0.5.4"
-      extra_deps: 'pyarrow "dask[dataframe]<2025.1"'
+      extra_deps: 'pyarrow pandas "dask<2025.1"'
       cmd: "shadems --help"
       dockerfile: pip/Dockerfile
   RAGAVI:

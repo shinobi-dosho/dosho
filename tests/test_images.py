@@ -85,3 +85,21 @@ def test_import_time_override_reaches_the_module_constant():
         assert reloaded.CASA6 == "ghcr.io/dosho/casa6:test"
     # restore the module to its unfudged state for any later tests
     importlib.reload(images)
+
+
+def test_shadems_does_not_request_the_dask_dataframe_extra():
+    """shadems needs dask's *legacy* dataframe.
+
+    The `[dataframe]` extra installs `dask-expr`, and dask 2024.3+ switches
+    `dd.DataFrame` to dask-expr's `FrameBase` whenever it is importable --
+    which rejects the low-level `dd.DataFrame(graph, name, meta=...,
+    divisions=...)` constructor shadems builds every plot with. The image
+    built fine and `shadems --help` (its `cmd:` sanity check) passed; only an
+    actual render failed, so nothing but this test guards the pin. See the
+    manifest's own comment on the entry.
+    """
+    deps = images.manifest["images"]["SHADEMS"]["build"]["extra_deps"]
+    assert "dask[dataframe]" not in deps
+    # <2025.1 is equally load-bearing: 2025.1 deletes the legacy
+    # implementation, so there is no fallback left to fall back to.
+    assert "dask<2025.1" in deps.replace('"', "").replace(" <", "<")
