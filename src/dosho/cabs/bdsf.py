@@ -110,22 +110,22 @@ def catalog(
 
     process_image_kwargs = {
         k: v
-        for k, v in dict(
-            detection_image=str(detection_image) if detection_image else None,
-            thresh_isl=thresh_isl,
-            thresh_pix=thresh_pix,
-            rms_box=rms_box,
-            rms_map=rms_map,
-            adaptive_rms_box=adaptive_rms_box,
-            trim_box=trim_box,
-            flagging_opts=flagging_opts,
-            flag_maxsize_bm=flag_maxsize_bm,
-            spectralindex_do=spectralindex_do,
-            polarisation_do=polarisation_do,
-            advanced_opts=advanced_opts,
-            src_ra_dec=src_ra_dec,
-            src_radius_pix=src_radius_pix,
-        ).items()
+        for k, v in {
+            "detection_image": str(detection_image) if detection_image else None,
+            "thresh_isl": thresh_isl,
+            "thresh_pix": thresh_pix,
+            "rms_box": rms_box,
+            "rms_map": rms_map,
+            "adaptive_rms_box": adaptive_rms_box,
+            "trim_box": trim_box,
+            "flagging_opts": flagging_opts,
+            "flag_maxsize_bm": flag_maxsize_bm,
+            "spectralindex_do": spectralindex_do,
+            "polarisation_do": polarisation_do,
+            "advanced_opts": advanced_opts,
+            "src_ra_dec": src_ra_dec,
+            "src_radius_pix": src_radius_pix,
+        }.items()
         if v is not None
     }
 

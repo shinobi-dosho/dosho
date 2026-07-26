@@ -4,8 +4,7 @@ import json
 
 from click.testing import CliRunner
 
-from dosho import cli
-from dosho import images as _images
+from dosho import cli, images as _images
 
 
 def _a_ref_only_key() -> str:

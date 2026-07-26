@@ -41,6 +41,7 @@ def _image_exists(tag: str) -> bool:
             ["docker", "manifest", "inspect", tag],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            check=False,  # a missing tag is the answer, not an error
         ).returncode
         == 0
     )
@@ -166,6 +167,7 @@ def _digest(tag: str) -> str | None:
         ["docker", "inspect", "--format", "{{index .RepoDigests 0}}", tag],
         capture_output=True,
         text=True,
+        check=False,  # "no digest reported" is an answer the caller handles
     )
     return proc.stdout.strip() or None if proc.returncode == 0 else None
 

@@ -11,18 +11,18 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import date
+from datetime import UTC, datetime
 
 sys.path.insert(0, os.path.abspath("../src"))
 sys.path.insert(0, os.path.abspath("_ext"))  # local Sphinx extensions (cab_catalog)
 
-from dosho import __version__  # noqa: E402
+from dosho import __version__
 
 # -- Project information -----------------------------------------------------
 
 project = "dosho"
 author = "Sphesihle Makhathini"
-copyright = f"{date.today().year}, {author}"
+copyright = f"{datetime.now(tz=UTC).year}, {author}"
 
 version = __version__
 release = __version__

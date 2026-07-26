@@ -13,7 +13,7 @@ authors = [
     { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
 ]
 dependencies = [
-    "stimela-ninja>=0.1.0b3",
+    "stimela-ninja>=0.1.0b4",
     "pyyaml>=6.0",
     "click>=8.1",
 ]
@@ -22,7 +22,6 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "ruff>=0.5",
-    "pre-commit>=3.5",
 ]
 # Documentation build (Sphinx + Furo + autodoc). `uv sync --group docs`.
 docs = [
@@ -41,9 +40,9 @@ docs = [
 stimela-ninja = { git = "https://github.com/shinobi-dosho/stimela-ninja", branch = "main" }
 
 [project.urls]
-Homepage = "https://github.com/SpheMakh/dosho"
-Repository = "https://github.com/SpheMakh/dosho"
-Issues = "https://github.com/SpheMakh/dosho/issues"
+Homepage = "https://dosho.readthedocs.io"
+Repository = "https://github.com/shinobi-dosho/dosho"
+Issues = "https://github.com/shinobi-dosho/dosho/issues"
 Documentation = "https://dosho.readthedocs.io"
 
 [project.scripts]
@@ -77,22 +76,75 @@ line-length = 100
 [tool.ruff.lint]
 # `select`, not `extend-select` and not the implicit default. This list is the
 # repo's *whole* ruleset, stated outright rather than inherited from whatever
-# ruff happens to enable this month.
-#
-# There was no [lint] section at all before, which meant "whatever ruff
-# defaults to" -- and ruff 0.16.0 widened that default. `uv.lock` is untracked
-# and the dev group asks for `ruff>=0.5`, so CI resolves a fresh ruff every
-# run and picked the change up immediately: 30 findings across nine files
-# nobody had touched, turning the next PR red with nothing in it to blame.
-# (0.15.0 on the same tree: clean.) The set below is what this repo has
-# actually been enforcing all along.
-#
-# Adopting a broader ruleset is a fine thing to decide -- but it should be
-# decided, not inherited from a dependency bump. Add rules here deliberately.
+# ruff happens to enable this month -- `uv.lock` is untracked and the dev group
+# asks for `ruff>=0.5`, so CI resolves a fresh ruff every run, and when 0.16.0
+# widened its default it turned the next PR red with nothing in it to blame.
 # (caracal2's own ruff.toml carries this same fix, for the same reason.)
+#
+# 981a92a stated the set at ruff's classic default (E4/E7/E9/F) to stop the
+# bleeding without smuggling in a cleanup, and left widening it as a decision
+# to make here, deliberately. This is that decision: the families below are
+# the ones whose findings on this tree were worth fixing, and they are fixed --
+# nothing here is aspirational, and `ruff check .` is clean as it stands.
 select = [
-    "E4",  # pycodestyle: imports
-    "E7",  # pycodestyle: statements
-    "E9",  # pycodestyle: runtime/syntax errors
-    "F",   # pyflakes
+    "F",     # pyflakes -- real errors: undefined names, unused imports
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "B",     # bugbear -- mutable defaults, blind excepts in tests, ...
+    "C4",    # comprehension rewrites
+    "DTZ",   # naive datetimes
+    "EXE",   # shebang/executable-bit mismatches
+    "FA",    # missing `from __future__ import annotations` -- every module here relies on it
+    "FURB",  # modernizations
+    "G",     # logging call format (no f-strings in logger.* -- lazy % args)
+    "I",     # import sorting
+    "ICN",   # conventional import aliases
+    "ISC",   # implicit string concatenation
+    "LOG",   # logging misuse
+    "PGH",   # blanket `# noqa` / `# type: ignore` without a code
+    "PLE",   # pylint errors
+    "PLW",   # pylint warnings
+    "Q",     # quote style
+    "RSE",   # `raise X()` not `raise X`
+    "RUF",   # ruff's own rules, incl. unused `# noqa`
+    "SIM",   # simplifications
+    "T10",   # stray debugger imports
+    "T20",   # stray `print` -- this is a library; CLI output goes through click
+    "TID",   # relative-import hygiene
+    "UP",    # pyupgrade
+    "YTT",   # sys.version misuse
 ]
+ignore = [
+    # The formatter owns line length. E501 would only ever fire on lines
+    # `ruff format` has already declared final (long string literals it cannot
+    # split), which is a permanent floor, not a signal.
+    "E501",
+    # `registry.py`'s lazy `_entries_cache` is exactly what a module-level
+    # memo looks like; rewriting it to dodge `global` would be contortion for
+    # a linter's benefit.
+    "PLW0603",
+]
+
+# Deliberately NOT selected: PLR/PLC (132 + 39 findings -- magic numbers,
+# argument counts: a project-wide policy choice, not a cleanup), ERA (14, all
+# prose in comments that reads as code), and ANN/D/S (annotations, docstring
+# style, bandit -- same reason as PLR).
+
+[tool.ruff.lint.isort]
+# `cabs/__init__.py` re-exports a tool's sub-commands as one parenthesised
+# `from ... import (a as x, b as y)` block per module, which is how that file
+# stays readable at ~60 imports. Without this, isort splits every aliased name
+# into its own statement.
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-bugbear]
+# The pystep authoring pattern *is* `param: T = Field(default, description=...)`
+# in a function signature -- pydantic reads those at class-build time, so B008's
+# "call in a default argument" warning doesn't apply.
+extend-immutable-calls = ["pydantic.Field"]
+
+[tool.ruff.lint.per-file-ignores]
+# docs/_ext/cab_catalog.py is a standalone regeneration script as well as a
+# Sphinx extension; its stdout is its interface when run by hand or by the
+# pre-commit hook.
+"docs/**" = ["T201"]

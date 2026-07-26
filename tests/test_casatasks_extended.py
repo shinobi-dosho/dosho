@@ -281,12 +281,12 @@ def test_fluxscale_declares_listfile_as_output(monkeypatch):
     from dosho.cabs.casatasks import fluxscale
 
     body = fluxscale.func.__wrapped__
-    kwargs = dict(
-        vis=Path("x.ms"),
-        caltable=Path("c.tbl"),
-        fluxtable=Path("f.tbl"),
-        reference=["3C286"],
-    )
+    kwargs = {
+        "vis": Path("x.ms"),
+        "caltable": Path("c.tbl"),
+        "fluxtable": Path("f.tbl"),
+        "reference": ["3C286"],
+    }
     assert body(_FakeCtx(), listfile="fit.txt", **kwargs).listfile == Path("fit.txt")
     assert body(_FakeCtx(), **kwargs).listfile is None
 

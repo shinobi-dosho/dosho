@@ -9,6 +9,7 @@ these either), so these tests check schema shape and Recipe wiring, not
 real execution.
 """
 
+import contextlib
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -222,9 +223,7 @@ def test_quiet_casa_writes_site_config_and_redirects_casalog():
     finally:
         os.environ.pop("CASASITECONFIG", None)
         if config is not None:
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(config)
-            except FileNotFoundError:
-                pass
         if had is not None:
             os.environ["CASASITECONFIG"] = had

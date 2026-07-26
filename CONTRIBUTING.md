@@ -48,24 +48,39 @@ cd dosho
 uv sync --group dev
 uv run pytest
 uv run ruff check .
+
+# enable the repo's pre-commit hook (once per clone)
+git config core.hooksPath .githooks
 ```
 
 If you're working against an unreleased `stimela-ninja` change, clone
 it next to this repo and layer it in for the duration of a command with
 `uv run --with-editable ../stimela-ninja -- <command>` instead.
 
-Install the pre-commit hooks once:
+### The pre-commit hook
 
-```bash
-uv run pre-commit install
-```
+Enabling it is the only setup step that is not `uv`'s job -- git will
+not let a repository turn on an executable hook by itself, which is why
+the `git config` above is manual; skip it and you simply get no hook.
 
-The `cab-catalog` hook regenerates `docs/reference/cabs.rst` (generated
-from the live registry -- CI rejects a PR whose committed copy is stale)
-whenever a commit touches cab sources, so you never hit the CI staleness
-error after a schema change: if the catalog changed, the commit stops,
-and you `git add` the regenerated file and commit again. To refresh it
-by hand at any time: `uv run python docs/_ext/cab_catalog.py`.
+`.githooks/pre-commit` is a tracked shell script (no `pre-commit`
+framework, no separate pinned tool universe), and does two things, each
+only when the commit actually touches the relevant files:
+
+1. **staged Python** -- `ruff check` and `ruff format --check`, through
+   `uv run`, so it is this project's own pinned `ruff` and agrees with
+   CI's lint job by construction. A format failure is fixed with
+   `uv run ruff format <file> && git add <file>`; the hook never rewrites
+   files behind your back.
+2. **cab sources** (`src/dosho/`, `docs/_ext/cab_catalog.py`) --
+   regenerates `docs/reference/cabs.rst` from the live registry and fails
+   the commit if the committed copy was stale, so you never hit the CI
+   staleness error after a schema change: `git add` the regenerated file
+   and commit again. To refresh it by hand at any time:
+   `uv run python docs/_ext/cab_catalog.py`.
+
+Any other commit skips both in milliseconds. `git commit --no-verify`
+bypasses the hook when you genuinely need to.
 
 ## Testing
 
