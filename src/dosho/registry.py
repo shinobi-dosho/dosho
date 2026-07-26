@@ -77,7 +77,7 @@ def _entries() -> dict[str, str]:
     return _entries_cache
 
 
-def get(name: str) -> "Cab | StepRef":
+def get(name: str) -> Cab | StepRef:
     """Resolve a cab/pystep by name. Raises `KeyError` if `name` isn't
     one of this repo's entries -- the contract `shinobi.cabs.get` relies
     on to fall through to the next installed provider.

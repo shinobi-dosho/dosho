@@ -5,11 +5,12 @@ completely unresolved. This checks the real argv shape and the resolved
 implicit-template outputs against real WSClean CLI conventions.
 """
 
-import dosho
 from shinobi.backends.recording import RecordingBackend
 from shinobi.policies import build_argv
 from shinobi.steps import register_step_backend
 from shinobi.steps.dispatch import _dispatch
+
+import dosho
 
 
 def _cab():

@@ -21,11 +21,11 @@ still a real binary and keeps its binary-cab test below.
 """
 
 import pytest
-
-import dosho
+from pydantic import ValidationError
 from shinobi import StepRef
 from shinobi.policies import build_argv
 
+import dosho
 from dosho import images
 
 
@@ -132,7 +132,7 @@ def test_simms_skysim_is_a_pystep_with_choices_and_abbreviations():
     # `choices` reach real pydantic validation as a Literal, not just info text
     assert get_args(fields["mode"].annotation) == ("sim", "add", "subtract")
     step.step.inputs_model(ms="/x.ms", mode="add")  # in-set value accepted
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         step.step.inputs_model(ms="/x.ms", mode="bogus")  # out-of-set rejected
     # `abbreviation` is carried onto json_schema_extra for `ninja run`'s short flag
     assert fields["ascii_sky"].json_schema_extra == {"abbreviation": "as"}
@@ -191,7 +191,7 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     # the operation selector is a required Literal choice field
     assert get_args(fields["mode"].annotation) == ("to-fits", "tag-ms", "apply", "correct")
     assert fields["mode"].is_required()
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         step.step.inputs_model(mode="bogus")  # out-of-set rejected
     assert fields["beam_pattern"].json_schema_extra == {"abbreviation": "bp"}
     # the cattery/DDFacet to-fits knobs (simms' heterogeneous-beam support):
@@ -211,7 +211,9 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     for field in ("ms", "label_map", "output", "ascii_sky", "fits_sky", "source_schema"):
         assert Path in get_args(fields[field].annotation), field
     for field in ("ms", "ascii_sky", "primary_beam", "source_schema"):
-        assert Path in get_args(beam_axes[field].annotation) or beam_axes[field].annotation is Path, field
+        assert (
+            Path in get_args(beam_axes[field].annotation) or beam_axes[field].annotation is Path
+        ), field
     # ...but NOT beam_pattern: it takes a built-in model NAME or a band
     # shorthand as well as a path, and absolutizing a name would corrupt it
     assert fields["beam_pattern"].annotation == (str | None)

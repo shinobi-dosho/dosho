@@ -47,10 +47,10 @@ from typing import Literal
 
 import shinobi
 from pydantic import BaseModel, Field
+from shinobi.steps.schema import ParamMeta, Policies
 
 from dosho import images
 from dosho._builder import FieldSpec, define_cab
-from shinobi.steps.schema import ParamMeta, Policies
 
 
 class SkysimOutputs(BaseModel):

@@ -21,6 +21,19 @@ from typing import Any
 
 _SECTIONS = ("Args:", "Arguments:", "Returns:", "Yields:", "Raises:", "Parameters:")
 
+# The dotted module path in front of a type name in `str(annotation)`:
+# `list[pathlib._local.Path] | None` -> `list[Path] | None`. Stripping whole
+# qualifiers rather than named prefixes is what makes this survive the standard
+# library moving a class between modules -- 3.13 split `pathlib` into
+# `pathlib._local`/`pathlib._abc`, so a hardcoded `"pathlib."` strip leaves
+# `_local.Path` behind on 3.13+ and `Path` on 3.12, which is exactly the
+# interpreter-dependent output the freshness gates diff against.
+#
+# The lookbehind keeps it out of quoted `Literal[...]` values: a member like
+# `'ms.image.fits'` is preceded by a quote (or, mid-value, by a dot), so no
+# part of it is mistaken for a module path.
+_MODULE_QUALIFIER = re.compile(r"""(?<!['"\w.])(?:[A-Za-z_]\w*\.)+(?=[A-Za-z_])""")
+
 
 def _schema_obj(cab: Any) -> Any:
     """The schema-bearing object for a registry entry: the Cab itself, or a
@@ -63,7 +76,7 @@ def _type_name(annotation: Any) -> str:
     # a bare "list"); 3.11+ made those fail the isinstance check.
     if isinstance(annotation, type) and not getattr(annotation, "__args__", None):
         return annotation.__name__
-    text = str(annotation).replace("typing.", "").replace("pathlib.", "")
+    text = _MODULE_QUALIFIER.sub("", str(annotation))
     match = re.fullmatch(r"Optional\[(.*)\]", text)
     return f"{match.group(1)} | None" if match else text
 

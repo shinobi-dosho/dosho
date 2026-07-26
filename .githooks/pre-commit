@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+#
+# dosho pre-commit hook: lint/format the Python a commit touches, and keep the
+# generated cab catalog in step with the cabs it documents. Tracked in the repo
+# and enabled per clone with
+#
+#     git config core.hooksPath .githooks
+#
+# (see CONTRIBUTING.md). Git deliberately will not let a repository install an
+# executable hook by itself, so that one command is unavoidable -- but the
+# script is version-controlled, reviewable in diffs, and identical for
+# everyone, which is the part that actually matters.
+#
+# It installs nothing and pins nothing. Both checks run through `uv run`, so
+# they use this project's own pinned `ruff` and the live registry -- the same
+# things the `test` and `docs` CI jobs use, and the same things you get on the
+# command line. There is no second tool with its own version universe to drift.
+#
+# Only what the commit touched: a commit with no Python in it skips ruff, and
+# one that touches no cab sources skips the catalog. Charging a docstring fix
+# for a full catalog regeneration teaches people to reach for --no-verify.
+#
+# Bypass with `git commit --no-verify` when you genuinely need to.
+
+set -uo pipefail
+
+# Both checks are uv operations, so there is no meaningful degraded mode
+# without it -- say so and get out of the way, rather than blocking a commit on
+# a missing tool.
+if ! command -v uv >/dev/null 2>&1; then
+    echo "pre-commit: 'uv' not on PATH -- skipping lint and cab-catalog checks." >&2
+    exit 0
+fi
+
+staged=$(git diff --cached --name-only --diff-filter=ACM -z | tr '\0' '\n')
+status=0
+
+# Reads the working tree, not the staged blobs -- same simplification the rest
+# of git's hook ecosystem makes. Stage half a file and you lint the whole one.
+mapfile -t py < <(printf '%s\n' "$staged" | grep -E '\.pyi?$')
+
+if [ ${#py[@]} -gt 0 ]; then
+    # Captured rather than streamed, here and below: a passing commit should
+    # print nothing. On failure the whole thing goes to stderr, findings
+    # included.
+    #
+    # --force-exclude: honour ruff's own excludes even though the filenames are
+    # passed explicitly.
+    if ! output=$(uv run --quiet ruff check --force-exclude -- "${py[@]}" 2>&1); then
+        printf '%s\n' "$output" >&2
+        cat >&2 <<'MSG'
+
+pre-commit: ruff check rejected staged Python.
+
+  fix:    uv run ruff check --fix <file>, or fix by hand
+  bypass: git commit --no-verify
+
+MSG
+        status=1
+    fi
+
+    # --check rather than a rewrite: a hook that silently edits files leaves
+    # you committing something you never saw, and the fix is one command.
+    if ! output=$(uv run --quiet ruff format --check --force-exclude -- "${py[@]}" 2>&1); then
+        printf '%s\n' "$output" >&2
+        cat >&2 <<'MSG'
+
+pre-commit: staged Python is not ruff-formatted.
+
+  fix:    uv run ruff format <file> && git add <file>
+  bypass: git commit --no-verify
+
+MSG
+        status=1
+    fi
+fi
+
+# docs/reference/cabs.rst is generated from the live registry, and CI fails a PR
+# whose committed copy is stale. Catch it here, where the fix is one `git add`,
+# rather than after a push. The generator rewrites the file in place and exits 1
+# when that changed anything; the git diff additionally catches a stale copy
+# that was staged while the working tree was already fresh.
+if printf '%s\n' "$staged" | grep -qE '^(src/dosho/|docs/_ext/cab_catalog\.py$)'; then
+    catalog_out=$(uv run --quiet python docs/_ext/cab_catalog.py 2>&1)
+    catalog_status=$?
+
+    if [ $catalog_status -ne 0 ] || ! git diff --quiet -- docs/reference/cabs.rst; then
+        printf '%s\n' "$catalog_out" >&2
+        cat >&2 <<'MSG'
+
+pre-commit: docs/reference/cabs.rst is stale (or its staged copy is).
+
+  fix:    git add docs/reference/cabs.rst   (it has been regenerated for you)
+  rerun:  uv run python docs/_ext/cab_catalog.py
+  bypass: git commit --no-verify
+
+MSG
+        status=1
+    fi
+fi
+
+exit $status
