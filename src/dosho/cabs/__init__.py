@@ -93,6 +93,14 @@ from dosho.cabs.crystalball import crystalball
 from dosho.cabs.cubical import cubical
 from dosho.cabs.ddfacet import ddfacet
 from dosho.cabs.eidos import eidos
+from dosho.cabs.fitstoolz import (
+    add_axis as fitstoolz_add_axis,
+    header as fitstoolz_header,
+    remove_axis as fitstoolz_remove_axis,
+    slice_ as fitstoolz_slice,
+    stack as fitstoolz_stack,
+    stats as fitstoolz_stats,
+)
 from dosho.cabs.flagms import flagms
 from dosho.cabs.killms import killms
 from dosho.cabs.mosaic_queen import mosaic_queen
@@ -162,6 +170,12 @@ __all__ = [
     "delmod",
     "eidos",
     "feather",
+    "fitstoolz_add_axis",
+    "fitstoolz_header",
+    "fitstoolz_remove_axis",
+    "fitstoolz_slice",
+    "fitstoolz_stack",
+    "fitstoolz_stats",
     "fixplanets",
     "fixvis",
     "flagcmd",

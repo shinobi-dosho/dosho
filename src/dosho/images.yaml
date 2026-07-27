@@ -73,6 +73,18 @@ images:
     dev:
       package: "git+https://github.com/shinobi-dosho/simms@main"
 
+  FITSTOOLZ:
+    name: fitstoolz
+    source: "https://github.com/shinobi-dosho/fitstoolz"
+    build:
+      version: "0.1.0"
+      base: BASE_ASTRO
+      package: "fitstoolz==0.1.0"
+      cmd: "fitstoolz --help"
+      dockerfile: pip/Dockerfile
+    dev:
+      package: "git+https://github.com/shinobi-dosho/fitstoolz@main"
+
   MSUTILS:
     name: msutils
     source: "https://github.com/sphemakh/msutils"
