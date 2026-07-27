@@ -4130,6 +4130,423 @@ Combine a high-resolution (interferometric) and low-resolution (single-dish) ima
      - ``Path``
      - \-
 
+fitstoolz-add-axis
+------------------
+
+Add an axis to a FITS image.
+
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Source: https://github.com/shinobi-dosho/fitstoolz
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fname``
+     - ``Path``
+     - *required*
+     - Input file(s)
+   * - ``ctype``
+     - ``str``
+     - *required*
+     - Axis type; FREQ, STOKES, etc.
+   * - ``index``
+     - ``int``
+     - *required*
+     - Add axis at this dimension index
+   * - ``crpix``
+     - ``int``
+     - ``0``
+     - Reference pixel (zero-based indexing)
+   * - ``crval``
+     - ``float``
+     - ``0.0``
+     - Value at Reference pixel (crval)
+   * - ``cdelt``
+     - ``float``
+     - ``1.0``
+     - Pixel width
+   * - ``cunit``
+     - ``str``
+     - ``''``
+     - Units (astropy naming convention)
+   * - ``ra_chunks``
+     - ``int | None``
+     - ``None``
+     - RA chunking
+   * - ``dec_chunks``
+     - ``int | None``
+     - ``None``
+     - Dec chunking
+   * - ``spectral_chunks``
+     - ``int | None``
+     - ``None``
+     - Spectral chunking
+   * - ``outfile``
+     - ``Path | None``
+     - ``None``
+     - Path of output image
+   * - ``replace``
+     - ``bool``
+     - ``False``
+     - Overwrite output if it exists
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Log level
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+
+fitstoolz-header
+----------------
+
+Show, add, edit or remove FITS header entries.
+
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Source: https://github.com/shinobi-dosho/fitstoolz
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fname``
+     - ``Path``
+     - *required*
+     - Input file(s)
+   * - ``show``
+     - ``bool``
+     - ``False``
+     - Show header and exit
+   * - ``edit``
+     - ``list[str] | None``
+     - ``None``
+     - Edit FITS header entry, as KEY=VALUE
+   * - ``remove``
+     - ``list[str] | None``
+     - ``None``
+     - Remove header entry
+   * - ``add``
+     - ``list[str] | None``
+     - ``None``
+     - Add header entry, as KEY=VALUE
+   * - ``outfile``
+     - ``Path | None``
+     - ``None``
+     - Path of output image
+   * - ``replace``
+     - ``bool``
+     - ``False``
+     - Overwrite output if it exists
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Log level
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+
+fitstoolz-remove-axis
+---------------------
+
+Remove an axis from a FITS image.
+
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Source: https://github.com/shinobi-dosho/fitstoolz
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fname``
+     - ``Path``
+     - *required*
+     - Input file(s)
+   * - ``ctype``
+     - ``str``
+     - *required*
+     - Axis type (or dimension). FREQ, STOKES, etc.
+   * - ``select_index``
+     - ``int``
+     - ``0``
+     - Keep data at this index (zero-based). For example, if removing the frequency axis, this would be the channel to keep.
+   * - ``ra_chunks``
+     - ``int | None``
+     - ``None``
+     - RA chunking
+   * - ``dec_chunks``
+     - ``int | None``
+     - ``None``
+     - Dec chunking
+   * - ``spectral_chunks``
+     - ``int | None``
+     - ``None``
+     - Spectral chunking
+   * - ``outfile``
+     - ``Path | None``
+     - ``None``
+     - Path of output image
+   * - ``replace``
+     - ``bool``
+     - ``False``
+     - Overwrite output if it exists
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Log level
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+
+fitstoolz-slice
+---------------
+
+Slice a FITS image along one or more axes.
+
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Source: https://github.com/shinobi-dosho/fitstoolz
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fname``
+     - ``Path``
+     - *required*
+     - Input file(s)
+   * - ``axis``
+     - ``list[str] | None``
+     - ``None``
+     - Axis slicing info, as CTYPE,START,END
+   * - ``memmap``
+     - ``bool``
+     - ``True``
+     - memmap option to pass to astropy.io.fits.open()
+   * - ``ra_chunks``
+     - ``int | None``
+     - ``None``
+     - RA chunking
+   * - ``dec_chunks``
+     - ``int | None``
+     - ``None``
+     - Dec chunking
+   * - ``spectral_chunks``
+     - ``int | None``
+     - ``None``
+     - Spectral chunking
+   * - ``outfile``
+     - ``Path | None``
+     - ``None``
+     - Path of output image
+   * - ``replace``
+     - ``bool``
+     - ``False``
+     - Overwrite output if it exists
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Log level
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile``
+     - ``Path | None``
+     - \-
+
+fitstoolz-stack
+---------------
+
+Stack FITS images along an axis.
+
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Source: https://github.com/shinobi-dosho/fitstoolz
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fname``
+     - ``Path``
+     - *required*
+     - Input file(s)
+   * - ``axis``
+     - ``str``
+     - *required*
+     - Stack files along this axis
+   * - ``extra_files``
+     - ``list[Path] | None``
+     - ``None``
+     - Additional files to stack (use multiple times)
+   * - ``stacked_fits``
+     - ``Path``
+     - *required*
+     - Path of stacked output image
+   * - ``ra_chunks``
+     - ``int | None``
+     - ``None``
+     - RA chunking
+   * - ``dec_chunks``
+     - ``int | None``
+     - ``None``
+     - Dec chunking
+   * - ``spectral_chunks``
+     - ``int | None``
+     - ``None``
+     - Spectral chunking
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Log level
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``stacked_fits``
+     - ``Path | None``
+     - \-
+
+fitstoolz-stats
+---------------
+
+Get image statistics (min, max, mean, standard deviation).
+
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Source: https://github.com/shinobi-dosho/fitstoolz
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``fname``
+     - ``Path``
+     - *required*
+     - Input file(s)
+   * - ``show``
+     - ``bool``
+     - ``False``
+     - Show min, max, mean and standard deviation
+   * - ``slice``
+     - ``list[str] | None``
+     - ``None``
+     - Slice data, as CTYPE,START,END
+   * - ``clip_below``
+     - ``float | None``
+     - ``None``
+     - Blank pixels below this value
+   * - ``clip_above``
+     - ``float | None``
+     - ``None``
+     - Blank pixels above this value
+   * - ``blank_value``
+     - ``float | None``
+     - ``None``
+     - Blank value when using --clip-below/above. The values 'inf' and 'nan' are valid blank values.
+   * - ``log_level``
+     - ``str``
+     - ``'INFO'``
+     - Log level
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``min``
+     - ``float | None``
+     - \-
+   * - ``max``
+     - ``float | None``
+     - \-
+   * - ``mean``
+     - ``float | None``
+     - \-
+   * - ``std``
+     - ``float | None``
+     - \-
+
 fixplanets
 ----------
 
