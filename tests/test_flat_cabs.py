@@ -20,6 +20,8 @@ they wire into a `Recipe`, not a `build_argv` shape. `simms` (classic) is
 still a real binary and keeps its binary-cab test below.
 """
 
+import re
+
 import pytest
 from pydantic import ValidationError
 from shinobi import StepRef
@@ -118,6 +120,40 @@ def test_sofia2_real_param_count():
     cab = dosho.get("sofia2")
     assert cab.name == "sofia2"
     assert len(cab.inputs_model.model_fields) == 100
+
+
+def test_sofia2_renders_settings_not_flags():
+    # SoFiA-2 has no flags at all: `sofia <parfile>|<setting> ...`, where a
+    # setting is a bare `module.parameter=value` token. Under shinobi's
+    # default `--` policies SoFiA reads the first token as the name of a
+    # parameter file and dies with error code 5 before reading a voxel.
+    cab = dosho.get("sofia2")
+    argv = build_argv(cab, cab.inputs_model(input_data="/x/cube.fits").model_dump())
+    assert argv[0] == "sofia"
+    settings = argv[1:]
+    assert all(re.fullmatch(r"[a-zA-Z]+\.[a-zA-Z0-9]+=.*", token) for token in settings)
+    assert "input.data=/x/cube.fits" in settings
+
+
+def test_sofia2_parameter_names_are_the_ones_sofia_27_knows():
+    # A cab renders *every* defaulted field, and `pipeline.pedantic` (SoFiA's
+    # own default, true) makes an unknown setting fatal -- error code 7. So a
+    # name cult-cargo's schema carried from before the 2.6.38/2.6.54 renames
+    # is not inert here, it stops the run. See the module docstring for the
+    # mapping; these are the five that moved.
+    cab = dosho.get("sofia2")
+    argv = build_argv(cab, cab.inputs_model(input_data="/x/cube.fits").model_dump())
+    names = {token.split("=", 1)[0] for token in argv[1:]}
+    assert not {n for n in names if n.startswith("rippleFilter.")}
+    assert "background.enable" in names and "background.windowZ" in names
+    assert {"filter.minPixels", "filter.minSNR", "filter.discardNegative"} <= names
+    assert not {"reliability.minPixels", "reliability.minSNR", "linker.keepNegative"} & names
+    assert {"output.marginCubeletsXY", "output.marginCubeletsZ"} <= names
+    assert "output.marginCubelets" not in names
+    # ...and `port2tigger` was never a SoFiA parameter at all -- a
+    # stimela-classic wrapper option that reaches a plain binary as the bare
+    # token `port2tigger=false`, which SoFiA rejects.
+    assert "port2tigger" not in cab.inputs_model.model_fields
 
 
 def test_simms_skysim_is_a_pystep_with_choices_and_abbreviations():

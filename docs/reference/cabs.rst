@@ -11155,33 +11155,33 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``float | None``
      - ``5.0``
      - \-
-   * - ``rippleFilter_enable``
+   * - ``background_enable``
      - ``bool | None``
      - ``False``
      - \-
-   * - ``rippleFilter_gridXY``
+   * - ``background_gridXY``
      - ``int | None``
      - ``0``
      - \-
-   * - ``rippleFilter_gridZ``
+   * - ``background_gridZ``
      - ``int | None``
      - ``0``
      - \-
-   * - ``rippleFilter_interpolate``
+   * - ``background_interpolate``
      - ``bool | None``
      - ``False``
      - \-
-   * - ``rippleFilter_statistic``
+   * - ``background_statistic``
      - ``str | None``
      - ``'median'``
      - \-
-   * - ``rippleFilter_windowXY``
+   * - ``background_windowXY``
      - ``int | None``
      - ``31``
      - \-
-   * - ``rippleFilter_windowZ``
+   * - ``background_windowZ``
      - ``int | None``
-     - ``31``
+     - ``15``
      - \-
    * - ``scaleNoise_enable``
      - ``bool | None``
@@ -11275,10 +11275,6 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``bool | None``
      - ``True``
      - \-
-   * - ``linker_keepNegative``
-     - ``bool | None``
-     - ``False``
-     - \-
    * - ``linker_maxFill``
      - ``float | None``
      - ``0.0``
@@ -11343,14 +11339,6 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``int | None``
      - ``30``
      - \-
-   * - ``reliability_minPixels``
-     - ``int | None``
-     - ``0``
-     - \-
-   * - ``reliability_minSNR``
-     - ``float | None``
-     - ``3.0``
-     - \-
    * - ``reliability_parameters``
      - ``list[str] | None``
      - ``['peak', 'sum', 'mean']``
@@ -11370,6 +11358,18 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
    * - ``reliability_tolerance``
      - ``float | None``
      - ``0.05``
+     - \-
+   * - ``filter_discardNegative``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``filter_minPixels``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``filter_minSNR``
+     - ``float | None``
+     - ``3.0``
      - \-
    * - ``dilation_enable``
      - ``bool | None``
@@ -11415,7 +11415,11 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``str | None``
      - ``'sofia'``
      - \-
-   * - ``output_marginCubelets``
+   * - ``output_marginCubeletsXY``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``output_marginCubeletsZ``
      - ``int | None``
      - ``10``
      - \-
@@ -11464,10 +11468,6 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``False``
      - \-
    * - ``output_writeRawMask``
-     - ``bool | None``
-     - ``False``
-     - \-
-   * - ``port2tigger``
      - ``bool | None``
      - ``False``
      - \-

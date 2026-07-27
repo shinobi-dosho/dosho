@@ -2,7 +2,46 @@
 (https://gitlab.com/SoFiA-Admin/SoFiA-2).
 
 Ported field-by-field from cult-cargo's sofia2.yml (a flat, static
-100-parameter schema -- no dynamic_schema).
+100-parameter schema -- no dynamic_schema), then reconciled against the
+SoFiA 2.7.0 the image actually ships (see below).
+
+SoFiA-2 has **no flags**: its command line is `sofia <parfile>|<setting>
+...`, where a setting is a bare `module.parameter=value` token, so this
+cab takes `Policies(prefix="", key_value=True)` rather than shinobi's
+`--`-prefixed default. With the default policies SoFiA reads the first
+rendered token as the name of a parameter file and dies on `Failed to
+open parameter file: --pipeline.pedantic` (error code 5) before reading a
+single voxel.
+
+The parameter names likewise had to be brought up to 2.7.0. cult-cargo's
+schema predates SoFiA 2.6.38/2.6.54, and stale names here are not merely
+inert: a cab renders *every* defaulted field, and `pipeline.pedantic`
+(SoFiA's own default, true) makes an unknown setting fatal -- error code
+7, again before the cube is read. The renames applied, verified against
+`sofia -h <module>` in this image:
+
+* the whole `rippleFilter` module became `background` (2.6.54), 1:1
+  across all seven parameters;
+* `reliability.minPixels`/`minSNR` moved to the new `filter` module;
+* `linker.keepNegative` became `filter.discardNegative`, i.e. the
+  *negation* of itself, so it is the new field that is carried here;
+* `output.marginCubelets` split into `marginCubeletsXY`/`marginCubeletsZ`;
+* `port2tigger` is gone -- it was never a SoFiA parameter, but a
+  stimela-classic wrapper option that a plain binary can only see as the
+  bare token `port2tigger=false`, which SoFiA rejects.
+
+The ground truth for a name is `/SoFiA-2/template_par_file.par` inside
+the image, not `sofia -h`: the help text renders `linker.maxfill`, but
+matching is case-sensitive and only `linker.maxFill` is accepted.
+
+Nine 2.7.0 parameters are still unmodeled (`flag.cube`,
+`input.primaryBeam`, `output.dataFormat`, `output.marginAperSpec`,
+`output.showPreviewImage`, `output.writeDiagnosticPlot`,
+`output.writeKarma`, `output.writeLogFile`, `output.writePV`) -- unlike a
+stale name, an absent one costs nothing at run time beyond being
+unsettable, so SoFiA's own defaults stand. Note that two of those default
+to true, so `_logfile.log` and `_diagnostic.eps` are written by every run
+without being declared outputs here.
 
 Real SoFiA-2 derives `output.directory`/`output.filename` from
 `input.data` when either is left unset (cwd and the input cube's own
@@ -216,67 +255,67 @@ _FIELDS: dict[str, FieldSpec] = {
             info="Relative threshold in multiples of the standard deviation to be applied by the automatic flagging algorithm. Only relevant if flag.auto is enabled. Please see the documentation for details",
         ),
     ),
-    "rippleFilter_enable": (
+    "background_enable": (
         "bool",
         False,
         False,
         ParamMeta(
-            nom_de_guerre="rippleFilter.enable",
-            info="If set to true, then the ripple filter will be applied to the data cube prior to source finding. The filter works by measuring and subtracting either the mean or median across a running window. This can be useful if a DC offset or spatial/spectral ripple is present in the data.",
+            nom_de_guerre="background.enable",
+            info="If set to true, then the background subtraction filter will be applied to the data cube prior to source finding. The filter works by measuring and subtracting either the mean or median across a running window. This can be useful if a background offset or large-scale spatial/spectral ripple is present in the data.",
         ),
     ),
-    "rippleFilter_gridXY": (
+    "background_gridXY": (
         "int",
         False,
         0,
         ParamMeta(
-            nom_de_guerre="rippleFilter.gridXY",
-            info="Spatial grid separation in pixels for the running window used in the ripple filter. The value must be an odd integer value and specifies the spatial step by which the window is moved. Alternatively, it can be set to 0, in which case it will default to half the spatial window size (see rippleFilter.windowXY).",
+            nom_de_guerre="background.gridXY",
+            info="Spatial grid separation in pixels for the running window used by the background subtraction filter. The value must be an odd integer value and specifies the spatial step by which the window is moved. Alternatively, it can be set to 0, in which case it will default to half the spatial window size (see background.windowXY).",
         ),
     ),
-    "rippleFilter_gridZ": (
+    "background_gridZ": (
         "int",
         False,
         0,
         ParamMeta(
-            nom_de_guerre="rippleFilter.gridZ",
-            info="Spectral grid separation in channels for the running window used in the ripple filter. The value must be an odd integer value and specifies the spectral step by which the window is moved. Alternatively, it can be set to 0, in which case it will default to half the spectral window size (see rippleFilter.windowZ).",
+            nom_de_guerre="background.gridZ",
+            info="Spectral grid separation in channels for the running window used by the background subtraction filter. The value must be an odd integer value and specifies the spectral step by which the window is moved. Alternatively, it can be set to 0, in which case it will default to half the spectral window size (see background.windowZ).",
         ),
     ),
-    "rippleFilter_interpolate": (
+    "background_interpolate": (
         "bool",
         False,
         False,
         ParamMeta(
-            nom_de_guerre="rippleFilter.interpolate",
-            info="If set to true, then the mean or median values measured across the running window in the ripple filter will be linearly interpolated in between the grid points. If set to false, the mean or median will be subtracted from the entire grid cell without interpolation.",
+            nom_de_guerre="background.interpolate",
+            info="If set to true, then the mean or median values measured across the running window by the background subtraction filter will be linearly interpolated in between the grid points. If set to false, the mean or median will be subtracted from the entire grid cell without interpolation.",
         ),
     ),
-    "rippleFilter_statistic": (
+    "background_statistic": (
         "str",
         False,
         "median",
         ParamMeta(
-            nom_de_guerre="rippleFilter.statistic",
-            info="Controls whether the mean or median should be measured and subtracted in the running window of the ripple filter. The median is strongly recommended, as it is more robust.",
+            nom_de_guerre="background.statistic",
+            info="Controls whether the mean or median should be measured and subtracted in the running window of the background subtraction filter. The median is strongly recommended, as it is more robust against real signal and artefacts.",
         ),
     ),
-    "rippleFilter_windowXY": (
+    "background_windowXY": (
         "int",
         False,
         31,
         ParamMeta(
-            nom_de_guerre="rippleFilter.windowXY",
-            info="Spatial size in pixels of the running window used in the ripple filter. The size must be an odd integer number.",
+            nom_de_guerre="background.windowXY",
+            info="Spatial size in pixels of the running window used by the background subtraction filter. The size must be an odd integer number.",
         ),
     ),
-    "rippleFilter_windowZ": (
+    "background_windowZ": (
         "int",
         False,
-        31,
+        15,
         ParamMeta(
-            nom_de_guerre="rippleFilter.windowZ",
-            info="Spatial size in pixels of the running window used in the ripple filter. The size must be an odd integer number.",
+            nom_de_guerre="background.windowZ",
+            info="Spectral size in channels of the running window used by the background subtraction filter. The size must be an odd integer number.",
         ),
     ),
     "scaleNoise_enable": (
@@ -486,15 +525,6 @@ _FIELDS: dict[str, FieldSpec] = {
             info="If true, then the linker will be run to merge the pixels detected by the source finder into coherent detections that can then be parameterised and catalogued. If false, the pipeline will be terminated after source finding, and no catalogue or source products will be created. Disabling the linker can be useful if only the raw mask from the source finder is needed.",
         ),
     ),
-    "linker_keepNegative": (
-        "bool",
-        False,
-        False,
-        ParamMeta(
-            nom_de_guerre="linker.keepNegative",
-            info="If set to true, then the linker will not discard detections with negative flux. Reliability filtering must be disabled for negative sources to be retained. Also note that negative sources will not appear in moment 1 and 2 maps. This option should only ever be used for testing or debugging purposes, but never in production mode.",
-        ),
-    ),
     "linker_maxFill": (
         "float",
         False,
@@ -639,24 +669,6 @@ _FIELDS: dict[str, FieldSpec] = {
             info="Maximum number of iterations for the reliability kernel auto-scaling algorithm to converge. If convergence is not achieved, then reliability.scaleKernel will instead be applied.",
         ),
     ),
-    "reliability_minPixels": (
-        "int",
-        False,
-        0,
-        ParamMeta(
-            nom_de_guerre="reliability.minPixels",
-            info="Minimum total number of spatial and spectral pixels within the source mask for detections to be considered reliable. The reliability of any detection with fewer pixels will be set to zero by default.",
-        ),
-    ),
-    "reliability_minSNR": (
-        "float",
-        False,
-        3.0,
-        ParamMeta(
-            nom_de_guerre="reliability.minSNR",
-            info="Lower signal-to-noise limit for reliable sources. Detections that fall below this threshold will be deemed unreliable and assigned a reliability of 0. The value denotes the integrated signal-to-noise ratio, SNR = F_sum / [RMS * sqrt(N * Ω)], of the source, where Ω is the solid angle (in pixels) of the point spread function of the data, N is the number of spatial and spectral pixels of the source, F_sum is the summed flux density and RMS is the local RMS noise level (assumed to be constant). Note that the spectral resolution is assumed to be equal to the channel width.",
-        ),
-    ),
     "reliability_parameters": (
         "list:str",
         False,
@@ -700,6 +712,33 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(
             nom_de_guerre="reliability.tolerance",
             info="Convergence tolerance for the reliability kernel auto-scaling algorithm. Convergence is achieved when the absolute value of the median of the Skellam distribution drops below this tolerance.",
+        ),
+    ),
+    "filter_discardNegative": (
+        "bool",
+        False,
+        True,
+        ParamMeta(
+            nom_de_guerre="filter.discardNegative",
+            info="If set to false, then SoFiA will not remove detections with negative flux. Note that reliability filtering must be disabled for negative sources to be retained. Also note that negative sources will not appear in moment 1 and 2 maps. This setting should only ever be disabled for testing or debugging purposes, but never in production mode.",
+        ),
+    ),
+    "filter_minPixels": (
+        "int",
+        False,
+        0,
+        ParamMeta(
+            nom_de_guerre="filter.minPixels",
+            info="Minimum total number of spatial and spectral pixels within the source mask for detections to be considered reliable. Detections with fewer pixels will be removed from the catalogue.",
+        ),
+    ),
+    "filter_minSNR": (
+        "float",
+        False,
+        3.0,
+        ParamMeta(
+            nom_de_guerre="filter.minSNR",
+            info="Lower signal-to-noise limit for reliable sources. Detections that fall below this threshold will be deemed unreliable and removed from the catalogue. The value denotes the integrated signal-to-noise ratio, SNR = |F_sum| / [RMS * sqrt(N * Omega)], of the source, where Omega is the solid angle (in pixels) of the point spread function of the data, N is the number of spatial and spectral pixels of the source, F_sum is the summed flux density and RMS is the local RMS noise level (assumed to be constant). Note that the spectral resolution is assumed to be equal to the channel width.",
         ),
     ),
     "dilation_enable": (
@@ -801,13 +840,22 @@ _FIELDS: dict[str, FieldSpec] = {
             info="File name that will be used as the template for all output files. For example, if output.filename = my_data, then the output files will be named my_data_cat.xml, my_data_mom0.fits, etc. Defaults to 'sofia' here (real SoFiA would fall back to the input data cube's own name) so this cab's output paths stay predictable.",
         ),
     ),
-    "output_marginCubelets": (
+    "output_marginCubeletsXY": (
         "int",
         False,
         10,
         ParamMeta(
-            nom_de_guerre="output.marginCubelets",
-            info="Margin (in pixels) around detections to be added when creating cubelets, moment maps and spectra of individual sources. The same margin will be applied to all axes of the cube. A value of 0 will create tight cutouts without any extra margin, thus minimising file sizes. The default is 10 pixels.",
+            nom_de_guerre="output.marginCubeletsXY",
+            info="Spatial padding (in pixels) around detections to be added when creating cubelets and moment maps of individual sources. The same margin will be applied to both spatial axes of the cube. A value of 0 will create tight cutouts without any extra padding, thus minimising file sizes. The default is 10 pixels.",
+        ),
+    ),
+    "output_marginCubeletsZ": (
+        "int",
+        False,
+        10,
+        ParamMeta(
+            nom_de_guerre="output.marginCubeletsZ",
+            info="Spectral padding (in channels) around detections to be added when creating cubelets, moment maps and spectra of individual sources. A value of 0 will create tight cutouts without any extra padding, thus minimising file sizes. The default is 10 channels.",
         ),
     ),
     "output_overwrite": (
@@ -918,7 +966,6 @@ _FIELDS: dict[str, FieldSpec] = {
             info="If set to true, then a data cube containing the raw, binary source mask produced by the source finder prior to linking will be written in FITS format. The raw mask cube will have the suffix _mask-raw.fits.",
         ),
     ),
-    "port2tigger": ("bool", False, False),
 }
 
 _OUTPUTS: dict[str, FieldSpec] = {
@@ -1007,6 +1054,6 @@ sofia2 = define_cab(
     images.SOFIA2,
     _FIELDS,
     outputs=_OUTPUTS,
-    policies=Policies(prefix="--"),
+    policies=Policies(prefix="", key_value=True),
     info="SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/SoFiA-Admin/SoFiA-2)",
 )
