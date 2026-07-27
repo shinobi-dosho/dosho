@@ -29,10 +29,10 @@ def test_images_list_shows_build_and_ref_kinds():
 def test_build_dry_run_renders_dockerfile_and_tag():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
     # simms builds FROM the shared base-astro image (base: resolved to a full ref)
     assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
-    assert "--break-system-packages" in result.output and "simms==3.0.0" in result.output
+    assert "--break-system-packages" in result.output and "simms==3.0.2" in result.output
 
 
 def test_base_image_builds_from_kern_without_a_base_ref():
@@ -49,7 +49,7 @@ def test_build_package_override_changes_installed_spec_but_not_tag():
     assert result.exit_code == 0, result.output
     assert "simms==3.0b2" in result.output
     # tag still from manifest version
-    assert "ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
 
 
 def test_registry_override_changes_tag():
@@ -57,7 +57,7 @@ def test_registry_override_changes_tag():
         cli.main, ["images", "build", "SIMMS", "--dry-run", "--registry", "quay.io/dosho"]
     )
     assert result.exit_code == 0, result.output
-    assert "quay.io/dosho/simms:3.0.0-d0.1.0" in result.output
+    assert "quay.io/dosho/simms:3.0.2-d0.1.0" in result.output
 
 
 def test_build_refuses_a_ref_only_image():
@@ -212,7 +212,7 @@ def test_verify_ok_when_present(monkeypatch):
     monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
     result = CliRunner().invoke(cli.main, ["images", "verify"])
     assert result.exit_code == 0, result.output
-    assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0" in result.output
+    assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
 
 
 def test_verify_fails_when_missing(monkeypatch):
@@ -230,8 +230,8 @@ def test_dev_build_installs_from_the_branch_and_tags_dev():
     assert result.exit_code == 0, result.output
     # mutable pointer tag, deliberately outside the {version}-{bundle} scheme
     assert "# tag: ghcr.io/shinobi-dosho/simms:dev" in result.output
-    assert "git+https://github.com/wits-cfa/simms@main" in result.output
-    assert "simms==3.0.0" not in result.output  # the release spec is replaced
+    assert "git+https://github.com/shinobi-dosho/simms@main" in result.output
+    assert "simms==3.0.2" not in result.output  # the release spec is replaced
     # ...on the same base, from the same `build:` block
     assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
 
@@ -250,8 +250,8 @@ def test_dev_build_injects_the_framework_dev_pin():
 
 def test_release_build_is_untouched_by_the_dev_block():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
-    assert "ghcr.io/shinobi-dosho/simms:3.0.0-d0.1.0" in result.output
-    assert "simms==3.0.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
+    assert "simms==3.0.2" in result.output
     assert "@main" not in result.output
 
 

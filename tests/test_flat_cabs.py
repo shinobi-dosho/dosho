@@ -137,6 +137,13 @@ def test_simms_skysim_is_a_pystep_with_choices_and_abbreviations():
     # `abbreviation` is carried onto json_schema_extra for `ninja run`'s short flag
     assert fields["ascii_sky"].json_schema_extra == {"abbreviation": "as"}
     assert "ms" in step.step.outputs_model.model_fields  # passthrough MS output
+    # simms 3.0.2's image-domain a-term beam knobs. `aterm` is upstream's default,
+    # so a stale transcription here would silently pin every FITS-image predict to
+    # the legacy PA-averaged power beam
+    assert get_args(fields["fits_beam_mode"].annotation) == ("aterm", "average")
+    assert fields["fits_beam_mode"].default == "aterm"
+    assert fields["fits_beam_mode"].json_schema_extra == {"abbreviation": "fbm"}
+    assert fields["aterm_freq_tol"].json_schema_extra == {"abbreviation": "aft"}
 
 
 def test_simms_telsim_is_a_pystep_sharing_the_skysim_image():
@@ -150,6 +157,15 @@ def test_simms_telsim_is_a_pystep_sharing_the_skysim_image():
     assert fields["telescope"].json_schema_extra == {"abbreviation": "tel"}
     assert fields["nchan"].json_schema_extra == {"abbreviation": "nc"}
     assert "ms" in step.step.outputs_model.model_fields  # passthrough MS output
+    # `subarray_range` must keep simms' `list[str | int]`, str first: shinobi picks
+    # the click type from the first scalar leaf, so a plain list[int] renders as
+    # INTEGER and click rejects the documented comma form before simms sees it
+    assert step.step.inputs_model(
+        ms="/x.ms", telescope="meerkat", subarray_range=["0,64"]
+    ).subarray_range == ["0,64"]
+    assert step.step.inputs_model(
+        ms="/x.ms", telescope="meerkat", subarray_range=[0, 64]
+    ).subarray_range == [0, 64]
 
 
 def test_ragavi_gains_registered_and_passes_gain_flags():
