@@ -63,15 +63,15 @@ images:
   # ---- dosho-built (everything except the deprecated SIMMS_CLASSIC ref: below) ----
   SIMMS:
     name: simms
-    source: "https://github.com/wits-cfa/simms"
+    source: "https://github.com/shinobi-dosho/simms"
     build:
-      version: "3.0.0"
+      version: "3.0.2"
       base: BASE_ASTRO
-      package: "simms==3.0.0"
+      package: "simms==3.0.2"
       cmd: "simms --help"
       dockerfile: pip/Dockerfile
     dev:
-      package: "git+https://github.com/wits-cfa/simms@main"
+      package: "git+https://github.com/shinobi-dosho/simms@main"
 
   MSUTILS:
     name: msutils
@@ -212,7 +212,7 @@ images:
       dockerfile: casa6/Dockerfile
   # DEPRECATED: the pre-3.0 simms command, unused by any worker -- slated for removal.
   SIMMS_CLASSIC:
-    source: "https://github.com/wits-cfa/simms"
+    source: "https://github.com/shinobi-dosho/simms"
     ref: "quay.io/stimela2/simms-classic:cc0.2.1"
   MOSAIC_QUEEN:
     source: "https://github.com/caracal-pipeline/MosaicQueen"

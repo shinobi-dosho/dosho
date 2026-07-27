@@ -168,7 +168,9 @@ def skysim(
     nworkers: int = Field(4, description="Number of workers (one per CPU)."),
     row_chunks: int = Field(
         10000,
-        description="Number of rows per chunk. Controls the row-wise task/memory granularity.",
+        description="Maximum number of rows per chunk. Controls the row-wise task/memory "
+        "granularity; the effective size is reduced when needed so every worker gets "
+        "several chunks.",
         json_schema_extra={"abbreviation": "rcs"},
     ),
     chan_chunks: int | None = Field(
@@ -196,7 +198,21 @@ def skysim(
     ),
     beam_jones: Literal["diagonal", "full"] = Field(
         "diagonal",
-        description="Primary-beam application for component skies: per-feed voltage or full 2x2 E-Jones.",
+        description="Primary-beam application: per-feed voltage or full 2x2 E-Jones.",
+    ),
+    fits_beam_mode: Literal["aterm", "average"] = Field(
+        "aterm",
+        description="Primary-beam handling for the FITS-image path: 'aterm' applies exact per-antenna "
+        "a-terms in the image domain (time- and frequency-interpolated, heterogeneity-aware); 'average' "
+        "multiplies the sky by a single PA-averaged power beam (legacy approximation).",
+        json_schema_extra={"abbreviation": "fbm"},
+    ),
+    aterm_freq_tol: float = Field(
+        1e-3,
+        description="Largest allowed error (in voltage-beam units, beam peak ~1) of the a-term's "
+        "linear-in-frequency interpolation between knot channels. Smaller means more frequency knots; "
+        "0 or negative samples the beam at every channel.",
+        json_schema_extra={"abbreviation": "aft"},
     ),
     telescope_name_column: str = Field(
         "TELESCOPE_NAME",
@@ -221,7 +237,10 @@ def skysim(
     spw_id: int = Field(0, description="Spectral Window ID."),
     sefd: float | None = Field(None, description="Add noise using this SEFD value."),
     seed: int | None = Field(
-        None, description="Random seed for the thermal noise. Omit for a non-reproducible run."
+        None,
+        description="Random seed for the thermal noise. Omit for a non-reproducible run. The "
+        "realisation also depends on the row chunking, which --nworkers feeds into, so "
+        "reproducing a previous run needs the same --seed, --row-chunks and --nworkers.",
     ),
     ascii_species: Literal["bdsf_gaul", "aegean", "wsclean"] | None = Field(
         None, description="Non-simms sky model type.", json_schema_extra={"abbreviation": "asp"}
@@ -269,9 +288,15 @@ def telsim(
         description="Custom list of antennas to use, e.g. M000,M005,SKA009. Must be a subarray of the given telescope.",
         json_schema_extra={"abbreviation": "sublist"},
     ),
-    subarray_range: list[int] | None = Field(
+    # `str` deliberately leads the union, transcribing simms' own annotation: shinobi picks
+    # the click type from the first int/float/bool/str leaf, so a bare `list[int]` renders
+    # as `INTEGER` and click rejects the documented comma form ("'0,64' is not a valid
+    # integer") before simms ever sees it. The `int` arm still accepts a YAML list of ints
+    # from a recipe; simms' `_antenna_selection` casts either shape to int.
+    subarray_range: list[str | int] | None = Field(
         None,
-        description="Custom range of antenna indices to use, e.g. start,end,step (step optional). Must be a subarray of the given telescope.",
+        description="Custom range of antenna indices to use, e.g. start,end,step (step optional; "
+        "end is inclusive when no step is given). Must be a subarray of the given telescope.",
         json_schema_extra={"abbreviation": "subrange"},
     ),
     subarray_file: str | None = Field(
