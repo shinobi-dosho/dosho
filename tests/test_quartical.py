@@ -131,7 +131,11 @@ def test_in_place_ms_write_is_declared_mutable_not_just_echoed_as_an_output():
 
     cab = _cab()
     assert cab.mutability_of("input_ms_path") is Mutability.MUTABLE
-    assert mutated_path_fields(cab) == {"input_ms_path"}
+    assert mutated_path_fields(cab) == {
+        "input_ms_path",
+        "output_gain_directory",
+        "output_log_directory",
+    }
 
 
 def test_mutated_ms_is_dropped_from_the_cache_key_so_a_rerun_can_hit(tmp_path):
@@ -166,7 +170,56 @@ def test_mutated_ms_is_dropped_from_the_cache_key_so_a_rerun_can_hit(tmp_path):
     )
 
 
-def test_gain_directory_output_is_not_swept_up_as_mutable():
-    # only the MS is declared mutable; the gain store is a real new artifact
-    # and must keep its content hash in the key
-    assert "output_gain_directory" not in _cab().input_mutability
+def test_every_write_target_is_declared_and_the_one_read_path_is_not():
+    # goquartical has exactly four path-typed inputs. Three of them name a
+    # location it writes (the MS it rewrites, the gain store it solves into,
+    # the log dir it fills); `parset` is the only one it purely reads, and
+    # it must keep its content hash -- editing the parset really is a
+    # different step.
+    from shinobi.steps.schema import path_fields
+
+    cab = _cab()
+    assert path_fields(cab.inputs_model) == {
+        "input_ms_path",
+        "output_gain_directory",
+        "output_log_directory",
+        "parset",
+    }
+    assert "parset" not in cab.input_mutability
+
+
+def test_an_undeclared_write_target_would_move_the_key_on_its_own(tmp_path):
+    # why all three are declared together rather than one per PR: any single
+    # undeclared write target is enough to move the key on every run, so a
+    # partial fix measures as no fix at all. Declare only the first two and
+    # the log dir alone still breaks it.
+    from shinobi.cache import compute_cache_key, invalidate_path_hashes
+    from shinobi.steps.schema import Mutability
+
+    partial = _cab().model_copy(
+        update={
+            "input_mutability": {
+                "input_ms_path": Mutability.MUTABLE,
+                "output_gain_directory": Mutability.MUTABLE,
+            }
+        }
+    )
+    (ms := tmp_path / "obs.ms").mkdir()
+    logs = tmp_path / "logs.qc"
+    params = {
+        "input_ms_path": str(ms),
+        "output_gain_directory": str(tmp_path / "gains.qc"),
+        "output_log_directory": str(logs),
+    }
+    before = compute_cache_key(partial, None, params, None)
+    logs.mkdir()
+    (logs / "quartical.log").write_text("the run's own log")
+    invalidate_path_hashes()
+    assert compute_cache_key(partial, None, params, None) != before
+    # the real cab declares all three, so the same run keys stably
+    cab = _cab()
+    invalidate_path_hashes()
+    stable = compute_cache_key(cab, None, params, None)
+    (logs / "quartical.log").write_text("a second run's log")
+    invalidate_path_hashes()
+    assert compute_cache_key(cab, None, params, None) == stable
