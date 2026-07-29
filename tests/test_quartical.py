@@ -48,6 +48,28 @@ def test_gain_term_pattern_matches_real_attrs_only():
     assert cab.match_pattern("G.not-a-real-attr") is None
 
 
+def test_load_from_is_a_path_dtype_so_it_gets_bound_and_anchored():
+    # `<term>.load_from` names a directory on disk (a previous run's gain
+    # output plus the per-term zarr group). Shinobi decides whether a
+    # pattern-matched param needs a bind mount / workspace anchoring from
+    # its dtype alone, so a `str` here means the gain store is never mounted
+    # into the container and a relative path is left resolving against the
+    # sandbox instead of the workspace. Every other attr stays non-path.
+    from shinobi.loaders._modelgen import is_file_dtype
+
+    cab = _cab()
+    assert is_file_dtype(cab.match_pattern("G.load_from").dtype)
+    for attr in ("type", "solve_per", "time_interval", "freq_interval", "interp_method"):
+        assert not is_file_dtype(cab.match_pattern(f"G.{attr}").dtype)
+
+
+def test_load_from_still_emits_as_one_hydra_token():
+    # the dtype change is about bind-mounting, not argv shape
+    cab = _cab()
+    argv = build_argv(cab, {"input_ms_path": "/x.ms", "G.load_from": "gains.qc/G"})
+    assert "G.load_from=gains.qc/G" in argv
+
+
 def test_build_argv_matches_real_quartical_hydra_style_cli():
     cab = _cab()
     argv = build_argv(
