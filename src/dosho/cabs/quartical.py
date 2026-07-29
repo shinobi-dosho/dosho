@@ -27,15 +27,25 @@ by name as the motivating example).
 QuartiCal writes corrected visibilities back into the *same* input MS
 (via `output.products`/`output.columns`) and gain tables into
 `output.gain_directory` -- both declared as real passthrough output
-fields (`ms`, `gain_directory`), not synthetic hacks. The MS one is
-*also* declared `input_mutability={"input_ms.path": Mutability.MUTABLE}`:
-the passthrough output makes the in-place write wirable by a downstream
-step, but only the mutability declaration makes it visible to
+fields (`ms`, `gain_directory`), not synthetic hacks. *Both* are also
+declared `Mutability.MUTABLE` on the input they echo: a passthrough
+output makes the write wirable by a downstream step, but only the
+mutability declaration makes it visible to
 `shinobi.steps.schema.mutated_path_fields`, whose other spelling is a
 plain input/output *name* intersection that an `implicit`-templated
-output under a different name (`ms` vs `input_ms_path`) never satisfies.
-See `dosho._builder.define_cab`'s `input_mutability` for what that
-costs and buys.
+output under a different name (`ms` vs `input_ms_path`,
+`gain_directory` vs `output_gain_directory`) never satisfies. See
+`dosho._builder.define_cab`'s `input_mutability` for what that costs
+and buys.
+
+`output.gain_directory` is the less obvious of the two, because it is
+not a *pre-existing* file the tool rewrites -- it is where goquartical
+puts gains it just solved. It needs the declaration for the same reason
+all the same: it is a path-typed *input* naming a location the step
+itself writes, so an undeclared run keys on "gains.qc absent", creates
+it, and keys differently ever after. QuartiCal has an
+`output.overwrite` flag precisely because the directory may already be
+there, which is the in-place rewrite in its plainest form.
 
 `parset` is real, source-verified against `quartical/config/parser.py`'s
 own `parse_inputs`: it scans the *whole* `sys.argv` for any bare token
@@ -176,7 +186,24 @@ quartical = define_cab(
     # `compute_cache_key` fingerprints the MS QuartiCal is about to rewrite,
     # so a re-run of an unchanged step can never hit its own cache entry,
     # and `snapshots.eligible_fields` finds nothing to protect.
-    input_mutability={"input_ms.path": Mutability.MUTABLE},
+    #
+    # `output.gain_directory` is the same shape one field over: a path-typed
+    # *input* that names where the tool writes, echoed by an output spelled
+    # differently again (`gain_directory`). Undeclared, the first run keys on
+    # "gains.qc absent", creates it, and every re-run keys on "gains.qc
+    # present" -- a permanent miss, exactly as for the MS.
+    #
+    # `output.log_directory` is the same again and has no echoing output at
+    # all, which is why it is easy to miss and why it is listed here rather
+    # than left for later: this cab has exactly four path-typed inputs, three
+    # of them write targets, and one undeclared write target is enough to
+    # move the key on every run. Declaring two of three would have fixed
+    # nothing measurable.
+    input_mutability={
+        "input_ms.path": Mutability.MUTABLE,
+        "output.gain_directory": Mutability.MUTABLE,
+        "output.log_directory": Mutability.MUTABLE,
+    },
     policies=Policies(key_value=True, repeat="[]", prefix=""),
     input_patterns=[_GAIN_TERM_PATTERN],
     info="QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)",
