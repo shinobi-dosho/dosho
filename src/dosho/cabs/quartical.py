@@ -125,7 +125,21 @@ _GAIN_TERM_PATTERN = ParamPattern(
                 "pinned_directions": ParamMeta(dtype="List[int]"),
                 "time_interval": ParamMeta(dtype="str"),
                 "freq_interval": ParamMeta(dtype="str"),
-                "load_from": ParamMeta(dtype="str"),
+                # `Directory`, not `str` -- this one attr names a path *into*
+                # the filesystem (a previous run's `output.gain_directory`
+                # plus the per-term zarr group, e.g. `gains.qc/G`), and
+                # shinobi classifies a pattern-matched param as needing a
+                # bind mount and workspace anchoring purely by its dtype
+                # (`is_file_dtype`, consumed by `backends.container.bind_dirs`
+                # and `sandbox.absolutize_path_inputs`). Declared `str` it is
+                # neither bound into the container nor anchored, so loading a
+                # gain set only works by accident -- when the sandbox is off
+                # *and* the directory happens to sit under the mounted
+                # workdir. QuartiCal's own `gain_schema.yaml` says
+                # `Optional[str]`, but that is a Python type, not an I/O
+                # classification; the sibling `gain_directory` output is
+                # already `Directory`.
+                "load_from": ParamMeta(dtype="Directory"),
                 "interp_mode": ParamMeta(dtype="str"),
                 "interp_method": ParamMeta(dtype="str"),
                 "respect_scan_boundaries": ParamMeta(dtype="bool"),
