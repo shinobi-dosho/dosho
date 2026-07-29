@@ -34,7 +34,14 @@ visibilities written back into the *same* input MS, not a new file --
 (a passthrough of the resolved input, not a synthetic hack: this is
 CubiCal's actual in-place-mutation behaviour), so a downstream step can
 wire a real dependency on "this MS has been calibrated" instead of the
-`allow_extra`/synthetic-field workaround the pre-dosho port used.
+`allow_extra`/synthetic-field workaround the pre-dosho port used. That
+passthrough is *also* declared `input_mutability={"data-ms":
+Mutability.MUTABLE}`: it makes the write wirable, but only the mutability
+declaration makes it visible to `shinobi.steps.schema.mutated_path_fields`,
+whose other spelling is a plain input/output *name* intersection that an
+`implicit`-templated output under a different name (`ms` vs `data_ms`)
+never satisfies -- see `dosho._builder.define_cab`'s `input_mutability`,
+and `quartical.py`, which has the identical shape.
 
 `parset` mirrors real cult-cargo's own `cubical.yml` (`parset: {dtype:
 File, policies: {positional_head: true}}`) -- and for the same real
@@ -58,7 +65,7 @@ needs.
 
 from __future__ import annotations
 
-from shinobi.steps.schema import ParamMeta, ParamPattern, ParamSegment, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, ParamPattern, ParamSegment, Policies
 
 from dosho import images
 from dosho._builder import FieldSpec, define_cab
@@ -269,6 +276,16 @@ cubical = define_cab(
     images.CUBICAL,
     _FIELDS,
     outputs=_OUTPUTS,
+    # The `ms` output above resolves to the very path `data-ms` named, but
+    # `ms` != `data_ms`, so shinobi's name-intersection spelling of "mutated
+    # in place" sees nothing. Without this, `compute_cache_key` fingerprints
+    # the MS gocubical is about to rewrite, so a re-run of an unchanged step
+    # can never hit its own cache entry, and `snapshots.eligible_fields`
+    # finds nothing to protect. Declared unconditionally rather than per
+    # `out-mode`: a cab is one static schema, and the conservative direction
+    # for a *solve-only* run is to over-declare the mutation (the MS drops
+    # out of the key) rather than under-declare it (the step never caches).
+    input_mutability={"data-ms": Mutability.MUTABLE},
     # real cubical.yml: policies: {prefix: '--', explicit_true: true,
     # explicit_false: false} -- gocubical's optparse-derived CLI expects
     # every boolean option to always take an explicit value token; a bare
