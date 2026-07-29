@@ -5352,7 +5352,19 @@ flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measureme
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+   * - ``export``
+     - ``Path | None``
+     - \-
 
 fluxscale
 ---------

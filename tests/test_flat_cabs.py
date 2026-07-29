@@ -509,6 +509,60 @@ def test_flagms_reuses_owlcat_image_and_positional_ms():
     assert argv[-1] == "/x.ms"  # positional
 
 
+def test_flagms_declares_the_ms_and_export_file_it_writes():
+    # flag-ms.py's whole purpose is rewriting flags in the MS it is handed,
+    # and --export writes the named flag file. Both are re-declared as
+    # same-named outputs, which makes the write wirable by a downstream step
+    # *and* satisfies `mutated_path_fields`' input/output name intersection
+    # -- so `compute_cache_key` stops fingerprinting an MS the step itself
+    # rewrote. `import_` is read-only and must stay out of the mutated set.
+    from shinobi.steps.schema import mutated_path_fields
+
+    cab = dosho.get("flagms")
+    assert set(cab.outputs_model.model_fields) == {"ms", "export"}
+    assert mutated_path_fields(cab) == {"ms", "export"}
+    assert "import_" not in mutated_path_fields(cab)
+
+
+def test_flagms_outputs_do_not_clobber_their_inputs_field_meta():
+    # The hazard casatasks.py's docstring warns about: `field_meta` is
+    # `{**input_meta, **output_meta}`, so an output-side ParamMeta on a
+    # name that is also a real input silently replaces the input's. `ms`
+    # would stop being positional and the argv would break. Neither output
+    # carries a 4th spec element, so both metas survive intact.
+    cab = dosho.get("flagms")
+    assert cab.field_meta["ms"].positional is True
+    assert cab.field_meta["export"].positional is False
+    argv = build_argv(cab, {"ms": "/x.ms", "flag": "+L", "export": "flags.gz"})
+    assert argv[-1] == "/x.ms"  # still the trailing positional
+    assert "--export" in argv and "flags.gz" in argv
+
+
+def test_flagms_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
+    # `invalidate_path_hashes` is load-bearing: `_hash_path` is memoized, so
+    # without it this would pass for a stale-cache reason and hold against a
+    # cab declaring nothing at all.
+    from shinobi.cache import compute_cache_key, invalidate_path_hashes
+
+    cab = dosho.get("flagms")
+    (ms := tmp_path / "obs.ms").mkdir()
+    params = {"ms": str(ms), "flag": "+L"}
+    before = compute_cache_key(cab, None, params, None)
+    (ms / "BITFLAG").write_text("flags raised by the step itself")
+    invalidate_path_hashes()
+    assert compute_cache_key(cab, None, params, None) == before
+
+    # the control: the same cab as it was before this fix -- no outputs at
+    # all, so nothing for the name intersection to find
+    from shinobi.loaders import build_model
+
+    naive = cab.model_copy(update={"outputs_model": build_model("flagms_NoOutputs", {})})
+    stale = compute_cache_key(naive, None, params, None)
+    (ms / "BITFLAG").write_text("and again")
+    invalidate_path_hashes()
+    assert compute_cache_key(naive, None, params, None) != stale
+
+
 def test_pyddi_hyphenated_flags():
     cab = dosho.get("pyddi")
     assert cab.name == "pyddi"

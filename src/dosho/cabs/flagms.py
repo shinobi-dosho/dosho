@@ -6,6 +6,39 @@ https://github.com/ratt-ru/owlcat). Reuses dosho's existing `OWLCAT` image
 
 Ported field-by-field from `flag-ms.py --help` (owlcat 1.8.1), matching
 cult-cargo's `flagms.yml`.
+
+`ms` and `export` are re-declared as same-named outputs, the shape
+`tricolour.py` already uses and `casatasks.py`'s docstring names as the
+reference for a `Cab` that writes into its own input: because the names
+match, `steps.dispatch._fill_outputs` echoes each one from its final
+input value automatically -- no `ParamMeta.implicit`, no `field_meta`
+entry (which is also why neither output carries a 4th spec element: an
+output-side `ParamMeta` would overwrite the input's, and `ms` would stop
+being `positional`). That buys two things at once: a downstream step can
+wire a real dependency on "this MS has been flagged" rather than relying
+on step order, and the input/output *name* intersection is exactly what
+`shinobi.steps.schema.mutated_path_fields` looks for, so the in-place
+write stops being invisible to the cache keyer and the Tier 1
+snapshotter. Undeclared, `compute_cache_key` fingerprinted an MS
+flag-ms.py had just rewritten, and no identical re-run could ever hit its
+own cache entry.
+
+Both really are written: `--flag`/`--unflag`/`--copy`/`--copy-legacy`/
+`--fill-legacy`/`--remove`/`--restore`/`--import`/`--save` all write
+BITFLAG/BITFLAG_ROW/FLAG/FLAG_ROW back into the MS, and
+`--init-bitflags`/`--reinit-bitflags` add or replace a whole column;
+`--export` writes the named flag file. `--import` is the one path input
+that stays read-only, and keeps its content hash accordingly.
+
+The trade, which is sharper here than for the calibration cabs: flag-ms.py
+also has genuinely read-only modes (`--stats`, `--list`), and a cab is one
+static schema, so those runs also lose the MS's content hash from their
+key. A `--stats` step can therefore report a cache hit after someone else
+changed the flags underneath, and unlike a flagging run it produces no
+file for the "declared output still exists" half of the contract to check.
+Accepted rather than split into two cabs: the alternative is that every
+*flagging* run -- the overwhelmingly common case, and the expensive one --
+re-runs forever.
 """
 
 from __future__ import annotations
@@ -267,6 +300,9 @@ flagms = define_cab(
     "flag-ms.py",
     images.OWLCAT,
     _FIELDS,
+    # Same-named passthroughs, no 4th spec element -- see the module
+    # docstring. `import_` is deliberately absent: it is read, not written.
+    outputs={"ms": ("MS", False, None), "export": ("File", False, None)},
     policies=Policies(prefix="--"),
     info="flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measurement set",
 )
