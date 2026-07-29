@@ -57,3 +57,94 @@ def test_killms_parset_omitted_when_not_given():
     argv = build_argv(cab, {"vis_data_ms_name": "obs.MS"})
     assert "base.parset" not in argv
     assert argv[1] == "--VisData-MSName"
+
+
+def test_every_real_path_option_is_a_path_dtype_not_a_str():
+    # DefaultParset.cfg tags almost nothing with `#type:`, so the parser
+    # fallback lands every path on `str` -- and a `str` is invisible to
+    # `path_fields`, hence never bind-mounted into the container and never
+    # workspace-anchored under a sandbox. The dtypes come from each option's
+    # role in kMS.py's own option table instead; this pins the whole set, so
+    # a future field naming a location on disk can't be added as `str`
+    # without this test being looked at.
+    from shinobi.steps.schema import path_fields
+
+    assert path_fields(dosho.get("killms").inputs_model) == {
+        "parset",
+        "vis_data_ms_name",
+        "sky_model_sky_model",
+        "beam_fits_file",
+        "image_sky_model_base_image_name",
+        "image_sky_model_dico_model",
+        "image_sky_model_nodes_file",
+        "image_sky_model_image_predict_parset",
+        "image_sky_model_mask_image",
+        "solutions_ext_sols",
+        "compression_compression_dir_file",
+        "kafca_evolution_sol_file",
+    }
+
+
+def test_ms_is_typed_so_it_gets_bound_and_anchored():
+    from shinobi.loaders._modelgen import is_file_dtype
+
+    cab = dosho.get("killms")
+    assert is_file_dtype("MS")
+    assert "vis_data_ms_name" in cab.inputs_model.model_fields
+    # the dtype change must not touch the argv shape: still --VisData-MSName
+    argv = build_argv(cab, {"vis_data_ms_name": "obs.MS"})
+    assert argv == ["kMS.py", "--VisData-MSName", "obs.MS"]
+
+
+def test_write_targets_and_name_components_stay_str():
+    # SolsDir/DDFCacheDir are killMS *write* targets: a string-typed write
+    # target stays relative under a sandbox on purpose, so the tool writes
+    # inside the sandbox for harvest to collect. OutSolsName is a name
+    # component, not a path (kMS.py builds "<ms>/killMS.<name>.sols.npz"
+    # from it). *Col fields are MS column names.
+    from shinobi.steps.schema import path_fields
+
+    paths = path_fields(dosho.get("killms").inputs_model)
+    for field in (
+        "solutions_sols_dir",
+        "image_sky_model_ddf_cache_dir",
+        "solutions_out_sols_name",
+        "sky_model_kills",
+        "vis_data_in_col",
+        "vis_data_out_col",
+    ):
+        assert field not in paths
+
+
+def test_ms_is_declared_mutable_since_killms_writes_into_it():
+    # kMS.py opens the MS for writing (solved column, full predicted data,
+    # imaging weights) and, with no SolsDir, drops the .sols.npz inside the
+    # MS directory itself. This cab models no outputs, so the
+    # name-intersection spelling has nothing to intersect -- the plain
+    # flag/gaincal shape Mutability.MUTABLE exists for.
+    from shinobi.steps.schema import Mutability, mutated_path_fields
+
+    cab = dosho.get("killms")
+    assert cab.mutability_of("vis_data_ms_name") is Mutability.MUTABLE
+    assert mutated_path_fields(cab) == {"vis_data_ms_name"}
+    # read-side paths keep their content hash -- swapping the sky model
+    # really is a different step
+    assert cab.mutability_of("sky_model_sky_model") is Mutability.IMMUTABLE
+
+
+def test_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
+    from shinobi.cache import compute_cache_key, invalidate_path_hashes
+
+    cab = dosho.get("killms")
+    (ms := tmp_path / "obs.MS").mkdir()
+    params = {"vis_data_ms_name": str(ms)}
+    before = compute_cache_key(cab, None, params, None)
+    (ms / "CORRECTED_DATA").write_text("written by kMS.py itself")
+    invalidate_path_hashes()
+    assert compute_cache_key(cab, None, params, None) == before
+
+    naive = cab.model_copy(update={"input_mutability": {}})
+    stale = compute_cache_key(naive, None, params, None)
+    (ms / "CORRECTED_DATA").write_text("and again")
+    invalidate_path_hashes()
+    assert compute_cache_key(naive, None, params, None) != stale

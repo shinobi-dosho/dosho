@@ -6373,7 +6373,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``None``
      - \-
    * - ``vis_data_ms_name``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``vis_data_t_chunk``
@@ -6401,7 +6401,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``1``
      - \-
    * - ``sky_model_sky_model``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``sky_model_kills``
@@ -6449,7 +6449,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``1``
      - \-
    * - ``beam_fits_file``
-     - ``str | None``
+     - ``Path | None``
      - ``'beam_$(corr)_$(reim).fits'``
      - \-
    * - ``beam_fits_par_angle_inc_deg``
@@ -6493,19 +6493,19 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``'altaz'``
      - \-
    * - ``image_sky_model_base_image_name``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``image_sky_model_dico_model``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``image_sky_model_nodes_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``image_sky_model_image_predict_parset``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``image_sky_model_over_s``
@@ -6513,7 +6513,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``None``
      - \-
    * - ``image_sky_model_mask_image``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``image_sky_model_wmax``
@@ -6633,7 +6633,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``[]``
      - \-
    * - ``solutions_ext_sols``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``solutions_clip_method``
@@ -6669,7 +6669,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``None``
      - \-
    * - ``compression_compression_dir_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``compression_merge_stations``
@@ -6745,7 +6745,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
      - ``1``
      - \-
    * - ``kafca_evolution_sol_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
 
