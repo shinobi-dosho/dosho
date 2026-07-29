@@ -16,6 +16,48 @@ No outputs are modelled: killMS's real output (a `.sols.npz` solutions
 file) is named from `--SkyModel-SkyModel`/`--SkyModel-Kills`-derived
 defaults inside the tool itself, not a single flag-controlled path.
 
+**Path-typed fields.** `DefaultParset.cfg` carries a `#type:` tag on
+almost nothing, so the `ast.literal_eval`-or-string fallback this port
+inherits from DDFacet's parser lands every path on `str` -- including
+`VisData-MSName`, killMS's own input MS. A `str` is not a path to
+shinobi: `path_fields` never sees it, so it is neither bind-mounted into
+the container (`backends.container.bind_dirs`) nor workspace-anchored
+under a sandbox (`sandbox.absolutize_path_inputs`), and a containerised
+run only finds it by accident. The dtype is therefore taken from each
+option's role in killMS's own `kMS.py` option table rather than from the
+untagged `.cfg`:
+
+* `VisData-MSName` -> `MS` ("Input MS to draw"; `kMS.py`'s own usage
+  string is `--MSName=somename.MS`).
+* Read-side files -> `File`: `SkyModel-SkyModel` (`--SkyModel=SM.npy`),
+  `ImageSkyModel-DicoModel` (loaded via `MyPickle.Load`),
+  `-MaskImage`, `-NodesFile`, `-ImagePredictParset`, `Solutions-ExtSols`
+  ("External solution file"), `Compression-CompressionDirFile`,
+  `KAFCA-EvolutionSolFile`.
+* `Beam-FITSFile` ("FITS beam mode filename template", default
+  `beam_$(corr)_$(reim).fits`) and `ImageSkyModel-BaseImageName` (a
+  DDFacet image *prefix*, from which killMS derives `<Base>.DicoModel`)
+  are `File` too, even though neither value is literally one file.
+  Nothing in shinobi opens a path input: a bind mount is derived from the
+  value's *parent directory* and anchoring only rewrites a relative value
+  to an absolute one, both of which are exactly right here -- and both
+  are reads, so anchoring them at the workspace finds the caller's real
+  files rather than empty sandbox paths.
+
+Deliberately left as `str`: `Solutions-SolsDir` and
+`ImageSkyModel-DDFCacheDir`, which killMS *writes*. A string-typed write
+target stays relative under a sandbox on purpose, so the tool writes
+inside the sandbox for harvest to pick up -- see
+`sandbox.absolutize_path_inputs`' own docstring on output prefixes.
+Promoting those two to `Directory` would anchor them at the workspace and
+route killMS's writes around the sandbox; that is a real decision to make
+once this cab models outputs, not a dtype typo to fix in passing.
+`Solutions-OutSolsName` also stays `str`: despite "save the estimated
+solutions in this file", `kMS.py` uses it as a *name component*
+(`"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`), never as a
+path. So do `SkyModel-kills` (source names/indices) and every `*Col`
+field (MS column names).
+
 `parset` is source-verified against `killMS/kMS.py`'s own `driver()`:
 `ParsetFile=sys.argv[1]` -- read unconditionally (no `.startswith('-')`
 guard the way CubiCal has), and `driver()` never checks leftover-arg
@@ -31,7 +73,7 @@ makes sure it actually lands at `sys.argv[1]`.
 
 from __future__ import annotations
 
-from shinobi.steps.schema import ParamMeta, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, Policies
 
 from dosho import images
 from dosho._builder import FieldSpec, define_cab
@@ -47,7 +89,7 @@ _FIELDS: dict[str, FieldSpec] = {
             "(kMS.py's own driver() reads sys.argv[1] as the parset unconditionally)",
         ),
     ),
-    "vis_data_ms_name": ("str", False, None, ParamMeta(nom_de_guerre="VisData-MSName", info="")),
+    "vis_data_ms_name": ("MS", False, None, ParamMeta(nom_de_guerre="VisData-MSName", info="")),
     "vis_data_t_chunk": ("int", False, 15, ParamMeta(nom_de_guerre="VisData-TChunk", info="")),
     "vis_data_in_col": (
         "str",
@@ -75,7 +117,7 @@ _FIELDS: dict[str, FieldSpec] = {
     ),
     "vis_data_parallel": ("int", False, 1, ParamMeta(nom_de_guerre="VisData-Parallel", info="")),
     "sky_model_sky_model": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="SkyModel-SkyModel", info=""),
@@ -127,7 +169,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="Beam-NChanBeamPerMS", info=""),
     ),
     "beam_fits_file": (
-        "str",
+        "File",
         False,
         "beam_$(corr)_$(reim).fits",
         ParamMeta(nom_de_guerre="Beam-FITSFile", info=""),
@@ -193,25 +235,25 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "image_sky_model_base_image_name": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="ImageSkyModel-BaseImageName", info=""),
     ),
     "image_sky_model_dico_model": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="ImageSkyModel-DicoModel", info=""),
     ),
     "image_sky_model_nodes_file": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="ImageSkyModel-NodesFile", info=""),
     ),
     "image_sky_model_image_predict_parset": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="ImageSkyModel-ImagePredictParset", info=""),
@@ -223,7 +265,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="ImageSkyModel-OverS", info=""),
     ),
     "image_sky_model_mask_image": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="ImageSkyModel-MaskImage", info=""),
@@ -363,7 +405,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="PreApply-PreApplyMode", info=""),
     ),
     "solutions_ext_sols": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="Solutions-ExtSols", info=""),
@@ -417,7 +459,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="Compression-CompressionMode", info="auto, manual"),
     ),
     "compression_compression_dir_file": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="Compression-CompressionDirFile", info=""),
@@ -476,7 +518,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="KAFCA-evPStepStart", info=""),
     ),
     "kafca_evolution_sol_file": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="KAFCA-EvolutionSolFile", info=""),
@@ -488,6 +530,20 @@ killms = define_cab(
     "kMS.py",
     images.KILLMS,
     _FIELDS,
+    # kMS.py opens the MS for writing: it writes its solved column
+    # (`VisData-OutCol`), the full predicted data when `FreePredictColName`
+    # is set (`GiveMainTable(readonly=False)`, kMS.py:773/803), imaging
+    # weights when `UpdateWeights` is on -- and, when `Solutions-SolsDir` is
+    # unset, the `.sols.npz` itself lands *inside* the MS directory
+    # (`"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`). This cab
+    # models no outputs (see the module docstring), so the name-intersection
+    # spelling of "mutated in place" has nothing to intersect; without the
+    # declaration `compute_cache_key` fingerprints an MS the step rewrites.
+    # This is the plain flag/gaincal shape `Mutability.MUTABLE` exists for.
+    # (keyed by the `_FIELDS` key, which for this cab is already the
+    # sanitised name -- the cfg's literal `VisData-MSName` lives in the
+    # field's `nom_de_guerre`, not in the key)
+    input_mutability={"vis_data_ms_name": Mutability.MUTABLE},
     policies=Policies(prefix="--"),
     info="killMS: direction-dependent calibration for radio interferometric data "
     "(https://github.com/saopicc/killMS)",
