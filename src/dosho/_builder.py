@@ -19,7 +19,7 @@ from typing import Any
 
 from shinobi import Cab
 from shinobi.loaders import build_model, sanitize_unique
-from shinobi.steps.schema import ParamMeta, ParamPattern, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, ParamPattern, Policies
 
 # A field spec as a tool's own `--help`/docs give it to you -- `(dtype,
 # required, default)` -- plus an optional 4th element carrying the field's
@@ -33,18 +33,25 @@ FieldSpec = tuple[str, bool, Any] | tuple[str, bool, Any, ParamMeta]
 
 def _resolve(
     specs: dict[str, FieldSpec],
-) -> tuple[dict[str, tuple[str, bool, Any]], dict[str, ParamMeta]]:
-    """Split raw `{name: spec}` into build_model-ready fields and field_meta.
+) -> tuple[dict[str, tuple[str, bool, Any]], dict[str, ParamMeta], dict[str, str]]:
+    """Split raw `{name: spec}` into build_model-ready fields and field_meta,
+    plus the raw-name -> field-name map the sanitisation produced.
 
     Sanitises each raw name to a valid pydantic field name; a raw name that
     changes under sanitisation auto-derives a `nom_de_guerre`, which an
-    explicit `ParamMeta` 4th element overrides only if it sets its own.
+    explicit `ParamMeta` 4th element overrides only if it sets its own. The
+    third return value lets `define_cab` accept other per-field keyword
+    arguments (`input_mutability`) keyed by the *same* raw names the caller
+    already used in `fields`, rather than by the sanitised names only this
+    function knows.
     """
     resolved_fields: dict[str, tuple[str, bool, Any]] = {}
     resolved_meta: dict[str, ParamMeta] = {}
+    raw_to_field: dict[str, str] = {}
     seen: dict[str, str] = {}
     for raw_name, spec in specs.items():
         field = sanitize_unique(raw_name, seen)
+        raw_to_field[raw_name] = field
         core, meta = (spec[:3], spec[3]) if len(spec) == 4 else (spec, None)
         resolved_fields[field] = core
         if field != raw_name:
@@ -54,13 +61,38 @@ def _resolve(
                 meta = meta.model_copy(update={"nom_de_guerre": raw_name})
         if meta is not None:
             resolved_meta[field] = meta
-    return resolved_fields, resolved_meta
+    return resolved_fields, resolved_meta, raw_to_field
 
 
 def _choices(metas: dict[str, ParamMeta]) -> dict[str, list[Any]]:
     """Per-field allowed-value lists for `build_model(choices=...)`, so a
     `ParamMeta.choices` narrows the model's field to `Literal[*choices]`."""
     return {field: meta.choices for field, meta in metas.items() if meta.choices}
+
+
+def _mutability(
+    declared: dict[str, Mutability] | None,
+    raw_to_field: dict[str, str],
+) -> dict[str, Mutability]:
+    """Re-key a caller's `{raw_input_name: Mutability}` onto the sanitised
+    field names `Scope.input_mutability` is looked up by.
+
+    A raw name with no matching input field raises rather than being
+    dropped: an unnoticed mutability declaration is exactly the silent
+    failure this argument exists to fix (shinobi defaults an undeclared
+    field to `IMMUTABLE`, so a typo'd key would leave the cab keying its
+    cache on content it overwrites, with nothing to notice).
+    """
+    if not declared:
+        return {}
+    unknown = sorted(set(declared) - set(raw_to_field))
+    if unknown:
+        raise ValueError(
+            f"input_mutability names {unknown}, which are not input fields "
+            f"of this cab -- key it by the same raw names used in `fields` "
+            f"(e.g. 'input_ms.path', not 'input_ms_path')"
+        )
+    return {raw_to_field[raw]: value for raw, value in declared.items()}
 
 
 def _extras(metas: dict[str, ParamMeta]) -> dict[str, dict[str, Any]]:
@@ -81,6 +113,7 @@ def define_cab(
     fields: dict[str, FieldSpec],
     *,
     outputs: dict[str, FieldSpec] | None = None,
+    input_mutability: dict[str, Mutability] | None = None,
     policies: Policies | None = None,
     input_patterns: list[ParamPattern] | None = None,
     output_patterns: list[ParamPattern] | None = None,
@@ -112,6 +145,23 @@ def define_cab(
     `-<abbrev>` short flag. Both are threaded into `build_model` below,
     mirroring `shinobi.loaders.cultcargo._build_cabdef`.
 
+    `input_mutability` declares which path inputs the tool rewrites *in
+    place*, keyed by the same raw names used in `fields` (e.g.
+    `{"input_ms.path": Mutability.MUTABLE}`) and re-keyed here onto the
+    sanitised field names `Scope.mutability_of` looks up. This is the
+    second of the two spellings `shinobi.steps.schema.mutated_path_fields`
+    recognises, and the only one available to a cab whose output field is
+    *not* named after the input it echoes: shinobi's other spelling is
+    `input_paths & output_paths`, a plain name intersection, so an output
+    declared as `"ms": ParamMeta(implicit="{input_ms_path}")` looks like a
+    brand-new artifact no matter that it resolves to the very path the
+    input named. Undeclared, such a cab keys its cache on the content of
+    the MS it is about to overwrite (never a hit on a re-run) and the
+    Tier 1 snapshotter sees nothing to protect. Declaring it costs the
+    field its content hash in the cache key -- "unchanged" then means
+    params unchanged plus the declared output still present -- which is
+    the same trade the same-named-output spelling already makes.
+
     `sandbox`/`harvest` pass straight through to the `Cab` (see
     stimela-ninja's `shinobi.sandbox` and the fields on `Scope`): `harvest`
     declares the keep-globs for dynamically-named output *files* a
@@ -119,8 +169,8 @@ def define_cab(
     note this is a different thing from `output_patterns`, which match
     dynamic output parameter *names* for wiring validation only.
     """
-    input_fields, input_meta = _resolve(fields)
-    output_fields, output_meta = _resolve(outputs or {})
+    input_fields, input_meta, input_names = _resolve(fields)
+    output_fields, output_meta, _ = _resolve(outputs or {})
 
     return Cab(
         name=name,
@@ -142,6 +192,7 @@ def define_cab(
             extras=_extras(output_meta),
         ),
         field_meta={**input_meta, **output_meta},
+        input_mutability=_mutability(input_mutability, input_names),
         policies=policies or Policies(),
         input_patterns=input_patterns or [],
         output_patterns=output_patterns or [],

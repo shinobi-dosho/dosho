@@ -74,6 +74,18 @@ reserved field, then `implicit`, then the field's own default -- so the
 same-named-input tier does the echoing automatically, no extra
 `field_meta` entry needed.
 
+That same-name trick is not always available: a cab whose output is
+meaningfully named `ms` while its input is `input_ms.path`/`data-ms`
+(quartical, cubical) has to reach the input through an `implicit`
+template, and `mutated_path_fields`' input/output *name* intersection
+never matches a template. Such a cab declares the mutation in shinobi's
+other spelling instead -- `define_cab(input_mutability={"input_ms.path":
+Mutability.MUTABLE})` -- which the cache keyer and the Tier 1 snapshotter
+honour identically. The passthrough output field stays: it is what a
+downstream step wires a dependency on. The two say different things (one
+"here is the artifact", the other "this input *is* the artifact"), and a
+differently-named passthrough needs both.
+
 `shinobi.policies.build_argv` only ever consults `field_meta[name]` for
 names in `cab.inputs_model.model_fields`, so a field that exists *only* in
 `outputs_model` (a distinct name like `flagged_ms`, never declared as an

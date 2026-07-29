@@ -118,3 +118,55 @@ def test_ms_and_gain_directory_outputs_are_real_passthroughs():
     result = _dispatch(cab, None, input_ms_path="/obs.ms", output_gain_directory="gains.qc")
     assert str(result.outputs.ms) == "/obs.ms"
     assert str(result.outputs.gain_directory) == "gains.qc"
+
+
+def test_in_place_ms_write_is_declared_mutable_not_just_echoed_as_an_output():
+    # The `ms` output is an `implicit` passthrough of `input_ms.path`, so
+    # shinobi's name-intersection spelling of "mutated in place" sees
+    # nothing (`ms` != `input_ms_path`). Without the explicit declaration,
+    # `compute_cache_key` hashes the MS goquartical is about to rewrite --
+    # a standalone re-run of an unchanged step can never hit its own cache
+    # entry -- and `snapshots.eligible_fields` protects nothing.
+    from shinobi.steps.schema import Mutability, mutated_path_fields
+
+    cab = _cab()
+    assert cab.mutability_of("input_ms_path") is Mutability.MUTABLE
+    assert mutated_path_fields(cab) == {"input_ms_path"}
+
+
+def test_mutated_ms_is_dropped_from_the_cache_key_so_a_rerun_can_hit(tmp_path):
+    # the behavioural half of the declaration: two keys computed over the
+    # same params must agree even when the MS's own content has changed
+    # underneath (which it has -- the step is what changed it).
+    # `invalidate_path_hashes` is not ceremony: `_hash_path` is memoized, so
+    # without it the second key would match for a stale-cache reason rather
+    # than the declared-mutable one, and the same assertion would pass
+    # against a cab that never declared anything.
+    from shinobi.cache import compute_cache_key, invalidate_path_hashes
+
+    cab = _cab()
+    ms = tmp_path / "obs.ms"
+    ms.mkdir()
+    params = {"input_ms_path": str(ms), "output_gain_directory": "gains.qc"}
+    before = compute_cache_key(cab, None, params, None)
+    (ms / "CORRECTED_DATA").write_text("rewritten by the step itself")
+    invalidate_path_hashes()
+    assert compute_cache_key(cab, None, params, None) == before
+    # ... and the undeclared cab is what that guards against: same rewrite,
+    # different key, so the step re-runs forever
+    naive = cab.model_copy(update={"input_mutability": {}})
+    stale = compute_cache_key(naive, None, params, None)
+    (ms / "CORRECTED_DATA").write_text("rewritten again")
+    invalidate_path_hashes()
+    assert compute_cache_key(naive, None, params, None) != stale
+    # a different MS path is still a different step, though
+    assert (
+        compute_cache_key(cab, None, {**params, "input_ms_path": str(tmp_path / "other.ms")}, None)
+        != before
+    )
+
+
+def test_gain_directory_output_is_not_swept_up_as_mutable():
+    # only the MS is declared mutable; the gain store is a real new artifact
+    # and must keep its content hash in the key
+    assert "output_gain_directory" not in _cab().input_mutability
