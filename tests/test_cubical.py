@@ -117,3 +117,41 @@ def test_ms_output_is_a_real_passthrough_not_a_synthetic_hack():
     register_step_backend("cubical-record", RecordingBackend())
     result = _dispatch(cab, None, data_ms="/obs.ms", out_name="selfcal1")
     assert str(result.outputs.ms) == "/obs.ms"
+
+
+def test_in_place_ms_write_is_declared_mutable_not_just_echoed_as_an_output():
+    # The `ms` output is an `implicit` passthrough of `data-ms`, so shinobi's
+    # name-intersection spelling of "mutated in place" sees nothing
+    # (`ms` != `data_ms`). Without the explicit declaration,
+    # `compute_cache_key` hashes the MS gocubical is about to rewrite -- a
+    # standalone re-run of an unchanged step can never hit its own cache
+    # entry -- and `snapshots.eligible_fields` protects nothing.
+    from shinobi.steps.schema import Mutability, mutated_path_fields
+
+    cab = _cab()
+    assert cab.mutability_of("data_ms") is Mutability.MUTABLE
+    assert mutated_path_fields(cab) == {"data_ms"}
+
+
+def test_mutated_ms_is_dropped_from_the_cache_key_so_a_rerun_can_hit(tmp_path):
+    # `invalidate_path_hashes` is not ceremony: `_hash_path` is memoized, so
+    # without it the second key would match for a stale-cache reason rather
+    # than the declared-mutable one, and the assertion would pass against a
+    # cab that never declared anything -- which is what the `naive` half
+    # below demonstrates.
+    from shinobi.cache import compute_cache_key, invalidate_path_hashes
+
+    cab = _cab()
+    ms = tmp_path / "obs.ms"
+    ms.mkdir()
+    params = {"data_ms": str(ms)}
+    before = compute_cache_key(cab, None, params, None)
+    (ms / "CORRECTED_DATA").write_text("rewritten by the step itself")
+    invalidate_path_hashes()
+    assert compute_cache_key(cab, None, params, None) == before
+
+    naive = cab.model_copy(update={"input_mutability": {}})
+    stale = compute_cache_key(naive, None, params, None)
+    (ms / "CORRECTED_DATA").write_text("rewritten again")
+    invalidate_path_hashes()
+    assert compute_cache_key(naive, None, params, None) != stale
