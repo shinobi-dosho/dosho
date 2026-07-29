@@ -27,7 +27,15 @@ by name as the motivating example).
 QuartiCal writes corrected visibilities back into the *same* input MS
 (via `output.products`/`output.columns`) and gain tables into
 `output.gain_directory` -- both declared as real passthrough output
-fields (`ms`, `gain_directory`), not synthetic hacks.
+fields (`ms`, `gain_directory`), not synthetic hacks. The MS one is
+*also* declared `input_mutability={"input_ms.path": Mutability.MUTABLE}`:
+the passthrough output makes the in-place write wirable by a downstream
+step, but only the mutability declaration makes it visible to
+`shinobi.steps.schema.mutated_path_fields`, whose other spelling is a
+plain input/output *name* intersection that an `implicit`-templated
+output under a different name (`ms` vs `input_ms_path`) never satisfies.
+See `dosho._builder.define_cab`'s `input_mutability` for what that
+costs and buys.
 
 `parset` is real, source-verified against `quartical/config/parser.py`'s
 own `parse_inputs`: it scans the *whole* `sys.argv` for any bare token
@@ -45,7 +53,7 @@ changes nothing observable for QuartiCal itself.
 
 from __future__ import annotations
 
-from shinobi.steps.schema import ParamMeta, ParamPattern, ParamSegment, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, ParamPattern, ParamSegment, Policies
 
 from dosho import images
 from dosho._builder import FieldSpec, define_cab
@@ -160,6 +168,15 @@ quartical = define_cab(
     images.QUARTICAL,
     _FIELDS,
     outputs=_OUTPUTS,
+    # The `ms` output above resolves to the very path `input_ms.path` named,
+    # but shinobi's name-intersection spelling of "mutated in place" can't
+    # see through an `implicit` template -- the two fields are spelled
+    # differently, so `input_paths & output_paths` is empty. Say it in the
+    # other spelling shinobi provides for exactly this shape. Without it,
+    # `compute_cache_key` fingerprints the MS QuartiCal is about to rewrite,
+    # so a re-run of an unchanged step can never hit its own cache entry,
+    # and `snapshots.eligible_fields` finds nothing to protect.
+    input_mutability={"input_ms.path": Mutability.MUTABLE},
     policies=Policies(key_value=True, repeat="[]", prefix=""),
     input_patterns=[_GAIN_TERM_PATTERN],
     info="QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)",

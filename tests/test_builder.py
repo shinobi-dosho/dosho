@@ -3,7 +3,14 @@ from typing import get_args
 import pytest
 from pydantic import ValidationError
 from shinobi.policies import build_argv
-from shinobi.steps.schema import ParamMeta, ParamPattern, ParamSegment, Policies
+from shinobi.steps.schema import (
+    Mutability,
+    ParamMeta,
+    ParamPattern,
+    ParamSegment,
+    Policies,
+    mutated_path_fields,
+)
 
 from dosho._builder import define_cab
 
@@ -154,3 +161,57 @@ def test_sandbox_and_harvest_pass_through():
     plain = define_cab("t2", "t2", "quay.io/example/tool:1.0", {})
     assert plain.sandbox is None
     assert plain.harvest == []
+
+
+def test_input_mutability_is_rekeyed_onto_the_sanitised_field_name():
+    # keyed by the raw name the author already used in `fields` -- the
+    # sanitised `input_ms_path` is an artifact of the builder, not
+    # something a cab author should have to predict.
+    cab = define_cab(
+        "tool",
+        "tool",
+        "quay.io/example/tool:1.0",
+        {"input_ms.path": ("MS", True, None), "prefix": ("str", False, "out")},
+        input_mutability={"input_ms.path": Mutability.MUTABLE},
+    )
+    assert cab.input_mutability == {"input_ms_path": Mutability.MUTABLE}
+    assert cab.mutability_of("input_ms_path") is Mutability.MUTABLE
+    assert cab.mutability_of("prefix") is Mutability.IMMUTABLE
+
+
+def test_declared_mutability_reaches_mutated_path_fields_without_a_matching_output_name():
+    # the point of the whole argument: an `implicit`-templated output under
+    # a *different* name than the input it echoes is invisible to shinobi's
+    # `input_paths & output_paths` spelling, so the cache would fingerprint
+    # a path the step itself overwrites.
+    outputs = {"ms": ("MS", False, None, ParamMeta(implicit="{input_ms_path}"))}
+    fields = {"input_ms.path": ("MS", True, None)}
+    silent = define_cab("t1", "t1", "quay.io/example/tool:1.0", fields, outputs=outputs)
+    assert mutated_path_fields(silent) == set()
+    declared = define_cab(
+        "t2",
+        "t2",
+        "quay.io/example/tool:1.0",
+        fields,
+        outputs=outputs,
+        input_mutability={"input_ms.path": Mutability.MUTABLE},
+    )
+    assert mutated_path_fields(declared) == {"input_ms_path"}
+
+
+def test_unknown_input_mutability_name_raises_rather_than_being_dropped():
+    with pytest.raises(ValueError, match="not input fields"):
+        define_cab(
+            "tool",
+            "tool",
+            "quay.io/example/tool:1.0",
+            {"input_ms.path": ("MS", True, None)},
+            # the sanitised name, not the raw one -- a plausible typo, and
+            # silently ignoring it would restore the exact bug this fixes
+            input_mutability={"input_ms_path": Mutability.MUTABLE},
+        )
+
+
+def test_no_input_mutability_declared_leaves_the_cab_byte_identical():
+    cab = define_cab("t", "t", "quay.io/example/tool:1.0", {"prefix": ("str", True, None)})
+    assert cab.input_mutability == {}
