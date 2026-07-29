@@ -120,6 +120,11 @@ rfinder = define_cab(
     "rfinder",
     images.RFINDER,
     _FIELDS,
+    # rfinder writes its plots and tables under this directory (into a
+    # `rfi_<polarization>_<label>` subfolder). Declared as a same-named
+    # passthrough so a downstream step can wire onto it, and so the write
+    # stops being invisible to `mutated_path_fields`.
+    outputs={"output_dir": ("Directory", False, None)},
     policies=Policies(prefix="--"),
     info="rfinder: visualize flagged RFI in a measurement set (https://github.com/Fil8/RFInder)",
 )

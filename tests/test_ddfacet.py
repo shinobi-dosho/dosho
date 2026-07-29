@@ -63,3 +63,73 @@ def test_ddfacet_parset_omitted_when_not_given():
     argv = build_argv(cab, {"image_n_pix": 6000})
     assert "base.parset" not in argv
     assert argv == ["DDF.py", "--Image-NPix", "6000"]
+
+
+def test_ddfacet_read_side_paths_are_path_dtypes_not_str():
+    # DDFacet's .cfg does carry `#type:` tags, but `str` there means "a
+    # string on the command line", not "not a path" -- so every filename
+    # option arrived invisible to `path_fields`, hence never bind-mounted and
+    # never workspace-anchored. Classified from each option's own .cfg help.
+    from shinobi.steps.schema import path_fields
+
+    assert path_fields(dosho.get("ddfacet").inputs_model) == {
+        "parset",
+        "data_ms",
+        "predict_from_image",
+        "predict_init_dico_model",
+        "output_shift_facets_file",
+        "image_multi_field_file",
+        "facets_flux_padding_app_model",
+        "beam_fits_file",
+        "mask_external",
+        "hmp_peak_weight_image",
+        "pointing_solutions_pointing_sols_csv",
+        "dde_solutions_sols_dir",
+    }
+
+
+def test_ddfacet_write_targets_and_column_names_stay_str():
+    # Cache-Dir/DirWisdomFFTW/Montblanc-LogFile/Output-Name are DDFacet
+    # *write* targets: a string-typed write target stays relative under a
+    # sandbox on purpose so the tool writes inside it for harvest to collect
+    # (same call as killms' Solutions-SolsDir). The *ColName fields are MS
+    # column names, and DDESolutions-DDSols is a name resolved against
+    # SolsDir, not a path.
+    from shinobi.steps.schema import path_fields
+
+    paths = path_fields(dosho.get("ddfacet").inputs_model)
+    for field in (
+        "cache_dir",
+        "cache_dir_wisdom_fftw",
+        "montblanc_log_file",
+        "output_name",
+        "data_col_name",
+        "predict_col_name",
+        "weight_out_col_name",
+        "dde_solutions_dd_sols",
+    ):
+        assert field not in paths
+
+
+def test_ddfacet_ms_is_declared_mutable():
+    # DDF.py writes into the MS it images: --Predict-ColName,
+    # --Weight-OutColName, and by default its cache "next to the MS". No
+    # outputs model, so nothing for the name intersection to find.
+    from shinobi.steps.schema import Mutability, mutated_path_fields
+
+    cab = dosho.get("ddfacet")
+    assert cab.mutability_of("data_ms") is Mutability.MUTABLE
+    assert mutated_path_fields(cab) == {"data_ms"}
+    # a read-side path keeps its content hash -- swapping the mask really is
+    # a different step
+    assert cab.mutability_of("mask_external") is Mutability.IMMUTABLE
+
+
+def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
+    argv = build_argv(
+        dosho.get("ddfacet"),
+        {"data_ms": ["/x.ms"], "mask_external": "/m.fits", "dde_solutions_sols_dir": "/sols"},
+    )
+    assert "--Data-MS" in argv and "/x.ms" in argv
+    assert "--Mask-External" in argv and "/m.fits" in argv
+    assert "--DDESolutions-SolsDir" in argv and "/sols" in argv

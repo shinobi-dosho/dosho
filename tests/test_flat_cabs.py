@@ -563,6 +563,66 @@ def test_flagms_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
     assert compute_cache_key(naive, None, params, None) != stale
 
 
+def test_write_targets_are_declared_outputs_so_a_recipe_can_wire_them():
+    # These five had a path-typed *input* naming where the tool writes and no
+    # outputs model at all: nothing for `mutated_path_fields`' name
+    # intersection to find (so the step's own write moved its cache key), and
+    # no OutputRef for a downstream step to depend on.
+    from shinobi.steps.schema import mutated_path_fields
+
+    for name, field in (
+        ("tigger-convert", "output_model"),
+        ("tigger-restore", "output_image"),
+        ("tigger-tag", "output"),
+        ("rfinder", "output_dir"),
+        ("quartical-backup", "zarr_dir"),
+    ):
+        cab = dosho.get(name)
+        assert field in cab.outputs_model.model_fields, name
+        assert field in mutated_path_fields(cab), name
+
+
+def test_new_outputs_do_not_clobber_their_inputs_field_meta():
+    # `field_meta` is `{**input_meta, **output_meta}`, so an output-side
+    # ParamMeta on a name that is also a real input silently replaces the
+    # input's -- the positionals below would stop being positional. None of
+    # the new output specs carries a 4th element; these argv shapes are the
+    # proof, not the intent.
+    assert build_argv(
+        dosho.get("tigger-convert"),
+        {"sky_model": "in.lsm.html", "output_model": "out.lsm.html", "force": True},
+    ) == ["tigger-convert", "--force", "in.lsm.html", "out.lsm.html"]
+    assert build_argv(
+        dosho.get("quartical-backup"),
+        {"ms_path": "/x.ms", "zarr_dir": "/bk", "column_name": "FLAG"},
+    ) == ["goquartical-backup", "/x.ms", "/bk", "FLAG"]
+    assert build_argv(dosho.get("rfinder"), {"output_dir": "/out"}) == [
+        "rfinder",
+        "--output_dir",
+        "/out",
+    ]
+
+
+def test_tigger_tag_saves_in_place_by_default_so_its_model_is_mutable():
+    # --output's own help: "Save changes to a different output model
+    # [default: save in place]" -- with no --output the input model *is* the
+    # output. The sibling commands read their model and write elsewhere, so
+    # theirs stays immutable.
+    from shinobi.steps.schema import Mutability
+
+    assert dosho.get("tigger-tag").mutability_of("sky_model") is Mutability.MUTABLE
+    for sibling in ("tigger-convert", "tigger-restore"):
+        assert dosho.get(sibling).mutability_of("sky_model") is Mutability.IMMUTABLE
+
+
+def test_quartical_backup_reads_its_ms_rather_than_writing_it():
+    # unlike the `quartical` cab, goquartical-backup only reads the MS -- it
+    # copies a column out to zarr. The MS must keep its content hash.
+    from shinobi.steps.schema import Mutability
+
+    assert dosho.get("quartical-backup").mutability_of("ms_path") is Mutability.IMMUTABLE
+
+
 def test_pyddi_hyphenated_flags():
     cab = dosho.get("pyddi")
     assert cab.name == "pyddi"

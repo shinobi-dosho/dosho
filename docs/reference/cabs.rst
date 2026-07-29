@@ -2686,11 +2686,11 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``None``
      - \-
    * - ``predict_from_image``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``predict_init_dico_model``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``predict_overwrite``
@@ -2758,7 +2758,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'image'``
      - \-
    * - ``output_shift_facets_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``output_restoring_beam``
@@ -2806,7 +2806,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``200``
      - \-
    * - ``image_multi_field_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``facets_n_facets``
@@ -2850,7 +2850,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0``
      - \-
    * - ``facets_flux_padding_app_model``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``facets_flux_padding_scale``
@@ -3086,7 +3086,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'Linear'``
      - \-
    * - ``beam_fits_file``
-     - ``str | None``
+     - ``Path | None``
      - ``'beam_$(corr)_$(reim).fits'``
      - \-
    * - ``beam_fits_feed``
@@ -3162,7 +3162,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``None``
      - \-
    * - ``dde_solutions_sols_dir``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``dde_solutions_global_norm``
@@ -3218,7 +3218,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0.0``
      - \-
    * - ``pointing_solutions_pointing_sols_csv``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``pointing_solutions_interpolation_mode``
@@ -3278,7 +3278,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``'auto'``
      - \-
    * - ``mask_external``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``mask_auto``
@@ -3346,7 +3346,7 @@ DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.co
      - ``0``
      - \-
    * - ``hmp_peak_weight_image``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
      - \-
    * - ``hmp_kappa``
@@ -8753,7 +8753,16 @@ goquartical-backup: back up a measurement set column to zarr
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``zarr_dir``
+     - ``Path | None``
+     - \-
 
 quartical-plotter
 -----------------
@@ -9319,7 +9328,16 @@ rfinder: visualize flagged RFI in a measurement set (https://github.com/Fil8/RFI
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_dir``
+     - ``Path | None``
+     - \-
 
 rmclean3d
 ---------
@@ -12655,7 +12673,16 @@ tigger-convert: convert sky models into Tigger format (https://github.com/ska-sa
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_model``
+     - ``Path | None``
+     - \-
 
 tigger-restore
 --------------
@@ -12747,7 +12774,16 @@ tigger-restore: restore sky-model sources into a FITS image (https://github.com/
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_image``
+     - ``Path | None``
+     - \-
 
 tigger-tag
 ----------
@@ -12799,7 +12835,16 @@ tigger-tag: set or change tags of selected sources in a sky model (https://githu
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output``
+     - ``Path | None``
+     - \-
 
 tricolour
 ---------

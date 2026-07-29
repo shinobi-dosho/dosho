@@ -264,6 +264,11 @@ quartical_backup = define_cab(
     "goquartical-backup",
     images.QUARTICAL,
     _BACKUP_FIELDS,
+    # goquartical-backup creates the backup zarr *inside* this directory
+    # (named `[label]-[msname]-[column].bkp.qc`), so the directory is the
+    # wirable artifact -- `goquartical-restore` takes a path under it. The
+    # MS is read-only here, unlike in the `quartical` cab above.
+    outputs={"zarr_dir": ("Directory", False, None)},
     policies=Policies(prefix="--"),
     info="goquartical-backup: back up a measurement set column to zarr",
 )

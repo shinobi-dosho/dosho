@@ -7,11 +7,30 @@ All three are `optparse`-based, so every repeatable option is "append"-style
 (the flag itself repeats once per value, e.g. `-a f1.txt -a f2.txt`) --
 `optparse` has no argparse-style `nargs='+'` -- hence the shared cab-level
 `Policies(repeat_list=True)` rather than any per-field `repeat_as_tokens`.
+
+Each command's write target is re-declared as a same-named output
+(`tigger-convert`'s `output_model`, `tigger-restore`'s `output_image`,
+`tigger-tag`'s `output`), the `tricolour.py` shape: `_fill_outputs`'
+same-named-input tier echoes it with no `ParamMeta.implicit`, which both
+makes the product wirable by a downstream step -- these three had no
+outputs model at all, so a recipe could only order steps by hand -- and
+satisfies `mutated_path_fields`' name intersection, so the write stops
+being fingerprinted into the step's own cache key. None of the three
+output specs carries a 4th element: `field_meta` is `{**input_meta,
+**output_meta}`, so an output-side `ParamMeta` would replace the input's
+and the positional args would silently stop being positional.
+
+`tigger-tag` additionally declares `sky_model` `Mutability.MUTABLE`.
+Its `--output`'s own `--help` reads "Save changes to a different output
+model [default: save in place]" -- so with no `--output` the input model
+*is* the output. Declared unconditionally, as for `cubical.py`: a cab is
+one static schema, and here the mutating path is the documented default
+rather than the exception.
 """
 
 from __future__ import annotations
 
-from shinobi.steps.schema import ParamMeta, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, Policies
 
 from dosho import images
 from dosho._builder import FieldSpec, define_cab
@@ -388,6 +407,13 @@ convert = define_cab(
     "tigger-convert",
     images.TIGGER_LSM,
     _CONVERT_FIELDS,
+    # Same-named passthrough: the converted model is this cab's only
+    # artifact, and without an output field no recipe could wire a step onto
+    # it. `_fill_outputs`' same-named-input tier echoes it; the name
+    # intersection also makes the write visible to `mutated_path_fields`.
+    # No 4th spec element -- an output-side ParamMeta would replace the
+    # input's and `output_model` would stop being positional.
+    outputs={"output_model": ("File", False, None)},
     policies=_POLICIES,
     info="tigger-convert: convert sky models into Tigger format (https://github.com/ska-sa/tigger-lsm)",
 )
@@ -504,6 +530,8 @@ restore = define_cab(
     "tigger-restore",
     images.TIGGER_LSM,
     _RESTORE_FIELDS,
+    # same shape as tigger-convert above
+    outputs={"output_image": ("File", False, None)},
     policies=_POLICIES,
     info="tigger-restore: restore sky-model sources into a FITS image (https://github.com/ska-sa/tigger-lsm)",
 )
@@ -566,6 +594,12 @@ tag = define_cab(
     "tigger-tag",
     images.TIGGER_LSM,
     _TAG_FIELDS,
+    # `--output` is optional and its own help says the default is to "save
+    # in place", so `sky_model` is rewritten unless a separate output is
+    # named. Declared MUTABLE unconditionally: a cab is one static schema,
+    # and the in-place default is the common call.
+    input_mutability={"sky_model": Mutability.MUTABLE},
+    outputs={"output": ("File", False, None)},
     policies=_POLICIES,
     info="tigger-tag: set or change tags of selected sources in a sky model (https://github.com/ska-sa/tigger-lsm)",
 )
