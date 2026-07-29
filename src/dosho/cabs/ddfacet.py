@@ -34,6 +34,48 @@ produces a dynamically-named set of FITS files (`{Output-Name}.<code>.fits`
 per requested code) that isn't a single, statically-knowable path -- the
 same "no dynamic-naming implicit" call as `breizorro.py`'s `outfile`.
 
+`Data-MS` is nonetheless declared `Mutability.MUTABLE`: DDF.py writes into
+the MS it images (`--Predict-ColName` is "MS column to write predict to",
+`--Weight-OutColName` is "Save the internally computed weights into this
+column", and `--Cache-Dir`'s own help is "Default is to keep cache next to
+the MS"). With no outputs model there is nothing for
+`mutated_path_fields`' name intersection to find, so without the
+declaration `compute_cache_key` fingerprints an MS the step rewrites and
+no identical re-run can hit its own cache entry. This is the flag/gaincal
+shape, the same call as `killms.py`.
+
+**Path-typed fields.** Unlike killMS's `.cfg`, DDFacet's does carry
+`#type:` tags -- but `str` there means "a string on the command line", not
+"not a path", so every filename option still arrived as a plain `str` and
+was therefore invisible to `path_fields`: never bind-mounted
+(`backends.container.bind_dirs`), never workspace-anchored
+(`sandbox.absolutize_path_inputs`). The read-side ones are retyped from
+each option's own `.cfg` help text: `Predict-FromImage` ("will predict
+data from this image"), `Predict-InitDicoModel` ("Resume deconvolution
+from given DicoModel"), `Output-ShiftFacetsFile` ("Astrometric correction
+per facet"), `Image-MultiFieldFile` ("Takes a txt file as input"),
+`Facets-FluxPaddingAppModel` ("the apparant model image (or cube)"),
+`Beam-FITSFile` ("Beam FITS file pattern"), `Mask-External` ("External
+clean mask image (FITS format)"), `HMP-PeakWeightImage` ("weigh the peak
+finding by given image"), `PointingSolutions-PointingSolsCSV` ("Filename
+of CSV containing...") -> `File`; `DDESolutions-SolsDir` ("Name of the
+directry of the DDE Solutions which contains
+<SolsDir>/<MSNames>/killMS.<SolsName>.sols.npz") -> `Directory`.
+`Beam-FITSFile` is a pattern rather than one file, and that is fine for
+the same reason it is in `killms.py`: nothing in shinobi opens a path
+input, a bind mount comes from the parent directory, and anchoring only
+makes a relative value absolute.
+
+Deliberately still `str`, all of them DDFacet *write* targets:
+`Cache-Dir`, `Cache-DirWisdomFFTW`, `Montblanc-LogFile` and the
+`Output-Name` image prefix. A string-typed write target stays relative
+under a sandbox on purpose, so the tool writes inside the sandbox for
+harvest to collect -- see `sandbox.absolutize_path_inputs`' own docstring
+on output prefixes, and `killms.py`, which makes the same call for
+`Solutions-SolsDir`. `Data-ColName`/`Predict-ColName`/`Weight-ColName`/
+`Weight-OutColName` are MS column names, and `DDESolutions-DDSols` is a
+solution *name* resolved against `SolsDir`, not a path.
+
 `parset` is a real, separate thing from any `--Section-Option` flag:
 `DDF.py`'s own `main()` (`DDF.py [parset file] <options>`) treats a lone
 non-flag argument as a parset file to read defaults from before applying
@@ -51,7 +93,7 @@ per `build_argv`'s `if value is None: continue`.
 
 from __future__ import annotations
 
-from shinobi.steps.schema import ParamMeta, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, Policies
 
 from dosho import images
 from dosho._builder import FieldSpec, define_cab
@@ -138,7 +180,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "predict_from_image": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -147,7 +189,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "predict_init_dico_model": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -286,7 +328,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="Output-Name", info="Base name of output images (Default: image)"),
     ),
     "output_shift_facets_file": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -386,7 +428,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "image_multi_field_file": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -479,7 +521,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "facets_flux_padding_app_model": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -1010,7 +1052,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="Beam-SmoothInterpMode", info="Linear/Log"),
     ),
     "beam_fits_file": (
-        "str",
+        "File",
         False,
         "beam_$(corr)_$(reim).fits",
         ParamMeta(
@@ -1173,7 +1215,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="DDESolutions-DDSols", info="Name of the DDE solution file"),
     ),
     "dde_solutions_sols_dir": (
-        "str",
+        "Directory",
         False,
         None,
         ParamMeta(
@@ -1277,7 +1319,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(nom_de_guerre="DDESolutions-ReWeightSNR", info="Deprecated? (Default: 0.0)"),
     ),
     "pointing_solutions_pointing_sols_csv": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -1410,7 +1452,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "mask_external": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(nom_de_guerre="Mask-External", info="External clean mask image (FITS format)."),
@@ -1544,7 +1586,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ),
     ),
     "hmp_peak_weight_image": (
-        "str",
+        "File",
         False,
         None,
         ParamMeta(
@@ -2347,6 +2389,15 @@ ddfacet = define_cab(
     "DDF.py",
     images.DDFACET,
     _FIELDS,
+    # DDF.py writes into the MS it images: `--Predict-ColName` ("MS column
+    # to write predict to"), `--Weight-OutColName` ("Save the internally
+    # computed weights into this column"), and by default its cache too --
+    # `--Cache-Dir`'s own help is "Default is to keep cache next to the MS".
+    # This cab models no outputs (the image family is `--Output-Name`-
+    # prefixed and unmodelled, see the module docstring), so the
+    # name-intersection spelling has nothing to intersect: the flag/gaincal
+    # shape `Mutability.MUTABLE` exists for.
+    input_mutability={"data_ms": Mutability.MUTABLE},
     policies=Policies(prefix="--"),
     info="DDFacet: facet-based radio-interferometric imager/deconvolver "
     "(https://github.com/saopicc/DDFacet)",
