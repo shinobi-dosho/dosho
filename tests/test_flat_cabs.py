@@ -25,7 +25,10 @@ import re
 import pytest
 from pydantic import ValidationError
 from shinobi import StepRef
+from shinobi.backends.recording import RecordingBackend
 from shinobi.policies import build_argv
+from shinobi.steps import register_step_backend
+from shinobi.steps.dispatch import _dispatch
 
 import dosho
 from dosho import images
@@ -660,6 +663,85 @@ def test_spimple_imconv_shares_image_with_binterp():
     assert cab.image == dosho.get("spimple-binterp").image
     argv = build_argv(cab, {"image": "/img.fits", "output_filename": "/out", "circ_psf": True})
     assert "--circ-psf" in argv
+
+
+def test_spimple_output_filename_is_a_prefix_not_a_directory():
+    """Every spimple `--help` calls it "Path to output directory"; all three
+    commands use it as a filename stem. Source-verified against v0.0.5 (the
+    pinned image): binterp writes `save_fits(opts.output_filename, ...)`
+    verbatim, imconv/spifit do `outfile = opts.output_filename` then
+    concatenate a per-product suffix. Declaring it as the directory would put
+    every product one level too high.
+    """
+    binterp = dosho.get("spimple-binterp")
+    # binterp: the value *is* the file -- a same-named passthrough output
+    assert "output_filename" in binterp.outputs_model.model_fields
+    assert binterp.field_meta["output_filename"].implicit is None
+    # and the input keeps its flag: `field_meta` merges output over input, so a
+    # ParamMeta on the output spec would have dropped this
+    assert binterp.field_meta["output_filename"].nom_de_guerre == "output-filename"
+    argv = build_argv(binterp, {"image": "/img.fits", "output_filename": "/out/beam.fits"})
+    assert "--output-filename" in argv and "/out/beam.fits" in argv
+
+
+def test_spimple_binterp_output_passes_the_input_value_through():
+    cab = dosho.get("spimple-binterp").model_copy(update={"backend": "spimple-record"})
+    register_step_backend("spimple-record", RecordingBackend())
+    result = _dispatch(cab, None, image="/img.fits", output_filename="/out/beam.fits")
+    assert str(result.outputs.output_filename) == "/out/beam.fits"
+
+
+def test_spimple_imconv_products_resolve_to_the_suffixes_the_tool_writes():
+    # image_convolver.py: outfile + '.clean_psf.fits' / '.convolved.fits' /
+    # '.power_beam.fits' / '.spatial_weight.fits', one per `products` letter.
+    cab = dosho.get("spimple-imconv").model_copy(update={"backend": "spimple-record"})
+    register_step_backend("spimple-record", RecordingBackend())
+    result = _dispatch(cab, None, image="/img.fits", output_filename="out/img")
+    assert str(result.outputs.clean_psf) == "out/img.clean_psf.fits"
+    assert str(result.outputs.convolved) == "out/img.convolved.fits"
+    assert str(result.outputs.power_beam) == "out/img.power_beam.fits"
+    assert str(result.outputs.spatial_weight) == "out/img.spatial_weight.fits"
+    assert cab.harvest == ["{output_filename}.*"]
+
+
+def test_spimple_spifit_products_resolve_to_the_suffixes_the_tool_writes():
+    # spi_fitter.py, letter for letter from the `products` help text.
+    cab = dosho.get("spimple-spifit").model_copy(update={"backend": "spimple-record"})
+    register_step_backend("spimple-record", RecordingBackend())
+    result = _dispatch(cab, None, output_filename="out/spi")
+    expected = {
+        "alpha": "out/spi.alpha.fits",
+        "alpha_err": "out/spi.alpha_err.fits",
+        "i0": "out/spi.I0.fits",
+        "i0_err": "out/spi.I0_err.fits",
+        "irec_cube": "out/spi.Irec_cube.fits",
+        "clean_psf": "out/spi.clean_psf.fits",
+        "convolved_model": "out/spi.convolved_model.fits",
+        "convolved_residual": "out/spi.convolved_residual.fits",
+        "power_beam": "out/spi.power_beam.fits",
+        "fit_diff": "out/spi.fit_diff.fits",
+    }
+    for field, path in expected.items():
+        assert str(getattr(result.outputs, field)) == path
+    assert cab.harvest == ["{output_filename}.*"]
+    # the output names must not shadow the model/residual *inputs*, which would
+    # turn them into passthroughs of the wrong value
+    assert "model" not in cab.outputs_model.model_fields
+    assert "residual" not in cab.outputs_model.model_fields
+
+
+def test_sofia2_every_moment_map_resolves_not_just_mom2():
+    # One `output.writeMoments` toggle writes four files; mom0/mom1 used to be
+    # declared without a template, so they validated but never resolved.
+    cab = dosho.get("sofia2").model_copy(update={"backend": "sofia-record"})
+    register_step_backend("sofia-record", RecordingBackend())
+    result = _dispatch(
+        cab, None, input_data="/cube.fits", output_directory="/out", output_filename="run1"
+    )
+    assert str(result.outputs.mom0) == "/out/run1_mom0.fits"
+    assert str(result.outputs.mom1) == "/out/run1_mom1.fits"
+    assert str(result.outputs.mom2) == "/out/run1_mom2.fits"
+    assert str(result.outputs.chan_map) == "/out/run1_chan.fits"
 
 
 def test_spimple_spifit_model_and_residual_lists():

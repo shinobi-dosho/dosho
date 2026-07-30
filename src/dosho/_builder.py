@@ -106,6 +106,17 @@ def _extras(metas: dict[str, ParamMeta]) -> dict[str, dict[str, Any]]:
     }
 
 
+# Registered name -> why the cab is experimental. Populated by `define_cab`'s
+# `experimental=` argument and read by `dosho.registry.get`, which warns, and by
+# the docs. Some upstreams are not dependable enough for dosho to keep patching
+# around: DDFacet and killMS publish `.cfg` schemas with no usable `#type:`
+# tags, mangle their own output names internally (killMS's `reformat(MSName)`),
+# and name output families by letter code. Rather than accumulate per-gap fixes
+# for tools dosho does not control, such a cab is marked here and its
+# unsupported modes are stated outright -- to the reader, and at run time.
+EXPERIMENTAL_CABS: dict[str, str] = {}
+
+
 def define_cab(
     name: str,
     command: str,
@@ -122,6 +133,7 @@ def define_cab(
     info: str | None = None,
     sandbox: bool | None = None,
     harvest: list[str] | None = None,
+    experimental: str | None = None,
 ) -> Cab:
     """Build a `Cab` from a flat `{raw_param_name: (dtype, required,
     default)}` dict -- the shape a tool's own `--help`/docs naturally give
@@ -168,9 +180,22 @@ def define_cab(
     sandboxed run must rescue (e.g. wsclean's `"{prefix}-*"` family) --
     note this is a different thing from `output_patterns`, which match
     dynamic output parameter *names* for wiring validation only.
+
+    `experimental` marks a cab dosho supports on a best-effort basis and
+    says why, in one sentence naming the modes that are *not* covered. It
+    prefixes the cab's `info` with `EXPERIMENTAL:` -- so `ninja cabs
+    list/show` and the generated catalog carry it without any extra
+    plumbing -- and registers the reason in `EXPERIMENTAL_CABS`, which
+    `dosho.registry.get` warns from. Use it instead of a patch when the gap
+    belongs to an upstream dosho cannot rely on; use a real declaration for
+    everything else.
     """
     input_fields, input_meta, input_names = _resolve(fields)
     output_fields, output_meta, _ = _resolve(outputs or {})
+
+    if experimental:
+        EXPERIMENTAL_CABS[name] = experimental
+        info = f"EXPERIMENTAL: {info}" if info else f"EXPERIMENTAL: {experimental}"
 
     return Cab(
         name=name,

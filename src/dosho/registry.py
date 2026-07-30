@@ -9,6 +9,7 @@ for the write-time-known case, `from dosho.cabs import <tool>` (see
 from __future__ import annotations
 
 import importlib
+import warnings
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -83,14 +84,45 @@ def _entries() -> dict[str, str]:
     return _entries_cache
 
 
+_warned_experimental: set[str] = set()
+
+
+def _warn_if_experimental(name: str) -> None:
+    """Warn, once per name per process, that a cab is experimental and which
+    modes it doesn't cover.
+
+    `get()` is the hook because it is where a name becomes a cab -- for the
+    CLI, for `shinobi.cabs` discovery, and for any recipe built by name. A
+    direct `from dosho.cabs import ddfacet` bypasses it, which is why the
+    marker also rides on the cab's own `info` (see `_builder.define_cab`):
+    warning at construction time instead would fire for every importer of
+    `dosho.cabs`, which builds every cab in the repo.
+    """
+    from dosho._builder import EXPERIMENTAL_CABS
+
+    reason = EXPERIMENTAL_CABS.get(name)
+    if reason is None or name in _warned_experimental:
+        return
+    _warned_experimental.add(name)
+    warnings.warn(
+        f"dosho cab '{name}' is EXPERIMENTAL: {reason}",
+        UserWarning,
+        stacklevel=3,
+    )
+
+
 def get(name: str) -> Cab | StepRef:
     """Resolve a cab/pystep by name. Raises `KeyError` if `name` isn't
     one of this repo's entries -- the contract `shinobi.cabs.get` relies
     on to fall through to the next installed provider.
+
+    Warns (once per name) if the cab is marked experimental -- see
+    `_builder.EXPERIMENTAL_CABS`.
     """
     target = _entries()[name]
     module_name, attr = target.split(":", 1)
     module = importlib.import_module(module_name)
+    _warn_if_experimental(name)
     return getattr(module, attr)
 
 

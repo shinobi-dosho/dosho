@@ -47,6 +47,7 @@ and how it's structured.
    :caption: Reference
 
    reference/cabs
+   reference/experimental
    api/index
 
 .. toctree::
