@@ -136,29 +136,39 @@ def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
     assert "--DDESolutions-SolsDir" in argv and "/sols" in argv
 
 
-def test_ddfacet_harvest_declares_the_output_name_family():
-    """`Output-Images` letter codes make the image set dynamic, so there are no
-    output *fields* -- but the family is still declared, as a glob on the
-    prefix. This is what collects the images under a sandbox (nothing else
-    declares them) and what bind-mounts their directory under a container,
-    since `Output-Name` is a `str` and contributes no mount itself.
+def test_ddfacet_is_marked_experimental_with_its_unsupported_modes():
+    """DDFacet is a rogue sibling upstream: its `.cfg` carries no usable
+    `#type:` tags and `Output-Images` names the image family by letter code at
+    run time. dosho does not patch around that indefinitely -- it marks the cab
+    experimental and states which modes are not covered.
     """
+    from dosho._builder import EXPERIMENTAL_CABS
+
+    reason = EXPERIMENTAL_CABS["ddfacet"]
+    assert "Output-Name" in reason
+    assert "sandboxed" in reason and "containerised" in reason
+    assert dosho.get("ddfacet").info.startswith("EXPERIMENTAL:")
+
+
+def test_ddfacet_get_warns_once():
+    import warnings
+
+    from dosho import registry
+
+    registry._warned_experimental.discard("ddfacet")
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        dosho.get("ddfacet")
+        dosho.get("ddfacet")
+    assert len(caught) == 1
+    assert "EXPERIMENTAL" in str(caught[0].message)
+
+
+def test_ddfacet_write_targets_stay_undeclared():
+    # The deliberate consequence of the marker above: no output fields, no
+    # harvest globs. A declaration here would be the patch the experimental tag
+    # exists instead of.
     cab = dosho.get("ddfacet")
-    assert cab.harvest == ["{output_name}.*"]
-    # resolvable for any run: Output-Name defaults to "image", never None, so
-    # the glob can never format to a bogus "None.*" path
-    assert cab.inputs_model.model_fields["output_name"].default == "image"
-    assert cab.harvest[0].format(**{"output_name": "/scratch/run1/img"}) == "/scratch/run1/img.*"
-    # sandboxing stays a caller decision, as everywhere else
+    assert cab.outputs_model.model_fields == {}
+    assert cab.harvest == []
     assert cab.sandbox is None
-
-
-def test_ddfacet_scratch_write_targets_stay_undeclared():
-    # Cache-Dir and friends are scratch, not products: declaring them would
-    # make a sandboxed run rescue a cache tree into the caller's workspace.
-    # Cache-Dir defaults to living next to the MS, whose directory is already
-    # mounted as an input.
-    cab = dosho.get("ddfacet")
-    for field in ("cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
-        assert field not in cab.outputs_model.model_fields
-        assert not any(field in pattern for pattern in cab.harvest)

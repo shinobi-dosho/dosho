@@ -2633,7 +2633,7 @@ Regrid an MS or multi-MS to a new spectral window/channel structure or frame (th
 ddfacet
 -------
 
-DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.com/saopicc/DDFacet)
+EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.com/saopicc/DDFacet)
 
 :Command: ``DDF.py``
 :Image: ``ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-d0.1.0`` (``DDFACET`` 1.0.0.0, build)
@@ -6364,7 +6364,7 @@ Initialize weight-related columns in the MS.
 killms
 ------
 
-killMS: direction-dependent calibration for radio interferometric data (https://github.com/saopicc/killMS)
+EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric data (https://github.com/saopicc/killMS)
 
 :Command: ``kMS.py``
 :Image: ``ghcr.io/shinobi-dosho/killms:3.3.0-d0.1.0`` (``KILLMS`` 3.3.0, build)
@@ -6763,16 +6763,7 @@ killMS: direction-dependent calibration for radio interferometric data (https://
 
 **Outputs**
 
-.. list-table::
-   :header-rows: 1
-   :widths: 30 25 45
-
-   * - Field
-     - Type
-     - Description
-   * - ``solutions_sols_dir``
-     - ``Path | None``
-     - \-
+*(none)*
 
 listobs
 -------

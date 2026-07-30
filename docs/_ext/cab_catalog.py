@@ -16,6 +16,7 @@ underlying ``.step``. ``_schema_obj`` resolves whichever it is.
 from __future__ import annotations
 
 import re
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -150,7 +151,13 @@ def _generate(app: Any) -> None:
     ]
 
     for name in sorted(registry.list_cabs()):
-        obj = _schema_obj(registry.get(name))
+        # `registry.get` warns for an experimental cab, which is right for a
+        # caller about to *run* one and pure noise for a catalog that renders
+        # every cab in the repo -- the marker reaches the page anyway, via the
+        # `EXPERIMENTAL:` prefix `define_cab` puts on the cab's own `info`.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            obj = _schema_obj(registry.get(name))
         ref = getattr(obj, "image", None)
         meta = img_index.get(ref)
 

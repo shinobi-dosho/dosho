@@ -29,25 +29,10 @@ shinobi's default `list_sep=","` formatting -- no `repeat_list`/
 `repeat_as_tokens` override needed, since none of these fields repeat the
 flag itself.
 
-No output *fields* are modelled: DDFacet's own `Output-Images` letter-code
-system produces a dynamically-named set of FITS files
-(`{Output-Name}.<code>.fits` per requested code) that isn't a single,
-statically-knowable path -- the same "no dynamic-naming implicit" call as
-`breizorro.py`'s `outfile`. The family is nonetheless *declared*, as a
-`harvest` glob keyed on the `Output-Name` prefix -- the same shape
-`wsclean.py` uses for its own combinatorial family, and the only mechanism
-that can name a set whose exact members depend on a letter code.
-
-That declaration is load-bearing twice over. Under a sandbox it is what
-collects the images: nothing else declares them, so without it a sandboxed
-run harvests nothing. Under a container it is what gets their directory
-bind-mounted, because `backends.container.bind_dir_modes` reads the *output*
-side (`schema.declared_output_dirs`) precisely to cover a write target that
-is declared as a string-typed input and so contributes no mount of its own.
-Point `Output-Name` at an absolute path outside the working directory with
-nothing declared and the images land in the container's own filesystem --
-discarded on `docker run --rm`, a hard failure on apptainer's read-only
-image (stimela-ninja issue #60).
+No outputs are modelled: DDFacet's own `Output-Images` letter-code system
+produces a dynamically-named set of FITS files (`{Output-Name}.<code>.fits`
+per requested code) that isn't a single, statically-knowable path -- the
+same "no dynamic-naming implicit" call as `breizorro.py`'s `outfile`.
 
 `Data-MS` is nonetheless declared `Mutability.MUTABLE`: DDF.py writes into
 the MS it images (`--Predict-ColName` is "MS column to write predict to",
@@ -90,19 +75,6 @@ on output prefixes, and `killms.py`, which makes the same call for
 `Solutions-SolsDir`. `Data-ColName`/`Predict-ColName`/`Weight-ColName`/
 `Weight-OutColName` are MS column names, and `DDESolutions-DDSols` is a
 solution *name* resolved against `SolsDir`, not a path.
-
-The dtype and the declaration are separate axes, and only `Output-Name` gets
-both. `Cache-Dir`/`Cache-DirWisdomFFTW`/`Montblanc-LogFile` stay
-*undeclared* on purpose: they are scratch, not products, and declaring them
-would make a sandboxed run rescue a cache tree into the caller's workspace --
-exactly the auxiliary droppings the sandbox exists to suppress. The cost is
-bounded: `Cache-Dir` defaults to living next to the MS, whose directory is
-already mounted as an input, so only an explicitly-absolute cache directory
-elsewhere goes unmounted -- and losing a *cache* to the container costs a
-recompute, not a product. (On apptainer, whose image filesystem is
-read-only, that same case fails the run outright rather than silently; if a
-pipeline hits it, mount the directory explicitly rather than declaring the
-cache an output.)
 
 `parset` is a real, separate thing from any `--Section-Option` flag:
 `DDF.py`'s own `main()` (`DDF.py [parset file] <options>`) treats a lone
@@ -2426,13 +2398,10 @@ ddfacet = define_cab(
     # name-intersection spelling has nothing to intersect: the flag/gaincal
     # shape `Mutability.MUTABLE` exists for.
     input_mutability={"data_ms": Mutability.MUTABLE},
-    # The `--Output-Name`-prefixed image family, declared the only way a
-    # letter-code-dependent set can be: as a glob on the prefix (see the
-    # module docstring). This is what collects the images under a sandbox and
-    # what bind-mounts their directory under a container -- `Output-Name` is a
-    # `str`, so it contributes no mount by itself.
-    harvest=["{output_name}.*"],
     policies=Policies(prefix="--"),
+    experimental=(
+        "DDFacet's own schema is not dependable enough for dosho to model its I/O fully (a .cfg with no usable `#type:` tags, and an `Output-Images` letter-code system that names its image family at run time). The write targets -- `Output-Name`, `Cache-Dir`, `Cache-DirWisdomFFTW`, `Montblanc-LogFile` -- are therefore left undeclared, which is safe for a native run under the working directory and NOT supported in two modes: a sandboxed run harvests none of the images, and a containerised run does not bind-mount an `Output-Name` that points outside the working directory, so those images are written inside the container (lost on exit under docker/podman, a hard failure under apptainer). Keep `Output-Name` relative, or under a directory an input already mounts"
+    ),
     info="DDFacet: facet-based radio-interferometric imager/deconvolver "
     "(https://github.com/saopicc/DDFacet)",
 )
