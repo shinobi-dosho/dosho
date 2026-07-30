@@ -29,19 +29,29 @@ shinobi's default `list_sep=","` formatting -- no `repeat_list`/
 `repeat_as_tokens` override needed, since none of these fields repeat the
 flag itself.
 
-No outputs are modelled: DDFacet's own `Output-Images` letter-code system
-produces a dynamically-named set of FITS files (`{Output-Name}.<code>.fits`
-per requested code) that isn't a single, statically-knowable path -- the
-same "no dynamic-naming implicit" call as `breizorro.py`'s `outfile`.
+Outputs are modelled in two layers, because DDFacet's `Output-Images`
+letter-code system decides *at run time* which products a given run emits.
+The handful a real pipeline wires as a dependency are real output fields
+with `implicit` templates -- source-verified against DDFacet's own
+`ClassDeconvMachine.py`, which names everything `"%s.<suffix>" %
+self.BaseName` for `BaseName = Output-Name`. Everything else it can emit
+(`.cube.*`, `.Norm`, the per-major-cycle `.mask%2.2i`/`.Taylor%i.%2.2i`
+debug images) is covered by a `harvest` glob on the same prefix rather than
+enumerated: a set whose members are chosen by letter code is what a glob is
+for, and the two layers together are also what bind-mounts the products'
+directory when `Output-Name` points outside the working directory (the
+field is a `str`, so it contributes no mount by itself -- stimela-ninja
+issue #60).
 
-`Data-MS` is nonetheless declared `Mutability.MUTABLE`: DDF.py writes into
-the MS it images (`--Predict-ColName` is "MS column to write predict to",
+`Data-MS` is declared `Mutability.MUTABLE`: DDF.py writes into the MS it
+images (`--Predict-ColName` is "MS column to write predict to",
 `--Weight-OutColName` is "Save the internally computed weights into this
 column", and `--Cache-Dir`'s own help is "Default is to keep cache next to
-the MS"). With no outputs model there is nothing for
-`mutated_path_fields`' name intersection to find, so without the
-declaration `compute_cache_key` fingerprints an MS the step rewrites and
-no identical re-run can hit its own cache entry. This is the flag/gaincal
+the MS"). The declared outputs are all `Output-Name`-derived, so shinobi's
+other spelling -- the `input_paths & output_paths` name intersection --
+still has nothing to match for `data_ms`, and without this declaration
+`compute_cache_key` would fingerprint an MS the step rewrites and no
+identical re-run could hit its own cache entry. This is the flag/gaincal
 shape, the same call as `killms.py`.
 
 **Path-typed fields.** Unlike killMS's `.cfg`, DDFacet's does carry
@@ -75,6 +85,20 @@ on output prefixes, and `killms.py`, which makes the same call for
 `Solutions-SolsDir`. `Data-ColName`/`Predict-ColName`/`Weight-ColName`/
 `Weight-OutColName` are MS column names, and `DDESolutions-DDSols` is a
 solution *name* resolved against `SolsDir`, not a path.
+
+Dtype and declaration are separate axes, and the four `str` write targets
+above split on the second one. `Output-Name` is declared (outputs plus the
+harvest glob), so its directory is mounted and its products are harvested.
+`Cache-Dir`, `Cache-DirWisdomFFTW` and `Montblanc-LogFile` are deliberately
+*not*: they are scratch, not products, and declaring them would make a
+sandboxed run rescue a cache tree into the caller's workspace -- exactly the
+auxiliary droppings the sandbox exists to suppress. shinobi has no way to say
+"mount this but do not harvest it", so this is the residual the cab's
+`experimental` marker names. The cost is bounded: `Cache-Dir` defaults to
+living next to the MS, whose directory is already mounted as an input, so only
+an explicitly-absolute cache elsewhere is affected -- a lost cache costs a
+recompute under docker/podman, though it fails the run outright under
+apptainer's read-only image filesystem.
 
 `parset` is a real, separate thing from any `--Section-Option` flag:
 `DDF.py`'s own `main()` (`DDF.py [parset file] <options>`) treats a lone
@@ -2384,11 +2408,35 @@ _FIELDS: dict[str, FieldSpec] = {
     ),
 }
 
+# Source-verified against DDFacet's own `ClassDeconvMachine.py`, which names
+# every product `"%s.<suffix>" % self.BaseName` where BaseName is `Output-Name`
+# (`ToCasaImage(..., Fits=True)` appends `.fits`). Declared here: the handful a
+# real pipeline wires as a dependency, per dosho's authoring rule -- the
+# apparent- and intrinsic-flux restored images, their residuals and models, the
+# dirty image, the PSF, and the `.DicoModel` that killMS's
+# `ImageSkyModel-DicoModel` and DDFacet's own `Predict-InitDicoModel` consume.
+# Everything else DDFacet can emit (`.cube.*`, `.Norm`, `.NormFacets`, the
+# per-major-cycle `.mask%2.2i`/`.Taylor%i.%2.2i` debug images) is covered by the
+# `harvest` glob rather than enumerated: a letter-code family whose members are
+# chosen at run time is exactly what a glob is for.
+_OUTPUTS: dict[str, FieldSpec] = {
+    "dirty": ("File", False, None, ParamMeta(implicit="{output_name}.dirty.fits")),
+    "psf": ("File", False, None, ParamMeta(implicit="{output_name}.psf.fits")),
+    "app_restored": ("File", False, None, ParamMeta(implicit="{output_name}.app.restored.fits")),
+    "int_restored": ("File", False, None, ParamMeta(implicit="{output_name}.int.restored.fits")),
+    "app_residual": ("File", False, None, ParamMeta(implicit="{output_name}.app.residual.fits")),
+    "int_residual": ("File", False, None, ParamMeta(implicit="{output_name}.int.residual.fits")),
+    "app_model": ("File", False, None, ParamMeta(implicit="{output_name}.app.model.fits")),
+    "int_model": ("File", False, None, ParamMeta(implicit="{output_name}.int.model.fits")),
+    "dico_model": ("File", False, None, ParamMeta(implicit="{output_name}.DicoModel")),
+}
+
 ddfacet = define_cab(
     "ddfacet",
     "DDF.py",
     images.DDFACET,
     _FIELDS,
+    outputs=_OUTPUTS,
     # DDF.py writes into the MS it images: `--Predict-ColName` ("MS column
     # to write predict to"), `--Weight-OutColName` ("Save the internally
     # computed weights into this column"), and by default its cache too --
@@ -2398,9 +2446,15 @@ ddfacet = define_cab(
     # name-intersection spelling has nothing to intersect: the flag/gaincal
     # shape `Mutability.MUTABLE` exists for.
     input_mutability={"data_ms": Mutability.MUTABLE},
+    # The rest of the `--Output-Name` family, which the declared fields above
+    # cannot enumerate: `Output-Images` letter codes decide at run time which
+    # products exist. This is also what bind-mounts their directory when
+    # `Output-Name` points outside the working directory -- it is a `str`, so it
+    # contributes no mount by itself.
+    harvest=["{output_name}.*"],
     policies=Policies(prefix="--"),
     experimental=(
-        "DDFacet's own schema is not dependable enough for dosho to model its I/O fully (a .cfg with no usable `#type:` tags, and an `Output-Images` letter-code system that names its image family at run time). The write targets -- `Output-Name`, `Cache-Dir`, `Cache-DirWisdomFFTW`, `Montblanc-LogFile` -- are therefore left undeclared, which is safe for a native run under the working directory and NOT supported in two modes: a sandboxed run harvests none of the images, and a containerised run does not bind-mount an `Output-Name` that points outside the working directory, so those images are written inside the container (lost on exit under docker/podman, a hard failure under apptainer). Keep `Output-Name` relative, or under a directory an input already mounts"
+        "DDFacet's products are declared and mounted, but its *scratch* write targets are not: `Cache-Dir`, `Cache-DirWisdomFFTW` and `Montblanc-LogFile` are deliberately left undeclared, because declaring them would make a sandboxed run rescue a cache tree into the caller's workspace and shinobi has no way to say 'mount this but do not harvest it'. `Cache-Dir` defaults to living next to the MS, whose directory an input already mounts, so this only bites an explicitly-absolute cache directory elsewhere: under docker/podman it is written inside the container and lost (a recompute, not a lost product), and under apptainer's read-only image filesystem it fails the run. Keep those three relative or unset. Individual per-major-cycle debug images (`.mask00`, `.Taylor0.00`) are harvested but not wireable, since `Output-Images` letter codes name them at run time"
     ),
     info="DDFacet: facet-based radio-interferometric imager/deconvolver "
     "(https://github.com/saopicc/DDFacet)",

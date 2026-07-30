@@ -3748,7 +3748,40 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``dirty``
+     - ``Path | None``
+     - \-
+   * - ``psf``
+     - ``Path | None``
+     - \-
+   * - ``app_restored``
+     - ``Path | None``
+     - \-
+   * - ``int_restored``
+     - ``Path | None``
+     - \-
+   * - ``app_residual``
+     - ``Path | None``
+     - \-
+   * - ``int_residual``
+     - ``Path | None``
+     - \-
+   * - ``app_model``
+     - ``Path | None``
+     - \-
+   * - ``int_model``
+     - ``Path | None``
+     - \-
+   * - ``dico_model``
+     - ``Path | None``
+     - \-
 
 deconvolve
 ----------
@@ -6763,7 +6796,16 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``solutions_sols_dir``
+     - ``Path | None``
+     - \-
 
 listobs
 -------

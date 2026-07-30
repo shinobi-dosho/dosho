@@ -150,20 +150,52 @@ def test_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
     assert compute_cache_key(naive, None, params, None) != stale
 
 
-def test_killms_is_marked_experimental_with_its_unsupported_modes():
-    """killMS mangles its own output name (`reformat(MSName)`), so no template
-    dosho can write names the `.sols.npz`. Marked experimental rather than
-    patched around; the reason names the modes that are not covered.
+def test_killms_declares_the_solutions_directory_it_writes():
+    """The `.sols.npz` filename is built internally (`reformat(MSName)`), so the
+    *directory* is what gets declared -- and it is what a pipeline wires, since
+    DDFacet consumes SolsDir plus a solution name, never the file.
     """
+    from shinobi.steps.schema import path_fields
+
+    cab = dosho.get("killms")
+    assert "solutions_sols_dir" in cab.outputs_model.model_fields
+    # input stays `str` (relative under a sandbox); the output side is path-typed
+    assert "solutions_sols_dir" not in path_fields(cab.inputs_model)
+    assert "solutions_sols_dir" in path_fields(cab.outputs_model)
+    # the flag still renders: field_meta merges output over input, so an
+    # output-side ParamMeta would have dropped the nom_de_guerre
+    assert cab.field_meta["solutions_sols_dir"].nom_de_guerre == "Solutions-SolsDir"
+    argv = build_argv(cab, {"vis_data_ms_name": "/obs.ms", "solutions_sols_dir": "/sols"})
+    assert "--Solutions-SolsDir" in argv and "/sols" in argv
+
+
+def test_killms_solsdir_passthrough_resolves_and_stays_none_when_unset():
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    register_step_backend("killms-record", RecordingBackend())
+    cab = dosho.get("killms").model_copy(update={"backend": "killms-record"})
+
+    result = _dispatch(cab, None, vis_data_ms_name="/obs.ms", solutions_sols_dir="/sols")
+    assert str(result.outputs.solutions_sols_dir) == "/sols"
+
+    # unset declares nothing, which is right: the solutions then land inside the
+    # MS directory, already mounted as an input
+    result = _dispatch(cab, None, vis_data_ms_name="/obs.ms")
+    assert result.outputs.solutions_sols_dir is None
+
+
+def test_killms_experimental_marker_names_only_the_residual():
     from dosho._builder import EXPERIMENTAL_CABS
 
     reason = EXPERIMENTAL_CABS["killms"]
-    assert "SolsDir" in reason
-    assert "sandboxed" in reason and "containerised" in reason
+    assert "DDFCacheDir" in reason
+    assert "sols.npz" in reason  # the unnameable file, wired as dir + name instead
     assert dosho.get("killms").info.startswith("EXPERIMENTAL:")
 
 
-def test_killms_write_target_stays_undeclared():
+def test_killms_cache_dir_stays_undeclared():
     cab = dosho.get("killms")
-    assert cab.outputs_model.model_fields == {}
+    assert "image_sky_model_ddf_cache_dir" not in cab.outputs_model.model_fields
     assert cab.harvest == []

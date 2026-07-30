@@ -136,17 +136,47 @@ def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
     assert "--DDESolutions-SolsDir" in argv and "/sols" in argv
 
 
-def test_ddfacet_is_marked_experimental_with_its_unsupported_modes():
-    """DDFacet is a rogue sibling upstream: its `.cfg` carries no usable
-    `#type:` tags and `Output-Images` names the image family by letter code at
-    run time. dosho does not patch around that indefinitely -- it marks the cab
-    experimental and states which modes are not covered.
+def test_ddfacet_declares_the_products_a_pipeline_wires():
+    """Source-verified against DDFacet's own ClassDeconvMachine.py, which names
+    every product `"%s.<suffix>" % BaseName` for BaseName = Output-Name.
+    """
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    register_step_backend("ddf-record", RecordingBackend())
+    cab = dosho.get("ddfacet").model_copy(update={"backend": "ddf-record"})
+    result = _dispatch(cab, None, data_ms=["/obs.ms"], output_name="img/run1")
+    assert str(result.outputs.app_restored) == "img/run1.app.restored.fits"
+    assert str(result.outputs.int_restored) == "img/run1.int.restored.fits"
+    assert str(result.outputs.app_residual) == "img/run1.app.residual.fits"
+    assert str(result.outputs.int_residual) == "img/run1.int.residual.fits"
+    assert str(result.outputs.app_model) == "img/run1.app.model.fits"
+    assert str(result.outputs.dirty) == "img/run1.dirty.fits"
+    assert str(result.outputs.psf) == "img/run1.psf.fits"
+    # the DicoModel killMS and DDFacet's own Predict-InitDicoModel consume
+    assert str(result.outputs.dico_model) == "img/run1.DicoModel"
+
+
+def test_ddfacet_harvest_covers_the_letter_code_family():
+    # What the declared fields cannot enumerate: `Output-Images` codes choose at
+    # run time which products exist, so the rest ride on a glob.
+    cab = dosho.get("ddfacet")
+    assert cab.harvest == ["{output_name}.*"]
+    assert cab.inputs_model.model_fields["output_name"].default == "image"
+    assert cab.sandbox is None
+
+
+def test_ddfacet_experimental_marker_names_only_the_scratch_residual():
+    """The products are declared now, so the marker covers what is left: the
+    cache/log write targets, which cannot be declared without a sandboxed run
+    rescuing a cache tree into the workspace.
     """
     from dosho._builder import EXPERIMENTAL_CABS
 
     reason = EXPERIMENTAL_CABS["ddfacet"]
-    assert "Output-Name" in reason
-    assert "sandboxed" in reason and "containerised" in reason
+    assert "Cache-Dir" in reason
+    assert "apptainer" in reason
     assert dosho.get("ddfacet").info.startswith("EXPERIMENTAL:")
 
 
@@ -164,11 +194,8 @@ def test_ddfacet_get_warns_once():
     assert "EXPERIMENTAL" in str(caught[0].message)
 
 
-def test_ddfacet_write_targets_stay_undeclared():
-    # The deliberate consequence of the marker above: no output fields, no
-    # harvest globs. A declaration here would be the patch the experimental tag
-    # exists instead of.
+def test_ddfacet_scratch_write_targets_stay_undeclared():
     cab = dosho.get("ddfacet")
-    assert cab.outputs_model.model_fields == {}
-    assert cab.harvest == []
-    assert cab.sandbox is None
+    for field in ("cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
+        assert field not in cab.outputs_model.model_fields
+        assert not any(field in pattern for pattern in cab.harvest)

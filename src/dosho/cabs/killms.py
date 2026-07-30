@@ -12,9 +12,19 @@ to cross-check against). `nom_de_guerre` preserves the `.cfg`'s literal
 case (e.g. `VisData-MSName`, `SolverType`); fields with no `#type:` tag get
 the same `ast.literal_eval`-or-string fallback DDFacet's own parser uses.
 
-No outputs are modelled: killMS's real output (a `.sols.npz` solutions
-file) is named from `--SkyModel-SkyModel`/`--SkyModel-Kills`-derived
-defaults inside the tool itself, not a single flag-controlled path.
+One output is modelled, and it is a directory rather than a file:
+`Solutions-SolsDir`. killMS builds the solutions filename itself as
+`"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`, and `reformat()` is
+an internal transformation of the MS name that no `str.format` template can
+reproduce -- so the `.npz` path is not declarable. The directory it lands in
+is, and that is the one that matters: it is what bind-mounts the solutions
+into reach of the host when SolsDir points outside the working directory
+(stimela-ninja issue #60), and it is what a pipeline actually wires, since
+the consumer of these solutions is DDFacet, whose `DDESolutions-SolsDir`
+takes the directory and whose `DDESolutions-DDSols` takes the solution
+*name*. `ImageSkyModel-DDFCacheDir` stays undeclared: it is a cache, and
+declaring it would make a sandboxed run rescue that cache into the caller's
+workspace -- see the `experimental` marker on this cab.
 
 **Path-typed fields.** `DefaultParset.cfg` carries a `#type:` tag on
 almost nothing, so the `ast.literal_eval`-or-string fallback this port
@@ -49,9 +59,10 @@ Deliberately left as `str`: `Solutions-SolsDir` and
 target stays relative under a sandbox on purpose, so the tool writes
 inside the sandbox for harvest to pick up -- see
 `sandbox.absolutize_path_inputs`' own docstring on output prefixes.
-Promoting those two to `Directory` would anchor them at the workspace and
-route killMS's writes around the sandbox; that is a real decision to make
-once this cab models outputs, not a dtype typo to fix in passing.
+Promoting those two *inputs* to `Directory` would anchor them at the
+workspace and route killMS's writes around the sandbox; the declaration
+happens on the output side instead (see `_OUTPUTS`), which leaves the input
+relative and still tells shinobi where the tool writes.
 `Solutions-OutSolsName` also stays `str`: despite "save the estimated
 solutions in this file", `kMS.py` uses it as a *name component*
 (`"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`), never as a
@@ -525,11 +536,34 @@ _FIELDS: dict[str, FieldSpec] = {
     ),
 }
 
+_OUTPUTS: dict[str, FieldSpec] = {
+    # Same-named passthrough (the `tigger`/`rfinder` shape): the *input* stays
+    # `str` so it keeps working relative under a sandbox, while the output side
+    # -- path-typed, so `path_fields` sees it -- is what declares that killMS
+    # writes there. `_fill_outputs` copies the input's value across, and an
+    # unset SolsDir stays None and declares nothing, which is right: the
+    # solutions then land inside the MS directory, already mounted as an input.
+    #
+    # The directory, not the file: `kMS.py` builds the filename itself as
+    # `"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`, and `reformat()`
+    # is internal. That costs nothing in practice -- the consumer of these
+    # solutions is DDFacet, whose `DDESolutions-SolsDir` takes the directory and
+    # whose `DDESolutions-DDSols` takes the solution *name*, so a pipeline wires
+    # `killms.solutions_sols_dir -> ddfacet.dde_solutions_sols_dir` and never
+    # needs the `.npz` path itself.
+    #
+    # No 4th element on purpose -- `field_meta` is `{**input_meta,
+    # **output_meta}`, so an output-side `ParamMeta` here would drop the input's
+    # own `nom_de_guerre` and stop emitting `--Solutions-SolsDir`.
+    "solutions_sols_dir": ("Directory", False, None),
+}
+
 killms = define_cab(
     "killms",
     "kMS.py",
     images.KILLMS,
     _FIELDS,
+    outputs=_OUTPUTS,
     # kMS.py opens the MS for writing: it writes its solved column
     # (`VisData-OutCol`), the full predicted data when `FreePredictColName`
     # is set (`GiveMainTable(readonly=False)`, kMS.py:773/803), imaging
@@ -546,7 +580,7 @@ killms = define_cab(
     input_mutability={"vis_data_ms_name": Mutability.MUTABLE},
     policies=Policies(prefix="--"),
     experimental=(
-        "killMS builds its own output name internally (`reformat(MSName)` + `SolsName`), so no template dosho can write names the `.sols.npz` it produces, and its `.cfg` carries almost no `#type:` tags. `Solutions-SolsDir` is therefore left undeclared, which is safe when it is unset (the solutions land inside the MS directory, already mounted) and NOT supported in two modes: a sandboxed run harvests nothing from an explicit SolsDir, and a containerised run does not bind-mount an absolute SolsDir outside the working directory, so the solutions are written inside the container. Leave SolsDir unset, or point it inside the working directory"
+        "killMS's solutions directory is declared and mounted, but the `.sols.npz` file itself is not nameable -- kMS.py builds it internally as `reformat(MSName) + SolsName` -- so a downstream step wires the *directory* plus the solution name (which is what DDFacet's `DDESolutions-SolsDir`/`DDESolutions-DDSols` want anyway), never the file. `ImageSkyModel-DDFCacheDir` is left undeclared for the same reason as DDFacet's `Cache-Dir`: it is a cache, and declaring it would make a sandboxed run rescue that cache into the caller's workspace. Keep it relative or unset; an explicitly-absolute one elsewhere is written inside the container (lost under docker/podman, a hard failure under apptainer)"
     ),
     info="killMS: direction-dependent calibration for radio interferometric data "
     "(https://github.com/saopicc/killMS)",
