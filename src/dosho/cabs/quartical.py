@@ -430,6 +430,14 @@ quartical_plotter = define_cab(
     "goquartical-plot",
     images.QUARTICAL,
     _PLOTTER_FIELDS,
+    # Same-named passthrough for the write target, like `quartical-backup`'s
+    # `zarr_dir`: the input stays `str` ("the desired output location",
+    # positional, and stays relative under a sandbox), while the path-typed
+    # output side is what declares that the plotter writes there, so the
+    # directory gets bind-mounted under a container. Whether the tool treats
+    # the value as a directory or a filename stem does not change that -- the
+    # mount is derived from its parent either way.
+    outputs={"output_path": ("Directory", False, None)},
     policies=Policies(prefix="--"),
     info="goquartical-plot: rudimentary plotter for QuartiCal gain solutions",
 )

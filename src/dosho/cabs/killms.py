@@ -12,9 +12,17 @@ to cross-check against). `nom_de_guerre` preserves the `.cfg`'s literal
 case (e.g. `VisData-MSName`, `SolverType`); fields with no `#type:` tag get
 the same `ast.literal_eval`-or-string fallback DDFacet's own parser uses.
 
-No outputs are modelled: killMS's real output (a `.sols.npz` solutions
-file) is named from `--SkyModel-SkyModel`/`--SkyModel-Kills`-derived
-defaults inside the tool itself, not a single flag-controlled path.
+The `.sols.npz` solutions file itself is not modelled as a resolved path:
+`kMS.py` builds its name internally as `"%skillMS.%s.sols.npz" %
+(reformat(MSName), SolsName)`, and `reformat()` is a tool-internal
+transformation of the MS name that no `str.format` template can reproduce.
+What *is* declared is the directory it lands in -- `Solutions-SolsDir`, as a
+same-named passthrough output (see `_OUTPUTS` below). That is the difference
+between "shinobi knows the exact filename" (it cannot) and "shinobi knows
+this step writes there" (it must): the latter is what bind-mounts the
+directory under a container, since a string-typed input contributes no mount
+of its own and the solutions would otherwise be written inside the container
+and lost on exit -- stimela-ninja issue #60.
 
 **Path-typed fields.** `DefaultParset.cfg` carries a `#type:` tag on
 almost nothing, so the `ast.literal_eval`-or-string fallback this port
@@ -525,20 +533,36 @@ _FIELDS: dict[str, FieldSpec] = {
     ),
 }
 
+_OUTPUTS: dict[str, FieldSpec] = {
+    # Same-named passthrough (the `tigger`/`rfinder` shape): the *input* stays
+    # `str` so it keeps working relative under a sandbox, while the output side
+    # -- path-typed, so `path_fields` sees it -- is what declares that killMS
+    # writes there. `_fill_outputs` copies the input's value straight across,
+    # and an unset `SolsDir` stays None and declares nothing, which is right:
+    # the solutions then land inside the MS directory, already mounted as an
+    # input. No 4th element on purpose -- `field_meta` is
+    # `{**input_meta, **output_meta}`, so an output-side `ParamMeta` here would
+    # drop the input's own `nom_de_guerre` and stop emitting
+    # `--Solutions-SolsDir`.
+    "solutions_sols_dir": ("Directory", False, None),
+}
+
 killms = define_cab(
     "killms",
     "kMS.py",
     images.KILLMS,
     _FIELDS,
+    outputs=_OUTPUTS,
     # kMS.py opens the MS for writing: it writes its solved column
     # (`VisData-OutCol`), the full predicted data when `FreePredictColName`
     # is set (`GiveMainTable(readonly=False)`, kMS.py:773/803), imaging
     # weights when `UpdateWeights` is on -- and, when `Solutions-SolsDir` is
     # unset, the `.sols.npz` itself lands *inside* the MS directory
-    # (`"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`). This cab
-    # models no outputs (see the module docstring), so the name-intersection
-    # spelling of "mutated in place" has nothing to intersect; without the
-    # declaration `compute_cache_key` fingerprints an MS the step rewrites.
+    # (`"%skillMS.%s.sols.npz" % (reformat(MSName), SolsName)`). The one
+    # output declared above is `SolsDir`, not the MS, so the name-intersection
+    # spelling of "mutated in place" still has nothing to intersect for
+    # `vis_data_ms_name`; without the declaration below `compute_cache_key`
+    # fingerprints an MS the step rewrites.
     # This is the plain flag/gaincal shape `Mutability.MUTABLE` exists for.
     # (keyed by the `_FIELDS` key, which for this cab is already the
     # sanitised name -- the cfg's literal `VisData-MSName` lives in the

@@ -6763,7 +6763,16 @@ killMS: direction-dependent calibration for radio interferometric data (https://
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``solutions_sols_dir``
+     - ``Path | None``
+     - \-
 
 listobs
 -------
@@ -8846,7 +8855,16 @@ goquartical-plot: rudimentary plotter for QuartiCal gain solutions
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_path``
+     - ``Path | None``
+     - \-
 
 quartical-restore
 -----------------
@@ -11608,7 +11626,16 @@ spimple-binterp: beam interpolation tool (https://github.com/ratt-ru/spimple)
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_filename``
+     - ``Path | None``
+     - \-
 
 spimple-imconv
 --------------
@@ -11680,7 +11707,25 @@ spimple-imconv: convolve images to a common resolution (https://github.com/ratt-
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``clean_psf``
+     - ``Path | None``
+     - \-
+   * - ``convolved``
+     - ``Path | None``
+     - \-
+   * - ``power_beam``
+     - ``Path | None``
+     - \-
+   * - ``spatial_weight``
+     - ``Path | None``
+     - \-
 
 spimple-spifit
 --------------
@@ -11800,7 +11845,43 @@ spimple-spifit: simple spectral index fitting tool (https://github.com/ratt-ru/s
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``alpha``
+     - ``Path | None``
+     - \-
+   * - ``alpha_err``
+     - ``Path | None``
+     - \-
+   * - ``i0``
+     - ``Path | None``
+     - \-
+   * - ``i0_err``
+     - ``Path | None``
+     - \-
+   * - ``irec_cube``
+     - ``Path | None``
+     - \-
+   * - ``clean_psf``
+     - ``Path | None``
+     - \-
+   * - ``convolved_model``
+     - ``Path | None``
+     - \-
+   * - ``convolved_residual``
+     - ``Path | None``
+     - \-
+   * - ``power_beam``
+     - ``Path | None``
+     - \-
+   * - ``fit_diff``
+     - ``Path | None``
+     - \-
 
 split
 -----

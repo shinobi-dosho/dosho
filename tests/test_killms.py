@@ -148,3 +148,41 @@ def test_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
     (ms / "CORRECTED_DATA").write_text("and again")
     invalidate_path_hashes()
     assert compute_cache_key(naive, None, params, None) != stale
+
+
+def test_killms_solsdir_is_declared_as_a_write_target():
+    """The `.sols.npz` filename is built internally (`reformat(MSName)`), so no
+    template can name it -- but the *directory* it lands in is declarable, and
+    must be: a `str` input contributes no bind mount, so an absolute SolsDir
+    outside the workdir would have its solutions written inside the container
+    and lost on exit (stimela-ninja #60).
+    """
+    cab = dosho.get("killms")
+    assert "solutions_sols_dir" in cab.outputs_model.model_fields
+    # the input stays `str` -- that is what keeps it relative under a sandbox
+    from shinobi.steps.schema import path_fields
+
+    assert "solutions_sols_dir" not in path_fields(cab.inputs_model)
+    assert "solutions_sols_dir" in path_fields(cab.outputs_model)
+    # and the flag still renders: `field_meta` merges output over input, so an
+    # output-side ParamMeta here would have dropped the nom_de_guerre
+    assert cab.field_meta["solutions_sols_dir"].nom_de_guerre == "Solutions-SolsDir"
+    argv = build_argv(cab, {"vis_data_ms_name": "/obs.ms", "solutions_sols_dir": "/sols"})
+    assert "--Solutions-SolsDir" in argv and "/sols" in argv
+
+
+def test_killms_solsdir_passthrough_resolves_and_stays_none_when_unset():
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    register_step_backend("killms-record", RecordingBackend())
+    cab = dosho.get("killms").model_copy(update={"backend": "killms-record"})
+
+    result = _dispatch(cab, None, vis_data_ms_name="/obs.ms", solutions_sols_dir="/sols")
+    assert str(result.outputs.solutions_sols_dir) == "/sols"
+
+    # unset: declares nothing, which is right -- the solutions then land inside
+    # the MS directory, already mounted as an input
+    result = _dispatch(cab, None, vis_data_ms_name="/obs.ms")
+    assert result.outputs.solutions_sols_dir is None

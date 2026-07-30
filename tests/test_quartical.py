@@ -223,3 +223,20 @@ def test_an_undeclared_write_target_would_move_the_key_on_its_own(tmp_path):
     (logs / "quartical.log").write_text("a second run's log")
     invalidate_path_hashes()
     assert compute_cache_key(cab, None, params, None) == stable
+
+
+def test_quartical_plotter_output_path_is_declared_as_a_write_target():
+    # Same shape as quartical-backup's zarr_dir: the input stays `str` (a
+    # positional "desired output location"), the path-typed output side is what
+    # gets the directory bind-mounted.
+    from shinobi.steps.schema import path_fields
+
+    cab = dosho.get("quartical-plotter")
+    assert "output_path" in cab.outputs_model.model_fields
+    assert "output_path" not in path_fields(cab.inputs_model)
+    assert "output_path" in path_fields(cab.outputs_model)
+    # positional-ness survives the field_meta merge
+    assert cab.field_meta["output_path"].positional is True
+    argv = build_argv(cab, {"input_path": "/gains/G", "output_path": "/plots"})
+    assert argv[0] == "goquartical-plot"
+    assert "/plots" in argv and "--output-path" not in argv

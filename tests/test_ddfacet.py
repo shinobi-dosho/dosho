@@ -91,10 +91,11 @@ def test_ddfacet_read_side_paths_are_path_dtypes_not_str():
 def test_ddfacet_write_targets_and_column_names_stay_str():
     # Cache-Dir/DirWisdomFFTW/Montblanc-LogFile/Output-Name are DDFacet
     # *write* targets: a string-typed write target stays relative under a
-    # sandbox on purpose so the tool writes inside it for harvest to collect
-    # (same call as killms' Solutions-SolsDir). The *ColName fields are MS
-    # column names, and DDESolutions-DDSols is a name resolved against
-    # SolsDir, not a path.
+    # sandbox on purpose (same call as killms' Solutions-SolsDir). Staying
+    # `str` is the dtype half; the declaration half is the `harvest` glob
+    # asserted below -- dtype and declaration are separate axes, and only
+    # Output-Name gets both. The *ColName fields are MS column names, and
+    # DDESolutions-DDSols is a name resolved against SolsDir, not a path.
     from shinobi.steps.schema import path_fields
 
     paths = path_fields(dosho.get("ddfacet").inputs_model)
@@ -133,3 +134,31 @@ def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
     assert "--Data-MS" in argv and "/x.ms" in argv
     assert "--Mask-External" in argv and "/m.fits" in argv
     assert "--DDESolutions-SolsDir" in argv and "/sols" in argv
+
+
+def test_ddfacet_harvest_declares_the_output_name_family():
+    """`Output-Images` letter codes make the image set dynamic, so there are no
+    output *fields* -- but the family is still declared, as a glob on the
+    prefix. This is what collects the images under a sandbox (nothing else
+    declares them) and what bind-mounts their directory under a container,
+    since `Output-Name` is a `str` and contributes no mount itself.
+    """
+    cab = dosho.get("ddfacet")
+    assert cab.harvest == ["{output_name}.*"]
+    # resolvable for any run: Output-Name defaults to "image", never None, so
+    # the glob can never format to a bogus "None.*" path
+    assert cab.inputs_model.model_fields["output_name"].default == "image"
+    assert cab.harvest[0].format(**{"output_name": "/scratch/run1/img"}) == "/scratch/run1/img.*"
+    # sandboxing stays a caller decision, as everywhere else
+    assert cab.sandbox is None
+
+
+def test_ddfacet_scratch_write_targets_stay_undeclared():
+    # Cache-Dir and friends are scratch, not products: declaring them would
+    # make a sandboxed run rescue a cache tree into the caller's workspace.
+    # Cache-Dir defaults to living next to the MS, whose directory is already
+    # mounted as an input.
+    cab = dosho.get("ddfacet")
+    for field in ("cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
+        assert field not in cab.outputs_model.model_fields
+        assert not any(field in pattern for pattern in cab.harvest)

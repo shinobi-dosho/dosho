@@ -1020,8 +1020,23 @@ _OUTPUTS: dict[str, FieldSpec] = {
         None,
         ParamMeta(implicit="{output_directory}/{output_filename}_mask-raw.fits"),
     ),
-    "mom0": ("File", False, None),
-    "mom1": ("File", False, None),
+    # `output_writeMoments` produces four files; all four get a template. mom0
+    # and mom1 were declared without one, so they validated but never resolved
+    # to a path -- unwireable by a downstream step, and invisible to sandbox
+    # pre-creation and harvest, while their own siblings `mom2`/`chan_map`
+    # resolved fine.
+    "mom0": (
+        "File",
+        False,
+        None,
+        ParamMeta(implicit="{output_directory}/{output_filename}_mom0.fits"),
+    ),
+    "mom1": (
+        "File",
+        False,
+        None,
+        ParamMeta(implicit="{output_directory}/{output_filename}_mom1.fits"),
+    ),
     "mom2": (
         "File",
         False,
