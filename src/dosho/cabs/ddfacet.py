@@ -87,18 +87,15 @@ on output prefixes, and `killms.py`, which makes the same call for
 solution *name* resolved against `SolsDir`, not a path.
 
 Dtype and declaration are separate axes, and the four `str` write targets
-above split on the second one. `Output-Name` is declared (outputs plus the
-harvest glob), so its directory is mounted and its products are harvested.
-`Cache-Dir`, `Cache-DirWisdomFFTW` and `Montblanc-LogFile` are deliberately
-*not*: they are scratch, not products, and declaring them would make a
-sandboxed run rescue a cache tree into the caller's workspace -- exactly the
-auxiliary droppings the sandbox exists to suppress. shinobi has no way to say
-"mount this but do not harvest it", so this is the residual the cab's
-`experimental` marker names. The cost is bounded: `Cache-Dir` defaults to
-living next to the MS, whose directory is already mounted as an input, so only
-an explicitly-absolute cache elsewhere is affected -- a lost cache costs a
-recompute under docker/podman, though it fails the run outright under
-apptainer's read-only image filesystem.
+above split on *which* declaration they get rather than on whether they get
+one. `Output-Name` is a product stem: declared as output fields plus a
+`harvest` glob, so its directory is mounted and its products are rescued.
+`Cache-Dir` and `Montblanc-LogFile` are scratch: declared via
+`Scope.scratch`, so their directories are mounted exactly the same way and are
+*not* rescued -- a cache tree must never follow the products into the caller's
+workspace. That distinction is what `scratch` exists for (stimela-ninja #66);
+before it, these two had to choose between an unmounted write and a polluted
+workspace, and this cab chose unmounted.
 
 `parset` is a real, separate thing from any `--Section-Option` flag:
 `DDF.py`'s own `main()` (`DDF.py [parset file] <options>`) treats a lone
@@ -2452,9 +2449,22 @@ ddfacet = define_cab(
     # `Output-Name` points outside the working directory -- it is a `str`, so it
     # contributes no mount by itself.
     harvest=["{output_name}.*"],
+    # DDFacet's *scratch*: written, mounted so the write lands on the host, and
+    # never rescued into the caller's workspace (`Scope.scratch`). Both default
+    # to None and so declare nothing when unset -- `Cache-Dir` then keeps its
+    # cache next to the MS, whose directory an input already mounts.
+    #
+    # `Cache-DirWisdomFFTW` is deliberately absent: its default `~/.fftw_wisdom`
+    # is *HOME*-relative, and shinobi resolves a relative declaration against
+    # the working directory, not $HOME -- so a pattern would name a literal `~`
+    # directory rather than the real one. It needs no declaration in the default
+    # case anyway: `run_as_host_user` sets HOME to the (mounted) workdir, so the
+    # wisdom lands inside it. Point it somewhere absolute and it wants an
+    # explicit mount.
+    scratch=["{cache_dir}/*", "{montblanc_log_file}"],
     policies=Policies(prefix="--"),
     experimental=(
-        "DDFacet's products are declared and mounted, but its *scratch* write targets are not: `Cache-Dir`, `Cache-DirWisdomFFTW` and `Montblanc-LogFile` are deliberately left undeclared, because declaring them would make a sandboxed run rescue a cache tree into the caller's workspace and shinobi has no way to say 'mount this but do not harvest it'. `Cache-Dir` defaults to living next to the MS, whose directory an input already mounts, so this only bites an explicitly-absolute cache directory elsewhere: under docker/podman it is written inside the container and lost (a recompute, not a lost product), and under apptainer's read-only image filesystem it fails the run. Keep those three relative or unset. Individual per-major-cycle debug images (`.mask00`, `.Taylor0.00`) are harvested but not wireable, since `Output-Images` letter codes name them at run time"
+        "DDFacet is a rogue sibling upstream dosho supports on a best-effort basis: its `DefaultParset.cfg` carries no usable `#type:` tags (so every path arrived as a bare `str` and had to be classified from help text), and `Output-Images` letter codes name its image family at run time. Its I/O *is* declared -- products as output fields plus a harvest glob, cache and log as `scratch` -- so nothing is silently lost. What remains: individual per-major-cycle images (`.mask00`, `.Taylor0.00`) are harvested but cannot be wired as an `OutputRef`, since only the tool knows which letter codes a given run emits; and `Cache-DirWisdomFFTW` is undeclared because its `~/.fftw_wisdom` default is HOME-relative, which shinobi resolves against the working directory rather than $HOME. Expect to verify a DDFacet upgrade against this cab rather than assuming the schema held still"
     ),
     info="DDFacet: facet-based radio-interferometric imager/deconvolver "
     "(https://github.com/saopicc/DDFacet)",

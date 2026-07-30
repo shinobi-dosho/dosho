@@ -190,12 +190,24 @@ def test_killms_experimental_marker_names_only_the_residual():
     from dosho._builder import EXPERIMENTAL_CABS
 
     reason = EXPERIMENTAL_CABS["killms"]
-    assert "DDFCacheDir" in reason
     assert "sols.npz" in reason  # the unnameable file, wired as dir + name instead
+    assert "nothing is silently lost" in reason.lower()
     assert dosho.get("killms").info.startswith("EXPERIMENTAL:")
 
 
-def test_killms_cache_dir_stays_undeclared():
+def test_killms_cache_dir_is_scratch_not_an_output():
     cab = dosho.get("killms")
+    assert cab.scratch == ["{image_sky_model_ddf_cache_dir}/*"]
+    # declaring it as an output would mount it *and* drag the cache into the
+    # caller's workspace on every sandboxed run
     assert "image_sky_model_ddf_cache_dir" not in cab.outputs_model.model_fields
     assert cab.harvest == []
+
+
+def test_killms_scratch_declares_nothing_when_the_cache_is_unset():
+    from shinobi.steps.schema import declared_output_dirs
+
+    cab = dosho.get("killms")
+    dirs = [str(d) for d, _ in declared_output_dirs(cab, {"solutions_sols_dir": "sols/r1"})]
+    assert "None" not in dirs
+    assert dirs == ["sols"]

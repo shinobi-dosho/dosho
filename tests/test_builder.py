@@ -215,3 +215,25 @@ def test_unknown_input_mutability_name_raises_rather_than_being_dropped():
 def test_no_input_mutability_declared_leaves_the_cab_byte_identical():
     cab = define_cab("t", "t", "quay.io/example/tool:1.0", {"prefix": ("str", True, None)})
     assert cab.input_mutability == {}
+
+
+def test_scratch_passes_through_to_the_cab():
+    from dosho._builder import _SCRATCH_SUPPORTED
+
+    cab = define_cab("t", "t", "img:1", {"cache": ("str", False, None)}, scratch=["{cache}/*"])
+    if _SCRATCH_SUPPORTED:
+        assert cab.scratch == ["{cache}/*"]
+
+
+def test_scratch_on_an_unsupporting_shinobi_warns_rather_than_raising(monkeypatch):
+    """Raising would fire at `import dosho.cabs` and break the package for
+    anyone on a released shinobi, to guard against a degradation that is merely
+    the behaviour they already had. Loud, not fatal.
+    """
+    import dosho._builder as builder
+
+    monkeypatch.setattr(builder, "_SCRATCH_SUPPORTED", False)
+    monkeypatch.setattr(builder, "_scratch_warned", False)
+    with pytest.warns(UserWarning, match="does not support"):
+        cab = define_cab("t", "t", "img:1", {"cache": ("str", False, None)}, scratch=["{cache}/*"])
+    assert cab is not None  # still built

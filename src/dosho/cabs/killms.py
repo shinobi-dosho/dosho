@@ -22,9 +22,10 @@ into reach of the host when SolsDir points outside the working directory
 (stimela-ninja issue #60), and it is what a pipeline actually wires, since
 the consumer of these solutions is DDFacet, whose `DDESolutions-SolsDir`
 takes the directory and whose `DDESolutions-DDSols` takes the solution
-*name*. `ImageSkyModel-DDFCacheDir` stays undeclared: it is a cache, and
-declaring it would make a sandboxed run rescue that cache into the caller's
-workspace -- see the `experimental` marker on this cab.
+*name*. `ImageSkyModel-DDFCacheDir` is declared as `Scope.scratch`: a cache is a
+write target that must be mounted but must never be rescued into the caller's
+workspace, which is the distinction `scratch` exists to draw (stimela-ninja
+#66).
 
 **Path-typed fields.** `DefaultParset.cfg` carries a `#type:` tag on
 almost nothing, so the `ast.literal_eval`-or-string fallback this port
@@ -564,6 +565,10 @@ killms = define_cab(
     images.KILLMS,
     _FIELDS,
     outputs=_OUTPUTS,
+    # killMS's cache: mounted so the write lands on the host, never rescued
+    # into the caller's workspace (`Scope.scratch`). Defaults to None, so it
+    # declares nothing when unset.
+    scratch=["{image_sky_model_ddf_cache_dir}/*"],
     # kMS.py opens the MS for writing: it writes its solved column
     # (`VisData-OutCol`), the full predicted data when `FreePredictColName`
     # is set (`GiveMainTable(readonly=False)`, kMS.py:773/803), imaging
@@ -580,7 +585,7 @@ killms = define_cab(
     input_mutability={"vis_data_ms_name": Mutability.MUTABLE},
     policies=Policies(prefix="--"),
     experimental=(
-        "killMS's solutions directory is declared and mounted, but the `.sols.npz` file itself is not nameable -- kMS.py builds it internally as `reformat(MSName) + SolsName` -- so a downstream step wires the *directory* plus the solution name (which is what DDFacet's `DDESolutions-SolsDir`/`DDESolutions-DDSols` want anyway), never the file. `ImageSkyModel-DDFCacheDir` is left undeclared for the same reason as DDFacet's `Cache-Dir`: it is a cache, and declaring it would make a sandboxed run rescue that cache into the caller's workspace. Keep it relative or unset; an explicitly-absolute one elsewhere is written inside the container (lost under docker/podman, a hard failure under apptainer)"
+        "killMS is a rogue sibling upstream dosho supports on a best-effort basis: its `DefaultParset.cfg` declares almost no types, and it mangles its own output name internally (`reformat(MSName)` + `SolsName`). Its I/O *is* declared -- the solutions directory as an output, the DDF cache as `scratch` -- so nothing is silently lost. What remains: the `.sols.npz` path itself cannot be named, so a downstream step wires the solutions *directory* plus the solution name, which is what DDFacet's `DDESolutions-SolsDir`/`DDESolutions-DDSols` want anyway. Expect to verify a killMS upgrade against this cab rather than assuming the schema held still"
     ),
     info="killMS: direction-dependent calibration for radio interferometric data "
     "(https://github.com/saopicc/killMS)",

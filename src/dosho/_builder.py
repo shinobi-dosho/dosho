@@ -15,11 +15,12 @@ it's sugar, not a wall.
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 from shinobi import Cab
 from shinobi.loaders import build_model, sanitize_unique
-from shinobi.steps.schema import Mutability, ParamMeta, ParamPattern, Policies
+from shinobi.steps.schema import Mutability, ParamMeta, ParamPattern, Policies, Scope
 
 # A field spec as a tool's own `--help`/docs give it to you -- `(dtype,
 # required, default)` -- plus an optional 4th element carrying the field's
@@ -116,6 +117,40 @@ def _extras(metas: dict[str, ParamMeta]) -> dict[str, dict[str, Any]]:
 # unsupported modes are stated outright -- to the reader, and at run time.
 EXPERIMENTAL_CABS: dict[str, str] = {}
 
+# Whether the installed shinobi knows `Scope.scratch` (stimela-ninja #66).
+# `Scope` does not forbid extra fields, so an older one accepts `scratch=` and
+# silently drops it -- no error, no mount, the exact failure mode `scratch`
+# exists to prevent. A version floor cannot express this yet: the field landed
+# on shinobi's main and the newest release (0.1.0b4) predates it, so the check
+# is on the field itself. Bump `stimela-ninja>=` in pyproject.toml and drop this
+# once a release carries it.
+_SCRATCH_SUPPORTED = "scratch" in Scope.model_fields
+_scratch_warned = False
+
+
+def _warn_scratch_unsupported(name: str) -> None:
+    """Warn once that `scratch` declarations are inert on this shinobi.
+
+    A warning rather than an error on purpose: raising here would fire at
+    `import dosho.cabs` time and break the whole package for anyone on a
+    released shinobi, to guard against a degradation -- an unmounted cache
+    directory -- that is merely the behaviour they had before the feature
+    existed. Loud, not fatal.
+    """
+    global _scratch_warned
+    if _scratch_warned:
+        return
+    _scratch_warned = True
+    warnings.warn(
+        f"cab {name!r} (and possibly others) declares `scratch` write targets, which the "
+        "installed shinobi does not support -- shinobi.steps.schema.Scope has no `scratch` "
+        "field, so the declaration is ignored. Those directories will not be bind-mounted: a "
+        "cache or logfile pointed outside the working directory is written inside the container "
+        "and lost (a hard failure under apptainer). Upgrade stimela-ninja to a build that has it.",
+        UserWarning,
+        stacklevel=3,
+    )
+
 
 def define_cab(
     name: str,
@@ -133,6 +168,7 @@ def define_cab(
     info: str | None = None,
     sandbox: bool | None = None,
     harvest: list[str] | None = None,
+    scratch: list[str] | None = None,
     experimental: str | None = None,
 ) -> Cab:
     """Build a `Cab` from a flat `{raw_param_name: (dtype, required,
@@ -174,12 +210,21 @@ def define_cab(
     params unchanged plus the declared output still present -- which is
     the same trade the same-named-output spelling already makes.
 
-    `sandbox`/`harvest` pass straight through to the `Cab` (see
+    `sandbox`/`harvest`/`scratch` pass straight through to the `Cab` (see
     stimela-ninja's `shinobi.sandbox` and the fields on `Scope`): `harvest`
     declares the keep-globs for dynamically-named output *files* a
     sandboxed run must rescue (e.g. wsclean's `"{prefix}-*"` family) --
     note this is a different thing from `output_patterns`, which match
     dynamic output parameter *names* for wiring validation only.
+
+    `scratch` is `harvest`'s counterpart for a write target that is not a
+    product -- a cache tree, a tool logfile. Same glob shape, mounted by the
+    container backends the same way, and never rescued into the caller's
+    workspace. Declaring a cache as an output instead gets it mounted at the
+    cost of dragging it into the workspace on every sandboxed run; leaving it
+    undeclared keeps the workspace clean but leaves the tool writing inside the
+    container. Passing it to a shinobi too old to have the field raises rather
+    than being silently dropped.
 
     `experimental` marks a cab dosho supports on a best-effort basis and
     says why, in one sentence naming the modes that are *not* covered. It
@@ -192,6 +237,9 @@ def define_cab(
     """
     input_fields, input_meta, input_names = _resolve(fields)
     output_fields, output_meta, _ = _resolve(outputs or {})
+
+    if scratch and not _SCRATCH_SUPPORTED:
+        _warn_scratch_unsupported(name)
 
     if experimental:
         EXPERIMENTAL_CABS[name] = experimental
@@ -224,4 +272,5 @@ def define_cab(
         wranglers=wranglers or {},
         sandbox=sandbox,
         harvest=harvest or [],
+        scratch=scratch or [],
     )
