@@ -25,57 +25,62 @@ Why a tool ends up here
 -----------------------
 
 Not because a tool is unimportant, and not because its cab is unfinished. The
-test is whether some part of the tool's behaviour can't be declared at all --
-where the honest options are to keep adding per-gap patches for an upstream
-dosho does not control, or to state the limitation. dosho states it.
+test is whether the *upstream* is one dosho can depend on: a parameter schema
+that states its own types, and output names dosho can predict without executing
+the tool's own code. Where that fails, every gap an audit turns up is a patch
+dosho would carry forever for a tool it does not control, and the burden
+accumulates quietly. dosho states the limitation instead.
 
-Both cabs below have their **products** declared and mounted like any other
-cab. What is left in each case is narrower, and named on the cab itself.
+Both cabs below have their I/O fully declared -- products as output fields and
+``harvest`` globs, caches and logs as ``scratch`` (mounted, never rescued into
+your workspace). **Nothing is silently lost.** What is left in each case is a
+wiring limitation, plus the standing expectation that an upstream release may
+move the schema under the cab.
 
 Current list
 ------------
 
 ``ddfacet``
-    Products are declared: the apparent- and intrinsic-flux restored images,
-    residuals, models, the dirty image, the PSF and the ``.DicoModel`` are real
-    output fields (source-verified against DDFacet's own
-    ``ClassDeconvMachine.py``), and a ``harvest`` glob on ``Output-Name`` covers
-    the rest of the letter-code family. So an ``Output-Name`` anywhere -- inside
-    or outside the working directory -- is bind-mounted and harvested.
+    ``DefaultParset.cfg`` carries no usable ``#type:`` tags, so every path had
+    to be classified from its help text, and ``Output-Images`` letter codes name
+    the image family at run time.
 
-    **The residual:** DDFacet's *scratch* write targets, ``Cache-Dir``,
-    ``Cache-DirWisdomFFTW`` and ``Montblanc-LogFile``, are deliberately left
-    undeclared. Declaring them would make a sandboxed run rescue a cache tree
-    into the caller's workspace, and shinobi has no way to say "mount this but
-    do not harvest it". ``Cache-Dir`` defaults to living next to the MS, whose
-    directory an input already mounts, so this only bites an explicitly-absolute
-    cache directory elsewhere: under docker/podman it is written inside the
-    container and lost -- a recompute, not a lost product -- and under
-    apptainer's read-only image filesystem it fails the run.
+    **Declared:** the apparent- and intrinsic-flux restored images, residuals,
+    models, the dirty image, the PSF and the ``.DicoModel`` are output fields
+    with resolved templates; ``harvest=["{output_name}.*"]`` covers the rest of
+    the family; ``scratch`` covers ``Cache-Dir`` and ``Montblanc-LogFile``.
 
-    Per-major-cycle debug images (``.mask00``, ``.Taylor0.00``) are harvested but
-    not wireable, since the letter codes name them at run time.
+    **The residual:** individual per-major-cycle images (``.mask00``,
+    ``.Taylor0.00``) are harvested but cannot be wired as an ``OutputRef``, since
+    only the tool knows which codes a given run emits. ``Cache-DirWisdomFFTW`` is
+    undeclared because its ``~/.fftw_wisdom`` default is HOME-relative, and
+    shinobi resolves a relative declaration against the working directory, not
+    ``$HOME``; in the default case it needs no declaration, since
+    ``run_as_host_user`` sets HOME to the mounted workdir.
 
 ``killms``
-    ``Solutions-SolsDir`` is declared, so the solutions directory is
-    bind-mounted and harvested wherever it points.
+    ``DefaultParset.cfg`` declares almost no types, and killMS builds its own
+    output filename internally as ``reformat(MSName) + SolsName``.
 
-    **The residual:** the ``.sols.npz`` file itself is not nameable -- ``kMS.py``
-    builds it internally as ``reformat(MSName) + SolsName`` -- so a downstream
-    step wires the *directory* plus the solution name rather than the file. In
-    practice that is what DDFacet's ``DDESolutions-SolsDir`` /
-    ``DDESolutions-DDSols`` want anyway, so this costs nothing for the pipeline
-    shape these two are used in. ``ImageSkyModel-DDFCacheDir`` is undeclared for
-    the same reason as DDFacet's ``Cache-Dir``.
+    **Declared:** ``Solutions-SolsDir`` as an output, so the solutions directory
+    is mounted and harvested wherever it points; ``ImageSkyModel-DDFCacheDir`` as
+    ``scratch``.
+
+    **The residual:** the ``.sols.npz`` path cannot be named, so a downstream
+    step wires the solutions *directory* plus the solution name -- which is what
+    DDFacet's ``DDESolutions-SolsDir`` / ``DDESolutions-DDSols`` want anyway, so
+    this costs nothing for the pipeline shape these two are used in.
 
 Working around it
 -----------------
 
-In order of preference:
+There is no longer a data-loss mode to work around: point ``Output-Name``,
+``Solutions-SolsDir``, ``Cache-Dir``, ``Montblanc-LogFile`` or
+``ImageSkyModel-DDFCacheDir`` wherever you like and the directory is mounted.
+What remains is wiring: if a pipeline needs to depend on a product no field
+names -- a per-major-cycle debug image, or the ``.sols.npz`` itself -- pass the
+*directory* to the next step and let it find the file, the way DDFacet already
+consumes killMS's solutions.
 
-#. Leave the cache/log options unset, so they default next to the MS (whose
-   directory is already mounted) or under the working directory.
-#. Point one inside a directory the step's own path-typed inputs already
-   contribute -- an input's parent directory is mounted read-write.
-#. Run the step natively, or with the sandbox off, and accept that the scratch
-   lands wherever the tool puts it.
+The one exception is ``Cache-DirWisdomFFTW``: if you point it at an absolute
+path outside the working directory, mount that directory yourself.

@@ -167,16 +167,17 @@ def test_ddfacet_harvest_covers_the_letter_code_family():
     assert cab.sandbox is None
 
 
-def test_ddfacet_experimental_marker_names_only_the_scratch_residual():
-    """The products are declared now, so the marker covers what is left: the
-    cache/log write targets, which cannot be declared without a sandboxed run
-    rescuing a cache tree into the workspace.
+def test_ddfacet_experimental_marker_names_only_the_wiring_residual():
+    """Products and scratch are both declared now, so the marker covers what is
+    genuinely left: products the letter codes name at run time cannot be wired,
+    and an upstream release may move the schema under the cab.
     """
     from dosho._builder import EXPERIMENTAL_CABS
 
     reason = EXPERIMENTAL_CABS["ddfacet"]
-    assert "Cache-Dir" in reason
-    assert "apptainer" in reason
+    # the residual is a *wiring* limit now, not a lost write
+    assert "cannot be wired" in reason
+    assert "nothing is silently lost" in reason.lower()
     assert dosho.get("ddfacet").info.startswith("EXPERIMENTAL:")
 
 
@@ -194,8 +195,33 @@ def test_ddfacet_get_warns_once():
     assert "EXPERIMENTAL" in str(caught[0].message)
 
 
-def test_ddfacet_scratch_write_targets_stay_undeclared():
+def test_ddfacet_scratch_targets_are_declared_but_never_harvested():
+    """A cache is a write target that must be mounted and must never follow the
+    products into the caller's workspace -- `Scope.scratch`, not an output.
+    """
     cab = dosho.get("ddfacet")
-    for field in ("cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
+    assert cab.scratch == ["{cache_dir}/*", "{montblanc_log_file}"]
+    # not outputs, and not harvest globs: those two would rescue them
+    for field in ("cache_dir", "montblanc_log_file"):
         assert field not in cab.outputs_model.model_fields
         assert not any(field in pattern for pattern in cab.harvest)
+
+
+def test_ddfacet_scratch_declares_nothing_when_the_cache_is_unset():
+    # Both scratch fields default to None; a pattern over a None field must not
+    # resolve to a literal "None" directory.
+    from shinobi.steps.schema import declared_output_dirs
+
+    cab = dosho.get("ddfacet")
+    dirs = [str(d) for d, _ in declared_output_dirs(cab, {"output_name": "img/run1"})]
+    assert "None" not in dirs
+    assert dirs == ["img"]
+
+
+def test_ddfacet_wisdom_dir_stays_undeclared_because_its_default_is_home_relative():
+    # `~/.fftw_wisdom` is HOME-relative, and shinobi resolves a relative
+    # declaration against the working directory -- a pattern would name a
+    # literal `~`. Noted in the experimental marker instead.
+    cab = dosho.get("ddfacet")
+    assert cab.inputs_model.model_fields["cache_dir_wisdom_fftw"].default == "~/.fftw_wisdom"
+    assert not any("wisdom" in pattern for pattern in cab.scratch)
