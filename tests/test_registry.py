@@ -38,7 +38,8 @@ def test_direct_import_matches_registry_lookup():
     """
     from dosho.cabs import listobs, wsclean
     from dosho.cabs.casatasks import listobs as listobs_submodule
-    from dosho.cabs.simms import simms_classic, skysim, telsim
+    from dosho.cabs.simms import skysim, telsim
+    from dosho.cabs.simms_classic import simms_classic
 
     assert wsclean is dosho.get("wsclean")
     assert listobs is dosho.get("listobs")
