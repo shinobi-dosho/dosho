@@ -22,14 +22,19 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # --locked everywhere: install the versions committed in uv.lock and fail
+      # if the lock does not match pyproject.toml. Without it a green run only
+      # means the tree passed against whatever PyPI published that morning, and
+      # a red one tomorrow cannot tell you whether this repo or a dependency
+      # moved. Mirrors stimela-ninja's own CI.
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --locked --group dev
 
       - name: Run tests
-        run: uv run pytest -q
+        run: uv run --locked --group dev pytest -q
 
       - name: Lint
-        run: uv run ruff check .
+        run: uv run --locked --group dev ruff check .
 
   docs:
     runs-on: ubuntu-latest
@@ -43,10 +48,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --group docs
+        run: uv sync --locked --group docs
 
       - name: Build docs
-        run: uv run sphinx-build -b html docs docs/_build/html -W --keep-going
+        run: uv run --locked --group docs sphinx-build -b html docs docs/_build/html -W --keep-going
 
       # The build regenerates docs/reference/cabs.rst in place from the live
       # registry (docs/_ext/cab_catalog.py). If that changes the committed
