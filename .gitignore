@@ -95,10 +95,10 @@ ipython_config.py
 Pipfile.lock
 
 # UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-uv.lock
+#   uv.lock IS tracked -- see the note in that file's own history and CI's
+#   `--locked` flags. dosho is consumed as a library, but it is also developed
+#   and tested as an application, and a committed lock is what makes a green CI
+#   run mean something specific.
 
 # poetry
 #   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
