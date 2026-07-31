@@ -41,7 +41,17 @@ extensions = [
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+# `design_*.md` are repo-internal design records, not published pages -- they
+# carry file:line citations and implementation sequencing that go stale by
+# design. myst_parser would otherwise pick them up as documents, and CI builds
+# with `-W`, so a design doc in no toctree fails the build. Matches
+# stimela-ninja's own conf.py, which excludes its design docs the same way.
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "design_data_registry.md",
+]
 
 # Treat warnings as build-relevant but don't fail the build on missing
 # autodoc targets during early scaffolding.
