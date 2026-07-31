@@ -13,8 +13,16 @@ carries assumptions shinobi deliberately doesn't carry forward:
 cab-load time to compute a real tool's schema), package-scoped
 ``_include`` composition, and dtype coverage gaps that silently degrade
 to ``str``. Every tool in ``dosho`` is instead authored directly in
-Python, using shinobi's existing typed schema machinery -- no YAML
-dialect, and none should be added.
+Python, using shinobi's existing typed schema machinery.
+
+Note what that objection is and isn't. It is to *executable and
+self-composing content* in a cab, not to static markup: a cab definition
+is parameter configuration -- names, dtypes, defaults, metadata,
+policies -- which is what YAML and JSON were made for. Python is used
+here because it supplies dtypes, completion and refactoring for free and
+spares us maintaining a dialect and its loader, not because a static cab
+format would be wrong in principle. See ``AGENTS.md``'s Core rule for
+the constraints that bind a cab definition in any format.
 
 Two shapes: ``Cab`` and pystep
 --------------------------------

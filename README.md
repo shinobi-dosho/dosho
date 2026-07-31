@@ -7,9 +7,10 @@
 Stimela 3.0). Every tool is authored directly in Python -- a
 `shinobi.Cab` object for a real binary, or a `@shinobi.pystep`-produced
 `StepRef` for a Python-package tool with no standalone binary (CASA tasks,
-simms 3.0's `skysim`/`telsim`/`primary-beam`) -- instead of a YAML dialect,
-so there's no `dynamic_schema`-style Python-execution step at cab-load time
-and no dtype coverage gaps.
+simms 3.0's `skysim`/`telsim`/`primary-beam`). A cab is parameter
+configuration and stays declarative whatever carries it, so there's no
+`dynamic_schema`-style Python-execution step at cab-load time, no expression
+language, and no dtype coverage gaps.
 
 See [`AGENTS.md`](./AGENTS.md) for the design rationale and
 tool-authoring conventions.

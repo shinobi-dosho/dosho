@@ -16,16 +16,46 @@ inherits; this file only states what's specific to authoring cabs here.
 
 ## Core rule
 
-**Cabs are authored directly in Python, not parsed from a YAML dialect.**
-Every tool is a `shinobi.Cab` object (or several) built in a plain Python
-module under `src/dosho/cabs/`, using shinobi's existing
-`Cab`/`Policies`/`ParamMeta`/`ParamPattern` machinery -- see
-`dosho._builder.define_cab` for the boilerplate-reduction helper. There is
-no YAML authoring path and none should be added: a YAML dialect is exactly
-the kind of "grows its own semantics" surface stimela-ninja's `AGENTS.md`
-warns against.
+**A cab definition is parameter configuration, not code.** A cab declares a
+tool's schema -- parameter names, dtypes, defaults, required-ness, metadata,
+policies, output patterns. That is declarative data, and a static format
+(YAML/JSON) is a legitimate way to carry it; it is what those formats were
+made for.
 
-Not every tool can be a `Cab`, though: shinobi only ever executes
+The line that matters is code vs. data, not Python vs. YAML. What must never
+enter a cab definition, **in any format**:
+
+- **Executable content.** cult-cargo's `dynamic_schema` -- a Python function
+  imported and *executed* at cab-load time to compute a schema -- is the
+  canonical example. See "Never import/execute an external Cab's own
+  schema-generation code" below.
+- **An expression or substitution language** (`=IFSET(...)`,
+  `{recipe.name}-{info.suffix}`). `ParamMeta.implicit` is plain `str.format`
+  against a step's own validated inputs, and deliberately nothing more.
+- **Composition semantics needing their own resolver**, e.g. cult-cargo's
+  package-scoped `_include` chains.
+
+Do not over-read stimela-ninja's `AGENTS.md` here: its anti-YAML rule is scoped
+to the **recipe/orchestration layer** throughout -- "Stimela 2.0's YAML-*recipe*
+complexity" (L3), "not a return to YAML *orchestration* ... no expression
+language or control-flow semantics" (L9), "that entire class of problem only
+exists because YAML was the *orchestration* layer" (L13). Recipes are Python
+because a DAG with wiring and control flow is a program. A cab's parameter table
+is not, and that rule does not reach it.
+
+**Today every cab is authored in Python**, as a `shinobi.Cab` object built in a
+plain module under `src/dosho/cabs/` on shinobi's
+`Cab`/`Policies`/`ParamMeta`/`ParamPattern` machinery -- see
+`dosho._builder.define_cab` for the boilerplate-reduction helper. That is a
+practical choice, not a prohibition: Python supplies dtypes, completion and
+refactoring for free, and spares us maintaining a dialect and its loader. A
+static YAML/JSON authoring path is permitted by the rule above, and would let
+dosho ship as pure data with no shinobi dependency at all -- an open design
+question, not a settled one. Whichever format a cab uses, the constraints above
+bind it.
+
+Not every tool can be a `Cab`, though, and the exception is genuinely code:
+shinobi only ever executes
 `flavour="binary"` cabs (real standalone executables, argv-built and
 shelled out to). A tool that's actually a Python-package function call --
 no standalone binary at all (CASA tasks are the running example:
@@ -40,6 +70,15 @@ on the host at load time. Both shapes live side by side under
 `src/dosho/cabs/`, and both are first-class for `Recipe.add_step` -- a
 pipeline author (or `dosho.get(name)`) doesn't need to know or care which
 one a given tool is. See `dosho/cabs/casatasks.py` for the pattern.
+
+A pystep is a real function with a body, not a declarative pointer at a
+published one -- `bdsf.py`'s `catalog` wraps `ctx.import_func("process_image",
+"bdsf")` in a typed signature and its own orchestration. So pysteps stay Python
+under any cab-format decision: the static-data rule above governs `Cab`
+definitions, which is the half that *is* configuration. Note the balance when
+weighing that decision -- pysteps currently outnumber binary cabs (79
+`@shinobi.pystep` decorators against 43 `define_cab` calls), though most of the
+former are thin `casatasks` pass-throughs.
 
 ## Never import/execute an external Cab's own schema-generation code
 
@@ -76,9 +115,8 @@ cabs read (`images.WSCLEAN`, `images.CASA6`, ...). Each entry is either a
 `build:` recipe (a dosho-built image, resolved to
 `{registry}/{name}:{version}-{bundle_version}`). `src/dosho/images.py` loads
 the manifest, resolves each entry to a full reference, and exposes it as a
-module constant, so cab modules import it exactly as before -- this is plain
-data plus resolution, not a cab schema, so it doesn't fall under the "no YAML
-authoring path" rule above.
+module constant, so cab modules import it exactly as before -- plain data plus
+resolution, which is exactly the shape the Core rule endorses.
 
 **Provisioning overrides:** a deployment can repoint any image without editing
 dosho, via (lowest→highest precedence) the manifest, a YAML file named by
