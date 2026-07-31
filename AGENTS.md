@@ -128,7 +128,10 @@ src/dosho/
     <family>.py         # multi-command tool: one module-level object per
                           # sub-command (e.g. casatasks.py's `listobs`,
                           # `mstransform`, ...; simms.py's `skysim`/
-                          # `telsim`/`simms_classic`)
+                          # `telsim`/`primary_beam`). Sharing a *name* does
+                          # not make two tools one family -- pre-3.0 simms
+                          # is a different tool and has its own module,
+                          # simms_classic.py.
 tests/
   test_registry.py
   test_<tool>.py     # one per ported cab: round-trips a representative param

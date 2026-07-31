@@ -124,7 +124,8 @@ from dosho.cabs.ragavi import gains as ragavi_gains, vis as ragavi_vis
 from dosho.cabs.rfinder import rfinder
 from dosho.cabs.rmtools import rmclean3d, rmsynth1d, rmsynth3d
 from dosho.cabs.shadems import shadems
-from dosho.cabs.simms import primary_beam, simms_classic, skysim, telsim
+from dosho.cabs.simms import primary_beam, skysim, telsim
+from dosho.cabs.simms_classic import simms_classic
 from dosho.cabs.smops import smops
 from dosho.cabs.sofia2 import sofia2
 from dosho.cabs.spimple import (
