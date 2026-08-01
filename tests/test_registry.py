@@ -5,7 +5,7 @@ from dosho import registry
 
 
 def test_list_cabs_returns_registered_names():
-    assert set(registry.list_cabs()) == set(registry._entries())
+    assert set(registry.list_cabs()) == set(registry._index())
 
 
 def test_get_unknown_cab_raises_key_error():
@@ -41,9 +41,19 @@ def test_direct_import_matches_registry_lookup():
     from dosho.cabs.simms import skysim, telsim
     from dosho.cabs.simms_classic import simms_classic
 
-    assert wsclean is dosho.get("wsclean")
+    # Pysteps are still Python objects, so identity holds and is worth
+    # pinning: the registry must hand back *the* StepRef, not a copy.
     assert listobs is dosho.get("listobs")
     assert listobs_submodule is listobs
     assert skysim is dosho.get("simms-skysim")
     assert telsim is dosho.get("simms-telsim")
-    assert simms_classic is dosho.get("simms")
+
+    # Binary cabs are built from their document now, so `get` returns a fresh
+    # equivalent rather than the module-level object. Equivalence is the real
+    # contract; identity was only ever an artefact of both coming from the
+    # same import. Once the Python definitions go, `dosho.cabs` will serve
+    # these through the registry too and identity returns.
+    from tests.cab_compare import cab_differences
+
+    assert cab_differences(wsclean, dosho.get("wsclean")) == []
+    assert cab_differences(simms_classic, dosho.get("simms")) == []

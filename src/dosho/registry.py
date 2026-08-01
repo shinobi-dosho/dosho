@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import importlib
 import warnings
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import yaml
 
 if TYPE_CHECKING:
     from shinobi import Cab
@@ -58,31 +61,54 @@ _NAME_OVERRIDES: dict[str, str] = {
 }
 
 
-_entries_cache: dict[str, str] | None = None
+_INDEX_PATH = Path(__file__).with_name("cab_index.yaml")
+_DOCUMENT_DIR = Path(__file__).with_name("documents")
+_index_cache: dict[str, dict[str, Any]] | None = None
 
 
-def _entries() -> dict[str, str]:
-    """registered name -> "dosho.cabs:<attribute>" for every tool
-    `dosho.cabs` re-exports. Every entry resolves through the same
-    `dosho.cabs` module now that it re-exports everything -- `get()`
-    doesn't care whether a given entry is a `Cab` (real binary-flavour
-    tool) or a `StepRef` (from `@shinobi.pystep`, e.g. a CASA task) --
-    `Recipe.add_step` accepts either identically.
+def _index() -> dict[str, dict[str, Any]]:
+    """registered name -> where its definition lives, from the generated index.
 
-    Computed lazily and cached: reading `dosho.cabs.__all__` requires
-    importing that module, which -- per its own docstring -- eagerly
-    constructs every `Cab`/`StepRef` in the repo. Deferring this to first
-    use keeps `import dosho.registry` itself cheap, matching this
-    module's own "lazy, string-keyed lookup" contract.
+    Read from a file rather than derived from `dosho.cabs.__all__`, which
+    would import every cab in the repo and, through `_builder`, shinobi
+    itself. Everything on this side of the module -- `list_cabs`,
+    `get_document`, the experimental warning -- stays usable by a consumer
+    that wants dosho's definitions without the framework that runs them.
+
+    Regenerate with `python -m tools.generate_documents`.
     """
-    global _entries_cache
-    if _entries_cache is None:
-        from dosho import cabs
+    global _index_cache
+    if _index_cache is None:
+        _index_cache = yaml.safe_load(_INDEX_PATH.read_text())["cabs"]
+    return _index_cache
 
-        _entries_cache = {
-            _NAME_OVERRIDES.get(attr, attr): f"dosho.cabs:{attr}" for attr in cabs.__all__
-        }
-    return _entries_cache
+
+def get_document(name: str) -> tuple[str, str]:
+    """`(dialect, text)` for a cab defined by a document.
+
+    The `shinobi.cabs` provider protocol's preferred entry: shinobi builds the
+    `Cab`, so nothing here parses the document or imports the schema. Raises
+    `KeyError` for a pystep, whose definition is a Python function and cannot
+    be a document -- the protocol then falls through to `get` on this same
+    module.
+    """
+    entry = _index()[name]
+    if "document" not in entry:
+        raise KeyError(name)
+    _warn_if_experimental(name)
+    return "yaml_cab", (_DOCUMENT_DIR / entry["document"]).read_text()
+
+
+def loader_options() -> dict[str, Any]:
+    """What dosho's documents need in order to be loaded.
+
+    They name images by manifest key (`image: WSCLEAN`) so a deployment's
+    `$DOSHO_IMAGES`/`$DOSHO_IMAGE_<KEY>` overrides still decide the reference
+    at load time. shinobi has no manifest; this is how it gets one.
+    """
+    from dosho import images
+
+    return {"images": {k: getattr(images, k) for k in dir(images) if k.isupper()}}
 
 
 _warned_experimental: set[str] = set()
@@ -99,9 +125,7 @@ def _warn_if_experimental(name: str) -> None:
     warning at construction time instead would fire for every importer of
     `dosho.cabs`, which builds every cab in the repo.
     """
-    from dosho._builder import EXPERIMENTAL_CABS
-
-    reason = EXPERIMENTAL_CABS.get(name)
+    reason = _index().get(name, {}).get("experimental")
     if reason is None or name in _warned_experimental:
         return
     _warned_experimental.add(name)
@@ -120,11 +144,18 @@ def get(name: str) -> Cab | StepRef:
     Warns (once per name) if the cab is marked experimental -- see
     `_builder.EXPERIMENTAL_CABS`.
     """
-    target = _entries()[name]
-    module_name, attr = target.split(":", 1)
-    module = importlib.import_module(module_name)
+    entry = _index()[name]
+    if "document" in entry:
+        # One code path with `shinobi.cabs.get`: the same document, the same
+        # builder, the same options. A second path here would be a second
+        # place for the two to disagree about what a cab is.
+        from shinobi.cabs import build_document
+
+        dialect, text = get_document(name)
+        return build_document(dialect, text, name=name, **loader_options())
     _warn_if_experimental(name)
-    return getattr(module, attr)
+    module = importlib.import_module("dosho.cabs")
+    return getattr(module, entry["attr"])
 
 
 def list_cabs() -> list[str]:
@@ -134,4 +165,4 @@ def list_cabs() -> list[str]:
         The registered names (may be hyphenated, e.g. `"simms-skysim"`),
         in no particular order.
     """
-    return list(_entries())
+    return list(_index())
