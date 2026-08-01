@@ -1,0 +1,44 @@
+cabs:
+  tricolour:
+    command: tricolour
+    image: TRICOLOUR
+    info: Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
+    inputs:
+      ms:
+        dtype: MS
+        policies:
+          positional: true
+      config:
+        dtype: File
+      ignore-flags:
+        dtype: bool
+      flagging-strategy:
+        dtype: str
+      row-chunks:
+        dtype: int
+      baseline-chunks:
+        dtype: int
+      nworkers:
+        dtype: int
+      dilate-masks:
+        dtype: Union[int,str]
+      data-column:
+        dtype: str
+      field-names:
+        dtype: str
+      scan_numbers:
+        dtype: str
+      disable-post-mortem:
+        dtype: bool
+        default: true
+      window-backend:
+        dtype: str
+      temporary-directory:
+        dtype: Directory
+      subtract-model-column:
+        dtype: str
+    outputs:
+      ms:
+        dtype: MS
+        policies:
+          positional: true

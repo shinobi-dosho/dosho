@@ -1,0 +1,46 @@
+cabs:
+  eidos:
+    command: eidos
+    image: EIDOS
+    info: 'eidos: create a primary beam model of MeerKAT (https://github.com/ratt-ru/eidos)'
+    inputs:
+      pixels:
+        dtype: int
+        default: 256
+        info: Number of pixels on one side
+      diameter:
+        dtype: float
+        info: Diameter of the required beam
+      scale:
+        dtype: float
+        info: Pixel scale in degrees
+      freq:
+        dtype: List[float]
+        required: true
+        info: A single freq, or the start, end freqs, and channel width in MHz
+        policies:
+          repeat: list
+      coeff:
+        dtype: str
+        required: true
+        info: 'Which coefficients to use: mh for MeerKAT holography, me for MeerKAT EM simulation, vh
+          for VLA holography'
+      coefficients_file:
+        dtype: File
+        nom_de_guerre: coefficients-file
+        info: Coefficients file
+      prefix:
+        dtype: str
+        info: Prefix of output beam file(s)
+      output_eight:
+        dtype: bool
+        nom_de_guerre: output-eight
+        info: Output complex voltage beams (8 files)
+      thresh:
+        dtype: int
+        info: How many Zernike coefficients to use. Must be <=20.
+      stokes:
+        dtype: str
+        nom_de_guerre: Stokes
+        info: 'Output in Stokes (Mueller) formalism instead of the default Jones formalism: ''I'',''Q'',''U'',''V''
+          for the Stokes beams, ''M'' for the full Mueller matrix, or e.g. ''IQ'' for the Q-to-I leakage'

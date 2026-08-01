@@ -1,0 +1,178 @@
+cabs:
+  shadems:
+    command: shadems
+    image: SHADEMS
+    info: 'ShadeMS: rendering MS data via datashader (https://github.com/ratt-ru/shadeMS)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to plot
+        policies:
+          positional: true
+      xaxis:
+        dtype: str
+        info: 'Xaxis to plot. Can be any MS column name, also: CHAN, FREQ, CORR, ROW, WAVEL, U, V, W,
+          UV, and, for complex columns, keywords such as: ''amp'', ''phase'', ''real'', ''imag''. You
+          can also specify correlations, e.g. ''DATA:phase:XX''. The order of specifiers does not matter.'
+      yaxis:
+        dtype: str
+        info: Y axis to plot. Must be given the same number of times as --xaxis.
+      aaxis:
+        dtype: str
+        info: Intensity axis. If none, plot intensity (a.k.a. alpha channel) is proportional to density
+          of points.Otherwise, a reduction function (--ared) is applied to the given values, and the result
+          is used to determine intensity.
+      ared:
+        dtype: str
+        info: Alpha axis reduction function.
+      colour_by:
+        dtype: str
+        nom_de_guerre: colour-by
+        info: Colour axis. All columns and variations listed under --xaxis are available for colouring
+          by.
+      col:
+        dtype: str
+        info: Name of visibility column. Default is DATA. Two-column arithmetic is recognized.
+      noflags:
+        dtype: bool
+        info: Ignore flags. Default is to honour
+      noconj:
+        dtype: bool
+        info: Do not show conjugate points in u,v plots. Default is true.
+      xmin:
+        dtype: float
+        info: Minimum x-axis value. Default is data min.
+      xmax:
+        dtype: float
+        info: Maximum x-axis value to plot. Default is data max.
+      ymin:
+        dtype: float
+        info: Minimum y-axis value. Default is data min.
+      ymax:
+        dtype: float
+        info: Maximum y-axis value to plot. Default is data max.
+      cmin:
+        dtype: float
+        info: Minimum colouring value. Default is data-min.
+      cmax:
+        dtype: float
+        info: Maximum colouring value.  Default is data-max.
+      cnum:
+        dtype: int
+        info: Number of colours to use.
+      iter_field:
+        dtype: bool
+        nom_de_guerre: iter-field
+        info: Separate plots per field. Default is combine all.
+      iter_antenna:
+        dtype: bool
+        nom_de_guerre: iter-antenna
+        info: Separate plots per antenna. Default is combine all.
+      iter_spw:
+        dtype: bool
+        nom_de_guerre: iter-spw
+        info: Separate plots per spw. Default is combine all.
+      iter_scan:
+        dtype: bool
+        nom_de_guerre: iter-scan
+        info: Separate plots per scan. Default is combine all.
+      iter_corr:
+        dtype: bool
+        nom_de_guerre: iter-corr
+        info: Separate plots per correlation / Stokes. Default is combine all.
+      ant:
+        dtype: Union[str, List[str]]
+        info: Antennas to plot (comma-separated list of names). Default is all.
+      ant_num:
+        dtype: Union[str, List[int]]
+        nom_de_guerre: ant-num
+        info: Antennas to plot (comma-separated list of numbers, or a [start]:[stop][:step] slice, overrides
+          --ant).
+      baseline:
+        dtype: Union[str, List[str]]
+        info: Baselines to plot, as 'ant1-ant2' (comma-separated list). Default is all.
+      spw:
+        dtype: Union[int, List[int]]
+        info: Spectral windows (DDIDs) to plot (comma-separated list) Default is all.
+      field:
+        dtype: Union[int, str, List[str], List[int]]
+        info: Field ID(s) to plot (comma-separated list). Default is all.
+      scan:
+        dtype: Union[int, List[int]]
+        info: Scans to plot (comma-separated list). Default is all.
+      corr:
+        dtype: Union[str, List[str]]
+        info: Correlations or Stokes to plot, use indices or labels (comma-separated list). Default is
+          all.
+      chan:
+        dtype: str
+        info: Channel slice, as [start]:[stop][:step].  Default is to plot all.
+      xcanvas:
+        dtype: int
+        info: Canvas x-size in pixels.
+      ycanvas:
+        dtype: int
+        info: Canvas y-size in pixels.
+      norm:
+        dtype: str
+        info: Pixel scale normalization. Default is 'log' when colouring, and 'eq_hist' when not.
+      cmap:
+        dtype: str
+        info: Colorcet map used without --colour-by.
+      bmap:
+        dtype: str
+        info: Colorcet map used when colouring by a continuous axis.
+      dmap:
+        dtype: str
+        info: Colorcet map used when colouring by a discrete axis.
+      spread_pix:
+        dtype: int
+        nom_de_guerre: spread-pix
+        info: Dynamically spread rendered pixels to this size.
+      spread_thr:
+        dtype: float
+        nom_de_guerre: spread-thr
+        info: Threshold parameter for spreading (0 to 1).
+      bgcol:
+        dtype: str
+        info: RGB hex code for background colour. Default FFFFFF (white).
+      fontsize:
+        dtype: float
+        info: Font size for all text elements.
+      suffix:
+        dtype: str
+        info: Suffix to be included in filenames.
+      png:
+        dtype: str
+        info: Output PNG name. Default is plot-{ms}{_field}{_Spw}{_Scan}{_Ant}-{label}{_alphalabel}{_colorlabel}{_suffix}.png
+      title:
+        dtype: str
+        info: Template for plot titles. Default title includes ms name, field, spw, scan, antenna, plot
+          title, alpha title and colour title.
+      xlabel:
+        dtype: str
+        info: Template for X axis labels. Default is x-axis name and unit
+      ylabel:
+        dtype: str
+        info: Template for Y axis labels. Default is y-axis name and unit
+      debug:
+        dtype: bool
+        info: Enable debugging output.
+      row_chunk_size:
+        dtype: int
+        nom_de_guerre: row-chunk-size
+        info: Row chunk size for dask-ms. Larger chunks may or may not be faster, but will certainly use
+          more RAM.
+      num_parallel:
+        dtype: int
+        nom_de_guerre: num-parallel
+        info: Run up to N renderers in parallel. Default is serial. Use -j0 to auto-set this to half the
+          available cores.
+      profile:
+        dtype: bool
+        info: Enable dask profiling output.
+    outputs:
+      dir:
+        dtype: Directory
+        info: Send all plots to this output directory

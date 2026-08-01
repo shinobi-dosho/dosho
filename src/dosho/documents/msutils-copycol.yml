@@ -1,0 +1,30 @@
+cabs:
+  msutils-copycol:
+    command: msutils copycol
+    image: MSUTILS
+    info: 'msutils copycol: copy one column''s data to another (creating it if needed)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to operate on
+        policies:
+          positional: true
+      fromcol:
+        dtype: str
+        required: true
+        info: Source column to copy from
+        policies:
+          positional: true
+      tocol:
+        dtype: str
+        required: true
+        info: Destination column (created if it does not exist)
+        policies:
+          positional: true
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set to operate on
+        policies:
+          positional: true

@@ -1,0 +1,92 @@
+cabs:
+  rfinder:
+    command: rfinder
+    image: RFINDER
+    info: 'rfinder: visualize flagged RFI in a measurement set (https://github.com/Fil8/RFInder)'
+    inputs:
+      config:
+        dtype: File
+        info: RFInder configuration file (YAML format)
+      input_dir:
+        dtype: Directory
+        info: Working directory (MS file assumed to be here)
+      output_dir:
+        dtype: Directory
+        info: Output directory
+      label:
+        dtype: str
+        info: 'Output folder is called: rfi_polarization_label'
+      input:
+        dtype: MS
+        info: Input MS file
+      field:
+        dtype: str
+        info: Field of the MS file to analyze
+      telescope:
+        dtype: str
+        info: 'Telescope: meerkat, apertif, wsrt'
+      rfimode:
+        dtype: str
+        info: 'Mode to investigate RFI: use_flags or rms_clip'
+      polarization:
+        dtype: str
+        info: 'Stokes parameter: xx, yy, xy, yx, q (also in CAPS)'
+      frequency_interval:
+        dtype: List[float]
+        info: Frequency interval where to measure noise, in GHz
+        policies:
+          repeat: list
+      spw_av:
+        dtype: int
+        info: Number of channels to average
+      time_step:
+        dtype: float
+        info: Time step (minutes) in which to divide the MS analysis
+      sigma_clip:
+        dtype: float
+        info: Sigma clip for rms_clip mode to find RFI
+      baseline_cut:
+        dtype: float
+        info: Cut in baseline length (m) for differential RFI analysis
+      no_chunks:
+        dtype: bool
+        info: Disable chunking in time
+      yes_chunks:
+        dtype: bool
+        info: Enable chunking in time
+      no_movies:
+        dtype: bool
+        info: Disable movies (use if dataset is read as a whole)
+      no_spw_av:
+        dtype: bool
+        info: Disable averaging in channels
+      yes_spw_av:
+        dtype: bool
+        info: Enable averaging in channels
+      no_cleanup:
+        dtype: bool
+        info: Disable cleanup of intermediate products
+      yes_cleanup:
+        dtype: bool
+        info: Enable cleanup of intermediate products
+      plot_details:
+        dtype: bool
+        info: Plot percentage of RFI/noise, or factor of noise increase
+      plot_summary:
+        dtype: bool
+        info: Plot percentage of RFI per ant/scan/freq/corr
+      summary_options:
+        dtype: List[str]
+        info: 'Summary type(s): ant, corr, scan, freq'
+        policies:
+          repeat: list
+      freq_bin:
+        dtype: float
+        info: Number of frequencies to bin into a single channel
+      ncpu:
+        dtype: int
+        info: Number of CPUs to use when generating summary stats
+    outputs:
+      output_dir:
+        dtype: Directory
+        info: Output directory

@@ -1,0 +1,157 @@
+cabs:
+  flagms:
+    command: flag-ms.py
+    image: OWLCAT
+    info: 'flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measurement set'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to operate on
+        policies:
+          positional: true
+      channels:
+        dtype: str
+        nom_de_guerre: channels
+        info: 'Channel selection: N, or start:end[:step] / start~end[:step]'
+      timeslots:
+        dtype: str
+        info: 'Timeslot selection: N, or start:end / start~end'
+      timeslot_multiplier:
+        dtype: float
+        default: 1.0
+        nom_de_guerre: timeslot-multiplier
+        info: Multiplies the timeslot numbers given via --timeslots
+      corrs:
+        dtype: str
+        info: 'Correlation selection: comma-separated list of indices'
+      stations:
+        dtype: str
+        info: 'Station (antenna) selection: comma-separated list of indices'
+      ifrs:
+        dtype: str
+        info: Interferometer selection (use "-I help" for syntax help)
+      ddid:
+        dtype: str
+        info: 'DATA_DESC_ID selection: single number, or comma-separated list'
+      field:
+        dtype: str
+        info: 'FIELD_ID selection: single number, or comma-separated list'
+      taql:
+        dtype: str
+        info: Additional TaQL selection to restrict the subset
+      above:
+        dtype: float
+        info: Select on abs(data) > X
+      below:
+        dtype: float
+        info: Select on abs(data) < X
+      nan:
+        dtype: bool
+        info: Select on invalid data (NaN or infinite)
+      fm_above:
+        dtype: float
+        nom_de_guerre: fm-above
+        info: Select on mean(abs(data)) > X over frequencies
+      fm_below:
+        dtype: float
+        nom_de_guerre: fm-below
+        info: Select on mean(abs(data)) < X over frequencies
+      data_column:
+        dtype: str
+        default: CORRECTED_DATA
+        nom_de_guerre: data-column
+        info: Data column for --above/--below/--nan
+      data_flagmask:
+        dtype: str
+        default: ALL
+        nom_de_guerre: data-flagmask
+        info: Flags to apply to the data column when e.g. computing the mean
+      flagged_any:
+        dtype: str
+        nom_de_guerre: flagged-any
+        info: Selects if any of the specified FLAGS are raised
+      flagged_all:
+        dtype: str
+        nom_de_guerre: flagged-all
+        info: Selects if all of the specified FLAGS are raised
+      flag:
+        dtype: str
+        info: Raise the specified FLAGS (added to the output FLAGS)
+      unflag:
+        dtype: str
+        info: Clear the specified FLAGS (removed from the output FLAGS)
+      copy_flags:
+        dtype: str
+        nom_de_guerre: copy
+        info: Copy the selection to the specified FLAGS (replaces output FLAGS)
+      copy_legacy:
+        dtype: str
+        nom_de_guerre: copy-legacy
+        info: Shortcut for --flagged-any +L --copy FLAGS --fill-legacy -
+      fill_legacy:
+        dtype: str
+        nom_de_guerre: fill-legacy
+        info: Fill legacy FLAG/FLAG_ROW columns using the specified FLAGS (use '-' to skip, '0' to clear)
+      create:
+        dtype: bool
+        info: 'With --flag: create the named flagset if it doesn''t exist'
+      init_bitflags:
+        dtype: int
+        nom_de_guerre: init-bitflags
+        info: Initialise a BITFLAG column with this many bits (8, 16 or 32)
+      reinit_bitflags:
+        dtype: int
+        nom_de_guerre: reinit-bitflags
+        info: Remove (if any) and reinitialise a BITFLAG column with this many bits (8, 16 or 32)
+      incr_stman:
+        dtype: bool
+        nom_de_guerre: incr-stman
+        info: 'Force the incremental storage manager for new BITFLAG columns [default: same as DATA]'
+      list_info:
+        dtype: bool
+        nom_de_guerre: list
+        info: 'List MS info: flagsets, CASA flagversions if available'
+      stats:
+        dtype: bool
+        info: Print per-flagset flagging stats
+      remove:
+        dtype: str
+        info: Unflag and remove the named flagset(s) (comma-separated list)
+      export:
+        dtype: File
+        info: Export all flags to this flag file (.gz for gzip-compressed); done after any flagging actions
+      import_:
+        dtype: File
+        nom_de_guerre: import
+        info: Import flags from this flag file; done before any flagging actions
+      restore:
+        dtype: str
+        info: Restore flags from a CASA-style flagversion (see --list for names)
+      save:
+        dtype: str
+        info: Save flags to a CASA-style flagversion
+      force:
+        dtype: bool
+        info: 'With --save: force overwrite of an existing CASA-style flagversion'
+      verbose:
+        dtype: int
+        default: 0
+        info: Verbosity level for messages (higher is more verbose)
+      timestamps:
+        dtype: bool
+        info: Add timestamps to verbosity messages
+      chunk_size:
+        dtype: int
+        default: 200000
+        nom_de_guerre: chunk-size
+        info: Number of rows to process at once
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set to operate on
+        policies:
+          positional: true
+      export:
+        dtype: File
+        info: Export all flags to this flag file (.gz for gzip-compressed); done after any flagging actions

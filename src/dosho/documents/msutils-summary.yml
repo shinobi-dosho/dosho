@@ -1,0 +1,24 @@
+cabs:
+  msutils-summary:
+    command: msutils summary
+    image: MSUTILS
+    info: 'msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to summarise
+        policies:
+          positional: true
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: Also write the summary to this JSON file.
+      quiet:
+        dtype: bool
+        info: Do not print the summary.
+    outputs:
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: Also write the summary to this JSON file.

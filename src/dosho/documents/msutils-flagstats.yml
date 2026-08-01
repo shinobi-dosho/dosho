@@ -1,0 +1,35 @@
+cabs:
+  msutils-flagstats:
+    command: msutils flagstats
+    image: MSUTILS
+    info: 'msutils flagstats: out-of-core flag statistics + matplotlib summary plot'
+    policies:
+      repeat_list: true
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to compute flag statistics for
+        policies:
+          positional: true
+      plot:
+        dtype: File
+        info: Output PNG plot file.
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: Output JSON statistics file.
+      field:
+        dtype: List[str]
+        info: Field id/name to include (repeatable).
+      antenna:
+        dtype: List[str]
+        info: Antenna id/name to include (repeatable).
+    outputs:
+      plot:
+        dtype: File
+        info: Output PNG plot file.
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: Output JSON statistics file.

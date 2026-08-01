@@ -1,0 +1,43 @@
+cabs:
+  spimple-binterp:
+    command: spimple-binterp
+    image: SPIMPLE
+    info: 'spimple-binterp: beam interpolation tool (https://github.com/ratt-ru/spimple)'
+    inputs:
+      image:
+        dtype: File
+        required: true
+        info: A FITS image providing the coordinates to interpolate to
+      ms:
+        dtype: List[MS]
+        info: Measurement set(s) used to make the image (for parallactic angles, primary beam correction)
+        policies:
+          repeat: list
+      field:
+        dtype: int
+        info: Field ID
+      output_filename:
+        dtype: str
+        required: true
+        nom_de_guerre: output-filename
+        info: Path to output directory
+      beam_model:
+        dtype: str
+        nom_de_guerre: beam-model
+        info: 'FITS beam model to use: path up to name, e.g. /home/user/beams/meerkat_lband (pattern path_to_beam/name_corr_re/im.fits)'
+      sparsify_time:
+        dtype: int
+        nom_de_guerre: sparsify-time
+        info: Used to select a subset of time
+      nthreads:
+        dtype: int
+        info: 'Number of threads to use [0: all threads]'
+      corr_type:
+        dtype: str
+        nom_de_guerre: corr-type
+        info: 'Correlation type: linear or circular'
+    outputs:
+      output_filename:
+        dtype: File
+        nom_de_guerre: output-filename
+        info: Path to output directory

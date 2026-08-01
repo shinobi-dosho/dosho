@@ -1,0 +1,29 @@
+cabs:
+  owlcat_plotelev:
+    command: plot-elevation-tracks.py
+    image: OWLCAT
+    info: 'Owlcat plot-elevation-tracks.py: plot target elevation over time'
+    inputs:
+      msname:
+        dtype: MS
+        required: true
+        info: Name of Measurement set
+        policies:
+          positional: true
+      list:
+        dtype: bool
+        info: lists fields found in MS, then exits
+      display:
+        dtype: bool
+        default: false
+        info: Display plot on screen
+      output_name:
+        dtype: File
+        nom_de_guerre: output-name
+        info: Output filename
+    outputs:
+      output_name:
+        dtype: File
+        default: lst-elev.png
+        nom_de_guerre: output-name
+        info: Output filename

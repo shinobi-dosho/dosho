@@ -1,0 +1,34 @@
+cabs:
+  msutils-addcol:
+    command: msutils addcol
+    image: MSUTILS
+    info: 'msutils addcol: add a column to an MS, cloning shape/type from an existing one'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to add the column to
+        policies:
+          positional: true
+      colname:
+        dtype: str
+        required: true
+        info: Name of the column to add
+        policies:
+          positional: true
+      clone:
+        dtype: str
+        default: DATA
+        info: Existing column to clone shape/type from.
+      valuetype:
+        dtype: str
+        info: Column value type, e.g. 'complex', 'float', 'scalar'.
+      init-with:
+        dtype: float
+        info: Initialise the new column with this (float) value.
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set to add the column to
+        policies:
+          positional: true

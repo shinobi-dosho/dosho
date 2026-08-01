@@ -1,0 +1,78 @@
+cabs:
+  rmsynth1d:
+    command: rmsynth1d
+    image: RM_TOOLS
+    info: 'RM-Tools rmsynth1d: RM-synthesis on Stokes I/Q/U spectra (1D, ASCII)'
+    policies:
+      prefix: '-'
+    inputs:
+      data_file:
+        dtype: File
+        required: true
+        info: 'ASCII file containing Stokes spectra & errors: [freq_Hz, I, Q, U, I_err, Q_err, U_err]
+          or [freq_Hz, Q, U, Q_err, U_err]'
+        policies:
+          positional: true
+      fit_rmsf_gaussian:
+        dtype: bool
+        nom_de_guerre: t
+        info: Fit a Gaussian to the RMSF
+      max_faraday_depth:
+        dtype: str
+        nom_de_guerre: l
+        info: Absolute max Faraday depth sampled [Auto if not set]
+      dphi_radm2:
+        dtype: str
+        nom_de_guerre: d
+        info: Width of Faraday depth channel [Auto if not set] (overrides nsamples)
+      nsamples:
+        dtype: int
+        default: 10
+        nom_de_guerre: s
+        info: Number of samples across the RMSF lobe
+      weight_type:
+        dtype: str
+        nom_de_guerre: w
+        info: 'Weighting: inverse ''variance'' [default] or ''uniform'' (all 1s)'
+      fit_function:
+        dtype: str
+        nom_de_guerre: f
+        info: 'Stokes I fitting function: ''linear'' or ''log'' [default] polynomials'
+      poly_order:
+        dtype: int
+        default: 2
+        nom_de_guerre: o
+        info: 'Polynomial order to fit to the I spectrum: 0-5, or negative for dynamic order selection'
+      ignore_stokes_i:
+        dtype: bool
+        nom_de_guerre: i
+        info: Ignore the Stokes I spectrum
+      use_64bit:
+        dtype: bool
+        nom_de_guerre: b
+        info: 'Use 64-bit floating point precision [default: 32-bit]'
+      show_plots:
+        dtype: bool
+        nom_de_guerre: p
+        info: Show the plots
+      verbose:
+        dtype: bool
+        nom_de_guerre: v
+        info: Verbose output
+      save_outputs:
+        dtype: bool
+        nom_de_guerre: S
+        info: Save the arrays and plots
+      debug:
+        dtype: bool
+        nom_de_guerre: D
+        info: Turn on debugging messages & plots
+      units:
+        dtype: str
+        default: Jy/beam
+        nom_de_guerre: U
+        info: Intensity units of the data
+      super_resolution:
+        dtype: bool
+        nom_de_guerre: r
+        info: Optimise the resolution of the RMSF (Rudnick & Cotton)

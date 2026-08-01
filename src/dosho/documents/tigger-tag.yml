@@ -1,0 +1,43 @@
+cabs:
+  tigger-tag:
+    command: tigger-tag
+    image: TIGGER_LSM
+    info: 'tigger-tag: set or change tags of selected sources in a sky model (https://github.com/ska-sa/tigger-lsm)'
+    policies:
+      repeat_list: true
+    inputs:
+      sky_model:
+        dtype: File
+        required: true
+        info: Sky model to tag
+        policies:
+          positional: true
+        mutable: true
+      selectors:
+        dtype: List[str]
+        info: Source selector(s) (NAME, =SELTAG, or SELTAG<>SELVAL) followed by tag expressions (TAG=[TYPE:]VALUE,
+          +TAG, !TAG, /TAG)
+        policies:
+          positional: true
+          repeat: list
+      list_sources:
+        dtype: bool
+        nom_de_guerre: list
+        info: List selected sources only; does not apply any tags
+      output:
+        dtype: File
+        info: 'Save changes to a different output model [default: save in place]'
+      force:
+        dtype: bool
+        info: 'Save changes without prompting [default: prompt]'
+      transfer_tags:
+        dtype: str
+        nom_de_guerre: transfer-tags
+        info: Transfer tags from a reference LSM (FROM_LSM:TOL) to this model, within TOL arcsec
+      debug:
+        dtype: List[str]
+        info: 'Set verbosity of a named Python context: Context=Level (repeatable)'
+    outputs:
+      output:
+        dtype: File
+        info: 'Save changes to a different output model [default: save in place]'

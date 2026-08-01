@@ -1,0 +1,74 @@
+cabs:
+  rmsynth3d:
+    command: rmsynth3d
+    image: RM_TOOLS
+    info: 'RM-Tools rmsynth3d: RM-synthesis on Stokes Q/U cubes (3D)'
+    policies:
+      prefix: '-'
+    inputs:
+      stokes_q:
+        dtype: File
+        required: true
+        info: FITS cube containing Stokes Q data
+        policies:
+          positional: true
+      stokes_u:
+        dtype: File
+        required: true
+        info: FITS cube containing Stokes U data
+        policies:
+          positional: true
+      freqs:
+        dtype: File
+        required: true
+        info: ASCII file containing the frequency vector (Hz)
+        policies:
+          positional: true
+      stokes_i_model:
+        dtype: File
+        nom_de_guerre: i
+        info: FITS cube containing a Stokes I model [None]
+      noise_file:
+        dtype: File
+        nom_de_guerre: n
+        info: Text file containing channel noise values [None]
+      weight_type:
+        dtype: str
+        nom_de_guerre: w
+        info: 'Weighting: ''uniform'' [default] (all 1s) or ''variance'''
+      fit_rmsf_gaussian:
+        dtype: bool
+        nom_de_guerre: t
+        info: Fit a Gaussian to the RMSF
+      max_faraday_depth:
+        dtype: str
+        nom_de_guerre: l
+        info: Absolute max Faraday depth sampled (overrides nsamples) [Auto if not set]
+      dphi_radm2:
+        dtype: str
+        nom_de_guerre: d
+        info: Width of Faraday depth channel [Auto if not set]
+      prefix_out:
+        dtype: str
+        nom_de_guerre: o
+        info: Prefix to prepend to output files [None]
+      nsamples:
+        dtype: int
+        nom_de_guerre: s
+        info: Number of samples across the FWHM RMSF
+      fits_extensions:
+        dtype: bool
+        nom_de_guerre: f
+        info: 'Store different Stokes as FITS extensions [default: separate files]'
+      verbose:
+        dtype: bool
+        nom_de_guerre: v
+        info: Verbose output
+      skip_rmsf:
+        dtype: bool
+        nom_de_guerre: R
+        info: Skip calculation of the RMSF
+      super_resolution:
+        dtype: bool
+        nom_de_guerre: r
+        info: Optimise the resolution of the RMSF (Rudnick & Cotton)

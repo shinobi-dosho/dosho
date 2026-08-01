@@ -1,0 +1,141 @@
+cabs:
+  spimple-spifit:
+    command: spimple-spifit
+    image: SPIMPLE
+    info: 'spimple-spifit: simple spectral index fitting tool (https://github.com/ratt-ru/spimple)'
+    harvest:
+    - '{output_filename}.*'
+    inputs:
+      model:
+        dtype: List[File]
+        info: Model image(s)
+        policies:
+          repeat: list
+      residual:
+        dtype: List[File]
+        info: Residual image(s)
+        policies:
+          repeat: list
+      output_filename:
+        dtype: str
+        required: true
+        nom_de_guerre: output-filename
+        info: Path to output directory + prefix
+        write_path: true
+      psf_pars:
+        dtype: List[float]
+        nom_de_guerre: psf-pars
+        info: 'Restoring beam FWHM as emaj emin pa [default: from the residual''s FITS header]'
+        policies:
+          repeat: list
+      circ_psf:
+        dtype: bool
+        nom_de_guerre: circ-psf
+        info: Convolve with a circularised beam instead of elliptical
+      threshold:
+        dtype: float
+        info: Multiple of the residual rms to threshold on; only components above are fit
+      maxDR:
+        dtype: float
+        info: Max dynamic range used to determine the threshold if no residual is passed in
+      nthreads:
+        dtype: int
+        info: 'Number of threads to use [0: all threads]'
+      pb_min:
+        dtype: float
+        nom_de_guerre: pb-min
+        info: Set image to zero where pb falls below this value
+      products:
+        dtype: str
+        info: 'Outputs to write: a=alpha, e=alpha error, i=I0, k=I0 error, I=reconstructed cube, c=restoring
+          beam, m=convolved model, r=convolved residual, b=average power beam, d=data-model difference
+          [default: all]'
+      padding_frac:
+        dtype: float
+        nom_de_guerre: padding-frac
+        info: Padding fraction for FFTs
+      dont_convolve:
+        dtype: bool
+        nom_de_guerre: dont-convolve
+        info: Bypass the convolution by the clean beam
+      channel_weights:
+        dtype: List[float]
+        info: Per-channel weights for the frequency-axis fit (only if no residual is passed in)
+        policies:
+          repeat: list
+      channel_freqs:
+        dtype: List[float]
+        info: 'Per-channel freqs for the frequency-axis fit [default: from the FITS header]'
+        policies:
+          repeat: list
+      ref_freq:
+        dtype: float
+        nom_de_guerre: ref-freq
+        info: Reference frequency where the I0 map is sought
+      out_dtype:
+        dtype: str
+        info: 'Data type of output [default: single precision]'
+      add_convolved_residuals:
+        dtype: bool
+        nom_de_guerre: add-convolved-residuals
+        info: Add in the convolved residuals before fitting components
+      ms:
+        dtype: List[MS]
+        info: Measurement set(s) used to make the image (for parallactic angles, primary beam correction)
+        policies:
+          repeat: list
+      field:
+        dtype: int
+        info: Field ID
+      beam_model:
+        dtype: str
+        nom_de_guerre: beam-model
+        info: 'FITS beam model to use: path up to name (pattern path_to_beam/name_corr_re/im.fits)'
+      sparsify_time:
+        dtype: int
+        nom_de_guerre: sparsify-time
+        info: Used to select a subset of time
+      corr_type:
+        dtype: str
+        nom_de_guerre: corr-type
+        info: 'Correlation type: linear or circular'
+      band:
+        dtype: str
+        info: 'Band to use with JimBeam: L, UHF or S'
+      deselect_bands:
+        dtype: List[int]
+        nom_de_guerre: deselect-bands
+        info: Indices of sub-bands to exclude from the fitting, e.g. 1 2
+        policies:
+          repeat: list
+    outputs:
+      alpha:
+        dtype: File
+        implicit: '{output_filename}.alpha.fits'
+      alpha_err:
+        dtype: File
+        implicit: '{output_filename}.alpha_err.fits'
+      i0:
+        dtype: File
+        implicit: '{output_filename}.I0.fits'
+      i0_err:
+        dtype: File
+        implicit: '{output_filename}.I0_err.fits'
+      irec_cube:
+        dtype: File
+        implicit: '{output_filename}.Irec_cube.fits'
+      clean_psf:
+        dtype: File
+        implicit: '{output_filename}.clean_psf.fits'
+      convolved_model:
+        dtype: File
+        implicit: '{output_filename}.convolved_model.fits'
+      convolved_residual:
+        dtype: File
+        implicit: '{output_filename}.convolved_residual.fits'
+      power_beam:
+        dtype: File
+        implicit: '{output_filename}.power_beam.fits'
+      fit_diff:
+        dtype: File
+        implicit: '{output_filename}.fit_diff.fits'

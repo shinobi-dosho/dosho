@@ -1,0 +1,62 @@
+cabs:
+  chgcentre:
+    command: chgcentre
+    image: WSCLEAN
+    info: 'chgcentre: recompute UVWs and rotate visibilities to a new phase centre (https://wsclean.readthedocs.io)'
+    policies:
+      prefix: '-'
+    inputs:
+      geozenith:
+        dtype: bool
+        info: Calculate the RA/dec of zenith for each timestep and move there (makes the set non-standard)
+      flipuvwsign:
+        dtype: bool
+        info: Flip the UVW sign (necessary for LOFAR, for unknown reasons)
+      minw:
+        dtype: bool
+        info: Calculate the direction that gives the minimum w-values for the array
+      zenith:
+        dtype: bool
+        info: Shift to the average zenith value
+      only_uvw:
+        dtype: bool
+        nom_de_guerre: only-uvw
+        info: Only update the UVW values, do not apply the phase shift
+      shiftback:
+        dtype: bool
+        info: After changing the phase centre, project visibilities back to the old phase centre
+      force:
+        dtype: bool
+        nom_de_guerre: f
+        info: Force recalculation even if the destination equals the original phase direction
+      datacolumn:
+        dtype: str
+        info: 'Only phase-rotate this column [default: DATA, MODEL_DATA, CORRECTED_DATA if present]'
+      from_ms:
+        dtype: MS
+        nom_de_guerre: from-ms
+        info: Rotate to the same direction as specified in this measurement set
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to rotate (edited in place)
+        policies:
+          positional: true
+      ra:
+        dtype: str
+        required: true
+        info: New Right Ascension (00h00m00.0s or 00:00:00.0 format)
+        policies:
+          positional: true
+      dec:
+        dtype: str
+        required: true
+        info: New Declination (00d00m00.0s or 00.00.00.0 format)
+        policies:
+          positional: true
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set to rotate (edited in place)
+        policies:
+          positional: true

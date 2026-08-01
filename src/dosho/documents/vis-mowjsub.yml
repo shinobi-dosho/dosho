@@ -1,0 +1,134 @@
+cabs:
+  vis-mowjsub:
+    command: vis-mowjsub
+    image: MOWJSUB
+    info: 'mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Input MS file
+        policies:
+          positional: true
+        mutable: true
+      input-column:
+        dtype: str
+        default: DATA
+        info: Column which contains the data to be continuum subtracted.
+      output-column:
+        dtype: str
+        default: LINE_DATA
+        info: Column name to write the continuum subtracted data to
+      fit-model:
+        dtype: str
+        default: b-spline
+        info: 'Fit function to model the continuum. The ''scipy-median-filter'' model is much faster than
+          ''median-filter'', but treats band edges and masked channels differently, so the two do not
+          give identical continuum models. WARNING: A median-filter continuum model may subsume low SNR
+          line emission, use it with great care.'
+        choices:
+        - b-spline
+        - spline
+        - polynomial
+        - median-filter
+        - scipy-median-filter
+        - gcv-spline
+      order:
+        dtype: int
+        info: Order of spline/polynomial or number of top coefficients to use for DCT reconstruction
+      vel-width:
+        dtype: float
+        info: Width of spline segments or median filter window in km/s.
+      chan-width:
+        dtype: int
+        info: Width of spline segments or median filter window in number of channels.
+      gcv-lambda:
+        dtype: float
+        info: GCV spline penalty. Zero is equivalent to an interpolating spline, high values lead to a
+          flatter curve. If unset the parameter will be estimated using the GCV criterion; this can be
+          very slow. Experience suggests that values chanwidth/nchan work best.
+      segments:
+        dtype: float
+        info: '## This has been replaced by --vel-width. It will be removed in future releases ## Width
+          of spline segments or median filter window in km/s. If given as a list, then it must have same
+          size as --order.'
+      spwid:
+        dtype: int
+        default: 0
+        info: Spectral Window ID
+      field-id:
+        dtype: int
+        default: 0
+        info: Field ID
+      row-chunks:
+        dtype: int
+        default: 10000
+        info: Chunking strategy (Done along the time axis)
+      time-chunks:
+        dtype: int
+        default: 64
+        info: Chunk size for time axis
+      bl-chunks:
+        dtype: int
+        default: 10
+        info: Chunk size for baseline axis
+      cont-fit-tol:
+        dtype: float
+        default: 0
+        info: Minimum percentage of valid spectrum data points required to do a fit. If the percentage
+          of data points is below this percentage, original data will be returned.
+      nworkers:
+        dtype: int
+        default: 4
+        info: Number of parallel worker threads (roughly one per CPU core). Runtime for fitting-bound
+          models scales with this, so raise it to speed up large datasets.
+      output-ms:
+        dtype: MS
+      load-from-cache:
+        dtype: File
+        info: Load the MS from a cache (give Zarr file name) if available, otherwise create it.
+      doppler-frame:
+        dtype: str
+        info: Spectral reference frame to Doppler-correct the output to. When set, the continuum-subtracted
+          visibilities are resampled onto a channel grid fixed in this frame, as CASA mstransform does
+          with regridms=True. The continuum is always fitted on the native topocentric grid first, so
+          the fit sees the bandpass structure where it is stationary. Requires --output-ms, since the
+          output channel grid differs from the input. Leave unset to skip Doppler correction.
+        choices:
+        - topo
+        - geo
+        - bary
+        - lsrk
+        - lsrd
+        - galacto
+        - lgroup
+        - cmb
+        - source
+      doppler-chan-grid:
+        dtype: str
+        default: auto
+        info: Output channel grid for the Doppler correction. 'auto' derives the grid that every timestamp
+          of this observation covers. Otherwise give 'nchan,chan0,chanwidth' with frequency units, e.g.
+          '1000,1419.5MHz,26.1kHz'; use this to place several MSs on one common grid, since 'auto' only
+          ever sees a single MS.
+      doppler-interpolation:
+        dtype: str
+        default: nearest
+        info: Interpolation used when resampling onto the Doppler-corrected grid. 'nearest' is what caracal
+          asks of CASA mstransform and leaves channel noise uncorrelated; 'linear' is smoother but correlates
+          adjacent channels.
+        choices:
+        - nearest
+        - linear
+      doppler-source-vel:
+        dtype: float
+        info: Systemic radial velocity of the source in km/s, positive for recession. Only used with --doppler-frame=source;
+          when unset it is read from the MS SOURCE::SYSVEL column.
+    outputs:
+      ms:
+        dtype: MS
+        info: Input MS file
+        policies:
+          positional: true
+      output-ms:
+        dtype: MS

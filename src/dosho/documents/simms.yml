@@ -1,0 +1,121 @@
+cabs:
+  simms:
+    command: simms
+    image: SIMMS_CLASSIC
+    info: 'simms (classic): simulate an empty MS from telescope/observation parameters (pre-3.0)'
+    inputs:
+      msname:
+        dtype: MS
+        required: true
+        nom_de_guerre: name
+        info: Name of MS file to be created
+      telescope:
+        dtype: str
+        required: true
+        nom_de_guerre: tel
+        info: Name of telescope that being simulated
+      antenna_file:
+        dtype: File
+        nom_de_guerre: antenna-file
+        info: File that contains antenna coordinates
+      type:
+        dtype: str
+        default: casa
+        info: Type of antenna file
+      coord_sys:
+        dtype: str
+        default: itrf
+        nom_de_guerre: coord-sys
+        info: Coordinate system of antenna coordinates in 'antenna-file'. Only needed if 'type' is 'ascii';
+          CASA tables are assumed to be in ITRF coords
+      lon_lat_elv:
+        dtype: List[float]
+        nom_de_guerre: lon-lat-elv
+        info: Reference position of telescope. Comma seperated longitude,lattitude and elevation 'deg,deg,m'.
+          Elevation is not crucial, lon,lat should be enough. If not specified, we'll try to get this
+          info from the CASA database (assuming that your telescope is known to CASA)
+      noup:
+        dtype: bool
+        default: false
+        info: Enable this to indicate that your ENU file does not have an 'up' dimension
+      direction:
+        dtype: List[str]
+        default: J2000,0deg,-30deg
+        info: Pointing direction. Example J2000,0h0m0s,-30d0m0d. Option --direction may be specified multiple
+          times for multiple pointings. Provide a list of directions for multiple pointings; each pointing
+          will have a unique field ID
+      synthesis:
+        dtype: float
+        default: 4
+        info: Synthesis time in hours
+      scan_length:
+        dtype: float
+        nom_de_guerre: scan-length
+        info: Duration of a single scan in hours. Default is the entire observation (synthesis)
+      dtime:
+        dtype: int
+        default: 2
+        info: Integration time in seconds
+      freq0:
+        dtype: List[str]
+        default: 1.4GHz
+        info: Start frequency. This is the middle of the first channel. Specify as val[unit]. E.g 700MHz,
+          no unit => Hz. Use a comma seperated list for multiple start frequencies (for multiple subbands)
+      dfreq:
+        dtype: List[str]
+        default: 2MHz
+        info: Channel width. Specify as val[unit]. E.g 700MHz, no unit => Hz. Use a comma separated list
+          of channel widths (for multiple subbands)
+      nband:
+        dtype: int
+        default: 1
+        info: Number of subbands
+      nchan:
+        dtype: List[int]
+        default: 1
+        info: Number of channels. Can be used in tandem with 'freq0, dfreq, nband' to customise the partitioning
+          of the subbands
+      init_ha:
+        dtype: float
+        nom_de_guerre: init-ha
+        info: Initial hour angle. 'scan-length/2' is the default
+      pol:
+        dtype: str
+        default: XX XY YX YY
+        info: polarization
+      feed:
+        dtype: str
+        default: perfect X Y
+        info: Feed type
+      scan_lag:
+        dtype: float
+        default: 0
+        nom_de_guerre: scan-lag
+        info: Lag time between scans in hours
+      set_limits:
+        dtype: bool
+        default: false
+        nom_de_guerre: set-limits
+        info: Set telescope limits. Elevation and shadow limits. Works in tandem with 'shadow-limit, elevation-limit'
+      elevation_limit:
+        dtype: float
+        nom_de_guerre: elevation-limit
+        info: Dish elevation limit. Will only be taken into account if 'set-limits' is enabled.
+      shadow_limit:
+        dtype: float
+        nom_de_guerre: shadow-limit
+        info: Shadow limit. Will only be taken into account if 'set-limits' is enabled.
+      auto_correlations:
+        dtype: bool
+        default: false
+        nom_de_guerre: auto-correlations
+        info: Don't flag autocorrelations
+      date:
+        dtype: str
+        info: 'Date of observation. Example UTC,2014/05/26 or UTC,2014/05/26/12:12:12: default is today
+          (format EPOCH,yyyy/mm/dd/[h:m:s])'
+    outputs:
+      msname:
+        dtype: MS
+        nom_de_guerre: name
+        info: Name of MS file to be created

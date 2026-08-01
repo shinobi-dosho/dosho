@@ -1,0 +1,82 @@
+cabs:
+  quartical-plotter:
+    command: goquartical-plot
+    image: QUARTICAL
+    info: 'goquartical-plot: rudimentary plotter for QuartiCal gain solutions'
+    inputs:
+      input_path:
+        dtype: Directory
+        required: true
+        info: Path to input gains, e.g. path/to/dir/G (also accepts s3 URLs)
+        policies:
+          positional: true
+      output_path:
+        dtype: str
+        required: true
+        info: Path to the desired output location
+        policies:
+          positional: true
+      plot_var:
+        dtype: str
+        nom_de_guerre: plot-var
+        info: Name of the data variable to plot
+      flag_var:
+        dtype: str
+        nom_de_guerre: flag-var
+        info: Name of the data variable to use as flags
+      xaxis:
+        dtype: str
+        info: 'Coordinate to use for the x-axis: gain_time, gain_freq, param_time, param_freq'
+      transform:
+        dtype: str
+        info: 'Transform to apply before plotting: raw, amplitude, phase, real, imag'
+      iter_attrs:
+        dtype: List[str]
+        nom_de_guerre: iter-attrs
+        info: Attributes (datasets) to iterate over; omitting one concatenates across it
+        policies:
+          repeat: list
+      iter_axes:
+        dtype: List[str]
+        nom_de_guerre: iter-axes
+        info: Axes to iterate over, producing one plot per unique combination
+        policies:
+          repeat: list
+      mean_axis:
+        dtype: str
+        nom_de_guerre: mean-axis
+        info: If set, plot a heavier line for the mean along this axis
+      colourize_axis:
+        dtype: str
+        nom_de_guerre: colourize-axis
+        info: Axis to colour by
+      time_range:
+        dtype: List[float]
+        nom_de_guerre: time-range
+        info: Time range to plot
+        policies:
+          repeat: list
+      freq_range:
+        dtype: List[float]
+        nom_de_guerre: freq-range
+        info: Frequency range to plot
+        policies:
+          repeat: list
+      nworker:
+        dtype: int
+        info: Number of processes to use while plotting
+      colourmap:
+        dtype: str
+        info: Matplotlib colourmap to use with --colourize-axis
+      fig_size:
+        dtype: List[float]
+        nom_de_guerre: fig-size
+        info: 'Figure size in inches: width height'
+        policies:
+          repeat: list
+    outputs:
+      output_path:
+        dtype: Directory
+        info: Path to the desired output location
+        policies:
+          positional: true
