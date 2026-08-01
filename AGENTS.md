@@ -105,6 +105,18 @@ new mechanism speculatively -- leave the field/output out and come back
 when a real pipeline needs it (same "as small and boring as possible" gate
 as stimela-ninja itself).
 
+## YAML files use `.yaml`
+
+Not `.yml`. One extension, chosen so nobody has to remember which file went
+which way: `src/dosho/images.yaml` and every generated cab document under
+`src/dosho/documents/` use it, and a new one should too.
+
+Two exceptions, both because the name is not ours to pick. `.github/workflows/`
+keeps `.yml` -- renaming those churns CI for nothing. And when prose refers to
+an *upstream* file it uses that project's own spelling, so cult-cargo's
+`cubical.yml` stays `cubical.yml`; renaming it in a sentence would be quietly
+wrong about a file someone might go and look for.
+
 ## Container images
 
 `src/dosho/images.yaml` is the **single source of truth** linking each cab to

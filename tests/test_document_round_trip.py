@@ -41,7 +41,7 @@ def generated() -> dict:
     are_current` is what ties the two together.
     """
     out = {}
-    for path in sorted(DOCUMENT_DIR.glob("*.yml")):
+    for path in sorted(DOCUMENT_DIR.glob("*.yaml")):
         body = yaml.safe_load(path.read_text())["cabs"]
         (name,) = body
         out[name] = body[name]
@@ -84,8 +84,8 @@ def test_committed_documents_are_current(tmp_path):
     keep passing against the stale copy, since they read the same stale files.
     """
     write_documents(tmp_path)
-    committed = {p.name: p.read_text() for p in DOCUMENT_DIR.glob("*.yml")}
-    fresh = {p.name: p.read_text() for p in tmp_path.glob("*.yml")}
+    committed = {p.name: p.read_text() for p in DOCUMENT_DIR.glob("*.yaml")}
+    fresh = {p.name: p.read_text() for p in tmp_path.glob("*.yaml")}
     assert set(committed) == set(fresh), "a cab was added or removed without regenerating"
     stale = sorted(n for n in committed if committed[n] != fresh[n])
     assert stale == [], (
@@ -100,7 +100,7 @@ def test_the_generator_and_the_committed_files_agree_on_content(built):
     (indent, width) is not mistaken for a change in what they say.
     """
     for name, body in documents().items():
-        path = DOCUMENT_DIR / f"{name}.yml"
+        path = DOCUMENT_DIR / f"{name}.yaml"
         assert path.exists(), f"{name} has no committed document"
         assert path.read_text() == render(body, name)
 

@@ -191,7 +191,7 @@ def write_documents(target: Path | None = None) -> list[Path]:
     target.mkdir(parents=True, exist_ok=True)
     written = []
     for name, body in documents().items():
-        path = target / f"{name}.yml"
+        path = target / f"{name}.yaml"
         path.write_text(render(body, name))
         written.append(path)
     return written
