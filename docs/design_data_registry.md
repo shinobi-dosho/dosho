@@ -243,10 +243,11 @@ because it never parses. It reads a file and hands over bytes.
 
 ```python
 def __getattr__(name: str):
-    doc = _lookup(name)                     # index + file read, no shinobi
-    from shinobi.cabs import build_document # imported only now
+    doc = _lookup(name)  # index + file read, no shinobi
+    from shinobi.cabs import build_document  # imported only now
+
     cab = build_document(*doc)
-    globals()[name] = cab                   # cache; __getattr__ won't fire again
+    globals()[name] = cab  # cache; __getattr__ won't fire again
     return cab
 ```
 
@@ -425,8 +426,10 @@ instead is a structural comparator: everything except the two model fields via
 
 ```python
 def model_shape(m):
-    return {n: (f.annotation, f.default, f.is_required(), f.alias, f.json_schema_extra)
-            for n, f in m.model_fields.items()}
+    return {
+        n: (f.annotation, f.default, f.is_required(), f.alias, f.json_schema_extra)
+        for n, f in m.model_fields.items()
+    }
 ```
 
 Validated against the tree before being written here:

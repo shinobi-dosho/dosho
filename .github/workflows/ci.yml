@@ -36,6 +36,14 @@ jobs:
       - name: Lint
         run: uv run --locked --extra run --group dev ruff check .
 
+      # Formatting is checked here as well as by .githooks/pre-commit, which
+      # already runs both. The hook is opt-in per clone (`git config
+      # core.hooksPath .githooks`) and `--no-verify` bypasses it, so without
+      # this an unformatted file reaches main and the next contributor's
+      # `ruff format` rewrites lines they did not touch.
+      - name: Format
+        run: uv run --locked --extra run --group dev ruff format --check .
+
   docs:
     runs-on: ubuntu-latest
     steps:
