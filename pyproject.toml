@@ -101,9 +101,13 @@ line-length = 100
 [tool.ruff.lint]
 # `select`, not `extend-select` and not the implicit default. This list is the
 # repo's *whole* ruleset, stated outright rather than inherited from whatever
-# ruff happens to enable this month -- `uv.lock` is untracked and the dev group
-# asks for `ruff>=0.5`, so CI resolves a fresh ruff every run, and when 0.16.0
-# widened its default it turned the next PR red with nothing in it to blame.
+# ruff happens to enable this month. It was written when `uv.lock` was
+# untracked, so CI resolved a fresh ruff every run and 0.16.0 widening its
+# default turned the next PR red with nothing in it to blame. The lock is
+# tracked now and CI runs `--locked` (#42), so a ruff upgrade is a deliberate
+# lockfile change rather than a surprise -- but the reason to state the set
+# outright survives that: it moves the widening into the PR that bumps ruff,
+# where it can be read, instead of into whichever PR happens to follow.
 # (caracal2's own ruff.toml carries this same fix, for the same reason.)
 #
 # 981a92a stated the set at ruff's classic default (E4/E7/E9/F) to stop the
