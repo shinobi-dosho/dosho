@@ -58,8 +58,8 @@ def _meta_spec(
         out["choices"] = meta.choices
     if meta.abbreviation:
         out["abbreviation"] = meta.abbreviation
-    if meta.path_prefix:
-        out["path_prefix"] = True
+    if meta.write_path:
+        out["write_path"] = True
     if with_dtype and meta.dtype is not None:
         out["dtype"] = meta.dtype
 
