@@ -39,7 +39,7 @@ from dosho._builder import FieldSpec, define_cab
 
 _FIELDS: dict[str, FieldSpec] = {
     "ms": ("List[MS]", True, None, ParamMeta(positional=True, repeat_as_tokens=True)),
-    "prefix": ("str", True, None, ParamMeta(nom_de_guerre="name", path_prefix=True)),
+    "prefix": ("str", True, None, ParamMeta(nom_de_guerre="name", write_path=True)),
     "column": ("str", False, "DATA", ParamMeta(nom_de_guerre="data-column")),
     "model-column": ("str", False, None),
     "model-storage-manager": ("str", False, None),

@@ -828,7 +828,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ".",
         ParamMeta(
             nom_de_guerre="output.directory",
-            path_prefix=True,
+            write_path=True,
             info="Full path to the directory to which all output files will be written. Defaults to '.' here (real SoFiA would fall back to the input data cube's own directory) so this cab's output paths stay predictable.",
         ),
     ),
@@ -838,7 +838,7 @@ _FIELDS: dict[str, FieldSpec] = {
         "sofia",
         ParamMeta(
             nom_de_guerre="output.filename",
-            path_prefix=True,
+            write_path=True,
             info="File name that will be used as the template for all output files. For example, if output.filename = my_data, then the output files will be named my_data_cat.xml, my_data_mom0.fits, etc. Defaults to 'sofia' here (real SoFiA would fall back to the input data cube's own name) so this cab's output paths stay predictable.",
         ),
     ),

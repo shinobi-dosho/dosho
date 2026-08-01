@@ -310,7 +310,7 @@ _FIELDS: dict[str, FieldSpec] = {
         "str",
         False,
         None,
-        ParamMeta(nom_de_guerre="ImageSkyModel-DDFCacheDir", info=""),
+        ParamMeta(nom_de_guerre="ImageSkyModel-DDFCacheDir", info="", write_path=True),
     ),
     "image_sky_model_filter_neg_comp": (
         "bool",

@@ -349,7 +349,7 @@ _FIELDS: dict[str, FieldSpec] = {
         ParamMeta(
             nom_de_guerre="Output-Name",
             info="Base name of output images (Default: image)",
-            path_prefix=True,
+            write_path=True,
         ),
     ),
     "output_shift_facets_file": (
@@ -950,6 +950,7 @@ _FIELDS: dict[str, FieldSpec] = {
         None,
         ParamMeta(
             nom_de_guerre="Cache-Dir",
+            write_path=True,
             info="Directory to store caches in. Default is to keep cache next to the MS, but this can cause performance issues with e.g. NFS volumes. If you have fast local storage, point to it. %metavar:DIR",
         ),
     ),
@@ -1808,6 +1809,7 @@ _FIELDS: dict[str, FieldSpec] = {
         None,
         ParamMeta(
             nom_de_guerre="Montblanc-LogFile",
+            write_path=True,
             info="None to dump as Output-Name.montblanc.log, otherwise user-specified filename",
         ),
     ),
