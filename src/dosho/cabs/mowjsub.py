@@ -22,14 +22,21 @@ by the fit being too stiff to follow it rather than by naming channels.
 which mowjsub's own help warns about. This is a different method occupying
 the same slot, not a drop-in replacement.
 
-**`ms` is declared MUTABLE**, because the tool's default mode adds
-`--output-column` to the *input* MS and writes nothing new. `--output-ms`
-switches it to producing a fresh MS instead, and only then is the declared
-`output-ms` output the thing downstream should wire from. Declaring the
-mutation is not optional: an undeclared in-place write keys its cache on the
-content of a table the step is about to rewrite, and shinobi's Tier 1
-snapshotter cannot protect what it cannot see -- see `define_cab`'s
-`input_mutability` docstring and stimela-ninja#52.
+**Both `ms` and `output-ms` are declared outputs, and which one a caller
+wires from is which mode it asked for.** The tool's default mode adds
+`--output-column` to the *input* MS and writes nothing new, so `ms` is
+echoed back: that echo is the only thing that can carry the in-place write
+into a DAG, since a mutation with no output ref behind it is a *sibling* of
+the next step rather than its producer. Pass `--output-ms` and it produces a
+fresh MS instead, and `output-ms` is what downstream should take.
+
+`ms` is additionally declared MUTABLE. That is belt-and-braces --
+`mutated_path_fields` already sees it via the input/output name
+intersection -- but it says in one place what the echo only implies, and the
+cost of getting this wrong is not cosmetic: an undeclared in-place write
+keys its cache on the content of a table the step is about to rewrite, and
+shinobi's Tier 1 snapshotter can roll it away under a later cache hit
+(stimela-ninja#52).
 """
 
 from __future__ import annotations
@@ -223,7 +230,7 @@ vis_mowjsub = define_cab(
     "vis-mowjsub",
     images.MOWJSUB,
     _FIELDS,
-    outputs={"output-ms": ("MS", False, None)},
+    outputs={"ms": ("MS", False, None), "output-ms": ("MS", False, None)},
     input_mutability={"ms": Mutability.MUTABLE},
     policies=Policies(prefix="--"),
     info="mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)",

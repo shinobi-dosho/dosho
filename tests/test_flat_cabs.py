@@ -895,3 +895,12 @@ def test_vis_mowjsub_declares_its_in_place_write():
 def test_vis_mowjsub_output_ms_is_wireable():
     cab = dosho.get("vis-mowjsub")
     assert "output_ms" in cab.outputs_model.model_fields
+
+
+def test_vis_mowjsub_echoes_ms_so_the_in_place_mode_is_wireable():
+    """Without --output-ms the tool writes a column into the MS it was given.
+    A mutation with no output ref behind it is a sibling of the next step
+    rather than its producer, so the echo is what makes that mode usable in
+    a DAG at all."""
+    cab = dosho.get("vis-mowjsub")
+    assert "ms" in cab.outputs_model.model_fields

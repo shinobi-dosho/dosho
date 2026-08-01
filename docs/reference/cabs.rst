@@ -13523,6 +13523,9 @@ mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/m
    * - Field
      - Type
      - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
    * - ``output_ms``
      - ``Path | None``
      - \-
