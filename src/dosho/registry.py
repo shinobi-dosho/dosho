@@ -92,12 +92,12 @@ def registered_name_for_attr(attr: str) -> str | None:
     differ between the two. The index records both, so the mapping is written
     down once rather than inferred from `_NAME_OVERRIDES` in reverse.
 
-    Only document-backed names resolve here: a pystep is a real module-level
-    object, so it never reaches `__getattr__` at all, and returning it from
-    this would paper over an import that failed.
+    Both kinds resolve here now that `dosho.cabs` imports nothing eagerly:
+    a document-backed cab is built from its file, a pystep is fetched from the
+    module the index names.
     """
     for name, entry in _index().items():
-        if entry.get("attr") == attr and "document" in entry:
+        if entry.get("attr") == attr:
             return name
     return None
 
@@ -185,8 +185,10 @@ def get(name: str) -> Cab | StepRef:
         cab = build_document(dialect, text, name=name, **loader_options())
         _cab_cache[name] = cab
         return cab
-    module = importlib.import_module("dosho.cabs")
-    return getattr(module, entry["attr"])
+    # The pystep's own module, not `dosho.cabs` -- that package resolves
+    # names *through here*, so reaching back into it would be a cycle.
+    module = importlib.import_module(entry["module"])
+    return getattr(module, entry["symbol"])
 
 
 def list_cabs() -> list[str]:

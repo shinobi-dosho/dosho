@@ -1,108 +1,46 @@
+"""Every tool dosho provides, by name.
+
+`from dosho.cabs import wsclean` gives you the `Cab`; `from dosho.cabs import
+listobs` gives you the pystep `StepRef`. Both are first-class for
+`Recipe.add_step`, and a pipeline author does not need to know which one a
+given tool is.
+
+Nothing is imported eagerly. A name resolves on first access, through
+`dosho.registry.get` -- the same path `shinobi.cabs.get` takes -- so there is
+one answer to "what is this tool" and one place for it to be wrong. Repeated
+access returns the same object, as it did when these were module-level
+assignments.
+
+That laziness is also what makes shinobi optional. Building a `Cab` from its
+document, or importing a pystep, needs the schema; *naming* one does not. So
+`import dosho.cabs` costs nothing and works without shinobi installed, and
+only attribute access requires the `dosho[run]` extra.
+
+For runtime, string-keyed lookup -- the CLI, `shinobi.cabs` entry-point
+discovery -- use `dosho.get(name)` instead. Same objects, keyed by registered
+name (`msutils-addcol`) rather than by the attribute this module exports it
+as (`addcol`).
+"""
+
 from __future__ import annotations
-
-from dosho.cabs.bdsf import catalog as bdsf_catalog
-from dosho.cabs.casaplotms import plotms
-from dosho.cabs.casatasks import (
-    accor,
-    apparentsens,
-    appendantab,
-    applycal,
-    bandpass,
-    blcal,
-    clearcal,
-    clearstat,
-    concat,
-    conjugatevis,
-    cvel,
-    cvel2,
-    deconvolve,
-    defintent,
-    delmod,
-    feather,
-    fixplanets,
-    fixvis,
-    flagcmd,
-    flagdata,
-    flagmanager,
-    fluxscale,
-    fringefit,
-    ft,
-    gaincal,
-    gencal,
-    getantposalma,
-    getcalmodvla,
-    hanningsmooth,
-    impbcor,
-    initweights,
-    listobs,
-    makemask,
-    mstransform,
-    msuvbin,
-    msuvbinflag,
-    partition,
-    pccor,
-    phaseshift,
-    polcal,
-    polfromgain,
-    predictcomp,
-    rerefant,
-    rmtables,
-    sdintimaging,
-    setjy,
-    smoothcal,
-    split,
-    statwt,
-    tclean,
-    uvcontsub,
-    uvcontsub_old,
-    uvmodelfit,
-    uvsub,
-    virtualconcat,
-    widebandpbcor,
-    wvrgcal,
-)
-from dosho.cabs.fitstoolz import (
-    add_axis as fitstoolz_add_axis,
-    header as fitstoolz_header,
-    remove_axis as fitstoolz_remove_axis,
-    slice_ as fitstoolz_slice,
-    stack as fitstoolz_stack,
-    stats as fitstoolz_stats,
-)
-from dosho.cabs.simms import primary_beam, skysim, telsim
-
-# --- documents ------------------------------------------------------------
-#
-# The 43 binary cabs are defined by the documents under `dosho/documents/`,
-# not by Python. They are served here on attribute access so
-# `from dosho.cabs import wsclean` keeps working and keeps returning a `Cab`,
-# which is what every recipe written against this package expects.
-#
-# Lazy for two reasons. It keeps `import dosho.cabs` from building 43 cabs
-# nobody asked for, which is what the eager imports used to do. And it is what
-# lets the document half stay reachable without shinobi: building a `Cab`
-# needs the schema, so the import that needs it happens only when someone
-# actually wants one.
-#
-# Resolution goes through `dosho.registry.get`, the same path
-# `shinobi.cabs.get` takes, so there is one answer to "what is this cab" and
-# one place for it to be wrong.
 
 
 def __getattr__(name: str):
-    from dosho.registry import registered_name_for_attr
+    from dosho.registry import get, registered_name_for_attr
 
     registered = registered_name_for_attr(name)
     if registered is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    from dosho.registry import get
-
-    # `registry.get` caches, so this is the same object `dosho.get(name)`
-    # returns -- one name, one cab, however it is reached. Binding it here as
-    # well just stops `__getattr__` firing again.
-    cab = get(registered)
-    globals()[name] = cab
-    return cab
+    try:
+        obj = get(registered)
+    except ImportError as exc:  # shinobi absent
+        raise ImportError(
+            f"dosho.cabs.{name} needs stimela-ninja, which is not installed. "
+            "dosho ships its cab definitions without it -- install `dosho[run]` "
+            "to build and run them."
+        ) from exc
+    globals()[name] = obj
+    return obj
 
 
 def __dir__() -> list[str]:

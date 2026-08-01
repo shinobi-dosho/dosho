@@ -73,3 +73,76 @@ def test_getting_a_cab_still_works():
     import dosho
 
     assert dosho.get("breizorro").name == "breizorro"
+
+
+# --------------------------------------------------------------------------
+# shinobi is the `dosho[run]` extra, not a dependency
+# --------------------------------------------------------------------------
+
+# Simulating absence rather than building a shinobi-free venv per test: the
+# test environment necessarily has shinobi (the rest of the suite needs it),
+# and a meta-path finder that refuses it reproduces the condition faithfully
+# in-process. The real thing is checked once, by installing into a clean venv
+# -- see this PR -- but that is too slow to run per case.
+_BLOCK = """
+import sys, importlib.abc, importlib.machinery
+
+
+class _Blocked(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "shinobi" or fullname.startswith("shinobi."):
+            raise ImportError(f"no module named {fullname!r} (blocked)")
+        return None
+
+
+sys.meta_path.insert(0, _Blocked())
+for name in [m for m in sys.modules if m == "shinobi" or m.startswith("shinobi.")]:
+    del sys.modules[name]
+"""
+
+
+def _without_shinobi(body: str) -> subprocess.CompletedProcess:
+    # `check=False`: these assert on the child's own output, and a non-zero
+    # exit is a finding to report rather than an exception to raise here.
+    return subprocess.run(
+        [sys.executable, "-c", _BLOCK + body], capture_output=True, text=True, check=False
+    )
+
+
+def test_the_data_path_works_without_shinobi():
+    """Listing what exists, fetching a definition, and resolving an image
+    reference are what a catalogue is for, and none of them need the runner.
+    """
+    out = _without_shinobi(
+        "import dosho\n"
+        "d = dosho.registry.get_document('wsclean')\n"
+        "print(len(dosho.list_cabs()), d[0], len(dosho.registry.loader_options()['images']))\n"
+    )
+    assert out.returncode == 0, out.stderr
+    count, dialect, images = out.stdout.split()
+    assert int(count) > 100 and dialect == "yaml_cab" and int(images) > 20
+
+
+def test_importing_dosho_cabs_works_without_shinobi():
+    """Naming a tool is not building one. `import dosho.cabs` must not be the
+    thing that fails, or the package is unusable without the extra.
+    """
+    out = _without_shinobi("import dosho.cabs; print(len(dosho.cabs.__all__))")
+    assert out.returncode == 0, out.stderr
+    assert int(out.stdout.strip()) > 100
+
+
+def test_building_a_cab_without_shinobi_says_what_to_install():
+    """The failure a user actually meets. A bare ModuleNotFoundError three
+    frames deep in a loader does not tell them they wanted `dosho[run]`.
+    """
+    out = _without_shinobi(
+        "import dosho.cabs\n"
+        "try:\n"
+        "    dosho.cabs.wsclean\n"
+        "except ImportError as exc:\n"
+        "    print(exc)\n"
+    )
+    assert out.returncode == 0, out.stderr
+    assert "dosho[run]" in out.stdout
+    assert "stimela-ninja" in out.stdout
