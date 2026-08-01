@@ -125,7 +125,9 @@ _IMCONV_FIELDS: dict[str, FieldSpec] = {
         "str",
         True,
         None,
-        ParamMeta(nom_de_guerre="output-filename", info="Path to output directory"),
+        ParamMeta(
+            nom_de_guerre="output-filename", info="Path to output directory", path_prefix=True
+        ),
     ),
     "products": (
         "str",
@@ -230,7 +232,11 @@ _SPIFIT_FIELDS: dict[str, FieldSpec] = {
         "str",
         True,
         None,
-        ParamMeta(nom_de_guerre="output-filename", info="Path to output directory + prefix"),
+        ParamMeta(
+            nom_de_guerre="output-filename",
+            info="Path to output directory + prefix",
+            path_prefix=True,
+        ),
     ),
     "psf_pars": (
         "List[float]",
