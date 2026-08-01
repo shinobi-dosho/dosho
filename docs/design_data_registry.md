@@ -1,11 +1,48 @@
 # dosho as a data registry: static cabs, optional shinobi
 
-**Status:** v2 — **proposed, nothing implemented.** §9 step 3 is a gate; §8.1
-should be answered before §9 step 5.
+**Status:** v3 — **partly implemented.** Steps 0, 1 and the comparator have
+landed; §9 step 3 is the gate; §8.1 should be answered before §9 step 5.
 **Context:** spans this repo and stimela-ninja (`shinobi`). §9 marks which steps
 land where.
 
 **Change log**
+
+- **v2 → v3 (spike against the code).** Steps 0 and 1 shipped (dosho #42,
+  stimela-ninja #76), the comparator shipped (dosho #44), and a spike on three
+  representative cabs then found that §4.6's generator cannot work as written.
+  Everything below was measured, not reasoned about.
+  1. **`dtype` is not recoverable from a built `Cab`, and 16% of fields carry
+     one that matters (§4.6).** `_modelgen.dtype_to_type` is many-to-one:
+     `Path` ← `File`/`MS`/`Directory`/`URI`, `list[Path]` ←
+     `List[File]`/`List[MS]`/`List[Directory]`. Measured across dosho's 42
+     cabs: **1523 declared fields, 237 (16%) collapse to `Path`**. v2 said the
+     generator "imports each of the 42 cabs and serializes it" -- that
+     flattens every one of those 237 to whatever the emitter guesses.
+  2. **The comparator cannot catch it.** Both sides are already `Path` by the
+     time it looks, so a migration that silently turned every `MS` into `File`
+     would pass the gate. The gate is weaker than v2 claimed, for exactly this
+     one class of information, and no amount of improving the comparator fixes
+     it.
+  3. **Recording the dtype on `ParamMeta` does not rescue it -- tried, and it
+     is architecturally impossible.** `field_meta` is one dict keyed by field
+     name, built as `{**input_meta, **output_meta}` (`_builder.py:286`), so a
+     field that is both an input and an output has a single `ParamMeta`. Three
+     real cabs need two different dtypes for one name: `killms`
+     `solutions_sols_dir` (`str` in, `Directory` out), `quartical-plotter`
+     `output_path` (`str`/`Directory`), `spimple-binterp` `output_filename`
+     (`str`/`File`). The attempt failed 20 tests, all from the output-side
+     `ParamMeta` clobbering the input side's `nom_de_guerre`.
+  4. **Reading the source instead is feasible, and that is now measured rather
+     than hoped.** An AST pass over `src/dosho/cabs/*.py` resolves **42/42**
+     `define_cab` calls and **1437 input fields with zero non-literal specs**.
+     Every field dict is either a literal or a module-level name bound to one
+     (`_FIELDS: dict[str, FieldSpec] = {...}` -- an `AnnAssign`, which the
+     first version of the extractor missed).
+  **Fixed:** §4.6 now generates from source, and the gate is two checks rather
+  than one -- the comparator for everything the `Cab` knows, plus a direct
+  string comparison of dtypes for the part it forgets. The second is nearly
+  free once the generator reads source, because the document's dtypes are then
+  the source's dtypes by construction.
 
 - **v1 → v2 (review round 1).** Independent review attacked v1 against both
   trees. The goal survived; v1's proof mechanism, its API-preservation story and
@@ -70,14 +107,19 @@ the *optional* thing you add in order to load and run them.
 The load-bearing claim, and the thing most worth attacking:
 
 1. **A binary cab's Python definition and a static document are
-   interconvertible without loss, and the comparator that proves it is correct
-   (§4.6).** The claim is a test, not an argument: serialize each of the 42
-   `define_cab` cabs, load it back, compare. But the comparator is now the thing
-   carrying the weight, because plain `==` cannot do this job at all (see the
-   change log). Attack the comparator: find two `Cab`s it calls equal that
-   behave differently, or a document that reproduces a cab under it while
-   producing different argv. Or find a cab whose definition carries something no
-   document can express — `experimental` was one, and §4.7 is the answer to it.
+   interconvertible without loss, and the two checks that prove it are between
+   them sufficient (§4.6).** The claim is a test, not an argument. It is now
+   two tests, because one is provably not enough: the comparator (shipped,
+   dosho #44) covers everything the built `Cab` knows, and a direct dtype-string
+   comparison covers the 16% of fields whose `dtype` the `Cab` has already
+   forgotten by the time anything can compare them.
+
+   Attack either half. Find two `Cab`s the comparator calls equal that behave
+   differently. Find something a document cannot express that neither check
+   would notice — `experimental` was one such (§4.7), `dtype` was the second
+   (found by spike, and it invalidated v2's gate outright), and the interesting
+   question is what the third is. The pattern to look for is information that
+   exists in the Python source but not in the object the source builds.
 
 Two things this deliberately does **not** claim:
 
@@ -317,14 +359,53 @@ Consequently the §4.6 comparison runs on a **resolved** document — the loader
 applies the manifest before the comparator sees the `Cab` — so both sides carry
 a full reference and `image` compares like any other scalar.
 
-### 4.6 Migration is generated, and proven by a comparator that had to be built
+### 4.6 Migration is generated from source, and proven by two checks
 
-1. A one-off script imports each of the 42 cabs and serializes it to the
-   dialect. Nobody hand-writes 42 documents.
-2. A golden test loads each document and compares against the Python cab it came
-   from, for as long as both exist.
-3. Only once all 42 pass does the document become the source of truth and the
-   Python definitions get deleted.
+1. A one-off script reads `src/dosho/cabs/*.py` **as source** and serializes
+   each cab to the dialect. Nobody hand-writes 42 documents -- and nobody
+   imports them either, for the reason in "why source" below.
+2. A golden test checks each document two ways, because one check cannot cover
+   everything: the comparator against the Python cab it came from, **and** a
+   direct comparison of the document's dtype strings against the source's.
+3. Only once all 42 pass both does the document become the source of truth and
+   the Python definitions get deleted.
+
+**Why source, and not the imported cabs.** v2 said to import and serialize.
+That silently discards `dtype`. `_modelgen.dtype_to_type` is many-to-one:
+
+```
+Path        <- File, MS, Directory, URI
+list[Path]  <- List[File], List[MS], List[Directory]
+list[int]   <- List[int], list:int        (spelling only; harmless)
+```
+
+Measured over dosho's 42 cabs: **1523 declared fields, of which 237 (16%)
+collapse to `Path`**. Serializing from a built `Cab` cannot tell you which of
+the four a field was, so it must guess, and every guess it gets wrong is a
+tool's declared interface quietly rewritten.
+
+Recording the dtype on `ParamMeta` looks like the fix and is not: `field_meta`
+is `{**input_meta, **output_meta}` (`_builder.py:286`), one entry per field
+*name*, so a field appearing on both sides gets one `ParamMeta`. Three cabs
+need two dtypes for one name (`killms` `solutions_sols_dir` is `str` in and
+`Directory` out; likewise `quartical-plotter` `output_path` and
+`spimple-binterp` `output_filename`). Attempting it failed 20 tests, all from
+the output-side meta clobbering the input side's `nom_de_guerre` -- which is a
+pre-existing fragility in that merge, worth fixing on its own.
+
+Reading source is feasible and measured: an AST pass resolves **42/42**
+`define_cab` calls and **1437 input fields with zero non-literal specs**. Each
+field dict is a literal or a module-level name bound to one -- note
+`_FIELDS: dict[str, FieldSpec] = {...}` is an `AnnAssign`, not an `Assign`,
+which the first extractor missed and which is the kind of detail that decides
+whether this step works at all.
+
+**Why two checks.** The comparator covers everything the built `Cab` knows,
+which is most of it, and is already proven (dosho #44: 42/42 on rebuilds, 0
+false positives across 861 pairs). It cannot cover `dtype`, because both sides
+are `Path` before it looks. The second check closes exactly that gap and costs
+almost nothing: if the generator emits the source's dtype strings verbatim,
+comparing them back is string equality.
 
 **Step 2 cannot use `==`, and this is the design's sharpest edge.** `Cab` is a
 pydantic model whose `inputs_model`/`outputs_model` fields hold *class objects*
@@ -446,7 +527,24 @@ shape this design cannot carry. There is currently one.
    this design does not currently say where that implementation lives. Open.
 7. **The comparator can bless a lossy dialect.** §4.6 shifts the load from
    pydantic onto code we write; a field it forgets to compare is a field the
-   dialect may silently drop. Invariant 7 is the mitigation, not a cure.
+   dialect may silently drop. Invariant 7 is the mitigation, not a cure. And
+   there is at least one thing it *structurally* cannot check -- `dtype` --
+   which is why §4.6's gate is two checks and not one.
+8. **`field_meta`'s output-over-input merge is lossy** (`_builder.py:286`).
+   `{**input_meta, **output_meta}` replaces whole `ParamMeta` objects, so any
+   cab declaring output-side metadata for a name that is also an input silently
+   drops that input's `nom_de_guerre`, `info` and the rest. No cab hits it
+   today -- `test_killms` documents the hazard in a comment rather than
+   guarding it -- but the spike hit it immediately, and an attribute-wise merge
+   would remove the trap. Independent of this design; worth fixing regardless.
+9. **28 of cubical's 37 pattern attrs carry no `dtype`**, including
+   `load-from`, `xfer-from`, `save-to`, `fix-dirs`. `ParamMeta.dtype` is the
+   *only* thing that marks a pattern-matched input as file-like
+   (`sandbox.py:152`, `container.py:572` -- both consult it solely for names
+   not in `path_fields`), so those are neither bind-mounted nor
+   sandbox-anchored. If they are paths, that is a live bug, and it predates
+   this design. Worth checking before the migration bakes the current state
+   into documents.
 
 ## 7. Alternatives considered and rejected
 
@@ -498,18 +596,24 @@ shape this design cannot carry. There is currently one.
    warning-only path, in exactly the two cabs already flagged as fragile.
    Sequence it: release shinobi ≥ the scratch commit, bump dosho's constraint,
    *then* delete the redirect. Still independent of steps 1-6.
-1. **[shinobi] Provider protocol**: `get_document` tried before `get`, plus
-   `build_document(dialect, text)`. Additive; no dosho change; testable against
-   a fixture provider.
+1. **[shinobi] Provider protocol** -- **done** (stimela-ninja #76):
+   `get_document` tried before `get`, plus `build_document(dialect, text)`.
+   Additive; no dosho change. Note it is *not* a prerequisite for the gate --
+   it is what step 4 needs at runtime. The gate needs step 2 and step 3 only.
 2. **[shinobi] `loaders/dosho.py`**: the dialect, reusing `build_model` /
    `sanitize_unique`. Tested against hand-written fixtures before any migration.
-3. **[dosho] The comparator first, then the generator, then the golden test**
-   over all 42 cabs, with Python still the source of truth. The comparator
-   (§4.6) lands with its own tests — 42/42 on rebuilt cabs *and* 0 false
-   positives across the 861 distinct pairs — before it is trusted to judge a
-   single document. **This is the gate.** If any cab fails to round-trip, stop
-   and reassess — do not route around it, and do not loosen the comparator to
-   make it pass.
+3. **[dosho] The comparator, then the source-reading generator, then the
+   golden test** over all 42 cabs, with Python still the source of truth.
+   - The comparator is **done** (dosho #44), with its own tests: 42/42 on
+     rebuilt cabs *and* 0 false positives across the 861 distinct pairs, before
+     it was trusted to judge a single document.
+   - The generator reads `src/dosho/cabs/*.py` as source (§4.6). The AST pass is
+     measured feasible: 42/42 calls, 1437 input fields, zero non-literal specs.
+   - The golden test runs **both** checks per cab (§4.6).
+
+   **This is the gate.** If any cab fails either check, stop and reassess -- do
+   not route around it, and do not loosen a check to make it pass. Depends on
+   step 2 for the loader; independent of step 1.
 4. **[dosho] Flip the source of truth**: documents become canonical, Python cab
    definitions deleted, `dosho/cabs/__init__.py` becomes `__getattr__`/`__dir__`
    (§4.3), image resolution moves loader-side (§4.5).
@@ -525,6 +629,11 @@ shape this design cannot carry. There is currently one.
 Steps 1–2 are useful on their own — a document-shaped provider protocol is a
 better protocol whether or not dosho ever uses it. Step 0 is independent of them
 but is now a two-part sequence, not a four-line deletion.
+
+The order above is not the dependency order, and a reviewer of v1 was right to
+ask. The gate (step 3) needs step 2's loader and nothing else; step 1 is for
+step 4's runtime resolution. Read it as: **2 and 3 gate the design, 1 and 0 are
+independent, 4 and 5 follow.**
 
 Two prerequisites are already satisfied: the Core rule (PR #39, above), and the
 absence of any module mixing a `Cab` with a pystep — PR #40 gave pre-3.0 simms
