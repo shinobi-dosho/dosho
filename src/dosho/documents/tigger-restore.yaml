@@ -1,0 +1,77 @@
+cabs:
+  tigger-restore:
+    command: tigger-restore
+    image: TIGGER_LSM
+    info: 'tigger-restore: restore sky-model sources into a FITS image (https://github.com/ska-sa/tigger-lsm)'
+    policies:
+      repeat_list: true
+    inputs:
+      input_image:
+        dtype: File
+        required: true
+        info: Input FITS image to restore sources into
+        policies:
+          positional: true
+      sky_model:
+        dtype: File
+        required: true
+        info: Sky model to restore from
+        policies:
+          positional: true
+      output_image:
+        dtype: File
+        info: Output image; auto-generated if omitted
+        policies:
+          positional: true
+      type:
+        dtype: str
+        info: 'Input model type: ASCII, Tigger, BBS, NEWSTAR, AIPSCC, AIPSCCFITS, Gaul, auto'
+      format:
+        dtype: str
+        info: Input format for ASCII/BBS tables
+      num_sources:
+        dtype: int
+        nom_de_guerre: num-sources
+        info: Only restore the NSRC brightest sources
+      scale:
+        dtype: str
+        info: Rescale model fluxes by FLUXSCALE[,N] (N brightest only if given)
+      restoring_beam:
+        dtype: str
+        nom_de_guerre: restoring-beam
+        info: 'Restoring beam size, overriding the image''s BMAJ/BMIN/BPA: BMAJ[,BMIN,PA]'
+      psf_file:
+        dtype: File
+        nom_de_guerre: psf-file
+        info: Determine the restoring beam by fitting this PSF file
+      clear:
+        dtype: bool
+        info: Clear the contents of the FITS file before adding in sources
+      pb:
+        dtype: bool
+        info: Apply the model primary beam function during restoration where defined
+      beamgain:
+        dtype: bool
+        info: Apply the beamgain attribute during restoration where defined
+      ignore_nobeam:
+        dtype: bool
+        nom_de_guerre: ignore-nobeam
+        info: Apply PB or beamgain even if a source is tagged 'nobeam'
+      freq:
+        dtype: float
+        info: Frequency (MHz) to use for spectral indices and primary beams
+      force:
+        dtype: bool
+        info: Overwrite the output image even if it already exists
+      verbose:
+        dtype: int
+        info: Verbosity level (0 is silent, higher is more verbose)
+      timestamps:
+        dtype: bool
+        info: Enable timestamps in debug messages
+    outputs:
+      output_image:
+        dtype: File
+        info: Output image; auto-generated if omitted
+        policies:
+          positional: true

@@ -1,0 +1,202 @@
+cabs:
+  tigger-convert:
+    command: tigger-convert
+    image: TIGGER_LSM
+    info: 'tigger-convert: convert sky models into Tigger format (https://github.com/ska-sa/tigger-lsm)'
+    policies:
+      repeat_list: true
+    inputs:
+      sky_model:
+        dtype: File
+        required: true
+        info: Input sky model, any format importable by Tigger
+        policies:
+          positional: true
+      output_model:
+        dtype: File
+        info: Output model (always native Tigger format); auto-generated if omitted
+        policies:
+          positional: true
+      force:
+        dtype: bool
+        nom_de_guerre: force
+        info: Force overwrite of output model
+      type:
+        dtype: str
+        default: auto
+        info: 'Input model type: Tigger, ASCII, BBS, NEWSTAR, AIPSCC, AIPSCCFITS, Gaul, auto'
+      output_type:
+        dtype: str
+        default: auto
+        nom_de_guerre: output-type
+        info: 'Output model type: Tigger, ASCII, BBS, NEWSTAR, auto'
+      append:
+        dtype: List[File]
+        nom_de_guerre: append
+        info: Append another model to the input model (repeatable)
+      append_type:
+        dtype: str
+        nom_de_guerre: append-type
+        info: Appended model type
+      format:
+        dtype: str
+        info: Input format for ASCII/BBS tables, e.g. "name ra_h ra_m ra_s dec_d dec_m dec_s i q u v spi
+          rm emaj_s emin_s pa_d freq0 tags..."
+      append_format:
+        dtype: str
+        nom_de_guerre: append-format
+        info: 'Format of the appended file (default: --format)'
+      output_format:
+        dtype: str
+        nom_de_guerre: output-format
+        info: Output format for ASCII/BBS tables
+      help_format:
+        dtype: bool
+        nom_de_guerre: help-format
+        info: Print help on format strings
+      min_extent:
+        dtype: float
+        default: 0.0
+        nom_de_guerre: min-extent
+        info: Minimal source extent (arcsec) when importing NEWSTAR/ASCII; smaller sources become point
+          sources
+      tags:
+        dtype: str
+        info: Extract sources with the specified tags
+      select:
+        dtype: List[str]
+        info: Select a subset of sources by tag<>value comparison (repeatable, logical-AND)
+      remove_nans:
+        dtype: bool
+        nom_de_guerre: remove-nans
+        info: Removes the named source(s) from the model (NAME may use */? wildcards)
+      app_to_int:
+        dtype: bool
+        nom_de_guerre: app-to-int
+        info: Treat fluxes as apparent, rescale to intrinsic via the primary beam model
+      int_to_app:
+        dtype: bool
+        nom_de_guerre: int-to-app
+        info: Treat fluxes as intrinsic, rescale to apparent via the primary beam model
+      newstar_app_to_int:
+        dtype: bool
+        nom_de_guerre: newstar-app-to-int
+        info: Convert NEWSTAR apparent fluxes to intrinsic
+      newstar_int_to_app:
+        dtype: bool
+        nom_de_guerre: newstar-int-to-app
+        info: Convert NEWSTAR intrinsic fluxes to apparent
+      center:
+        dtype: str
+        info: Override the nominal field centre, e.g. "Xdeg,Ydeg" or a pyrap.measures direction string
+      refresh_r:
+        dtype: bool
+        nom_de_guerre: refresh-r
+        info: Recompute each source's radial distance from the current field centre
+      ref_freq:
+        dtype: float
+        nom_de_guerre: ref-freq
+        info: Set or change the model's reference frequency (MHz)
+      primary_beam:
+        dtype: str
+        nom_de_guerre: primary-beam
+        info: Primary beam expression (in r, fq) or FITS beam pattern to estimate apparent fluxes
+      linear_pol:
+        dtype: bool
+        nom_de_guerre: linear-pol
+        info: 'Use XY basis for beam filenames/Mueller matrices [default: RL]'
+      fits_l_axis:
+        dtype: str
+        nom_de_guerre: fits-l-axis
+        info: CTYPE for the L axis in the FITS PB file
+      fits_m_axis:
+        dtype: str
+        nom_de_guerre: fits-m-axis
+        info: CTYPE for the M axis in the FITS PB file
+      beam_freq:
+        dtype: float
+        nom_de_guerre: beam-freq
+        info: Frequency (MHz) to use for the primary beam model
+      beam_clip:
+        dtype: float
+        default: 0.001
+        nom_de_guerre: beam-clip
+        info: Clip (power) beam gains at this level
+      beam_spi:
+        dtype: float
+        nom_de_guerre: beam-spi
+        info: Bandwidth (MHz, centred on --beam-freq) for a beam-based spectral index fit
+      force_beam_spi_wo_spectrum:
+        dtype: bool
+        nom_de_guerre: force-beam-spi-wo-spectrum
+        info: Apply beam-derived spectral indices even to sources without an intrinsic spectrum
+      beam_nopol:
+        dtype: bool
+        nom_de_guerre: beam-nopol
+        info: Apply intensity beam model only, ignoring polarization
+      beam_diag:
+        dtype: bool
+        nom_de_guerre: beam-diag
+        info: Use diagonal Jones terms only for the beam model
+      pa:
+        dtype: float
+        info: Rotate the primary beam pattern through this parallactic angle (degrees)
+      pa_range:
+        dtype: str
+        nom_de_guerre: pa-range
+        info: Rotate through a parallactic angle range FROM,TO and average
+      pa_from_ms:
+        dtype: str
+        nom_de_guerre: pa-from-ms
+        info: Rotate through the parallactic angle range from MS1[:FIELD1],... and average
+      beam_average_jones:
+        dtype: bool
+        nom_de_guerre: beam-average-jones
+        info: Convert Jones(PA) to Mueller(PA) before averaging over PA
+      cluster_dist:
+        dtype: float
+        default: 60.0
+        nom_de_guerre: cluster-dist
+        info: Distance (arcsec) for source clustering, 0 to disable
+      rename:
+        dtype: bool
+        info: Rename sources using the COPART scheme
+      radial_step:
+        dtype: float
+        default: 10.0
+        nom_de_guerre: radial-step
+        info: Radial-distance step size (arcmin) for the COPART scheme
+      merge_clusters:
+        dtype: str
+        nom_de_guerre: merge-clusters
+        info: Merge source clusters bearing the given tag(s) (comma-separated, or 'ALL')
+      prefix:
+        dtype: str
+        info: Prefix all source names with the given string
+      remove_source:
+        dtype: str
+        nom_de_guerre: remove-source
+        info: Remove the named source(s) (NAME may use */? wildcards)
+      add_brick:
+        dtype: str
+        nom_de_guerre: add-brick
+        info: 'Add a uv-brick: NAME:FILE[:PAD_FACTOR:[TAGS:...]]'
+      recenter:
+        dtype: str
+        info: Shift the sky model to a different field centre (see --center)
+      verbose:
+        dtype: bool
+        info: Increases verbosity
+      debug:
+        dtype: List[str]
+        info: 'Set verbosity of a named Python context: Context=Level (repeatable)'
+      enable_plots:
+        dtype: bool
+        nom_de_guerre: enable-plots
+        info: Enable various diagnostic plots
+    outputs:
+      output_model:
+        dtype: File
+        info: Output model (always native Tigger format); auto-generated if omitted
+        policies:
+          positional: true

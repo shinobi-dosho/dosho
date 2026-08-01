@@ -28,12 +28,24 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from tests.cab_compare import cab_differences
 from tools.cab_source import read_sources
-from tools.generate_documents import documents
+from tools.generate_documents import DOCUMENT_DIR, documents, render, write_documents
 
 
 @pytest.fixture(scope="module")
 def generated() -> dict:
-    return documents()
+    """The documents as *committed*, not as freshly generated.
+
+    The distinction is the point of this file. A gate that regenerates and
+    then checks its own output proves the generator self-consistent and
+    nothing about the files anyone actually loads; `test_committed_documents_
+    are_current` is what ties the two together.
+    """
+    out = {}
+    for path in sorted(DOCUMENT_DIR.glob("*.yaml")):
+        body = yaml.safe_load(path.read_text())["cabs"]
+        (name,) = body
+        out[name] = body[name]
+    return out
 
 
 @pytest.fixture(scope="module")
@@ -62,6 +74,35 @@ def _reload(name: str, body: dict) -> Cab:
 
 def test_every_cab_has_a_document(generated, built):
     assert set(generated) == set(built)
+
+
+def test_committed_documents_are_current(tmp_path):
+    """Regenerating must reproduce the committed files byte for byte.
+
+    Without this the documents are a snapshot that drifts the first time a cab
+    changes and nobody reruns the generator -- and every other test here would
+    keep passing against the stale copy, since they read the same stale files.
+    """
+    write_documents(tmp_path)
+    committed = {p.name: p.read_text() for p in DOCUMENT_DIR.glob("*.yaml")}
+    fresh = {p.name: p.read_text() for p in tmp_path.glob("*.yaml")}
+    assert set(committed) == set(fresh), "a cab was added or removed without regenerating"
+    stale = sorted(n for n in committed if committed[n] != fresh[n])
+    assert stale == [], (
+        f"stale documents: {stale} -- regenerate with "
+        "`uv run python -m tools.generate_documents` and commit"
+    )
+
+
+def test_the_generator_and_the_committed_files_agree_on_content(built):
+    """Belt and braces on the above: compare through the generator's own
+    renderer rather than only file text, so a change in how files are written
+    (indent, width) is not mistaken for a change in what they say.
+    """
+    for name, body in documents().items():
+        path = DOCUMENT_DIR / f"{name}.yaml"
+        assert path.exists(), f"{name} has no committed document"
+        assert path.read_text() == render(body, name)
 
 
 def test_documents_round_trip(generated, built):

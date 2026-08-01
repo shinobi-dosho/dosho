@@ -1,0 +1,341 @@
+cabs:
+  cubical:
+    command: gocubical
+    image: CUBICAL
+    info: CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
+    policies:
+      explicit_true: true
+    input_patterns:
+    - separator: '-'
+      segments:
+      - regex: .+?
+      - attrs:
+          solvable: {}
+          type: {}
+          delay-estimate-pad-factor:
+            dtype: int
+          load-from: {}
+          xfer-from: {}
+          save-to: {}
+          dd-term:
+            dtype: bool
+          fix-dirs: {}
+          update-type: {}
+          estimate-pzd:
+            dtype: bool
+          time-int: {}
+          freq-int: {}
+          max-prior-error:
+            dtype: float
+          max-post-error:
+            dtype: float
+          low-snr-warn: {}
+          high-gain-var-warn: {}
+          clip-low:
+            dtype: float
+          clip-high:
+            dtype: float
+          clip-after: {}
+          max-iter: {}
+          pin-slope-iters: {}
+          epsilon: {}
+          delta-chi: {}
+          conv-quorum: {}
+          ref-ant: {}
+          prop-flags: {}
+          diag-only: {}
+          offdiag-only:
+            dtype: bool
+          robust-cov: {}
+          robust-scale: {}
+          robust-npol: {}
+          robust-int: {}
+          robust-flag-weights: {}
+          robust-cov-thresh: {}
+          robust-sigma-thresh: {}
+          robust-save-weights: {}
+          estimate-delays:
+            dtype: bool
+    inputs:
+      parset:
+        dtype: File
+        info: Optional parset to load before applying all other parameters (cult-cargo's own cubical.yml
+          wording)
+        policies:
+          positional_head: true
+      data-ms:
+        dtype: MS
+        required: true
+        mutable: true
+      data-column:
+        dtype: str
+      data-time-chunk:
+        dtype: str
+      data-freq-chunk:
+        dtype: str
+      data-rebin-time:
+        dtype: str
+      data-rebin-freq:
+        dtype: str
+      data-chunk-by:
+        dtype: str
+      data-chunk-by-jump:
+        dtype: str
+      data-single-chunk:
+        dtype: str
+      data-single-tile:
+        dtype: int
+      data-normalize:
+        dtype: str
+      sel-field:
+        dtype: int
+      sel-ddid:
+        dtype: str
+      sel-taql:
+        dtype: str
+      sel-chan:
+        dtype: str
+      sel-diag:
+        dtype: bool
+      out-dir:
+        dtype: str
+      out-name:
+        dtype: str
+      out-overwrite:
+        dtype: bool
+      out-backup:
+        dtype: str
+      out-mode:
+        dtype: str
+      out-apply-solver-flags:
+        dtype: bool
+      out-column:
+        dtype: str
+      out-derotate:
+        dtype: str
+      out-model-column:
+        dtype: str
+      out-weight-column:
+        dtype: str
+      out-reinit-column:
+        dtype: bool
+      out-subtract-model:
+        dtype: str
+      out-subtract-dirs:
+        dtype: str
+      out-correct-dir:
+        dtype: str
+      out-plots:
+        dtype: str
+      out-casa-gaintables:
+        dtype: bool
+      model-list:
+        dtype: str
+      model-ddes:
+        dtype: str
+      model-beam-pattern:
+        dtype: str
+      model-beam-l-axis:
+        dtype: str
+      model-beam-m-axis:
+        dtype: str
+      model-feed-rotate:
+        dtype: str
+      model-pa-rotate:
+        dtype: bool
+      model-null-v:
+        dtype: str
+      montblanc-device-type:
+        dtype: str
+      montblanc-dtype:
+        dtype: str
+      montblanc-mem-budget:
+        dtype: int
+      montblanc-verbosity:
+        dtype: str
+      montblanc-threads:
+        dtype: int
+      montblanc-pa-rotate:
+        dtype: str
+      weight-column:
+        dtype: str
+      weight-fill-offdiag:
+        dtype: bool
+      weight-legacy-v1-2:
+        dtype: bool
+      flags-apply:
+        dtype: str
+      flags-auto-init:
+        dtype: str
+      flags-save:
+        dtype: str
+      flags-save-legacy:
+        dtype: str
+      flags-reinit-bitflags:
+        dtype: bool
+      flags-warn-thr:
+        dtype: str
+      flags-see-no-evil:
+        dtype: str
+      degridding-OverS:
+        dtype: int
+      degridding-Support:
+        dtype: int
+      degridding-Nw:
+        dtype: int
+      degridding-wmax:
+        dtype: float
+      degridding-Padding:
+        dtype: float
+      degridding-NDegridBand:
+        dtype: int
+      degridding-MaxFacetSize:
+        dtype: str
+      degridding-MinNFacetPerAxis:
+        dtype: str
+      degridding-NProcess:
+        dtype: str
+      degridding-BeamModel:
+        dtype: str
+      degridding-NBand:
+        dtype: int
+      degridding-FITSFile:
+        dtype: str
+      degridding-FITSFeed:
+        dtype: str
+      degridding-FITSFeedSwap:
+        dtype: bool
+      degridding-DtBeamMin:
+        dtype: float
+      degridding-FITSParAngleIncDeg:
+        dtype: float
+      degridding-FITSLAxis:
+        dtype: str
+      degridding-FITSMAxis:
+        dtype: str
+      degridding-FITSVerbosity:
+        dtype: int
+      degridding-FeedAngle:
+        dtype: float
+      degridding-FlipVisibilityHands:
+        dtype: str
+      postmortem-enable:
+        dtype: bool
+      postmortem-tf-chisq-median:
+        dtype: float
+      postmortem-tf-np-median:
+        dtype: float
+      postmortem-time-density:
+        dtype: str
+      postmortem-chan-density:
+        dtype: str
+      postmortem-ddid-density:
+        dtype: str
+      madmax-enable:
+        dtype: str
+      madmax-residuals:
+        dtype: str
+      madmax-estimate:
+        dtype: str
+      madmax-diag:
+        dtype: bool
+      madmax-offdiag:
+        dtype: bool
+      madmax-threshold:
+        dtype: str
+      madmax-global-threshold:
+        dtype: str
+      madmax-plot:
+        dtype: str
+      madmax-plot-frac-above:
+        dtype: str
+      madmax-plot-bl:
+        dtype: str
+      madmax-flag-ant:
+        dtype: str
+      madmax-flag-ant-thr:
+        dtype: str
+      sol-jones:
+        dtype: List[str]
+      sol-precision:
+        dtype: str
+      sol-delta-g:
+        dtype: str
+      sol-delta-chi:
+        dtype: str
+      sol-chi-int:
+        dtype: str
+      sol-last-rites:
+        dtype: bool
+      sol-stall-quorum:
+        dtype: str
+      sol-term-iters:
+        dtype: str
+      sol-flag-divergence:
+        dtype: str
+      sol-min-bl:
+        dtype: float
+      sol-max-bl:
+        dtype: str
+      sol-subset:
+        dtype: str
+      sol-terms-iter:
+        dtype: List[int]
+      bbc-load-from:
+        dtype: str
+      bbc-compute-2x2:
+        dtype: bool
+      bbc-apply-2x2:
+        dtype: bool
+      bbc-save-to:
+        dtype: str
+      bbc-per-chan:
+        dtype: bool
+      bbc-plot:
+        dtype: bool
+      dist-ncpu:
+        dtype: int
+      dist-nworker:
+        dtype: int
+      dist-nthread:
+        dtype: int
+      dist-max-chunks:
+        dtype: int
+      dist-min-chunks:
+        dtype: int
+      dist-pin:
+        dtype: str
+      dist-pin-io:
+        dtype: bool
+      dist-pin-main:
+        dtype: str
+      dist-safe:
+        dtype: float
+      log-memory:
+        dtype: str
+      log-stats:
+        dtype: str
+      log-stats-warn:
+        dtype: str
+      log-boring:
+        dtype: bool
+      log-append:
+        dtype: bool
+      log-verbose:
+        dtype: str
+      log-file-verbose:
+        dtype: str
+      debug-pdb:
+        dtype: bool
+      debug-panic-amplitude:
+        dtype: float
+      debug-stop-before-solver:
+        dtype: bool
+      debug-escalate-warnings:
+        dtype: str
+      misc-random-seed:
+        dtype: str
+    outputs:
+      ms:
+        dtype: MS
+        implicit: '{data_ms}'

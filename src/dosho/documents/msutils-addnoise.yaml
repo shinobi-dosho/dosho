@@ -1,0 +1,33 @@
+cabs:
+  msutils-addnoise:
+    command: msutils addnoise
+    image: MSUTILS
+    info: 'msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to operate on
+        policies:
+          positional: true
+      column:
+        dtype: str
+        default: MODEL_DATA
+        info: Column to write noisy visibilities into.
+      sefd:
+        dtype: float
+        default: 551.0
+        info: SEFD (Jy) used to compute per-visibility noise.
+      noise:
+        dtype: float
+        default: 0.0
+        info: Noise stddev; if 0, computed from --sefd.
+      add-to:
+        dtype: str
+        info: Add the noise to this column's data instead of writing pure noise.
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set to operate on
+        policies:
+          positional: true

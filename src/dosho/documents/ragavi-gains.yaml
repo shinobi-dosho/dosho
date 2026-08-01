@@ -1,0 +1,64 @@
+cabs:
+  ragavi-gains:
+    command: ragavi-gains
+    image: RAGAVI
+    info: 'ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)'
+    inputs:
+      table:
+        dtype: List[File]
+        required: true
+        info: Gain table(s) to plot. Specify space separated list for multiple.
+      ant:
+        dtype: str
+        info: Plot only a specific antenna, or comma-separated list of antennas. Defaults to all.
+      corr:
+        dtype: str
+        info: Correlation index(ices) to plot. Defaults to all.
+      cmap:
+        dtype: str
+        default: coolwarm
+        info: Matplotlib colour map to use for antennas. Defaults to coolwarm.
+      ddid:
+        dtype: str
+        info: Spectral window to plot. Defaults to all.
+      debug:
+        dtype: bool
+        info: Enable debugging messages.
+      doplot:
+        dtype: str
+        info: 'Y-axes to plot: amplitude & phase (ap), real and imaginary (ri), or (all). Defaults to
+          ap.'
+      field:
+        dtype: List[str]
+        info: Field ID(s) / NAME(s) to plot. Defaults to all.
+      gaintype:
+        dtype: List[str]
+        info: Type of gain table(s) to be plotted (e.g. K/G/B/F/D). Table type is auto-detected.
+      logfile:
+        dtype: str
+        info: File in which to store logs. Default is ragavi.log.
+      xaxis:
+        dtype: str
+        info: Choose an x-axis for the plots, otherwise an appropriate one is chosen automatically.
+      t0:
+        dtype: float
+        info: Min time to plot [in seconds]. Defaults to full range.
+      t1:
+        dtype: float
+        info: Max time to plot [in seconds]. Defaults to full range.
+      taql:
+        dtype: str
+        info: TAQL where clause.
+      htmlname:
+        dtype: File
+        info: Output HTML file name (with or without .html suffix).
+      plotname:
+        dtype: File
+        info: Static output file name (with suffix). '.png' or '.svg' determines the output type.
+    outputs:
+      htmlname:
+        dtype: File
+        info: Output HTML file name (with or without .html suffix).
+      plotname:
+        dtype: File
+        info: Static output file name (with suffix). '.png' or '.svg' determines the output type.

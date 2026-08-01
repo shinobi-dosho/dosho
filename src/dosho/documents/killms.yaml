@@ -1,0 +1,461 @@
+cabs:
+  killms:
+    command: kMS.py
+    image: KILLMS
+    info: 'EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric data (https://github.com/saopicc/killMS)'
+    scratch:
+    - '{image_sky_model_ddf_cache_dir}/*'
+    inputs:
+      parset:
+        dtype: File
+        info: Parset file to read option defaults from, overridden by any of the flags below (kMS.py's
+          own driver() reads sys.argv[1] as the parset unconditionally)
+        policies:
+          positional_head: true
+      vis_data_ms_name:
+        dtype: MS
+        nom_de_guerre: VisData-MSName
+        info: ''
+        mutable: true
+      vis_data_t_chunk:
+        dtype: int
+        default: 15
+        nom_de_guerre: VisData-TChunk
+        info: ''
+      vis_data_in_col:
+        dtype: str
+        default: CORRECTED_DATA_BACKUP
+        nom_de_guerre: VisData-InCol
+        info: ''
+      vis_data_out_col:
+        dtype: str
+        default: CORRECTED_DATA
+        nom_de_guerre: VisData-OutCol
+        info: ''
+      vis_data_free_predict_gain_col_name:
+        dtype: str
+        nom_de_guerre: VisData-FreePredictGainColName
+        info: ''
+      vis_data_free_predict_col_name:
+        dtype: str
+        nom_de_guerre: VisData-FreePredictColName
+        info: ''
+      vis_data_parallel:
+        dtype: int
+        default: 1
+        nom_de_guerre: VisData-Parallel
+        info: ''
+      sky_model_sky_model:
+        dtype: File
+        nom_de_guerre: SkyModel-SkyModel
+        info: ''
+      sky_model_kills:
+        dtype: str
+        nom_de_guerre: SkyModel-kills
+        info: ''
+      sky_model_invert:
+        dtype: bool
+        default: false
+        nom_de_guerre: SkyModel-invert
+        info: ''
+      sky_model_decorrelation:
+        dtype: str
+        nom_de_guerre: SkyModel-Decorrelation
+        info: ''
+      sky_model_free_full_sub:
+        dtype: int
+        default: 0
+        nom_de_guerre: SkyModel-FreeFullSub
+        info: ''
+      sky_model_sky_model_col:
+        dtype: str
+        nom_de_guerre: SkyModel-SkyModelCol
+        info: ''
+      beam_beam_model:
+        dtype: str
+        nom_de_guerre: Beam-BeamModel
+        info: None/LOFAR
+      beam_beam_at:
+        dtype: str
+        default: facet
+        nom_de_guerre: Beam-BeamAt
+        info: tessel/facet
+      beam_lofar_beam_mode:
+        dtype: str
+        default: AE
+        nom_de_guerre: Beam-LOFARBeamMode
+        info: A/AE
+      beam_dt_beam_min:
+        dtype: int
+        default: 5
+        nom_de_guerre: Beam-DtBeamMin
+        info: ''
+      beam_center_norm:
+        dtype: bool
+        default: true
+        nom_de_guerre: Beam-CenterNorm
+        info: ''
+      beam_n_chan_beam_per_ms:
+        dtype: int
+        default: 1
+        nom_de_guerre: Beam-NChanBeamPerMS
+        info: ''
+      beam_fits_file:
+        dtype: File
+        default: beam_$(corr)_$(reim).fits
+        nom_de_guerre: Beam-FITSFile
+        info: ''
+      beam_fits_par_angle_inc_deg:
+        dtype: int
+        default: 5
+        nom_de_guerre: Beam-FITSParAngleIncDeg
+        info: ''
+      beam_fitsl_axis:
+        dtype: str
+        default: -X
+        nom_de_guerre: Beam-FITSLAxis
+        info: L axis of FITS file. Minus sign indicates reverse coordinate convention.
+      beam_fitsm_axis:
+        dtype: str
+        default: Y
+        nom_de_guerre: Beam-FITSMAxis
+        info: M axis of FITS file. Minus sign indicates reverse coordinate convention.
+      beam_fits_feed:
+        dtype: str
+        nom_de_guerre: Beam-FITSFeed
+        info: ''
+      beam_fits_verbosity:
+        dtype: int
+        default: 1
+        nom_de_guerre: Beam-FITSVerbosity
+        info: ''
+      beam_feed_angle:
+        dtype: int
+        default: 0
+        nom_de_guerre: Beam-FeedAngle
+        info: ''
+      beam_apply_p_jones:
+        dtype: int
+        default: 0
+        nom_de_guerre: Beam-ApplyPJones
+        info: derotate visibility data (only when FITS beam is active and also time sampled)
+      beam_flip_visibility_hands:
+        dtype: int
+        default: 0
+        nom_de_guerre: Beam-FlipVisibilityHands
+        info: apply anti-diagonal matrix if FITS beam is enabled effectively swapping X and Y or R and
+          L and their respective hands
+      beam_fits_feed_swap:
+        dtype: int
+        default: 0
+        nom_de_guerre: Beam-FITSFeedSwap
+        info: ''
+      beam_fits_frame:
+        dtype: str
+        default: altaz
+        nom_de_guerre: Beam-FITSFrame
+        info: coordinate frame for FITS beams. Currently, alt-az, equatorial and zenith mounts are supported.
+      image_sky_model_base_image_name:
+        dtype: File
+        nom_de_guerre: ImageSkyModel-BaseImageName
+        info: ''
+      image_sky_model_dico_model:
+        dtype: File
+        nom_de_guerre: ImageSkyModel-DicoModel
+        info: ''
+      image_sky_model_nodes_file:
+        dtype: File
+        nom_de_guerre: ImageSkyModel-NodesFile
+        info: ''
+      image_sky_model_image_predict_parset:
+        dtype: File
+        nom_de_guerre: ImageSkyModel-ImagePredictParset
+        info: ''
+      image_sky_model_over_s:
+        dtype: str
+        nom_de_guerre: ImageSkyModel-OverS
+        info: ''
+      image_sky_model_mask_image:
+        dtype: File
+        nom_de_guerre: ImageSkyModel-MaskImage
+        info: ''
+      image_sky_model_wmax:
+        dtype: str
+        nom_de_guerre: ImageSkyModel-wmax
+        info: ''
+      image_sky_model_max_facet_size:
+        dtype: str
+        nom_de_guerre: ImageSkyModel-MaxFacetSize
+        info: ''
+      image_sky_model_min_facet_size:
+        dtype: str
+        nom_de_guerre: ImageSkyModel-MinFacetSize
+        info: ''
+      image_sky_model_remove_ddf_cache:
+        dtype: bool
+        default: false
+        nom_de_guerre: ImageSkyModel-RemoveDDFCache
+        info: ''
+      image_sky_model_ddf_cache_dir:
+        dtype: str
+        nom_de_guerre: ImageSkyModel-DDFCacheDir
+        info: ''
+        write_path: true
+      image_sky_model_filter_neg_comp:
+        dtype: bool
+        default: false
+        nom_de_guerre: ImageSkyModel-FilterNegComp
+        info: ''
+      image_sky_model_th_solve:
+        dtype: float
+        default: 0.0
+        nom_de_guerre: ImageSkyModel-ThSolve
+        info: ''
+      data_selection_uv_min_max:
+        dtype: str
+        nom_de_guerre: DataSelection-UVMinMax
+        info: ''
+      data_selection_chan_slice:
+        dtype: str
+        nom_de_guerre: DataSelection-ChanSlice
+        info: ''
+      data_selection_flag_ants:
+        dtype: str
+        nom_de_guerre: DataSelection-FlagAnts
+        info: ''
+      data_selection_dist_max_to_core:
+        dtype: float
+        default: 10000.0
+        nom_de_guerre: DataSelection-DistMaxToCore
+        info: ''
+      data_selection_fill_factor:
+        dtype: float
+        default: 1.0
+        nom_de_guerre: DataSelection-FillFactor
+        info: ''
+      data_selection_field_id:
+        dtype: int
+        default: 0
+        nom_de_guerre: DataSelection-FieldID
+        info: ''
+      data_selection_ddid:
+        dtype: int
+        default: 0
+        nom_de_guerre: DataSelection-DDID
+        info: ''
+      weighting_resolution:
+        dtype: float
+        default: 0.0
+        nom_de_guerre: Weighting-Resolution
+        info: ''
+      weighting_weight_in_col:
+        dtype: str
+        nom_de_guerre: Weighting-WeightInCol
+        info: ''
+      weighting_weighting:
+        dtype: str
+        default: Natural
+        nom_de_guerre: Weighting-Weighting
+        info: ''
+      weighting_robust:
+        dtype: float
+        default: 0.0
+        nom_de_guerre: Weighting-Robust
+        info: ''
+      weighting_weight_uv_min_max:
+        dtype: str
+        nom_de_guerre: Weighting-WeightUVMinMax
+        info: ''
+      weighting_wtuv:
+        dtype: int
+        default: 1
+        nom_de_guerre: Weighting-WTUV
+        info: ''
+      actions_do_plot:
+        dtype: int
+        default: 0
+        nom_de_guerre: Actions-DoPlot
+        info: ''
+      actions_sub_only:
+        dtype: int
+        default: 0
+        nom_de_guerre: Actions-SubOnly
+        info: ''
+      actions_ncpu:
+        dtype: int
+        default: 1
+        nom_de_guerre: Actions-NCPU
+        info: ''
+      actions_do_bar:
+        dtype: int
+        default: 1
+        nom_de_guerre: Actions-DoBar
+        info: ''
+      actions_n_thread:
+        dtype: int
+        default: 1
+        nom_de_guerre: Actions-NThread
+        info: ''
+      actions_debug_pdb:
+        dtype: int
+        default: 1
+        nom_de_guerre: Actions-DebugPdb
+        info: ''
+      actions_update_weights:
+        dtype: int
+        default: 1
+        nom_de_guerre: Actions-UpdateWeights
+        info: ''
+      pre_apply_pre_apply_sols:
+        dtype: List[str]
+        default: []
+        nom_de_guerre: PreApply-PreApplySols
+        info: ''
+      pre_apply_pre_apply_mode:
+        dtype: List[str]
+        default: []
+        nom_de_guerre: PreApply-PreApplyMode
+        info: ''
+      solutions_ext_sols:
+        dtype: File
+        nom_de_guerre: Solutions-ExtSols
+        info: ''
+      solutions_clip_method:
+        dtype: str
+        default: '[ResidAnt]'
+        nom_de_guerre: Solutions-ClipMethod
+        info: ''
+      solutions_out_sols_name:
+        dtype: str
+        nom_de_guerre: Solutions-OutSolsName
+        info: ''
+      solutions_apply_to_dir:
+        dtype: int
+        default: -2
+        nom_de_guerre: Solutions-ApplyToDir
+        info: ''
+      solutions_merge_beam_to_applied_sol:
+        dtype: int
+        default: 0
+        nom_de_guerre: Solutions-MergeBeamToAppliedSol
+        info: ''
+      solutions_apply_mode:
+        dtype: str
+        default: AP
+        nom_de_guerre: Solutions-ApplyMode
+        info: ''
+      solutions_skip_existing_sols:
+        dtype: int
+        default: 0
+        nom_de_guerre: Solutions-SkipExistingSols
+        info: ''
+      solutions_sols_dir:
+        dtype: str
+        nom_de_guerre: Solutions-SolsDir
+        info: ''
+      compression_compression_mode:
+        dtype: str
+        nom_de_guerre: Compression-CompressionMode
+        info: auto, manual
+      compression_compression_dir_file:
+        dtype: File
+        nom_de_guerre: Compression-CompressionDirFile
+        info: ''
+      compression_merge_stations:
+        dtype: str
+        nom_de_guerre: Compression-MergeStations
+        info: ''
+      solvers_solver_type:
+        dtype: str
+        default: CohJones
+        nom_de_guerre: Solvers-SolverType
+        info: ''
+      solvers_precision_dot:
+        dtype: str
+        default: D
+        nom_de_guerre: Solvers-PrecisionDot
+        info: ''
+      solvers_pol_mode:
+        dtype: str
+        default: Scalar
+        nom_de_guerre: Solvers-PolMode
+        info: ''
+      solvers_dt:
+        dtype: int
+        default: 30
+        nom_de_guerre: Solvers-dt
+        info: ''
+      solvers_n_chan_sols:
+        dtype: int
+        default: 1
+        nom_de_guerre: Solvers-NChanSols
+        info: ''
+      coh_jones_n_iter_lm:
+        dtype: int
+        default: 7
+        nom_de_guerre: CohJones-NIterLM
+        info: ''
+      coh_jones_lambda_lm:
+        dtype: int
+        default: 1
+        nom_de_guerre: CohJones-LambdaLM
+        info: ''
+      coh_jones_lambda_tk:
+        dtype: float
+        default: 0.0
+        nom_de_guerre: CohJones-LambdaTk
+        info: ''
+      kafca_n_iter_kf:
+        dtype: int
+        default: 6
+        nom_de_guerre: KAFCA-NIterKF
+        info: ''
+      kafca_lambda_kf:
+        dtype: float
+        default: 0.5
+        nom_de_guerre: KAFCA-LambdaKF
+        info: ''
+      kafca_init_lm:
+        dtype: int
+        default: 0
+        nom_de_guerre: KAFCA-InitLM
+        info: ''
+      kafca_init_l_mdt:
+        dtype: int
+        default: 5
+        nom_de_guerre: KAFCA-InitLMdt
+        info: ''
+      kafca_cov_p:
+        dtype: float
+        default: 0.1
+        nom_de_guerre: KAFCA-CovP
+        info: ''
+      kafca_cov_q:
+        dtype: float
+        default: 0.1
+        nom_de_guerre: KAFCA-CovQ
+        info: ''
+      kafca_power_smooth:
+        dtype: float
+        default: 1.0
+        nom_de_guerre: KAFCA-PowerSmooth
+        info: ''
+      kafca_ev_p_step:
+        dtype: int
+        default: 120
+        nom_de_guerre: KAFCA-evPStep
+        info: ''
+      kafca_ev_p_step_start:
+        dtype: int
+        default: 1
+        nom_de_guerre: KAFCA-evPStepStart
+        info: ''
+      kafca_evolution_sol_file:
+        dtype: File
+        nom_de_guerre: KAFCA-EvolutionSolFile
+        info: ''
+    outputs:
+      solutions_sols_dir:
+        dtype: Directory
+        nom_de_guerre: Solutions-SolsDir
+        info: ''

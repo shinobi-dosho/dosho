@@ -1,0 +1,40 @@
+cabs:
+  quartical-backup:
+    command: goquartical-backup
+    image: QUARTICAL
+    info: 'goquartical-backup: back up a measurement set column to zarr'
+    inputs:
+      ms_path:
+        dtype: MS
+        required: true
+        info: Path to the input measurement set (also accepts s3 URLs)
+        policies:
+          positional: true
+      zarr_dir:
+        dtype: Directory
+        required: true
+        info: Directory for the backup location (not the zarr name itself; also accepts s3 URLs)
+        policies:
+          positional: true
+      column_name:
+        dtype: str
+        required: true
+        info: Name of the column to back up
+        policies:
+          positional: true
+      label:
+        dtype: str
+        info: 'Explicit label for the backup name [default: datetime]; full name is [label]-[msname]-[column].bkp.qc'
+      nthread:
+        dtype: int
+        info: Number of threads to use
+      field_id:
+        dtype: int
+        nom_de_guerre: field-id
+        info: Field ID to back up
+    outputs:
+      zarr_dir:
+        dtype: Directory
+        info: Directory for the backup location (not the zarr name itself; also accepts s3 URLs)
+        policies:
+          positional: true

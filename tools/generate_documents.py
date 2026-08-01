@@ -168,3 +168,38 @@ def documents() -> dict[str, dict[str, Any]]:
     if missing:
         raise ValueError(f"source defines cabs that are not exported: {sorted(missing)}")
     return {name: document_for(built[name], src) for name, src in sources.items()}
+
+
+DOCUMENT_DIR = Path(__file__).resolve().parent.parent / "src" / "dosho" / "documents"
+
+
+def render(body: dict[str, Any], name: str) -> str:
+    """One cab as the text of its document file."""
+    import yaml
+
+    return yaml.safe_dump({"cabs": {name: body}}, sort_keys=False, width=100, allow_unicode=True)
+
+
+def write_documents(target: Path | None = None) -> list[Path]:
+    """Write every cab's document, returning the paths written.
+
+    Used both by `python -m tools.generate_documents` and by the staleness
+    test, which regenerates into a temp directory and compares -- so the check
+    and the thing it checks cannot drift apart.
+    """
+    target = target or DOCUMENT_DIR
+    target.mkdir(parents=True, exist_ok=True)
+    written = []
+    for name, body in documents().items():
+        path = target / f"{name}.yaml"
+        path.write_text(render(body, name))
+        written.append(path)
+    return written
+
+
+if __name__ == "__main__":
+    paths = write_documents()
+    # A command-line tool reporting what it did. noqa rather than a
+    # per-file ignore: this is the only print in the repo, and a rule opened
+    # for a directory tends to stay open.
+    print(f"wrote {len(paths)} documents to {DOCUMENT_DIR}")  # noqa: T201

@@ -1,0 +1,442 @@
+cabs:
+  wsclean:
+    command: wsclean
+    image: WSCLEAN
+    info: WSClean imager (https://wsclean.readthedocs.io)
+    policies:
+      prefix: '-'
+      replace:
+        _: '-'
+    harvest:
+    - '{prefix}-*'
+    output_patterns:
+    - segments:
+      - attrs:
+          dirty:
+            dtype: File
+          image:
+            dtype: File
+          restored:
+            dtype: File
+          residual:
+            dtype: File
+          model:
+            dtype: File
+          psf:
+            dtype: File
+      - regex: .+
+    inputs:
+      ms:
+        dtype: List[MS]
+        required: true
+        policies:
+          positional: true
+          repeat: list
+      prefix:
+        dtype: str
+        required: true
+        nom_de_guerre: name
+        write_path: true
+      column:
+        dtype: str
+        default: DATA
+        nom_de_guerre: data-column
+      model-column:
+        dtype: str
+      model-storage-manager:
+        dtype: str
+      nchan:
+        dtype: int
+        nom_de_guerre: channels-out
+      deconvolution-channels:
+        dtype: int
+      channel-range:
+        dtype: Tuple[int, int]
+        policies:
+          repeat: list
+      channel-division-frequencies:
+        dtype: List[float]
+        policies:
+          repeat: list
+      gap-channel-division:
+        dtype: bool
+      pol:
+        dtype: Union[str, List[str]]
+      join-polarizations:
+        dtype: bool
+      link-polarizations:
+        dtype: Union[str, List[str]]
+      intervals-out:
+        dtype: int
+      interval:
+        dtype: Tuple[int, int]
+        policies:
+          repeat: list
+      even-timesteps:
+        dtype: bool
+      odd-timesteps:
+        dtype: bool
+      field:
+        dtype: Union[str, List[int]]
+      spws:
+        dtype: List[int]
+      threads:
+        dtype: int
+        nom_de_guerre: j
+      parallel-gridding:
+        dtype: int
+      parallel-reordering:
+        dtype: int
+      no-work-on-master:
+        dtype: bool
+      channel-to-node:
+        dtype: List[int]
+      max-mpi-message-size:
+        dtype: str
+      mem:
+        dtype: int
+      abs-mem:
+        dtype: int
+      verbose:
+        dtype: bool
+        nom_de_guerre: v
+      log-time:
+        dtype: bool
+      quiet:
+        dtype: bool
+      reorder:
+        dtype: bool
+      no-reorder:
+        dtype: bool
+      reuse-reordered:
+        dtype: bool
+      save-reordered:
+        dtype: bool
+      update-model-required:
+        dtype: bool
+      no-update-model-required:
+        dtype: bool
+      no-dirty:
+        dtype: bool
+      save-first-residual:
+        dtype: bool
+      save-weights:
+        dtype: bool
+      save-uv:
+        dtype: bool
+      reuse-psf:
+        dtype: str
+      reuse-dirty:
+        dtype: str
+      make-psf:
+        dtype: bool
+      make-psf-only:
+        dtype: bool
+      weight:
+        dtype: Union[str, Tuple[str, float]]
+        policies:
+          repeat: list
+      super-weight:
+        dtype: float
+      mf-weighting:
+        dtype: bool
+      no-mf-weighting:
+        dtype: bool
+      weighting-rank-filter:
+        dtype: float
+      weighting-rank-filter-size:
+        dtype: int
+      taper-gaussian:
+        dtype: str
+      taper-tukey:
+        dtype: float
+      taper-inner-tukey:
+        dtype: float
+      taper-edge:
+        dtype: float
+      taper-edge-tukey:
+        dtype: float
+      use-weights-as-taper:
+        dtype: bool
+      store-imaging-weights:
+        dtype: bool
+      size:
+        dtype: Union[int, Tuple[int, int]]
+        required: true
+        policies:
+          repeat: list
+      padding:
+        dtype: float
+      scale:
+        dtype: Union[str, float]
+        required: true
+      predict:
+        dtype: bool
+      continue:
+        dtype: bool
+      subtract-model:
+        dtype: bool
+      gridder:
+        dtype: str
+      use-wgridder:
+        dtype: bool
+      shift:
+        dtype: List[str]
+        policies:
+          repeat: list
+      facet-regions:
+        dtype: File
+      feather-size:
+        dtype: int
+      no-min-grid-resolution:
+        dtype: bool
+      min-grid-resolution:
+        dtype: bool
+      visibility-weighting-mode:
+        dtype: str
+      baseline-averaging:
+        dtype: float
+      simulate-noise:
+        dtype: float
+      simulate-baseline-noise:
+        dtype: File
+      idg-mode:
+        dtype: str
+      wstack-nwlayers:
+        dtype: int
+        nom_de_guerre: nwlayers
+      wstack-nwlayers-factor:
+        dtype: float
+        nom_de_guerre: nwlayers-factor
+      wstack-nwlayers-for-size:
+        dtype: List[int]
+        policies:
+          repeat: list
+      wstack-grid-mode:
+        dtype: str
+      wstack-kernel-size:
+        dtype: int
+      wstack-oversampling:
+        dtype: int
+      wgridder-accuracy:
+        dtype: float
+      compound-tasks:
+        dtype: bool
+      shared-facet-reads:
+        dtype: bool
+      aterm-config:
+        dtype: File
+      grid-with-beam:
+        dtype: bool
+      beam-aterm-update:
+        dtype: int
+      aterm-kernel-size:
+        dtype: float
+      apply-facet-solutions:
+        dtype: List[Union[File, str]]
+        policies:
+          repeat: list
+      no-solution-directions-check:
+        dtype: bool
+      scalar-visibilities:
+        dtype: bool
+      diagonal-visibilities:
+        dtype: bool
+      apply-facet-beam:
+        dtype: bool
+      facet-beam-update:
+        dtype: int
+      save-aterms:
+        dtype: bool
+      apply-primary-beam:
+        dtype: bool
+      reuse-primary-beam:
+        dtype: bool
+      use-differential-lofar-beam:
+        dtype: bool
+      primary-beam-limit:
+        dtype: float
+      scalar-beam:
+        dtype: bool
+      mwa-path:
+        dtype: Directory
+      save-psf-pb:
+        dtype: bool
+      pb-grid-size:
+        dtype: int
+      dd-psf-grid:
+        dtype: List[int]
+        policies:
+          repeat: list
+      beam-model:
+        dtype: str
+      beam-mode:
+        dtype: str
+      beam-normalisation-mode:
+        dtype: str
+      dry-run:
+        dtype: bool
+      maxuvw-m:
+        dtype: float
+      minuvw-m:
+        dtype: float
+      maxuv-l:
+        dtype: float
+      minuv-l:
+        dtype: float
+      maxw:
+        dtype: float
+      niter:
+        dtype: int
+      nmiter:
+        dtype: int
+      auto-threshold:
+        dtype: float
+      abs-threshold:
+        dtype: float
+        nom_de_guerre: threshold
+      auto-mask:
+        dtype: float
+      abs-auto-mask:
+        dtype: float
+      local-rms:
+        dtype: bool
+      local-rms-strength:
+        dtype: float
+      local-rms-window:
+        dtype: int
+      local-rms-method:
+        dtype: str
+      gain:
+        dtype: float
+      mgain:
+        dtype: float
+      join-channels:
+        dtype: bool
+      spectral-correction:
+        dtype: List[Union[float, str]]
+        policies:
+          repeat: list
+      no-fast-subminor:
+        dtype: bool
+      multiscale:
+        dtype: bool
+      multiscale-scale-bias:
+        dtype: float
+      multiscale-max-scales:
+        dtype: int
+      multiscale-scales:
+        dtype: List[float]
+      multiscale-shape:
+        dtype: str
+      multiscale-gain:
+        dtype: float
+      multiscale-convolution-padding:
+        dtype: float
+      asp:
+        dtype: bool
+      no-multiscale-fast-subminor:
+        dtype: bool
+      python-deconvolution:
+        dtype: File
+      iuwt:
+        dtype: bool
+      iuwt-snr-test:
+        dtype: bool
+      no-iuwt-snr-test:
+        dtype: bool
+      moresane-ext:
+        dtype: Directory
+      moresane-arg:
+        dtype: str
+      moresane-sl:
+        dtype: List[float]
+      save-source-list:
+        dtype: bool
+      clean-border:
+        dtype: float
+      fits-mask:
+        dtype: File
+      casa-mask:
+        dtype: File
+      horizon-mask:
+        dtype: str
+      no-negative:
+        dtype: bool
+      negative:
+        dtype: bool
+      stop-negative:
+        dtype: bool
+      fit-spectral-pol:
+        dtype: int
+      fit-spectral-log-pol:
+        dtype: int
+      force-spectrum:
+        dtype: File
+      squared-channel-joining:
+        dtype: bool
+      parallel-deconvolution:
+        dtype: int
+      deconvolution-threads:
+        dtype: int
+      restore:
+        dtype: List[File]
+        policies:
+          repeat: list
+      restore-list:
+        dtype: List[File]
+        policies:
+          repeat: list
+      beam-size:
+        dtype: float
+      beam-shape:
+        dtype: List[Union[str, float]]
+        policies:
+          repeat: list
+      fit-beam:
+        dtype: bool
+      no-fit-beam:
+        dtype: bool
+      beam-fitting-size:
+        dtype: float
+      theoretic-beam:
+        dtype: bool
+      circular-beam:
+        dtype: bool
+      elliptical-beam:
+        dtype: bool
+    outputs:
+      dirty:
+        dtype: File
+        implicit: '{prefix}-dirty.fits'
+      image:
+        dtype: File
+        implicit: '{prefix}-image.fits'
+      residual:
+        dtype: File
+        implicit: '{prefix}-residual.fits'
+      model:
+        dtype: File
+        implicit: '{prefix}-model.fits'
+      psf:
+        dtype: File
+        implicit: '{prefix}-psf.fits'
+      dirty_mfs:
+        dtype: File
+        implicit: '{prefix}-MFS-dirty.fits'
+      image_mfs:
+        dtype: File
+        implicit: '{prefix}-MFS-image.fits'
+      residual_mfs:
+        dtype: File
+        implicit: '{prefix}-MFS-residual.fits'
+      model_mfs:
+        dtype: File
+        implicit: '{prefix}-MFS-model.fits'
+      psf_mfs:
+        dtype: File
+        implicit: '{prefix}-MFS-psf.fits'
+      source-list:
+        dtype: File
+      temp-dir:
+        dtype: Directory

@@ -1,0 +1,116 @@
+cabs:
+  ragavi-vis:
+    command: ragavi-vis
+    image: RAGAVI
+    info: 'ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthedocs.io)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: MS to plot.
+      xaxis:
+        dtype: str
+        required: true
+        info: X-axis to plot.
+      yaxis:
+        dtype: str
+        required: true
+        info: Y-axis to plot.
+      canvas_height:
+        dtype: int
+        nom_de_guerre: canvas-height
+        info: Set height of the resulting image.
+      canvas_width:
+        dtype: int
+        nom_de_guerre: canvas-width
+        info: Set width of the resulting image.
+      cbin:
+        dtype: int
+        info: Size of channel bins over which to average.
+      ant:
+        dtype: str
+        info: Select baselines where ANTENNA1 corresponds to the supplied antenna(s)
+      chan:
+        dtype: str
+        info: Channels to select. Defaults to all.
+      chunks:
+        dtype: str
+        info: Chunk sizes to be applied to the dataset. Defaults to 5,000 in the row axis.
+      cmap:
+        dtype: str
+        info: Colour or colour map to use. Defaults to blues.
+      colour_axis:
+        dtype: str
+        nom_de_guerre: colour-axis
+        info: Select column to colourise by.
+      cols:
+        dtype: int
+        info: Number columns in grid if iteration is active. Defaults to 5.
+      corr:
+        dtype: str
+        info: Correlation index or subset to plot. Can be specified using normal python slicing syntax.
+          Defaults to all.
+      data_column:
+        dtype: str
+        default: DATA
+        nom_de_guerre: data-column
+        info: MS column to use for data.
+      debug:
+        dtype: bool
+        info: Enable debugging messages
+      ddid:
+        dtype: str
+        info: DATA_DESC_ID(s) /spw to select. Can be specified as e.g. 5, 5,6,7, 5~7 (inclusive range),
+          5:8 (exclusive range), 5:(from 5 to last). Defaults to all
+      field:
+        dtype: str
+        info: Field ID(s) / NAME(s) to plot. Can be specified as '0', '0,2,4', '0~3' (inclusive range),
+          '0:3' (exclusive range), '3:' (from 3 to last) or using a field name or comma separated field
+          names. Defaults to all.
+      iter_axis:
+        dtype: str
+        nom_de_guerre: iter-axis
+        info: Select column to iterate by.
+      logfile:
+        dtype: str
+        info: Desired name of logfile. Default is ragavi.log
+      mem_limit:
+        dtype: str
+        nom_de_guerre: mem-limit
+        info: Memory limit per core. Default is 1GB.
+      include_flagged:
+        dtype: bool
+        nom_de_guerre: include-flagged
+        info: Include flagged data in the generated plot. Default is false
+      num_cores:
+        dtype: int
+        nom_de_guerre: num-cores
+        info: Number of CPU cores to be used by Dask. Defaults to 10 or less cores
+      scan:
+        dtype: str
+        info: Scan Number to select. Defaults to all.
+      taql:
+        dtype: str
+        info: TAQL where clause
+      tbin:
+        dtype: float
+        info: Time in seconds over which to average.
+      xmin:
+        dtype: float
+        info: Minimum x value to plot
+      xmax:
+        dtype: float
+        info: Maximum x value to plot
+      ymin:
+        dtype: float
+        info: Minimum y value to plot
+      ymax:
+        dtype: float
+        info: Maximum y value to plot
+      htmlname:
+        dtype: File
+        info: Output HTML file name (without .html suffix)
+    outputs:
+      htmlname:
+        dtype: File
+        info: Output HTML file name (without .html suffix)

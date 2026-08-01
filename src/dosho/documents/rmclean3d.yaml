@@ -1,0 +1,63 @@
+cabs:
+  rmclean3d:
+    command: rmclean3d
+    image: RM_TOOLS
+    info: 'RM-Tools rmclean3d: RM-CLEAN on a cube of Faraday dispersion functions'
+    policies:
+      prefix: '-'
+    inputs:
+      fdf_dirty:
+        dtype: File
+        required: true
+        info: FITS cube containing the dirty FDF (any FDF output cube from rmsynth3d)
+        policies:
+          positional: true
+      rmsf:
+        dtype: File
+        required: true
+        info: FITS cube containing the RMSF and FWHM image (any RMSF output cube from rmsynth3d, not _FWHM.fits)
+        policies:
+          positional: true
+      cutoff:
+        dtype: float
+        default: 1.0
+        nom_de_guerre: c
+        info: Initial CLEAN cutoff in flux units
+      window:
+        dtype: float
+        nom_de_guerre: w
+        info: Threshold for (deeper) windowed clean [not used if not set]
+      max_iter:
+        dtype: int
+        default: 1000
+        nom_de_guerre: n
+        info: Maximum number of CLEAN iterations per pixel
+      gain:
+        dtype: float
+        default: 0.1
+        nom_de_guerre: g
+        info: CLEAN loop gain
+      prefix_out:
+        dtype: str
+        nom_de_guerre: o
+        info: Prefix to prepend to output files [None]
+      fits_extensions:
+        dtype: bool
+        nom_de_guerre: f
+        info: 'Store different Stokes as FITS extensions [default: separate files]'
+      verbose:
+        dtype: bool
+        nom_de_guerre: v
+        info: Verbose output
+      ncores:
+        dtype: int
+        nom_de_guerre: -ncores
+        info: Number of processes (uses multiprocessing)
+      chunk:
+        dtype: int
+        nom_de_guerre: -chunk
+        info: Chunk size (uses multiprocessing -- not available in MPI)
+      mpi:
+        dtype: bool
+        nom_de_guerre: -mpi
+        info: Run with MPI

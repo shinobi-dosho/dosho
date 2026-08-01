@@ -1,0 +1,128 @@
+cabs:
+  aegean:
+    command: aegean
+    image: AEGEAN
+    info: 'aegean: source finding in radio astronomical images (https://github.com/PaulHancock/Aegean)'
+    inputs:
+      image:
+        dtype: File
+        info: Input FITS image
+        policies:
+          positional: true
+      config:
+        dtype: File
+        info: Path to the config file
+      find:
+        dtype: bool
+        info: 'Source finding mode [default: true, unless --save or --measure]'
+      hdu_index:
+        dtype: int
+        default: 0
+        nom_de_guerre: hdu
+        info: HDU index (0-based) for cubes with multiple extensions
+      beam:
+        dtype: List[float]
+        info: 'The beam parameters to use as "major minor pa" (all in degrees) [default: from FITS header]'
+        policies:
+          repeat: list
+      slice:
+        dtype: int
+        info: For cube input, the array index of the image slice to process
+      progress:
+        dtype: bool
+        info: Show a progress bar as islands are being fit
+      cores:
+        dtype: int
+        info: Number of CPU cores to use for calculating background/rms images
+      forcerms:
+        dtype: float
+        info: Assume a single image noise of rms
+      forcebkg:
+        dtype: float
+        info: Assume a single image background of bkg
+      noise:
+        dtype: File
+        info: A FITS file representing the image noise (rms); from --save or BANE
+      background:
+        dtype: File
+        info: A FITS file representing the background level; from --save or BANE
+      psf:
+        dtype: File
+        info: A FITS file representing the local PSF
+      autoload:
+        dtype: bool
+        info: Automatically look for background/noise/region/psf files using the input filename as a hint
+      out:
+        dtype: File
+        info: Destination of the Aegean catalog output
+      table:
+        dtype: str
+        info: Additional table outputs, format inferred from extension
+      tformats:
+        dtype: bool
+        info: Show the table formats supported by this install
+      blankout:
+        dtype: bool
+        info: Create a blanked output image (only works if cores=1)
+      colprefix:
+        dtype: str
+        nom_de_guerre: colprefix
+        info: Prepend each column name with "prefix_"
+      maxsummits:
+        dtype: int
+        info: If more than maxsummits summits are detected in an island, only estimation is done, no fitting
+      seedclip:
+        dtype: float
+        default: 5.0
+        info: The clipping value (in sigmas) for seeding islands
+      floodclip:
+        dtype: float
+        default: 4.0
+        info: The clipping value (in sigmas) for growing islands
+      island:
+        dtype: bool
+        info: Also calculate the island flux in addition to individual components
+      nopositive:
+        dtype: bool
+        info: Don't report sources with positive fluxes
+      negative:
+        dtype: bool
+        info: Report sources with negative fluxes
+      region:
+        dtype: File
+        info: Restrict source finding to this MIMAS region (.mim) file
+      nocov:
+        dtype: bool
+        info: Don't use the covariance of the data in the fitting process
+      priorized:
+        dtype: int
+        info: 'Enable priorized fitting level n=[1,2,3]: 1=flux, 2=flux/position, 3=flux/position/shape'
+      ratio:
+        dtype: float
+        info: Ratio of synthesized beam sizes (image psf / input catalog psf), for priorized fitting
+      noregroup:
+        dtype: bool
+        info: Do not regroup islands before priorized fitting
+      input:
+        dtype: File
+        info: For --priorized, a catalog of locations at which fluxes will be measured
+      catpsf:
+        dtype: File
+        info: A psf map corresponding to the input catalog
+      regroup_eps:
+        dtype: float
+        nom_de_guerre: regroup-eps
+        info: Size in arcminutes used to regroup nearby components to be solved simultaneously
+      save:
+        dtype: bool
+        info: Save the background and noise images (sets --find to false)
+      outbase:
+        dtype: str
+        info: Base name of the background/noise images when --save is set
+      debug:
+        dtype: bool
+        info: Enable debug mode
+    outputs:
+      out:
+        dtype: File
+        info: Destination of the Aegean catalog output

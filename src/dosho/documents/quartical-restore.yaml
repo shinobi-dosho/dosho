@@ -1,0 +1,33 @@
+cabs:
+  quartical-restore:
+    command: goquartical-restore
+    image: QUARTICAL
+    info: 'goquartical-restore: restore a zarr column backup into a measurement set'
+    inputs:
+      zarr_path:
+        dtype: Directory
+        required: true
+        info: Path to the backup zarr column, e.g. path/to/dir/20211201-154457-foo.MS-FLAG.bkp.qc
+        policies:
+          positional: true
+      ms_path:
+        dtype: MS
+        required: true
+        info: Path to the measurement set to restore into
+        policies:
+          positional: true
+      column_name:
+        dtype: str
+        required: true
+        info: Column to populate from the backup (need not match the column the backup was made from)
+        policies:
+          positional: true
+      nthread:
+        dtype: int
+        info: Number of threads to use
+    outputs:
+      ms_path:
+        dtype: MS
+        info: Path to the measurement set to restore into
+        policies:
+          positional: true

@@ -1,0 +1,198 @@
+cabs:
+  quartical:
+    command: goquartical
+    image: QUARTICAL
+    info: QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
+    policies:
+      prefix: ''
+      key_value: true
+      repeat: '[]'
+    input_patterns:
+    - segments:
+      - regex: .+?
+      - attrs:
+          type:
+            dtype: str
+          solve_per:
+            dtype: str
+          direction_dependent:
+            dtype: bool
+          pinned_directions:
+            dtype: List[int]
+          time_interval:
+            dtype: str
+          freq_interval:
+            dtype: str
+          load_from:
+            dtype: Directory
+          interp_mode:
+            dtype: str
+          interp_method:
+            dtype: str
+          respect_scan_boundaries:
+            dtype: bool
+          initial_estimate:
+            dtype: bool
+    inputs:
+      parset:
+        dtype: File
+        info: Optional YAML config file to load before applying all other parameters (any bare *.yaml/*.yml
+          argv token, per goquartical's own parser.py)
+        policies:
+          positional_head: true
+      input_ms.path:
+        dtype: URI
+        required: true
+        mutable: true
+      input_ms.data_column:
+        dtype: str
+        default: DATA
+      input_ms.sigma_column:
+        dtype: str
+      input_ms.weight_column:
+        dtype: str
+      input_ms.time_chunk:
+        dtype: str
+        default: '0'
+      input_ms.freq_chunk:
+        dtype: str
+        default: '0'
+      input_ms.is_bda:
+        dtype: bool
+        default: false
+      input_ms.group_by:
+        dtype: List[str]
+        default:
+        - SCAN_NUMBER
+        - FIELD_ID
+        - DATA_DESC_ID
+      input_ms.select_corr:
+        dtype: List[int]
+      input_ms.select_fields:
+        dtype: List[int]
+        default: []
+      input_ms.select_ddids:
+        dtype: List[int]
+        default: []
+      input_ms.select_uv_range:
+        dtype: List[float]
+        default:
+        - 0
+        - 0
+      input_model.recipe:
+        dtype: str
+      input_model.beam:
+        dtype: str
+      input_model.beam_l_axis:
+        dtype: str
+        default: X
+      input_model.beam_m_axis:
+        dtype: str
+        default: Y
+      input_model.invert_uvw:
+        dtype: bool
+        default: true
+      input_model.source_chunks:
+        dtype: int
+        default: 500
+      input_model.apply_p_jones:
+        dtype: bool
+        default: false
+      output.gain_directory:
+        dtype: URI
+        default: gains.qc
+        mutable: true
+      output.log_directory:
+        dtype: Directory
+        default: logs.qc
+        mutable: true
+      output.log_to_terminal:
+        dtype: bool
+        default: true
+      output.overwrite:
+        dtype: bool
+        default: false
+      output.products:
+        dtype: List[str]
+      output.columns:
+        dtype: List[str]
+      output.flags:
+        dtype: bool
+        default: true
+      output.apply_p_jones_inv:
+        dtype: bool
+        default: false
+      output.subtract_directions:
+        dtype: List[int]
+      output.net_gains:
+        dtype: List[Any]
+      output.compute_baseline_corrections:
+        dtype: bool
+        default: false
+      output.apply_baseline_corrections:
+        dtype: bool
+        default: false
+      mad_flags.enable:
+        dtype: bool
+        default: false
+      mad_flags.whitening:
+        dtype: str
+        default: disabled
+      mad_flags.threshold_bl:
+        dtype: float
+        default: 5
+      mad_flags.threshold_global:
+        dtype: float
+        default: 10
+      mad_flags.max_deviation:
+        dtype: float
+        default: 0
+      mad_flags.use_off_diagonals:
+        dtype: bool
+        default: false
+      solver.terms:
+        dtype: List[str]
+        default:
+        - G
+      solver.iter_recipe:
+        dtype: List[int]
+        default:
+        - 25
+      solver.propagate_flags:
+        dtype: bool
+        default: true
+      solver.robust:
+        dtype: bool
+        default: false
+      solver.threads:
+        dtype: int
+        default: 1
+      solver.convergence_fraction:
+        dtype: float
+        default: 0.99
+      solver.convergence_criteria:
+        dtype: float
+        default: 1.0e-06
+      solver.reference_antenna:
+        dtype: int
+        default: 0
+      dask.threads:
+        dtype: int
+      dask.workers:
+        dtype: int
+        default: 1
+      dask.address:
+        dtype: str
+      dask.scheduler:
+        dtype: str
+        default: threads
+      dask.scheduler_plugin:
+        dtype: bool
+        default: true
+    outputs:
+      ms:
+        dtype: MS
+        implicit: '{input_ms_path}'
+      gain_directory:
+        dtype: Directory
+        implicit: '{output_gain_directory}'

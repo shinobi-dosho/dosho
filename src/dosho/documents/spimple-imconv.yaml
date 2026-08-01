@@ -1,0 +1,69 @@
+cabs:
+  spimple-imconv:
+    command: spimple-imconv
+    image: SPIMPLE
+    info: 'spimple-imconv: convolve images to a common resolution (https://github.com/ratt-ru/spimple)'
+    harvest:
+    - '{output_filename}.*'
+    inputs:
+      image:
+        dtype: File
+        required: true
+        info: Input image
+      output_filename:
+        dtype: str
+        required: true
+        nom_de_guerre: output-filename
+        info: Path to output directory
+        write_path: true
+      products:
+        dtype: str
+        info: 'Outputs to write: c=restoring beam, i=convolved image, b=average power beam, w=beam**2
+          weight image [default: convolved image only]'
+      psf_pars:
+        dtype: List[float]
+        nom_de_guerre: psf-pars
+        info: 'Restoring beam FWHM as emaj emin pa [default: from the FITS header]'
+        policies:
+          repeat: list
+      nthreads:
+        dtype: int
+        info: 'Number of threads to use [0: all threads]'
+      circ_psf:
+        dtype: bool
+        nom_de_guerre: circ-psf
+        info: Convolve with a circularised beam instead of elliptical
+      dilate:
+        dtype: float
+        info: Dilate the psf-pars in the FITS header by this amount (sometimes needed for stability)
+      beam_model:
+        dtype: str
+        nom_de_guerre: beam-model
+        info: FITS beam model to use (see power_beam_maker)
+      band:
+        dtype: str
+        info: 'Band to use with JimBeam: L, UHF or S'
+      pb_min:
+        dtype: float
+        nom_de_guerre: pb-min
+        info: Set image to zero where pb falls below this value
+      padding_frac:
+        dtype: float
+        nom_de_guerre: padding-frac
+        info: Padding fraction for FFTs (half on either side)
+      out_dtype:
+        dtype: str
+        info: 'Data type of output [default: single precision]'
+    outputs:
+      clean_psf:
+        dtype: File
+        implicit: '{output_filename}.clean_psf.fits'
+      convolved:
+        dtype: File
+        implicit: '{output_filename}.convolved.fits'
+      power_beam:
+        dtype: File
+        implicit: '{output_filename}.power_beam.fits'
+      spatial_weight:
+        dtype: File
+        implicit: '{output_filename}.spatial_weight.fits'

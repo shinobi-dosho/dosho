@@ -1,0 +1,32 @@
+cabs:
+  msutils-sumcols:
+    command: msutils sumcols
+    image: MSUTILS
+    info: 'msutils sumcols: sum (or, with --subtract, difference) MS columns into a new column'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to operate on
+        policies:
+          positional: true
+      cols:
+        dtype: List[str]
+        required: true
+        info: Columns to combine (two or more; exactly two with --subtract).
+        policies:
+          positional: true
+          repeat: list
+      out:
+        dtype: str
+        required: true
+        info: Output column.
+      subtract:
+        dtype: bool
+        info: Subtract the second column from the first (needs exactly 2 cols).
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set to operate on
+        policies:
+          positional: true
