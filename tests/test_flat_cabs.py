@@ -845,3 +845,53 @@ def test_rmclean3d_positionals_and_long_only_flags_get_double_dash():
     assert "--ncores" in argv and "4" in argv
     assert "--mpi" in argv
     assert "-ncores" not in argv  # never single-dash
+
+
+def test_vis_mowjsub_positional_ms_and_hyphenated_flags():
+    cab = dosho.get("vis-mowjsub")
+    assert cab.name == "vis-mowjsub"
+    assert cab.command == "vis-mowjsub"
+    assert cab.image == images.MOWJSUB
+    argv = build_argv(
+        cab,
+        {
+            "ms": "/x.ms",
+            "output_ms": "/out.ms",
+            "input_column": "CORRECTED_DATA",
+            "output_column": "DATA",
+            "vel_width": 250.0,
+        },
+    )
+    assert argv[0] == "vis-mowjsub"
+    assert argv[-1] == "/x.ms"  # positional, and last
+    # every other name is hyphenated on the CLI but underscored as a field
+    assert "--input-column" in argv and "--output-ms" in argv and "--vel-width" in argv
+    assert "--input_column" not in argv
+
+
+def test_vis_mowjsub_defaults_match_the_tools_own_parser_yaml():
+    cab = dosho.get("vis-mowjsub")
+    fields = cab.inputs_model.model_fields
+    assert fields["ms"].is_required()
+    assert fields["input_column"].default == "DATA"
+    assert fields["output_column"].default == "LINE_DATA"
+    assert fields["fit_model"].default == "b-spline"
+    assert fields["doppler_interpolation"].default == "nearest"
+    assert fields["nworkers"].default == 4
+    # no fitspw equivalent: the continuum is fitted across the whole band
+    assert not [f for f in fields if "fitspw" in f or "spw_sel" in f]
+
+
+def test_vis_mowjsub_declares_its_in_place_write():
+    """Without --output-ms the tool adds `output-column` to the INPUT MS, so
+    `ms` is a mutator. Undeclared, Tier 1 could roll that write away under a
+    later cache hit (stimela-ninja#52)."""
+    from shinobi.steps.schema import mutated_path_fields
+
+    cab = dosho.get("vis-mowjsub")
+    assert "ms" in mutated_path_fields(cab)
+
+
+def test_vis_mowjsub_output_ms_is_wireable():
+    cab = dosho.get("vis-mowjsub")
+    assert "output_ms" in cab.outputs_model.model_fields

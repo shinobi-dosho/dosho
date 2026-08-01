@@ -104,6 +104,7 @@ from dosho.cabs.fitstoolz import (
 from dosho.cabs.flagms import flagms
 from dosho.cabs.killms import killms
 from dosho.cabs.mosaic_queen import mosaic_queen
+from dosho.cabs.mowjsub import vis_mowjsub
 from dosho.cabs.msutils import (
     addcol,
     addnoise,
@@ -249,6 +250,7 @@ __all__ = [
     "uvmodelfit",
     "uvsub",
     "virtualconcat",
+    "vis_mowjsub",
     "widebandpbcor",
     "wsclean",
     "wvrgcal",

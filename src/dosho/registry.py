@@ -36,6 +36,7 @@ _NAME_OVERRIDES: dict[str, str] = {
     "fitstoolz_remove_axis": "fitstoolz-remove-axis",
     "fitstoolz_stack": "fitstoolz-stack",
     "mosaic_queen": "mosaic-queen",
+    "vis_mowjsub": "vis-mowjsub",
     "ragavi_gains": "ragavi-gains",
     "ragavi_vis": "ragavi-vis",
     "summary": "msutils-summary",
