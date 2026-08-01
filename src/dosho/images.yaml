@@ -236,6 +236,15 @@ images:
       pre_install: "RUN docker-apt-install montage"
       cmd: "mosaic-queen --help"
       dockerfile: pip/Dockerfile
+  MOWJSUB:
+    source: "https://github.com/laduma-dev/mowjsub"
+    name: mowjsub
+    build:
+      version: "2.0rc1"
+      base: BASE_ASTRO
+      package: "mowjsub==2.0rc1"
+      cmd: "vis-mowjsub --help"
+      dockerfile: pip/Dockerfile
   BREIZORRO:
     source: "https://github.com/ratt-ru/breizorro"
     name: breizorro

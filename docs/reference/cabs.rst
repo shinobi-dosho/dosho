@@ -13406,6 +13406,127 @@ Concatenate several MSs into one multi-MS, without copying the underlying data (
      - ``list[Path] | None``
      - \-
 
+vis-mowjsub
+-----------
+
+mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)
+
+:Command: ``vis-mowjsub``
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0rc1-d0.1.0`` (``MOWJSUB`` 2.0rc1, build)
+:Source: https://github.com/laduma-dev/mowjsub
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``input_column``
+     - ``str | None``
+     - ``'DATA'``
+     - \-
+   * - ``output_column``
+     - ``str | None``
+     - ``'LINE_DATA'``
+     - \-
+   * - ``fit_model``
+     - ``Literal['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline'] | None``
+     - ``'b-spline'``
+     - \-
+   * - ``order``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``vel_width``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``chan_width``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``gcv_lambda``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``segments``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``spwid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``field_id``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``row_chunks``
+     - ``int | None``
+     - ``10000``
+     - \-
+   * - ``time_chunks``
+     - ``int | None``
+     - ``64``
+     - \-
+   * - ``bl_chunks``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``cont_fit_tol``
+     - ``float | None``
+     - ``0``
+     - \-
+   * - ``nworkers``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``output_ms``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``load_from_cache``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``doppler_frame``
+     - ``Literal['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source'] | None``
+     - ``None``
+     - \-
+   * - ``doppler_chan_grid``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``doppler_interpolation``
+     - ``Literal['nearest', 'linear'] | None``
+     - ``'nearest'``
+     - \-
+   * - ``doppler_source_vel``
+     - ``float | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_ms``
+     - ``Path | None``
+     - \-
+
 widebandpbcor
 -------------
 
