@@ -56,9 +56,20 @@ def model_shape(model: type[BaseModel]) -> dict[str, tuple]:
     }
 
 
+# Config keys that change what a model *accepts*, as opposed to how it is
+# rendered. `extra` is the one that bites: a cab with input patterns needs
+# `extra="allow"` or it rejects every dynamically-named value the pattern was
+# written to match, and the cab otherwise looks identical.
+_CONFIG_KEYS = ("extra",)
+
+
 def _diff_models(label: str, a: type[BaseModel], b: type[BaseModel]) -> list[str]:
     sa, sb = model_shape(a), model_shape(b)
     out: list[str] = []
+    for key in _CONFIG_KEYS:
+        va, vb = a.model_config.get(key), b.model_config.get(key)
+        if va != vb:
+            out.append(f"{label}: model_config[{key!r}]: A={va!r} B={vb!r}")
     for missing in sorted(set(sa) - set(sb)):
         out.append(f"{label}: field {missing!r} present in A, absent in B")
     for extra in sorted(set(sb) - set(sa)):

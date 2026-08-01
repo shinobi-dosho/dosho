@@ -106,11 +106,21 @@ def test_detects_a_changed_flavour(pair):
 
 
 def test_detects_a_dropped_input_field(pair):
-    """The failure a lossy dialect would actually produce."""
+    """The failure a lossy dialect would actually produce.
+
+    Built with `create_model` rather than by poking `model_fields` onto a bare
+    class: the comparator reads `model_config` too, and a hand-made class has
+    none, so the shortcut tested the comparator against something pydantic
+    would never hand it.
+    """
+    from pydantic import create_model
+
     original, other = pair
-    kept = dict(list(other.inputs_model.model_fields.items())[:-1])
-    trimmed = type(other.inputs_model)(other.inputs_model.__name__, (), {})
-    trimmed.model_fields = kept
+    fields = {
+        name: (f.annotation, f.default)
+        for name, f in list(other.inputs_model.model_fields.items())[:-1]
+    }
+    trimmed = create_model(other.inputs_model.__name__, **fields)
     diffs = cab_differences(original, other.model_copy(update={"inputs_model": trimmed}))
     assert any("present in A, absent in B" in d for d in diffs)
 
