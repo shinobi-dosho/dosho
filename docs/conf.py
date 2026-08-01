@@ -51,6 +51,7 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     "design_data_registry.md",
+    "handover_stress_test.md",
 ]
 
 # Treat warnings as build-relevant but don't fail the build on missing
