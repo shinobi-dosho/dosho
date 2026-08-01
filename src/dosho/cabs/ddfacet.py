@@ -346,7 +346,11 @@ _FIELDS: dict[str, FieldSpec] = {
         "str",
         False,
         "image",
-        ParamMeta(nom_de_guerre="Output-Name", info="Base name of output images (Default: image)"),
+        ParamMeta(
+            nom_de_guerre="Output-Name",
+            info="Base name of output images (Default: image)",
+            path_prefix=True,
+        ),
     ),
     "output_shift_facets_file": (
         "File",
