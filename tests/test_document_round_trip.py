@@ -30,12 +30,6 @@ from tests.cab_compare import cab_differences
 from tools.cab_source import read_sources
 from tools.generate_documents import documents
 
-# Cabs whose `input_patterns`/`output_patterns` the dialect does not read yet
-# -- nested ParamPattern structures rather than scalars, deferred with their
-# own design (stimela-ninja #79). Named individually so a fourth one is a
-# failure rather than a silent addition.
-PATTERN_CABS = {"cubical", "quartical", "wsclean"}
-
 
 @pytest.fixture(scope="module")
 def generated() -> dict:
@@ -49,16 +43,21 @@ def built() -> dict[str, Cab]:
     return {c.name: c for n in C.__all__ if isinstance(c := getattr(C, n), Cab)}
 
 
-def _reload(name: str, body: dict) -> Cab:
-    cab = loads(yaml.safe_dump({"cabs": {name: body}}, sort_keys=False))[name]
-    # §4.5: the document carries the *manifest key* so a deployment's
-    # $DOSHO_IMAGES override still applies at load time. Resolving it belongs
-    # in the loader (as `package_roots` already is) and is not there yet, so
-    # the test does it -- the one place this round-trip is not yet end to end.
+def _image_keys() -> dict[str, str]:
+    """dosho's own manifest, as the loader's `images` mapping.
+
+    Exactly what a real consumer passes: the document names `WSCLEAN`, and
+    which reference that is stays the deployment's decision at load time
+    (§4.5) rather than being fixed when the document was written.
+    """
     from dosho import images
 
-    keys = {k: getattr(images, k) for k in dir(images) if k.isupper()}
-    return cab.model_copy(update={"image": keys[cab.image]}) if cab.image in keys else cab
+    return {k: getattr(images, k) for k in dir(images) if k.isupper()}
+
+
+def _reload(name: str, body: dict) -> Cab:
+    text = yaml.safe_dump({"cabs": {name: body}}, sort_keys=False)
+    return loads(text, images=_image_keys())[name]
 
 
 def test_every_cab_has_a_document(generated, built):
@@ -66,27 +65,29 @@ def test_every_cab_has_a_document(generated, built):
 
 
 def test_documents_round_trip(generated, built):
-    """The gate. Every cab the dialect fully covers must come back identical."""
+    """The gate. Every cab, with no exceptions -- there is no allowlist here,
+    deliberately: an exception that outlives its reason is how a migration
+    quietly stops covering what it claims to.
+    """
     failures = {}
     for name, body in generated.items():
-        if name in PATTERN_CABS:
-            continue
         diffs = cab_differences(built[name], _reload(name, body))
         if diffs:
             failures[name] = diffs[:3]
     assert failures == {}
 
 
-def test_pattern_cabs_are_the_only_exceptions(generated, built):
-    """Pins the deferral: these three fail *only* on patterns. If one starts
-    failing for another reason, or a fourth cab joins them, that is news.
+def test_pattern_cabs_round_trip_with_their_patterns(generated, built):
+    """The three that needed the dialect extended, checked for the thing that
+    was missing rather than only for overall equality -- so a regression that
+    dropped patterns while leaving everything else intact still fails here.
     """
-    for name in sorted(PATTERN_CABS):
-        diffs = cab_differences(built[name], _reload(name, generated[name]))
-        assert diffs, f"{name} now round-trips -- remove it from PATTERN_CABS"
-        assert all(d.startswith(("input_patterns", "output_patterns")) for d in diffs), (
-            f"{name} fails for something other than patterns: {diffs}"
-        )
+    for name in ("cubical", "quartical", "wsclean"):
+        reloaded = _reload(name, generated[name])
+        original = built[name]
+        assert original.input_patterns or original.output_patterns, f"{name} has no patterns"
+        assert reloaded.input_patterns == original.input_patterns
+        assert reloaded.output_patterns == original.output_patterns
 
 
 def test_every_declared_dtype_survives(generated):

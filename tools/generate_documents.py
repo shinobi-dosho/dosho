@@ -36,26 +36,20 @@ def _field_names(raw_names: list[str]) -> dict[str, str]:
     return {raw: sanitize_unique(raw, seen) for raw in raw_names}
 
 
-def _param(raw: str, field: str, spec: tuple, cab: Cab, *, is_input: bool) -> dict[str, Any]:
-    dtype, required, default = spec
-    out: dict[str, Any] = {"dtype": dtype}
-    if required:
-        out["required"] = True
-    if default is not None:
-        out["default"] = default
+def _meta_spec(
+    meta: Any, *, auto_nom: str | None = None, with_dtype: bool = False
+) -> dict[str, Any]:
+    """A `ParamMeta` as the dialect's param-spec keys.
 
-    meta = cab.field_meta.get(field)
-    if meta is None:
-        return out
-
-    # The loader derives nom_de_guerre from the key when sanitising changed
-    # it, so only an explicit one that differs needs writing down.
-    auto_nom = raw if raw != field else None
+    `with_dtype` mirrors the loader's own asymmetry: a declared field's dtype
+    lives in its model annotation and must not be repeated here, while a
+    pattern attr has no model field and carries dtype on the meta itself.
+    """
+    out: dict[str, Any] = {}
+    # The loader derives nom_de_guerre from the key when sanitising changed it,
+    # so only an explicit one that differs needs writing down.
     if meta.nom_de_guerre and meta.nom_de_guerre != auto_nom:
         out["nom_de_guerre"] = meta.nom_de_guerre
-    # `is not None`, not truthiness: two cabs carry an empty-string info, and
-    # dropping it turns `""` into `None` on the way back -- a difference the
-    # comparator sees, and rightly.
     if meta.info is not None:
         out["info"] = meta.info
     if meta.implicit is not None:
@@ -66,6 +60,8 @@ def _param(raw: str, field: str, spec: tuple, cab: Cab, *, is_input: bool) -> di
         out["abbreviation"] = meta.abbreviation
     if meta.path_prefix:
         out["path_prefix"] = True
+    if with_dtype and meta.dtype is not None:
+        out["dtype"] = meta.dtype
 
     policies: dict[str, Any] = {}
     if meta.positional:
@@ -76,6 +72,43 @@ def _param(raw: str, field: str, spec: tuple, cab: Cab, *, is_input: bool) -> di
         policies["repeat"] = "list"
     if policies:
         out["policies"] = policies
+    return out
+
+
+def _patterns(patterns: list) -> list[dict[str, Any]]:
+    """`ParamPattern`s as documents. An attr always gets a mapping, even an
+    empty one -- the attr *names* are what the pattern matches on, so an
+    omitted entry is a deleted attr, not a defaulted one.
+    """
+    out = []
+    for pattern in patterns:
+        entry: dict[str, Any] = {}
+        if pattern.separator != ".":
+            entry["separator"] = pattern.separator
+        entry["segments"] = [
+            {"attrs": {name: _meta_spec(m, with_dtype=True) for name, m in seg.attrs.items()}}
+            if seg.attrs is not None
+            else {"regex": seg.regex}
+            for seg in pattern.segments
+        ]
+        out.append(entry)
+    return out
+
+
+def _param(raw: str, field: str, spec: tuple, cab: Cab, *, is_input: bool) -> dict[str, Any]:
+    dtype, required, default = spec
+    out: dict[str, Any] = {"dtype": dtype}
+    if required:
+        out["required"] = True
+    if default is not None:
+        out["default"] = default
+
+    meta = cab.field_meta.get(field)
+    if meta is not None:
+        # `info` is emitted on `is not None` rather than truthiness: two cabs
+        # carry an empty-string info, and dropping it turns `""` into `None` on
+        # the way back -- a difference the comparator sees, and rightly.
+        out.update(_meta_spec(meta, auto_nom=raw if raw != field else None))
 
     if (
         is_input
@@ -109,6 +142,10 @@ def document_for(cab: Cab, src: CabSource) -> dict[str, Any]:
         body["sandbox"] = cab.sandbox
     if cab.wranglers:
         body["management"] = {"wranglers": cab.wranglers}
+    if cab.input_patterns:
+        body["input_patterns"] = _patterns(cab.input_patterns)
+    if cab.output_patterns:
+        body["output_patterns"] = _patterns(cab.output_patterns)
 
     for section, specs, is_input in (("inputs", src.inputs, True), ("outputs", src.outputs, False)):
         if not specs:
