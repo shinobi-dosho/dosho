@@ -172,9 +172,9 @@ def test_ddfacet_experimental_marker_names_only_the_wiring_residual():
     genuinely left: products the letter codes name at run time cannot be wired,
     and an upstream release may move the schema under the cab.
     """
-    from dosho._builder import EXPERIMENTAL_CABS
+    from dosho.registry import _index
 
-    reason = EXPERIMENTAL_CABS["ddfacet"]
+    reason = _index()["ddfacet"]["experimental"]
     # the residual is a *wiring* limit now, not a lost write
     assert "cannot be wired" in reason
     assert "nothing is silently lost" in reason.lower()

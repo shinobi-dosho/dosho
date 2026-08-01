@@ -64,6 +64,7 @@ _NAME_OVERRIDES: dict[str, str] = {
 _INDEX_PATH = Path(__file__).with_name("cab_index.yaml")
 _DOCUMENT_DIR = Path(__file__).with_name("documents")
 _index_cache: dict[str, dict[str, Any]] | None = None
+_cab_cache: dict[str, Any] = {}
 
 
 def _index() -> dict[str, dict[str, Any]]:
@@ -81,6 +82,24 @@ def _index() -> dict[str, dict[str, Any]]:
     if _index_cache is None:
         _index_cache = yaml.safe_load(_INDEX_PATH.read_text())["cabs"]
     return _index_cache
+
+
+def registered_name_for_attr(attr: str) -> str | None:
+    """The registered name a `dosho.cabs` attribute stands for, or None.
+
+    `dosho.cabs.__getattr__` is keyed by attribute (`simms_classic`) and
+    everything else by registered name (`simms`); twenty document-backed cabs
+    differ between the two. The index records both, so the mapping is written
+    down once rather than inferred from `_NAME_OVERRIDES` in reverse.
+
+    Only document-backed names resolve here: a pystep is a real module-level
+    object, so it never reaches `__getattr__` at all, and returning it from
+    this would paper over an import that failed.
+    """
+    for name, entry in _index().items():
+        if entry.get("attr") == attr and "document" in entry:
+            return name
+    return None
 
 
 def get_document(name: str) -> tuple[str, str]:
@@ -142,18 +161,30 @@ def get(name: str) -> Cab | StepRef:
     on to fall through to the next installed provider.
 
     Warns (once per name) if the cab is marked experimental -- see
-    `_builder.EXPERIMENTAL_CABS`.
+    the generated index.
     """
     entry = _index()[name]
+    # Before the cache, not after: whether a caller hears about an experimental
+    # cab should not depend on whether someone else already built it. The
+    # once-per-name guard lives in the warning itself.
+    _warn_if_experimental(name)
     if "document" in entry:
+        # Cached, so a name resolves to one object however it is reached --
+        # `dosho.get("wsclean")` and `dosho.cabs.wsclean` included. These were
+        # module-level singletons before the documents replaced them and
+        # callers may still compare them by identity; rebuilding per call
+        # would also re-parse ddfacet's 274 fields every lookup.
+        if name in _cab_cache:
+            return _cab_cache[name]
         # One code path with `shinobi.cabs.get`: the same document, the same
         # builder, the same options. A second path here would be a second
         # place for the two to disagree about what a cab is.
         from shinobi.cabs import build_document
 
         dialect, text = get_document(name)
-        return build_document(dialect, text, name=name, **loader_options())
-    _warn_if_experimental(name)
+        cab = build_document(dialect, text, name=name, **loader_options())
+        _cab_cache[name] = cab
+        return cab
     module = importlib.import_module("dosho.cabs")
     return getattr(module, entry["attr"])
 
