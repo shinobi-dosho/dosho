@@ -36,10 +36,9 @@ def test_direct_import_matches_registry_lookup():
     `dosho.get(...)` (runtime-known) -- two interfaces, one underlying set
     of objects.
     """
-    from dosho.cabs import listobs, wsclean
+    from dosho.cabs import listobs, simms_classic, wsclean
     from dosho.cabs.casatasks import listobs as listobs_submodule
     from dosho.cabs.simms import skysim, telsim
-    from dosho.cabs.simms_classic import simms_classic
 
     # Pysteps are still Python objects, so identity holds and is worth
     # pinning: the registry must hand back *the* StepRef, not a copy.

@@ -1,33 +1,6 @@
-"""Every tool dosho ports, re-exported by name at package level, so a
-pipeline author who knows what they want at write-time can do
-`from dosho.cabs import wsclean` or `from dosho.cabs.casatasks import
-listobs` directly -- no need to know or care whether a given tool is a
-`Cab` (a real binary, argv-built and shelled out to) or a `StepRef` (a
-Python-package tool with no standalone binary, run via `@shinobi.pystep`
-and `ctx.import_func` inside a container instead -- CASA tasks are the
-only example so far). Both shapes are first-class for `Recipe.add_step`.
-
-For *runtime*/string-keyed lookup (the CLI, `shinobi.cabs` entry-point
-discovery), use `dosho.get(name)`/`dosho.registry` instead -- that's a
-second, parallel interface for a caller that doesn't know the name until
-it runs, not a replacement for these direct imports.
-
-Importing this module (or any of its submodules -- Python always
-initializes a parent package first) eagerly constructs every `Cab`/
-`StepRef` below. That's a deliberate, accepted tradeoff here: each one is
-cheap (pydantic model + dict construction, no I/O), so the "don't pay for
-what you don't use" laziness `dosho.registry`'s own submodule-path table
-still gives a caller that only wants one specific tool is preserved
-there, not here.
-"""
-
 from __future__ import annotations
 
-from dosho.cabs.aegean import aegean
-from dosho.cabs.aimfast import aimfast
-from dosho.cabs.aoflagger import aoflagger
 from dosho.cabs.bdsf import catalog as bdsf_catalog
-from dosho.cabs.breizorro import breizorro
 from dosho.cabs.casaplotms import plotms
 from dosho.cabs.casatasks import (
     accor,
@@ -88,11 +61,6 @@ from dosho.cabs.casatasks import (
     widebandpbcor,
     wvrgcal,
 )
-from dosho.cabs.chgcentre import chgcentre
-from dosho.cabs.crystalball import crystalball
-from dosho.cabs.cubical import cubical
-from dosho.cabs.ddfacet import ddfacet
-from dosho.cabs.eidos import eidos
 from dosho.cabs.fitstoolz import (
     add_axis as fitstoolz_add_axis,
     header as fitstoolz_header,
@@ -101,46 +69,45 @@ from dosho.cabs.fitstoolz import (
     stack as fitstoolz_stack,
     stats as fitstoolz_stats,
 )
-from dosho.cabs.flagms import flagms
-from dosho.cabs.killms import killms
-from dosho.cabs.mosaic_queen import mosaic_queen
-from dosho.cabs.mowjsub import vis_mowjsub
-from dosho.cabs.msutils import (
-    addcol,
-    addnoise,
-    copycol,
-    flagstats,
-    sumcols,
-    summary,
-)
-from dosho.cabs.owlcat_plotelev import owlcat_plotelev
-from dosho.cabs.pyddi import pyddi
-from dosho.cabs.quartical import (
-    quartical,
-    quartical_backup,
-    quartical_plotter,
-    quartical_restore,
-)
-from dosho.cabs.ragavi import gains as ragavi_gains, vis as ragavi_vis
-from dosho.cabs.rfinder import rfinder
-from dosho.cabs.rmtools import rmclean3d, rmsynth1d, rmsynth3d
-from dosho.cabs.shadems import shadems
 from dosho.cabs.simms import primary_beam, skysim, telsim
-from dosho.cabs.simms_classic import simms_classic
-from dosho.cabs.smops import smops
-from dosho.cabs.sofia2 import sofia2
-from dosho.cabs.spimple import (
-    binterp as spimple_binterp,
-    imconv as spimple_imconv,
-    spifit as spimple_spifit,
-)
-from dosho.cabs.tigger import (
-    convert as tigger_convert,
-    restore as tigger_restore,
-    tag as tigger_tag,
-)
-from dosho.cabs.tricolour import tricolour
-from dosho.cabs.wsclean import wsclean
+
+# --- documents ------------------------------------------------------------
+#
+# The 43 binary cabs are defined by the documents under `dosho/documents/`,
+# not by Python. They are served here on attribute access so
+# `from dosho.cabs import wsclean` keeps working and keeps returning a `Cab`,
+# which is what every recipe written against this package expects.
+#
+# Lazy for two reasons. It keeps `import dosho.cabs` from building 43 cabs
+# nobody asked for, which is what the eager imports used to do. And it is what
+# lets the document half stay reachable without shinobi: building a `Cab`
+# needs the schema, so the import that needs it happens only when someone
+# actually wants one.
+#
+# Resolution goes through `dosho.registry.get`, the same path
+# `shinobi.cabs.get` takes, so there is one answer to "what is this cab" and
+# one place for it to be wrong.
+
+
+def __getattr__(name: str):
+    from dosho.registry import registered_name_for_attr
+
+    registered = registered_name_for_attr(name)
+    if registered is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from dosho.registry import get
+
+    # `registry.get` caches, so this is the same object `dosho.get(name)`
+    # returns -- one name, one cab, however it is reached. Binding it here as
+    # well just stops `__getattr__` firing again.
+    cab = get(registered)
+    globals()[name] = cab
+    return cab
+
+
+def __dir__() -> list[str]:
+    return sorted(__all__)
+
 
 __all__ = [
     "accor",

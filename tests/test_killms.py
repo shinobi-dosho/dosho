@@ -187,9 +187,9 @@ def test_killms_solsdir_passthrough_resolves_and_stays_none_when_unset():
 
 
 def test_killms_experimental_marker_names_only_the_residual():
-    from dosho._builder import EXPERIMENTAL_CABS
+    from dosho.registry import _index
 
-    reason = EXPERIMENTAL_CABS["killms"]
+    reason = _index()["killms"]["experimental"]
     assert "sols.npz" in reason  # the unnameable file, wired as dir + name instead
     assert "nothing is silently lost" in reason.lower()
     assert dosho.get("killms").info.startswith("EXPERIMENTAL:")
