@@ -17,7 +17,7 @@ import sys
 import pytest
 from shinobi.steps.schema import Cab
 
-from tests.cab_compare import cab_differences, cabs_equivalent
+from tests.cab_compare import FIELD_ATTRS, cab_differences, cabs_equivalent
 
 
 def _fresh_cabs() -> dict[str, Cab]:
@@ -144,3 +144,145 @@ def test_differences_name_the_field_that_differs(pair):
     assert len(diffs) == 1
     assert diffs[0].startswith("image:")
     assert "elsewhere/img:1" in diffs[0]
+
+
+# --------------------------------------------------------------------------
+# Mutation sweep: does the comparator notice every kind of change?
+# --------------------------------------------------------------------------
+#
+# The comparator is the migration gate. Its failure mode is silence -- it has
+# had two blind spots already (`dtype`, then `model_config["extra"]`), both
+# found by using its output rather than by reading it. This sweep changes one
+# thing at a time and insists it is reported.
+#
+# Every case asserts the mutation *took* before asserting it was seen. A
+# perturbation that sets a value to what it already was reads exactly like a
+# blind spot, and two of the first run's apparent misses were that.
+
+
+def _cab():
+    import dosho.cabs as C
+
+    return C.cubical
+
+
+CAB_MUTATIONS = {
+    "name": "other",
+    "info": "changed",
+    "image": "other/img:1",
+    "command": "other",
+    "flavour": "casa-task",
+    "backend": "native",
+    "venv": "/venv",
+    "cache": False,
+    "cache_dir": "/cache",
+    "sandbox": True,
+    "harvest": ["x-*.fits"],
+    "scratch": ["y/*"],
+    "wranglers": {"stdout": ["ERROR"]},
+}
+
+
+@pytest.mark.parametrize(("field", "value"), sorted(CAB_MUTATIONS.items()))
+def test_comparator_notices_a_changed_cab_field(field, value):
+    cab = _cab()
+    assert getattr(cab, field) != value, f"{field} mutation is a no-op -- pick another value"
+    assert cab_differences(cab, cab.model_copy(update={field: value})) != []
+
+
+def test_comparator_notices_changed_field_meta():
+    cab = _cab()
+    name = min(cab.field_meta)
+    meta = dict(cab.field_meta)
+    meta[name] = meta[name].model_copy(update={"info": "tampered"})
+    assert meta[name] != cab.field_meta[name]
+    assert cab_differences(cab, cab.model_copy(update={"field_meta": meta})) != []
+
+
+def test_comparator_notices_changed_patterns():
+    cab = _cab()
+    assert cab.input_patterns, "cubical should have input patterns"
+    mutated = [p.model_copy(update={"separator": "~"}) for p in cab.input_patterns]
+    assert mutated != cab.input_patterns
+    assert cab_differences(cab, cab.model_copy(update={"input_patterns": mutated})) != []
+
+
+def test_comparator_notices_a_changed_extra_policy():
+    """The blind spot that let a broken cubical through the gate: identical
+    fields, and a model that rejects every dynamic parameter it exists for.
+    """
+    from pydantic import create_model
+
+    cab = _cab()
+    fields = {
+        n: (f.annotation, f.default) for n, f in list(cab.inputs_model.model_fields.items())[:3]
+    }
+    permissive = create_model("X", __config__={"extra": "allow"}, **fields)
+    strict = create_model("X", **fields)
+    assert permissive.model_config.get("extra") != strict.model_config.get("extra")
+    assert (
+        cab_differences(
+            cab.model_copy(update={"inputs_model": permissive}),
+            cab.model_copy(update={"inputs_model": strict}),
+        )
+        != []
+    )
+
+
+@pytest.mark.parametrize("attr", [a for a in FIELD_ATTRS if a not in {"annotation", "default"}])
+def test_comparator_notices_every_field_attribute(attr):
+    """Generic over `FieldInfo.__slots__`, so an attribute pydantic adds in a
+    future version is covered the day it appears rather than the day someone
+    remembers to add it here.
+    """
+    from pydantic import Field, create_model
+
+    cab = _cab()
+    fields = {
+        n: (f.annotation, f.default) for n, f in list(cab.inputs_model.model_fields.items())[:3]
+    }
+    first = next(iter(fields))
+    annotation, default = fields[first]
+
+    probes = {
+        "alias": {"alias": "aliased"},
+        "alias_priority": {"alias": "aliased", "alias_priority": 1},
+        "deprecated": {"deprecated": "gone"},
+        "description": {"description": "described"},
+        "discriminator": None,  # needs a tagged union; not reachable for a cab
+        "examples": {"examples": [1]},
+        "exclude": {"exclude": True},
+        "exclude_if": None,  # callable; no stable value to compare
+        "field_title_generator": None,  # callable
+        "default_factory": None,  # mutually exclusive with a default
+        "default_factory_takes_validated_data": None,
+        "frozen": {"frozen": True},
+        "init": {"init": False},
+        "init_var": {"init_var": True},
+        "json_schema_extra": {"json_schema_extra": {"abbreviation": "z"}},
+        "kw_only": {"kw_only": True},
+        "metadata": {"gt": 0},
+        "repr": {"repr": False},
+        "serialization_alias": {"serialization_alias": "ser"},
+        "title": {"title": "titled"},
+        "validate_default": {"validate_default": True},
+        "validation_alias": {"validation_alias": "val"},
+    }
+    kwargs = probes.get(attr, "unhandled")
+    if kwargs == "unhandled":
+        pytest.fail(f"FieldInfo gained {attr!r} -- add a probe for it or say why it has none")
+    if kwargs is None:
+        pytest.skip(f"{attr} has no stable value a cab could carry")
+
+    ann = int if attr == "metadata" else annotation
+    ref = create_model("X", **{**fields, first: (ann, Field(default))})
+    mutated = create_model("X", **{**fields, first: (ann, Field(default, **kwargs))})
+    a, b = ref.model_fields[first], mutated.model_fields[first]
+    assert getattr(a, attr, None) != getattr(b, attr, None), f"{attr} probe is a no-op"
+    assert (
+        cab_differences(
+            cab.model_copy(update={"inputs_model": ref}),
+            cab.model_copy(update={"inputs_model": mutated}),
+        )
+        != []
+    )

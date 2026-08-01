@@ -33,25 +33,45 @@ from pydantic import BaseModel
 _MODEL_FIELDS = ("inputs_model", "outputs_model")
 
 
-def model_shape(model: type[BaseModel]) -> dict[str, tuple]:
-    """The structural fingerprint of a generated model: per field, what
-    `create_model` was given.
+def _field_attrs() -> tuple[str, ...]:
+    """Every public attribute pydantic says a field carries.
 
-    `annotation` compares by value for the types cabs use -- `Literal["a","b"]`
-    equals an identically-spelled `Literal`, so the `choices` narrowing
-    `shinobi.loaders._modelgen.narrow_choices` performs is covered. `alias`
-    carries the `nom_de_guerre` sanitisation and `json_schema_extra` the
-    `abbreviation` short flags, both of which a dialect could plausibly drop.
+    Taken from `FieldInfo.__slots__` rather than a hand-written list. The
+    hand-written version compared six attributes and silently ignored the rest
+    -- `title`, `frozen`, `exclude`, `deprecated` and others -- so a dialect
+    that started emitting one of them would round-trip "cleanly" while
+    dropping it. None of them are reachable today, which is exactly why a
+    hand-written list would have stayed wrong without anyone noticing.
+
+    Private slots are excluded: `_attributes_set` and `_original_assignment`
+    record *how* a field was declared, not what it means, and differ between
+    two identical fields built by different routes.
+    """
+    from pydantic.fields import FieldInfo
+
+    return tuple(sorted(s for s in FieldInfo.__slots__ if not s.startswith("_")))
+
+
+FIELD_ATTRS = _field_attrs()
+
+
+def model_shape(model: type[BaseModel]) -> dict[str, tuple]:
+    """The structural fingerprint of a generated model: per field, everything
+    pydantic records about it.
+
+    Annotations compare by value for the types cabs use -- `Literal["a","b"]`
+    equals an identically-spelled `Literal` -- so the `choices` narrowing
+    `shinobi.loaders._modelgen.narrow_choices` performs is covered, as are
+    `alias` (the `nom_de_guerre` sanitisation) and `json_schema_extra` (the
+    `abbreviation` short flags).
+
+    Fields are not the whole model, though -- see `_CONFIG_KEYS`. A missing
+    `extra="allow"` produced an identical field set and a cab that rejected
+    every dynamic parameter it existed to accept, and this comparison did not
+    notice for as long as it looked only here.
     """
     return {
-        name: (
-            f.annotation,
-            f.default,
-            f.is_required(),
-            f.alias,
-            f.description,
-            f.json_schema_extra,
-        )
+        name: tuple(getattr(f, attr, None) for attr in FIELD_ATTRS)
         for name, f in model.model_fields.items()
     }
 
@@ -66,6 +86,8 @@ _CONFIG_KEYS = ("extra",)
 def _diff_models(label: str, a: type[BaseModel], b: type[BaseModel]) -> list[str]:
     sa, sb = model_shape(a), model_shape(b)
     out: list[str] = []
+    if a.__name__ != b.__name__:
+        out.append(f"{label}: model class name: A={a.__name__!r} B={b.__name__!r}")
     for key in _CONFIG_KEYS:
         va, vb = a.model_config.get(key), b.model_config.get(key)
         if va != vb:
@@ -76,12 +98,7 @@ def _diff_models(label: str, a: type[BaseModel], b: type[BaseModel]) -> list[str
         out.append(f"{label}: field {extra!r} present in B, absent in A")
     for name in sorted(set(sa) & set(sb)):
         if sa[name] != sb[name]:
-            for attr, va, vb in zip(
-                ("annotation", "default", "required", "alias", "description", "json_schema_extra"),
-                sa[name],
-                sb[name],
-                strict=True,
-            ):
+            for attr, va, vb in zip(FIELD_ATTRS, sa[name], sb[name], strict=True):
                 if va != vb:
                     out.append(f"{label}: field {name!r} {attr}: A={va!r} B={vb!r}")
     return out
