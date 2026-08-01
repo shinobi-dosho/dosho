@@ -178,6 +178,10 @@ source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+run = [
     { name = "stimela-ninja" },
 ]
 
@@ -198,8 +202,9 @@ docs = [
 requires-dist = [
     { name = "click", specifier = ">=8.1" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "stimela-ninja", git = "https://github.com/shinobi-dosho/stimela-ninja?branch=main" },
+    { name = "stimela-ninja", marker = "extra == 'run'", git = "https://github.com/shinobi-dosho/stimela-ninja?branch=main" },
 ]
+provides-extras = ["run"]
 
 [package.metadata.requires-dev]
 dev = [

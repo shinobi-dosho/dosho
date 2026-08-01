@@ -12,11 +12,21 @@ requires-python = ">=3.11"
 authors = [
     { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
 ]
+# dosho is a catalogue of tool definitions. Reading them -- listing what
+# exists, fetching a cab's document, resolving an image reference -- needs
+# nothing but a YAML parser, and `import dosho` loads zero shinobi modules
+# (tests/test_import_is_shinobi_free.py).
+#
+# Turning a definition into something runnable is what needs the framework, so
+# shinobi is the `run` extra rather than a hard dependency. `dosho.cabs.<tool>`
+# and `dosho.get(...)` both require it and say so if it is missing.
 dependencies = [
-    "stimela-ninja>=0.1.0b5",
     "pyyaml>=6.0",
     "click>=8.1",
 ]
+
+[project.optional-dependencies]
+run = ["stimela-ninja>=0.1.0b5"]
 
 [dependency-groups]
 dev = [

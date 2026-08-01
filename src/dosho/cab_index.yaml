@@ -15,6 +15,8 @@
 cabs:
   accor:
     attr: accor
+    module: dosho.cabs.casatasks
+    symbol: accor
   aegean:
     attr: aegean
     document: aegean.yaml
@@ -26,16 +28,28 @@ cabs:
     document: aoflagger.yaml
   apparentsens:
     attr: apparentsens
+    module: dosho.cabs.casatasks
+    symbol: apparentsens
   appendantab:
     attr: appendantab
+    module: dosho.cabs.casatasks
+    symbol: appendantab
   applycal:
     attr: applycal
+    module: dosho.cabs.casatasks
+    symbol: applycal
   bandpass:
     attr: bandpass
+    module: dosho.cabs.casatasks
+    symbol: bandpass
   bdsf-catalog:
     attr: bdsf_catalog
+    module: dosho.cabs.bdsf
+    symbol: catalog
   blcal:
     attr: blcal
+    module: dosho.cabs.casatasks
+    symbol: blcal
   breizorro:
     attr: breizorro
     document: breizorro.yaml
@@ -44,12 +58,20 @@ cabs:
     document: chgcentre.yaml
   clearcal:
     attr: clearcal
+    module: dosho.cabs.casatasks
+    symbol: clearcal
   clearstat:
     attr: clearstat
+    module: dosho.cabs.casatasks
+    symbol: clearstat
   concat:
     attr: concat
+    module: dosho.cabs.casatasks
+    symbol: concat
   conjugatevis:
     attr: conjugatevis
+    module: dosho.cabs.casatasks
+    symbol: conjugatevis
   crystalball:
     attr: crystalball
     document: crystalball.yaml
@@ -58,8 +80,12 @@ cabs:
     document: cubical.yaml
   cvel:
     attr: cvel
+    module: dosho.cabs.casatasks
+    symbol: cvel
   cvel2:
     attr: cvel2
+    module: dosho.cabs.casatasks
+    symbol: cvel2
   ddfacet:
     attr: ddfacet
     document: ddfacet.yaml
@@ -74,60 +100,110 @@ cabs:
       verify a DDFacet upgrade against this cab rather than assuming the schema held still'
   deconvolve:
     attr: deconvolve
+    module: dosho.cabs.casatasks
+    symbol: deconvolve
   defintent:
     attr: defintent
+    module: dosho.cabs.casatasks
+    symbol: defintent
   delmod:
     attr: delmod
+    module: dosho.cabs.casatasks
+    symbol: delmod
   eidos:
     attr: eidos
     document: eidos.yaml
   feather:
     attr: feather
+    module: dosho.cabs.casatasks
+    symbol: feather
   fitstoolz-add-axis:
     attr: fitstoolz_add_axis
+    module: dosho.cabs.fitstoolz
+    symbol: add_axis
   fitstoolz-header:
     attr: fitstoolz_header
+    module: dosho.cabs.fitstoolz
+    symbol: header
   fitstoolz-remove-axis:
     attr: fitstoolz_remove_axis
+    module: dosho.cabs.fitstoolz
+    symbol: remove_axis
   fitstoolz-slice:
     attr: fitstoolz_slice
+    module: dosho.cabs.fitstoolz
+    symbol: slice_
   fitstoolz-stack:
     attr: fitstoolz_stack
+    module: dosho.cabs.fitstoolz
+    symbol: stack
   fitstoolz-stats:
     attr: fitstoolz_stats
+    module: dosho.cabs.fitstoolz
+    symbol: stats
   fixplanets:
     attr: fixplanets
+    module: dosho.cabs.casatasks
+    symbol: fixplanets
   fixvis:
     attr: fixvis
+    module: dosho.cabs.casatasks
+    symbol: fixvis
   flagcmd:
     attr: flagcmd
+    module: dosho.cabs.casatasks
+    symbol: flagcmd
   flagdata:
     attr: flagdata
+    module: dosho.cabs.casatasks
+    symbol: flagdata
   flagmanager:
     attr: flagmanager
+    module: dosho.cabs.casatasks
+    symbol: flagmanager
   flagms:
     attr: flagms
     document: flagms.yaml
   fluxscale:
     attr: fluxscale
+    module: dosho.cabs.casatasks
+    symbol: fluxscale
   fringefit:
     attr: fringefit
+    module: dosho.cabs.casatasks
+    symbol: fringefit
   ft:
     attr: ft
+    module: dosho.cabs.casatasks
+    symbol: ft
   gaincal:
     attr: gaincal
+    module: dosho.cabs.casatasks
+    symbol: gaincal
   gencal:
     attr: gencal
+    module: dosho.cabs.casatasks
+    symbol: gencal
   getantposalma:
     attr: getantposalma
+    module: dosho.cabs.casatasks
+    symbol: getantposalma
   getcalmodvla:
     attr: getcalmodvla
+    module: dosho.cabs.casatasks
+    symbol: getcalmodvla
   hanningsmooth:
     attr: hanningsmooth
+    module: dosho.cabs.casatasks
+    symbol: hanningsmooth
   impbcor:
     attr: impbcor
+    module: dosho.cabs.casatasks
+    symbol: impbcor
   initweights:
     attr: initweights
+    module: dosho.cabs.casatasks
+    symbol: initweights
   killms:
     attr: killms
     document: killms.yaml
@@ -140,13 +216,19 @@ cabs:
       held still'
   listobs:
     attr: listobs
+    module: dosho.cabs.casatasks
+    symbol: listobs
   makemask:
     attr: makemask
+    module: dosho.cabs.casatasks
+    symbol: makemask
   mosaic-queen:
     attr: mosaic_queen
     document: mosaic-queen.yaml
   mstransform:
     attr: mstransform
+    module: dosho.cabs.casatasks
+    symbol: mstransform
   msutils-addcol:
     attr: addcol
     document: msutils-addcol.yaml
@@ -167,25 +249,43 @@ cabs:
     document: msutils-summary.yaml
   msuvbin:
     attr: msuvbin
+    module: dosho.cabs.casatasks
+    symbol: msuvbin
   msuvbinflag:
     attr: msuvbinflag
+    module: dosho.cabs.casatasks
+    symbol: msuvbinflag
   owlcat_plotelev:
     attr: owlcat_plotelev
     document: owlcat_plotelev.yaml
   partition:
     attr: partition
+    module: dosho.cabs.casatasks
+    symbol: partition
   pccor:
     attr: pccor
+    module: dosho.cabs.casatasks
+    symbol: pccor
   phaseshift:
     attr: phaseshift
+    module: dosho.cabs.casatasks
+    symbol: phaseshift
   plotms:
     attr: plotms
+    module: dosho.cabs.casaplotms
+    symbol: plotms
   polcal:
     attr: polcal
+    module: dosho.cabs.casatasks
+    symbol: polcal
   polfromgain:
     attr: polfromgain
+    module: dosho.cabs.casatasks
+    symbol: polfromgain
   predictcomp:
     attr: predictcomp
+    module: dosho.cabs.casatasks
+    symbol: predictcomp
   pyddi:
     attr: pyddi
     document: pyddi.yaml
@@ -209,6 +309,8 @@ cabs:
     document: ragavi-vis.yaml
   rerefant:
     attr: rerefant
+    module: dosho.cabs.casatasks
+    symbol: rerefant
   rfinder:
     attr: rfinder
     document: rfinder.yaml
@@ -223,10 +325,16 @@ cabs:
     document: rmsynth3d.yaml
   rmtables:
     attr: rmtables
+    module: dosho.cabs.casatasks
+    symbol: rmtables
   sdintimaging:
     attr: sdintimaging
+    module: dosho.cabs.casatasks
+    symbol: sdintimaging
   setjy:
     attr: setjy
+    module: dosho.cabs.casatasks
+    symbol: setjy
   shadems:
     attr: shadems
     document: shadems.yaml
@@ -235,12 +343,20 @@ cabs:
     document: simms.yaml
   simms-primary-beam:
     attr: primary_beam
+    module: dosho.cabs.simms
+    symbol: primary_beam
   simms-skysim:
     attr: skysim
+    module: dosho.cabs.simms
+    symbol: skysim
   simms-telsim:
     attr: telsim
+    module: dosho.cabs.simms
+    symbol: telsim
   smoothcal:
     attr: smoothcal
+    module: dosho.cabs.casatasks
+    symbol: smoothcal
   smops:
     attr: smops
     document: smops.yaml
@@ -258,10 +374,16 @@ cabs:
     document: spimple-spifit.yaml
   split:
     attr: split
+    module: dosho.cabs.casatasks
+    symbol: split
   statwt:
     attr: statwt
+    module: dosho.cabs.casatasks
+    symbol: statwt
   tclean:
     attr: tclean
+    module: dosho.cabs.casatasks
+    symbol: tclean
   tigger-convert:
     attr: tigger_convert
     document: tigger-convert.yaml
@@ -276,21 +398,35 @@ cabs:
     document: tricolour.yaml
   uvcontsub:
     attr: uvcontsub
+    module: dosho.cabs.casatasks
+    symbol: uvcontsub
   uvcontsub_old:
     attr: uvcontsub_old
+    module: dosho.cabs.casatasks
+    symbol: uvcontsub_old
   uvmodelfit:
     attr: uvmodelfit
+    module: dosho.cabs.casatasks
+    symbol: uvmodelfit
   uvsub:
     attr: uvsub
+    module: dosho.cabs.casatasks
+    symbol: uvsub
   virtualconcat:
     attr: virtualconcat
+    module: dosho.cabs.casatasks
+    symbol: virtualconcat
   vis-mowjsub:
     attr: vis_mowjsub
     document: vis-mowjsub.yaml
   widebandpbcor:
     attr: widebandpbcor
+    module: dosho.cabs.casatasks
+    symbol: widebandpbcor
   wsclean:
     attr: wsclean
     document: wsclean.yaml
   wvrgcal:
     attr: wvrgcal
+    module: dosho.cabs.casatasks
+    symbol: wvrgcal

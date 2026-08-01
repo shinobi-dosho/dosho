@@ -12,6 +12,17 @@ configuration and stays declarative whatever carries it, so there's no
 `dynamic_schema`-style Python-execution step at cab-load time, no expression
 language, and no dtype coverage gaps.
 
+## Installing
+
+```
+pip install dosho          # the cab definitions: names, schemas, images
+pip install dosho[run]     # ...plus stimela-ninja, to build and run them
+```
+
+The definitions are data — YAML documents under `dosho/documents/`, readable
+without the framework. `dosho.cabs.<tool>` and `dosho.get(...)` turn one into a
+`Cab`, which needs the `run` extra.
+
 See [`AGENTS.md`](./AGENTS.md) for the design rationale and
 tool-authoring conventions.
 
