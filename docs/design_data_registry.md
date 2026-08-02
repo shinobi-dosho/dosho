@@ -471,7 +471,7 @@ The index already has to exist to answer `list_cabs()` without parsing anything
 
 ```
 wsclean       wsclean.yml
-ddfacet       ddfacet.yml     experimental="DDFacet is a rogue sibling package …"
+ddfacet       ddfacet.yml     experimental="DDFacet support is limited by … "
 ```
 
 `registry` reads the reason from the index — no shinobi, no parse, no import —

@@ -89,7 +89,7 @@ cabs:
   ddfacet:
     attr: ddfacet
     document: ddfacet.yaml
-    experimental: 'DDFacet is a rogue sibling upstream dosho supports on a best-effort basis: its `DefaultParset.cfg`
+    experimental: 'DDFacet support is limited by what its own schema declares: its `DefaultParset.cfg`
       carries no usable `#type:` tags (so every path arrived as a bare `str` and had to be classified
       from help text), and `Output-Images` letter codes name its image family at run time. Its I/O *is*
       declared -- products as output fields plus a harvest glob, cache and log as `scratch` -- so nothing
@@ -207,7 +207,7 @@ cabs:
   killms:
     attr: killms
     document: killms.yaml
-    experimental: 'killMS is a rogue sibling upstream dosho supports on a best-effort basis: its `DefaultParset.cfg`
+    experimental: 'killMS support is limited by what its own schema declares: its `DefaultParset.cfg`
       declares almost no types, and it mangles its own output name internally (`reformat(MSName)` + `SolsName`).
       Its I/O *is* declared -- the solutions directory as an output, the DDF cache as `scratch` -- so
       nothing is silently lost. What remains: the `.sols.npz` path itself cannot be named, so a downstream
