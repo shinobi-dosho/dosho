@@ -5,6 +5,7 @@ cabs:
     info: 'simms (classic): simulate an empty MS from telescope/observation parameters (pre-3.0)'
     inputs:
       msname:
+        write_path: true
         dtype: MS
         required: true
         nom_de_guerre: name

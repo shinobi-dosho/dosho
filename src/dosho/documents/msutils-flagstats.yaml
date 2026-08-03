@@ -13,9 +13,11 @@ cabs:
         policies:
           positional: true
       plot:
+        write_path: true
         dtype: File
         info: Output PNG plot file.
       json_out:
+        write_path: true
         dtype: File
         nom_de_guerre: json
         info: Output JSON statistics file.

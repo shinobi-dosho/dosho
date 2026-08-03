@@ -11,6 +11,7 @@ cabs:
         policies:
           positional: true
       json_out:
+        write_path: true
         dtype: File
         nom_de_guerre: json
         info: Also write the summary to this JSON file.

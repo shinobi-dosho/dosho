@@ -50,9 +50,11 @@ cabs:
         dtype: str
         info: TAQL where clause.
       htmlname:
+        write_path: true
         dtype: File
         info: Output HTML file name (with or without .html suffix).
       plotname:
+        write_path: true
         dtype: File
         info: Static output file name (with suffix). '.png' or '.svg' determines the output type.
     outputs:

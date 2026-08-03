@@ -18,6 +18,7 @@ cabs:
         default: false
         info: Display plot on screen
       output_name:
+        write_path: true
         dtype: File
         nom_de_guerre: output-name
         info: Output filename

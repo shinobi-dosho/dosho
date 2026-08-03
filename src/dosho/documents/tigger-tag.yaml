@@ -25,6 +25,7 @@ cabs:
         nom_de_guerre: list
         info: List selected sources only; does not apply any tags
       output:
+        write_path: true
         dtype: File
         info: 'Save changes to a different output model [default: save in place]'
       force:

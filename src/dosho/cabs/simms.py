@@ -269,6 +269,7 @@ def skysim(
     name="simms-telsim",
     image=images.SIMMS,
     info="Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).",
+    write_paths=["ms"],
 )
 def telsim(
     ctx,
@@ -407,6 +408,7 @@ def telsim(
     name="simms-primary-beam",
     image=images.SIMMS,
     info="Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simms 3.0).",
+    write_paths=["output"],
 )
 def primary_beam(
     ctx,

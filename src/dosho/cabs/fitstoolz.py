@@ -99,6 +99,7 @@ def _opts(local_vars: dict) -> SimpleNamespace:
     name="fitstoolz-header",
     image=images.FITSTOOLZ,
     info="Show, add, edit or remove FITS header entries.",
+    write_paths=["outfile"],
 )
 def header(
     ctx,
@@ -149,6 +150,7 @@ def stats(
     name="fitstoolz-slice",
     image=images.FITSTOOLZ,
     info="Slice a FITS image along one or more axes.",
+    write_paths=["outfile"],
 )
 def slice_(
     ctx,
@@ -170,6 +172,7 @@ def slice_(
     name="fitstoolz-add-axis",
     image=images.FITSTOOLZ,
     info="Add an axis to a FITS image.",
+    write_paths=["outfile"],
 )
 def add_axis(
     ctx,
@@ -195,6 +198,7 @@ def add_axis(
     name="fitstoolz-remove-axis",
     image=images.FITSTOOLZ,
     info="Remove an axis from a FITS image.",
+    write_paths=["outfile"],
 )
 def remove_axis(
     ctx,
@@ -225,6 +229,7 @@ def remove_axis(
     name="fitstoolz-stack",
     image=images.FITSTOOLZ,
     info="Stack FITS images along an axis.",
+    write_paths=["stacked_fits"],
 )
 def stack(
     ctx,

@@ -50,7 +50,7 @@ class PlotmsOutputs(BaseModel):
     plotfile: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["plotfile"])
 def plotms(
     ctx,
     vis: Path,

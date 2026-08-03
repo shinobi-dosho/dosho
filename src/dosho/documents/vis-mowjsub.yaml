@@ -83,6 +83,7 @@ cabs:
         info: Number of parallel worker threads (roughly one per CPU core). Runtime for fitting-bound
           models scales with this, so raise it to speed up large datasets.
       output-ms:
+        write_path: true
         dtype: MS
       load-from-cache:
         dtype: File

@@ -74,6 +74,42 @@ reserved field, then `implicit`, then the field's own default -- so the
 same-named-input tier does the echoing automatically, no extra
 `field_meta` entry needed.
 
+**The echo is two different things, and only a declaration tells them
+apart.** `mstransform(outputvis=...) -> outputvis` and `flagdata(vis=...)
+-> vis` are the same shape: one name on both models. But the first names a
+destination the task *creates* and the second names the caller's own MS.
+Nothing structural separates them -- `mutated_path_fields` sees one shape,
+and a pystep cannot declare `Mutability` at all -- so shinobi's default is
+the safe reading (an echoed path is the caller's data, never deleted) and a
+task that really does create its output says so with
+`@shinobi.pystep(write_paths=["outputvis"])`. `sandbox.clear_stale_outputs`
+then clears the previous run's product before the task re-runs, which is
+what CASA's refuse-to-overwrite tasks need to be re-runnable at all. It is
+also what retired `mstransform`/`fixvis`'s caller-facing `overwrite`
+parameter: a flag every call site had to remember, and silently wrong the
+once it was forgotten.
+
+Marked here: the MS producers (`mstransform`, `split`, `cvel`, `cvel2`,
+`hanningsmooth`, `partition`, `phaseshift`, `uvcontsub`, `conjugatevis`,
+`fixvis`, `appendantab`) plus `listobs.listfile`, `feather.imagename`, and
+`impbcor`/`getantposalma`/`getcalmodvla`'s `outfile`. Deliberately *not*
+marked, with the reason -- these are where deleting would cost data, and
+`tests/test_write_path_annotations.py` pins both sides, failing on any new
+dual declaration that joins neither:
+
+* every in-place `vis` mutator, and `msuvbinflag`'s already-binned MS;
+* the **calibration-table family** (`accor`, `bandpass`, `blcal`,
+  `fringefit`, `gaincal`, `gencal`, `polcal`, `wvrgcal`, `fluxscale`).
+  `append=True` adds solutions to an existing table and `gencal`
+  accumulates by design, so clearing first would silently drop the
+  accumulated result rather than fail -- the worse half. Treated as one
+  family rather than case-by-case, so the rule does not turn on which
+  wrapper happens to expose `append`;
+* `concat`/`virtualconcat`/`msuvbin`, which append to an existing output
+  if one is already there;
+* `predictcomp.prefix`, a prefix rather than a complete path -- the
+  products are `<prefix>*.cl`, so nothing exists at the declared value.
+
 That same-name trick is not always available: a cab whose output is
 meaningfully named `ms` while its input is `input_ms.path`/`data-ms`
 (quartical, cubical) has to reach the input through an `implicit`
@@ -188,7 +224,7 @@ class ListobsOutputs(BaseModel):
     listfile: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["listfile"])
 def listobs(
     ctx,
     vis: Path,
@@ -264,14 +300,29 @@ def listobs(
     return ListobsOutputs(listfile=listfile)
 
 
-def _remove_existing_output(outputvis: Path | str) -> None:
-    """Delete a pre-existing output MS -- and its `.flagversions` twin,
-    which would otherwise pair stale flag versions with the fresh MS --
-    so the calling task can rewrite it (see the `overwrite` convenience
-    parameter on `mstransform`/`fixvis`)."""
-    for stale in (Path(outputvis), Path(f"{outputvis}.flagversions")):
-        if stale.exists():
-            shutil.rmtree(stale)
+def _remove_stale_flagversions(outputvis: Path | str) -> None:
+    """Delete the `.flagversions` twin of an output MS this task is about
+    to (re)write, which would otherwise pair a previous incarnation's flag
+    versions with the fresh MS -- a later `flagmanager` restore would then
+    apply flags computed against data that no longer exists.
+
+    The MS itself is *not* this function's job any more: `outputvis` is
+    declared `write_paths=` on both tasks, so shinobi clears the stale
+    product before the step runs (`sandbox.clear_stale_outputs`). That is
+    what retired the caller-facing `overwrite` parameter these two used to
+    carry -- a flag every call site had to remember, and silently wrong the
+    once it was forgotten.
+
+    The twin cannot be handled the same way because nothing declares it: it
+    is written by a *downstream* `flagdata(vis=outputvis)`, not by this
+    task, so it is neither an output of this cab nor a path shinobi could
+    know to clear. Hence this narrow, unconditional sweep -- unconditional
+    because a `.flagversions` beside an MS that is being rewritten is stale
+    by definition, so there is nothing for a caller to decide.
+    """
+    stale = Path(f"{outputvis}.flagversions")
+    if stale.exists():
+        shutil.rmtree(stale)
 
 
 class MstransformOutputs(BaseModel):
@@ -280,7 +331,7 @@ class MstransformOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def mstransform(
     ctx,
     vis: Path,
@@ -334,7 +385,6 @@ def mstransform(
     denoising_lib: bool = True,
     nthreads: int = 1,
     niter: int = 1,
-    overwrite: bool = False,
 ) -> MstransformOutputs:
     """Split/combine/regrid an MS and optionally average in channel/time.
 
@@ -411,20 +461,20 @@ def mstransform(
         denoising_lib: Use the GSL denoising library instead of casacore.
         nthreads: OMP thread count for `douvcontsub`.
         niter: Re-weighted-linear-fit iteration count for `douvcontsub`.
-        overwrite: Delete a pre-existing `outputvis` (and its
-            `.flagversions` twin) before running. NOT a real CASA
-            parameter -- the real task has no overwrite option and
-            unconditionally fails on an existing output; this
-            wrapper-level convenience is what lets a pipeline rerun be
-            idempotent. Default `False` keeps CASA's own
-            refuse-to-clobber behaviour.
+
+    Note:
+        The real task has no overwrite option and fails outright on an
+        existing `outputvis`. `outputvis` is declared a write target
+        (`write_paths=`), so shinobi clears the previous run's product
+        before this step runs and a re-run is idempotent without the
+        caller asking for it. This used to be an `overwrite` parameter
+        every call site had to remember.
 
     Returns:
         `MstransformOutputs` with the written `outputvis`.
     """
     _quiet_casa(ctx)
-    if overwrite:
-        _remove_existing_output(outputvis)
+    _remove_stale_flagversions(outputvis)
     mstransform_fn = ctx.import_func("mstransform", "casatasks")
     mstransform_fn(
         vis=str(vis),
@@ -488,7 +538,7 @@ class FixvisOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def fixvis(
     ctx,
     vis: Path,
@@ -499,7 +549,6 @@ def fixvis(
     phasecenter: str = "",
     distances: str = "",
     datacolumn: str = "all",
-    overwrite: bool = False,
 ) -> FixvisOutputs:
     """Recompute (u, v, w) and/or change the phase center.
 
@@ -519,17 +568,17 @@ def fixvis(
             refocusing.
         datacolumn: Which visibility column(s) a phase-center shift
             modifies.
-        overwrite: Delete a pre-existing `outputvis` (and its
-            `.flagversions` twin) before running. NOT a real CASA
-            parameter -- same wrapper-level rerun-idempotency convenience
-            as `mstransform`'s own `overwrite`.
+
+    Note:
+        `outputvis` is a declared write target, cleared before the run --
+        see `mstransform`, which had the same retired `overwrite`
+        parameter.
 
     Returns:
         `FixvisOutputs` with the written `outputvis`.
     """
     _quiet_casa(ctx)
-    if overwrite:
-        _remove_existing_output(outputvis)
+    _remove_stale_flagversions(outputvis)
     fixvis_fn = ctx.import_func("fixvis", "casatasks")
     fixvis_fn(
         vis=str(vis),
@@ -1890,7 +1939,7 @@ class AppendantabOutputs(BaseModel):
     outvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outvis"])
 def appendantab(
     ctx,
     vis: Path,
@@ -2270,7 +2319,7 @@ class GetantposalmaOutputs(BaseModel):
     outfile: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outfile"])
 def getantposalma(
     ctx,
     outfile: Path,
@@ -2330,7 +2379,7 @@ class GetcalmodvlaOutputs(BaseModel):
     outfile: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outfile"])
 def getcalmodvla(
     ctx,
     outfile: Path,
@@ -2895,7 +2944,7 @@ class FeatherOutputs(BaseModel):
     imagename: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["imagename"])
 def feather(
     ctx,
     highres: Path,
@@ -3013,7 +3062,7 @@ class ImpbcorOutputs(BaseModel):
     outfile: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outfile"])
 def impbcor(
     ctx,
     imagename: Path,
@@ -4033,7 +4082,7 @@ class ConjugatevisOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def conjugatevis(
     ctx, vis: Path, outputvis: Path, spwlist: list[int] | None = None, overwrite: bool = False
 ) -> ConjugatevisOutputs:
@@ -4063,7 +4112,7 @@ class CvelOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def cvel(
     ctx,
     vis: Path,
@@ -4150,7 +4199,7 @@ class Cvel2Outputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def cvel2(
     ctx,
     vis: Path,
@@ -4296,7 +4345,7 @@ class HanningsmoothOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def hanningsmooth(
     ctx,
     vis: Path,
@@ -4444,7 +4493,7 @@ class PartitionOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def partition(
     ctx,
     vis: Path,
@@ -4526,7 +4575,7 @@ class PhaseshiftOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def phaseshift(
     ctx,
     vis: Path,
@@ -4609,7 +4658,7 @@ class SplitOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def split(
     ctx,
     vis: Path,
@@ -4799,7 +4848,7 @@ class UvcontsubOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
 def uvcontsub(
     ctx,
     vis: Path,

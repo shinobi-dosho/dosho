@@ -44,7 +44,7 @@ class BdsfCatalogOutputs(BaseModel):
     outdir: Path
 
 
-@shinobi.pystep(name="bdsf-catalog", image=images.BDSF)
+@shinobi.pystep(name="bdsf-catalog", image=images.BDSF, write_paths=["outfile_gaul", "outfile_srl"])
 def catalog(
     ctx,
     image: Path,
