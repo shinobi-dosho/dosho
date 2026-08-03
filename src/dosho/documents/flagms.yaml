@@ -119,6 +119,7 @@ cabs:
         dtype: str
         info: Unflag and remove the named flagset(s) (comma-separated list)
       export:
+        write_path: true
         dtype: File
         info: Export all flags to this flag file (.gz for gzip-compressed); done after any flagging actions
       import_:

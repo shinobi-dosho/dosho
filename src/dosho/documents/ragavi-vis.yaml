@@ -108,6 +108,7 @@ cabs:
         dtype: float
         info: Maximum y value to plot
       htmlname:
+        write_path: true
         dtype: File
         info: Output HTML file name (without .html suffix)
     outputs:

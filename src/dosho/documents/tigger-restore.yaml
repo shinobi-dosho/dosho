@@ -19,6 +19,7 @@ cabs:
         policies:
           positional: true
       output_image:
+        write_path: true
         dtype: File
         info: Output image; auto-generated if omitted
         policies:

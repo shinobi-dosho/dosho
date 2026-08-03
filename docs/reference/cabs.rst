@@ -4686,10 +4686,6 @@ Recompute (u, v, w) and/or change the phase center.
      - ``str``
      - ``'all'``
      - \-
-   * - ``overwrite``
-     - ``bool``
-     - ``False``
-     - \-
 
 **Outputs**
 
@@ -7297,10 +7293,6 @@ Split/combine/regrid an MS and optionally average in channel/time.
    * - ``niter``
      - ``int``
      - ``1``
-     - \-
-   * - ``overwrite``
-     - ``bool``
-     - ``False``
      - \-
 
 **Outputs**

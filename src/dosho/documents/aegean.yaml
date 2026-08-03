@@ -53,6 +53,7 @@ cabs:
         dtype: bool
         info: Automatically look for background/noise/region/psf files using the input filename as a hint
       out:
+        write_path: true
         dtype: File
         info: Destination of the Aegean catalog output
       table:

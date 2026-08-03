@@ -84,12 +84,15 @@ cabs:
         dtype: bool
         info: Open mask in bokeh html gui
       outfile:
+        write_path: true
         dtype: File
         info: The output mask image (default based on input name)
       outcatalog:
+        write_path: true
         dtype: File
         info: Generate a catalog based on the region mask
       outregion:
+        write_path: true
         dtype: File
         info: Generate polygon regions from the mask
     outputs:

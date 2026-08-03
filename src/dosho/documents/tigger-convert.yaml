@@ -13,6 +13,7 @@ cabs:
         policies:
           positional: true
       output_model:
+        write_path: true
         dtype: File
         info: Output model (always native Tigger format); auto-generated if omitted
         policies:
