@@ -3,12 +3,11 @@ cabs:
     command: im-mowjsub
     image: MOWJSUB
     info: 'mowjsub: image-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)'
-    policies:
-      # `--sigma-clip` is click `multiple=True`: the flag repeats, one value
-      # each. The default `list_sep` would join them into a single
-      # `--sigma-clip 3,2` token, which click parses as one float and rejects.
-      # Cab-level because this is the only list-valued parameter here.
-      repeat_list: true
+    # No cab-level `repeat_list` any more: it existed for `--sigma-clip`, which
+    # was click `multiple=True` and needed the flag repeated rather than joined
+    # into one `3,2` token. mowjsub 2.0.1 takes a single value there and no
+    # parameter in this cab is list-valued, so the policy has nothing to apply
+    # to.
     inputs:
       input-image:
         dtype: File
@@ -28,12 +27,10 @@ cabs:
         dtype: File
         info: Mask image. Channels flagged in it are excluded from the continuum fit.
       sigma-clip:
-        dtype: List[float]
-        info: Sigma clip for each iteration. Only required if mask-image is not given.
-      automask-per-iter:
-        dtype: bool
-        default: false
-        info: Generate a new mask per iteration.
+        dtype: float
+        info: Sigma-clipping level for the automatic mask, which is built by fitting an unmasked continuum
+          first and clipping that residual -- so it works on a cube that still holds its continuum, unlike
+          a mask made by running a source finder over the same cube. Only used if mask-image is not given.
       fit-model:
         dtype: str
         default: b-spline
@@ -53,10 +50,15 @@ cabs:
         info: Order of spline/polynomial or number of top coefficients to use for DCT reconstruction
       vel-width:
         dtype: float
-        info: Width of spline segments or median filter window in km/s.
+        info: Width of spline segments or median filter window in km/s. Give this or chan-width, not both
+          -- mowjsub refuses the pair rather than silently preferring one.
       chan-width:
         dtype: int
-        info: Width of spline segments or median filter window in number of channels.
+        info: Width of spline segments or median filter window in number of channels. The alternative to
+          vel-width, for a caller that wants the window fixed in channels rather than converted from a
+          velocity against the band centre. Must be at least 1. Honoured from mowjsub 2.0.1 -- before that
+          both CLIs accepted it and neither passed it to a fitter, so it satisfied no requirement and
+          changed no result.
       gcv-lambda:
         dtype: float
         info: GCV spline penalty. Zero is equivalent to an interpolating spline, high values lead to a

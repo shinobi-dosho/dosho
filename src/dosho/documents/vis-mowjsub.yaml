@@ -41,10 +41,15 @@ cabs:
         info: Order of spline/polynomial or number of top coefficients to use for DCT reconstruction
       vel-width:
         dtype: float
-        info: Width of spline segments or median filter window in km/s.
+        info: Width of spline segments or median filter window in km/s. Give this or chan-width, not both
+          -- mowjsub refuses the pair rather than silently preferring one.
       chan-width:
         dtype: int
-        info: Width of spline segments or median filter window in number of channels.
+        info: Width of spline segments or median filter window in number of channels. The alternative to
+          vel-width, for a caller that wants the window fixed in channels rather than converted from a
+          velocity against the band centre. Must be at least 1. Honoured from mowjsub 2.0.1 -- before that
+          both CLIs accepted it and neither passed it to a fitter, so it satisfied no requirement and
+          changed no result.
       gcv-lambda:
         dtype: float
         info: GCV spline penalty. Zero is equivalent to an interpolating spline, high values lead to a
