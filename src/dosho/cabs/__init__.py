@@ -98,6 +98,7 @@ __all__ = [
     "getantposalma",
     "getcalmodvla",
     "hanningsmooth",
+    "im_mowjsub",
     "impbcor",
     "initweights",
     "killms",

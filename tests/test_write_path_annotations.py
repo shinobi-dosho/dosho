@@ -44,6 +44,7 @@ from dosho import registry
 # String stems: the value is a prefix, never a file.
 STEMS = {
     ("ddfacet", "output_name"),
+    ("im-mowjsub", "output_prefix"),
     ("sofia2", "output_directory"),
     ("sofia2", "output_filename"),
     ("spimple-imconv", "output_filename"),

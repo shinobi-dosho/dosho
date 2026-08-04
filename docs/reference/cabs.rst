@@ -4168,7 +4168,7 @@ fitstoolz-add-axis
 
 Add an axis to a FITS image.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4252,7 +4252,7 @@ fitstoolz-header
 
 Show, add, edit or remove FITS header entries.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4316,7 +4316,7 @@ fitstoolz-remove-axis
 
 Remove an axis from a FITS image.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4384,7 +4384,7 @@ fitstoolz-slice
 
 Slice a FITS image along one or more axes.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4452,7 +4452,7 @@ fitstoolz-stack
 
 Stack FITS images along an axis.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4516,7 +4516,7 @@ fitstoolz-stats
 
 Get image statistics (min, max, mean, standard deviation).
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.1.0-d0.1.0`` (``FITSTOOLZ`` 0.1.0, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -6248,6 +6248,150 @@ Hanning-smooth channel data to remove Gibbs ringing.
      - Description
    * - ``outputvis``
      - ``Path``
+     - \-
+
+im-mowjsub
+----------
+
+mowjsub: image-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)
+
+:Command: ``im-mowjsub``
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0.0-d0.1.0`` (``MOWJSUB`` 2.0.0, build)
+:Source: https://github.com/laduma-dev/mowjsub
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``input_image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output_prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``mask_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``sigma_clip``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``automask_per_iter``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``fit_model``
+     - ``Literal['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline'] | None``
+     - ``'b-spline'``
+     - \-
+   * - ``order``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``vel_width``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``chan_width``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``gcv_lambda``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``segments``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``cont_fit_tol``
+     - ``float | None``
+     - ``0``
+     - \-
+   * - ``no_overwrite``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``stokes_index``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``rest_freq``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``hdu_index``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ra_chunks``
+     - ``int | None``
+     - ``64``
+     - \-
+   * - ``nworkers``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``loglevel``
+     - ``Literal['info', 'debug', 'trace', 'error', 'critical'] | None``
+     - ``'info'``
+     - \-
+   * - ``doppler_frame``
+     - ``Literal['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source'] | None``
+     - ``None``
+     - \-
+   * - ``doppler_chan_grid``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``doppler_interpolation``
+     - ``Literal['nearest', 'linear'] | None``
+     - ``'nearest'``
+     - \-
+   * - ``doppler_source_vel``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``doppler_time``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``doppler_obs_duration``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``doppler_telescope``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``doppler_phase_centre``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``cont``
+     - ``Path | None``
+     - \-
+   * - ``line``
+     - ``Path | None``
      - \-
 
 impbcor
@@ -13404,7 +13548,7 @@ vis-mowjsub
 mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)
 
 :Command: ``vis-mowjsub``
-:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0rc1-d0.1.0`` (``MOWJSUB`` 2.0rc1, build)
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0.0-d0.1.0`` (``MOWJSUB`` 2.0.0, build)
 :Source: https://github.com/laduma-dev/mowjsub
 
 **Inputs**
@@ -13426,8 +13570,8 @@ mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/m
      - ``'DATA'``
      - \-
    * - ``output_column``
-     - ``str | None``
-     - ``'LINE_DATA'``
+     - ``str``
+     - *required*
      - \-
    * - ``fit_model``
      - ``Literal['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline'] | None``

@@ -869,12 +869,15 @@ def test_vis_mowjsub_positional_ms_and_hyphenated_flags():
     assert "--input_column" not in argv
 
 
-def test_vis_mowjsub_defaults_match_the_tools_own_parser_yaml():
+def test_vis_mowjsub_defaults_match_the_tools_own_signature():
     cab = dosho.get("vis-mowjsub")
     fields = cab.inputs_model.model_fields
     assert fields["ms"].is_required()
     assert fields["input_column"].default == "DATA"
-    assert fields["output_column"].default == "LINE_DATA"
+    # 2.0 dropped the LINE_DATA default and made this required: it is not an
+    # MS-standard column name, and defaulting to it pushed a non-standard name
+    # into every tool downstream of the result.
+    assert fields["output_column"].is_required()
     assert fields["fit_model"].default == "b-spline"
     assert fields["doppler_interpolation"].default == "nearest"
     assert fields["nworkers"].default == 4
@@ -904,3 +907,65 @@ def test_vis_mowjsub_echoes_ms_so_the_in_place_mode_is_wireable():
     a DAG at all."""
     cab = dosho.get("vis-mowjsub")
     assert "ms" in cab.outputs_model.model_fields
+
+
+def test_im_mowjsub_positional_image_and_hyphenated_flags():
+    cab = dosho.get("im-mowjsub")
+    assert cab.name == "im-mowjsub"
+    assert cab.command == "im-mowjsub"
+    assert cab.image == images.MOWJSUB
+    argv = build_argv(
+        cab,
+        {
+            "input_image": "/cube.fits",
+            "output_prefix": "/out/field",
+            "fit_model": "median-filter",
+            "vel_width": 250.0,
+            "hdu_index": 1,
+        },
+    )
+    assert argv[0] == "im-mowjsub"
+    assert argv[-1] == "/cube.fits"  # positional, and last
+    assert "--output-prefix" in argv and "--fit-model" in argv and "--vel-width" in argv
+    assert "--hdu-index" in argv  # the abbreviation is a CLI alias, not the flag
+    assert "--output_prefix" not in argv
+
+
+def test_im_mowjsub_sigma_clip_repeats_the_flag():
+    """click builds `--sigma-clip` with multiple=True, so each value needs its
+    own flag occurrence. Comma-joining them (the default list policy) reaches
+    click as one token and fails float conversion."""
+    cab = dosho.get("im-mowjsub")
+    argv = build_argv(
+        cab,
+        {"input_image": "/cube.fits", "output_prefix": "field", "sigma_clip": [5.0, 3.0]},
+    )
+    assert argv.count("--sigma-clip") == 2
+    assert "5.0,3.0" not in argv
+
+
+def test_im_mowjsub_negates_overwrite_rather_than_carrying_it():
+    """The tool's own `--overwrite` defaults on, and a False boolean emits no
+    token at all -- so an `overwrite` field could never turn it off. The
+    negated flag is the only shape that reaches the tool."""
+    cab = dosho.get("im-mowjsub")
+    fields = cab.inputs_model.model_fields
+    assert "overwrite" not in fields
+    assert fields["no_overwrite"].default is False
+    assert "--no-overwrite" in build_argv(
+        cab, {"input_image": "/c.fits", "output_prefix": "f", "no_overwrite": True}
+    )
+
+
+def test_im_mowjsub_output_cubes_resolve_from_the_prefix():
+    cab = dosho.get("im-mowjsub")
+    assert cab.field_meta["cont"].implicit == "{output_prefix}-cont.fits"
+    assert cab.field_meta["line"].implicit == "{output_prefix}-line.fits"
+    # ...which is why the prefix cannot be optional here, unlike upstream.
+    assert cab.inputs_model.model_fields["output_prefix"].is_required()
+
+
+def test_im_mowjsub_rejects_a_fit_model_the_tool_does_not_have():
+    cab = dosho.get("im-mowjsub")
+    with pytest.raises(ValidationError):
+        cab.inputs_model(input_image="/c.fits", output_prefix="f", fit_model="chebyshev")

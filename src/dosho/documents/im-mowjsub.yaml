@@ -1,0 +1,178 @@
+cabs:
+  im-mowjsub:
+    command: im-mowjsub
+    image: MOWJSUB
+    info: 'mowjsub: image-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)'
+    policies:
+      # `--sigma-clip` is click `multiple=True`: the flag repeats, one value
+      # each. The default `list_sep` would join them into a single
+      # `--sigma-clip 3,2` token, which click parses as one float and rejects.
+      # Cab-level because this is the only list-valued parameter here.
+      repeat_list: true
+    inputs:
+      input-image:
+        dtype: File
+        required: true
+        info: Input image
+        policies:
+          positional: true
+      output-prefix:
+        dtype: str
+        required: true
+        info: Prefix for the output cubes, which are written as '<prefix>-cont.fits' and '<prefix>-line.fits'.
+          Required here, where the tool itself defaults it to '<input-image sans suffix>-contsub'; a
+          declared output path has to resolve from the step's own inputs, and no template can reach
+          the input's stem. Pass the tool's own default spelling if that is what you want.
+        write_path: true
+      mask-image:
+        dtype: File
+        info: Mask image. Channels flagged in it are excluded from the continuum fit.
+      sigma-clip:
+        dtype: List[float]
+        info: Sigma clip for each iteration. Only required if mask-image is not given.
+      automask-per-iter:
+        dtype: bool
+        default: false
+        info: Generate a new mask per iteration.
+      fit-model:
+        dtype: str
+        default: b-spline
+        info: 'Fit function to model the continuum. The ''scipy-median-filter'' model is much faster than
+          ''median-filter'', but treats band edges and masked channels differently, so the two do not
+          give identical continuum models. WARNING: A median-filter continuum model may subsume low SNR
+          line emission, use it with great care.'
+        choices:
+        - b-spline
+        - spline
+        - polynomial
+        - median-filter
+        - scipy-median-filter
+        - gcv-spline
+      order:
+        dtype: int
+        info: Order of spline/polynomial or number of top coefficients to use for DCT reconstruction
+      vel-width:
+        dtype: float
+        info: Width of spline segments or median filter window in km/s.
+      chan-width:
+        dtype: int
+        info: Width of spline segments or median filter window in number of channels.
+      gcv-lambda:
+        dtype: float
+        info: GCV spline penalty. Zero is equivalent to an interpolating spline, high values lead to a
+          flatter curve. If unset the parameter will be estimated using the GCV criterion; this can be
+          very slow. Experience suggests that values chanwidth/nchan work best.
+      segments:
+        dtype: float
+        info: '## This has been replaced by --vel-width. It will be removed in future releases ## Width
+          of spline segments or median filter window in km/s. If given as a list, then it must have same
+          size as --order.'
+      cont-fit-tol:
+        dtype: float
+        default: 0
+        info: Minimum percentage of valid spectrum data points required to do a fit. Spectra below this
+          tolerance will be set to NaN. Leaving this unset may result in poor or NaN spectra in the output
+          cubes
+      no-overwrite:
+        dtype: bool
+        default: false
+        info: Fail rather than overwrite an existing output cube. The tool's own parameter is --overwrite,
+          which defaults on; it is declared here in its negated form because a bare flag is the only
+          shape a boolean takes on the command line, so a False-valued --overwrite would emit nothing
+          and silently leave overwriting enabled.
+      stokes-index:
+        dtype: int
+        default: 0
+        info: Index of stokes channel (zero-based) to use.
+      rest-freq:
+        dtype: float
+        info: Cube rest frequency in MHz. Will ignore the one in the FITS header if it exists. Required
+          for a cube whose spectral axis is a velocity and whose header carries no RESTFRQ/RESTWAV.
+      hdu-index:
+        dtype: int
+        default: 0
+        info: FITS primary HDU index
+        abbreviation: hi
+      ra-chunks:
+        dtype: int
+        default: 64
+        info: Chunking along RA-axis. If set to zero, no Chunking is perfomed.
+      nworkers:
+        dtype: int
+        default: 4
+        info: Number of parallel worker threads (roughly one per CPU core). Runtime for fitting-bound
+          models scales with this, so raise it to speed up large cubes.
+      loglevel:
+        dtype: str
+        default: info
+        info: Log level for the output
+        choices:
+        - info
+        - debug
+        - trace
+        - error
+        - critical
+      doppler-frame:
+        dtype: str
+        info: 'Spectral reference frame to Doppler-correct the output cubes to, applied after the continuum
+          fit. A cube has already been integrated over time, so only a single correction factor can be
+          applied: this is safe only when the line-of-sight velocity drifts by much less than one channel
+          over the observation, and cannot undo smearing from a larger drift. Pass --doppler-obs-duration
+          to have that checked. For long tracks, correct in the visibility plane instead (vis-mowjsub
+          --doppler-frame). Leave unset to skip Doppler correction.'
+        choices:
+        - topo
+        - geo
+        - bary
+        - lsrk
+        - lsrd
+        - galacto
+        - lgroup
+        - cmb
+        - source
+      doppler-chan-grid:
+        dtype: str
+        default: auto
+        info: Output channel grid for the Doppler correction. 'auto' derives it from this cube, dropping
+          one guard channel at each end. Otherwise give 'nchan,chan0,chanwidth' with frequency units,
+          e.g. '1000,1419.5MHz,26.1kHz'; use this to place several observations on one common grid for
+          stacking.
+      doppler-interpolation:
+        dtype: str
+        default: nearest
+        info: Interpolation used when resampling onto the Doppler-corrected grid. 'nearest' leaves channel
+          noise uncorrelated; 'linear' is smoother but correlates adjacent channels.
+        choices:
+        - nearest
+        - linear
+      doppler-source-vel:
+        dtype: float
+        info: Systemic radial velocity of the source in km/s, positive for recession. Required with --doppler-frame=source,
+          since a cube carries no SOURCE::SYSVEL to fall back on.
+      doppler-time:
+        dtype: str
+        info: Observation epoch for the Doppler correction, as an ISO date or an MJD. Overrides the cube's
+          MJD-OBS or DATE-OBS.
+      doppler-obs-duration:
+        dtype: float
+        info: Length of the observation in hours. Only used to check how far the line-of-sight velocity
+          drifted over the track, and to take the correction at the midpoint rather than the start. Nothing
+          standard records this in a FITS header, so it must be given; without it the drift check is
+          skipped.
+      doppler-telescope:
+        dtype: str
+        info: Observatory name, resolved through astropy's site registry. Overrides the cube's OBSGEO-X/Y/Z
+          or TELESCOP keywords, and is needed when the header carries neither.
+      doppler-phase-centre:
+        dtype: str
+        info: Field centre used to project the observatory velocity, as 'RA,Dec' in degrees or sexagesimal.
+          Overrides the cube's WCS reference coordinate.
+    outputs:
+      cont:
+        dtype: File
+        implicit: '{output_prefix}-cont.fits'
+        info: The continuum model cube.
+      line:
+        dtype: File
+        implicit: '{output_prefix}-line.fits'
+        info: The continuum-subtracted (line) cube.

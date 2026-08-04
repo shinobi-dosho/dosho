@@ -196,6 +196,9 @@ cabs:
     attr: hanningsmooth
     module: dosho.cabs.casatasks
     symbol: hanningsmooth
+  im-mowjsub:
+    attr: im_mowjsub
+    document: im-mowjsub.yaml
   impbcor:
     attr: impbcor
     module: dosho.cabs.casatasks
