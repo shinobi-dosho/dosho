@@ -75,6 +75,7 @@ __all__ = [
     "deconvolve",
     "defintent",
     "delmod",
+    "doppler_mowjsub",
     "eidos",
     "feather",
     "fitstoolz_add_axis",

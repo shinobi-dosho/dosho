@@ -4043,6 +4043,87 @@ Delete model representations from an MS, in place.
      - ``Path``
      - \-
 
+doppler-mowjsub
+---------------
+
+mowjsub: Doppler-correct an already continuum-subtracted MS onto a channel grid fixed in a chosen spectral frame (https://github.com/laduma-dev/mowjsub)
+
+:Command: ``doppler-mowjsub``
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0.0-d0.1.0`` (``MOWJSUB`` 2.0.0, build)
+:Source: https://github.com/laduma-dev/mowjsub
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``input_column``
+     - ``str``
+     - *required*
+     - \-
+   * - ``output_column``
+     - ``str``
+     - *required*
+     - \-
+   * - ``output_ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``spwid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``field_id``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``row_chunks``
+     - ``int | None``
+     - ``10000``
+     - \-
+   * - ``nworkers``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``doppler_frame``
+     - ``Literal['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source']``
+     - *required*
+     - \-
+   * - ``doppler_chan_grid``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``doppler_interpolation``
+     - ``Literal['nearest', 'linear'] | None``
+     - ``'nearest'``
+     - \-
+   * - ``doppler_source_vel``
+     - ``float | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_ms``
+     - ``Path | None``
+     - \-
+
 eidos
 -----
 

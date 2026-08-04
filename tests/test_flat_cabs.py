@@ -965,6 +965,53 @@ def test_im_mowjsub_output_cubes_resolve_from_the_prefix():
     assert cab.inputs_model.model_fields["output_prefix"].is_required()
 
 
+def test_doppler_mowjsub_positional_ms_and_hyphenated_flags():
+    cab = dosho.get("doppler-mowjsub")
+    assert cab.name == "doppler-mowjsub"
+    assert cab.command == "doppler-mowjsub"
+    assert cab.image == images.MOWJSUB
+    argv = build_argv(
+        cab,
+        {
+            "ms": "/x.ms",
+            "input_column": "LINE_DATA",
+            "output_column": "DATA",
+            "output_ms": "/out.ms",
+            "doppler_frame": "bary",
+        },
+    )
+    assert argv[0] == "doppler-mowjsub"
+    assert argv[-1] == "/x.ms"  # positional, and last
+    assert "--input-column" in argv and "--output-ms" in argv and "--doppler-frame" in argv
+    assert "--input_column" not in argv
+
+
+def test_doppler_mowjsub_requires_what_it_cannot_default():
+    """It does no fitting, so nothing here has a sensible fallback: which
+    column holds the subtracted data, where to put the result, and which
+    frame to correct to are all the caller's to say."""
+    fields = dosho.get("doppler-mowjsub").inputs_model.model_fields
+    for name in ("ms", "input_column", "output_column", "output_ms", "doppler_frame"):
+        assert fields[name].is_required(), name
+    # ...and the rest still carries the tool's own defaults
+    assert fields["doppler_chan_grid"].default == "auto"
+    assert fields["doppler_interpolation"].default == "nearest"
+    assert fields["row_chunks"].default == 10000
+
+
+def test_doppler_mowjsub_never_writes_back_into_the_input():
+    """Unlike vis-mowjsub, there is no in-place mode: the correction changes
+    the channel count, so `--output-ms` is required and the input MS is only
+    ever read. It is therefore not a mutator, and does not echo `ms`."""
+    from shinobi.steps.schema import mutated_path_fields, write_path_fields
+
+    cab = dosho.get("doppler-mowjsub")
+    assert "ms" not in mutated_path_fields(cab)
+    assert "ms" not in cab.outputs_model.model_fields
+    assert cab.outputs_model.model_fields["output_ms"]
+    assert "output_ms" in write_path_fields(cab)
+
+
 def test_im_mowjsub_rejects_a_fit_model_the_tool_does_not_have():
     cab = dosho.get("im-mowjsub")
     with pytest.raises(ValidationError):

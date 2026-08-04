@@ -109,6 +109,7 @@ DESTINATIONS = {
     ("tigger-restore", "output_image"),
     ("tigger-tag", "output"),
     ("vis-mowjsub", "output_ms"),
+    ("doppler-mowjsub", "output_ms"),
 }
 
 # Every other dual declaration, and why deleting it would be wrong. Grouped by
