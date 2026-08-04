@@ -77,9 +77,9 @@ images:
     name: fitstoolz
     source: "https://github.com/shinobi-dosho/fitstoolz"
     build:
-      version: "0.1.0"
+      version: "0.2.1"
       base: BASE_ASTRO
-      package: "fitstoolz==0.1.0"
+      package: "fitstoolz==0.2.1"
       cmd: "fitstoolz --help"
       dockerfile: pip/Dockerfile
     dev:
@@ -240,9 +240,9 @@ images:
     source: "https://github.com/laduma-dev/mowjsub"
     name: mowjsub
     build:
-      version: "2.0rc1"
+      version: "2.0.0"
       base: BASE_ASTRO
-      package: "mowjsub==2.0rc1"
+      package: "mowjsub==2.0.0"
       cmd: "vis-mowjsub --help"
       dockerfile: pip/Dockerfile
   BREIZORRO:

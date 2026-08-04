@@ -110,6 +110,9 @@ cabs:
     attr: delmod
     module: dosho.cabs.casatasks
     symbol: delmod
+  doppler-mowjsub:
+    attr: doppler_mowjsub
+    document: doppler-mowjsub.yaml
   eidos:
     attr: eidos
     document: eidos.yaml
@@ -196,6 +199,9 @@ cabs:
     attr: hanningsmooth
     module: dosho.cabs.casatasks
     symbol: hanningsmooth
+  im-mowjsub:
+    attr: im_mowjsub
+    document: im-mowjsub.yaml
   impbcor:
     attr: impbcor
     module: dosho.cabs.casatasks

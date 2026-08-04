@@ -44,6 +44,7 @@ from dosho import registry
 # String stems: the value is a prefix, never a file.
 STEMS = {
     ("ddfacet", "output_name"),
+    ("im-mowjsub", "output_prefix"),
     ("sofia2", "output_directory"),
     ("sofia2", "output_filename"),
     ("spimple-imconv", "output_filename"),
@@ -108,6 +109,7 @@ DESTINATIONS = {
     ("tigger-restore", "output_image"),
     ("tigger-tag", "output"),
     ("vis-mowjsub", "output_ms"),
+    ("doppler-mowjsub", "output_ms"),
 }
 
 # Every other dual declaration, and why deleting it would be wrong. Grouped by

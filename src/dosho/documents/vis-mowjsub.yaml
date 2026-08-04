@@ -17,8 +17,11 @@ cabs:
         info: Column which contains the data to be continuum subtracted.
       output-column:
         dtype: str
-        default: LINE_DATA
-        info: Column name to write the continuum subtracted data to
+        required: true
+        info: 'Column name to write the continuum subtracted data to. Required: there is no standard MS
+          column for continuum-subtracted visibilities, so naming one is left to you. Pass DATA if the
+          imager you feed the result to expects that column -- but note that without --output-ms this
+          writes back into the input MS, so it must differ from --input-column.'
       fit-model:
         dtype: str
         default: b-spline

@@ -19,48 +19,6 @@ if TYPE_CHECKING:
     from shinobi import Cab
     from shinobi.steps.schema import StepRef
 
-# registered name -> re-exported attribute, for the handful of tools whose
-# real (possibly hyphenated) name doesn't match the identifier
-# `dosho/cabs/__init__.py` re-exports it as. Every other entry in
-# `dosho.cabs.__all__` registers under its own attribute name unchanged --
-# see `_build_entries` below. Keeping just the exceptions here (instead of
-# a full name -> attribute table) means a new cab only has to be added
-# once, in `dosho/cabs/__init__.py`'s imports/`__all__`, unless its real
-# name needs to differ from its attribute name.
-_NAME_OVERRIDES: dict[str, str] = {
-    "skysim": "simms-skysim",
-    "telsim": "simms-telsim",
-    "primary_beam": "simms-primary-beam",
-    "simms_classic": "simms",
-    "fitstoolz_header": "fitstoolz-header",
-    "fitstoolz_stats": "fitstoolz-stats",
-    "fitstoolz_slice": "fitstoolz-slice",
-    "fitstoolz_add_axis": "fitstoolz-add-axis",
-    "fitstoolz_remove_axis": "fitstoolz-remove-axis",
-    "fitstoolz_stack": "fitstoolz-stack",
-    "mosaic_queen": "mosaic-queen",
-    "vis_mowjsub": "vis-mowjsub",
-    "ragavi_gains": "ragavi-gains",
-    "ragavi_vis": "ragavi-vis",
-    "summary": "msutils-summary",
-    "addcol": "msutils-addcol",
-    "copycol": "msutils-copycol",
-    "sumcols": "msutils-sumcols",
-    "addnoise": "msutils-addnoise",
-    "flagstats": "msutils-flagstats",
-    "bdsf_catalog": "bdsf-catalog",
-    "quartical_backup": "quartical-backup",
-    "quartical_restore": "quartical-restore",
-    "quartical_plotter": "quartical-plotter",
-    "spimple_binterp": "spimple-binterp",
-    "spimple_imconv": "spimple-imconv",
-    "spimple_spifit": "spimple-spifit",
-    "tigger_convert": "tigger-convert",
-    "tigger_restore": "tigger-restore",
-    "tigger_tag": "tigger-tag",
-}
-
-
 _INDEX_PATH = Path(__file__).with_name("cab_index.yaml")
 _DOCUMENT_DIR = Path(__file__).with_name("documents")
 _index_cache: dict[str, dict[str, Any]] | None = None
@@ -88,9 +46,9 @@ def registered_name_for_attr(attr: str) -> str | None:
     """The registered name a `dosho.cabs` attribute stands for, or None.
 
     `dosho.cabs.__getattr__` is keyed by attribute (`simms_classic`) and
-    everything else by registered name (`simms`); twenty document-backed cabs
-    differ between the two. The index records both, so the mapping is written
-    down once rather than inferred from `_NAME_OVERRIDES` in reverse.
+    everything else by registered name (`simms`); 31 tools differ between the
+    two. The index records both, so the mapping is written down once rather
+    than inferred in reverse from a table of exceptions.
 
     Both kinds resolve here now that `dosho.cabs` imports nothing eagerly:
     a document-backed cab is built from its file, a pystep is fetched from the

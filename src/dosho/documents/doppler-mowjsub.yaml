@@ -1,0 +1,86 @@
+cabs:
+  doppler-mowjsub:
+    command: doppler-mowjsub
+    image: MOWJSUB
+    info: 'mowjsub: Doppler-correct an already continuum-subtracted MS onto a channel grid fixed in a chosen
+      spectral frame (https://github.com/laduma-dev/mowjsub)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Input MS file. Its continuum must already have been subtracted; this command does no fitting.
+        policies:
+          positional: true
+      input-column:
+        dtype: str
+        required: true
+        info: 'Column holding the continuum-subtracted data to Doppler-correct. Required: there is no standard
+          MS column name for continuum-subtracted visibilities, so this is whatever the subtraction stage
+          was told to write.'
+      output-column:
+        dtype: str
+        required: true
+        info: Column name to write the Doppler-corrected data to in the output MS. Pass DATA if the imager
+          you feed it to expects that column.
+      output-ms:
+        dtype: MS
+        required: true
+        write_path: true
+        info: Name of the MS to write. Required, since the Doppler correction changes the channel count
+          and so cannot be written back into a column of the input MS. Naming the input MS here is refused.
+      spwid:
+        dtype: int
+        default: 0
+        info: Spectral Window ID
+      field-id:
+        dtype: int
+        default: 0
+        info: Field ID
+      row-chunks:
+        dtype: int
+        default: 10000
+        info: Chunking strategy (Done along the time axis)
+      nworkers:
+        dtype: int
+        default: 4
+        info: Number of parallel worker threads (roughly one per CPU core).
+      doppler-frame:
+        dtype: str
+        required: true
+        info: Spectral reference frame to Doppler-correct the output to. The visibilities are resampled
+          onto a channel grid fixed in this frame, as CASA mstransform does with regridms=True. The input
+          channel grid must still be topocentric, i.e. as it came off the telescope.
+        choices:
+        - topo
+        - geo
+        - bary
+        - lsrk
+        - lsrd
+        - galacto
+        - lgroup
+        - cmb
+        - source
+      doppler-chan-grid:
+        dtype: str
+        default: auto
+        info: Output channel grid for the Doppler correction. 'auto' derives the grid that every timestamp
+          of this observation covers. Otherwise give 'nchan,chan0,chanwidth' with frequency units, e.g.
+          '1000,1419.5MHz,26.1kHz'; use this to place several MSs on one common grid, since 'auto' only
+          ever sees a single MS.
+      doppler-interpolation:
+        dtype: str
+        default: nearest
+        info: Interpolation used when resampling onto the Doppler-corrected grid. 'nearest' is what caracal
+          asks of CASA mstransform and leaves channel noise uncorrelated; 'linear' is smoother but correlates
+          adjacent channels.
+        choices:
+        - nearest
+        - linear
+      doppler-source-vel:
+        dtype: float
+        info: Systemic radial velocity of the source in km/s, positive for recession. Only used with --doppler-frame=source;
+          when unset it is read from the MS SOURCE::SYSVEL column.
+    outputs:
+      output-ms:
+        dtype: MS
+        info: The Doppler-corrected MS this step wrote.
