@@ -206,3 +206,33 @@ ported tool gets a test: for a `Cab`, round-trip a representative param
 set through `build_argv` and check the real CLI token shape; for a
 pystep, check its `inputs_model` schema shape and that it wires into a
 `Recipe` -- not just that the object constructs without error.
+
+## Attribution: commit trailers yes, PR trailers no
+
+A commit made with an assistant's help records it as a trailer on the
+**commit message**, in the form
+
+```
+Assisted-by: <AGENT> <MODEL>
+```
+
+-- e.g. `Assisted-by: Claude Opus 5`, or `Assisted-by: Codex GPT-5`. One
+line, last in the message, after any `Co-authored-by:` for real people.
+`Assisted-by:` rather than `Co-authored-by:` on purpose: co-authorship
+attributes the work to a second author, which GitHub then shows as a
+contributor, and that is not what happened. A human authored the commit
+and is answerable for it; the trailer says what helped.
+
+**Pull request descriptions carry no trailer at all** -- no
+`Assisted-by:`, no "Generated with", no tool badge. A PR body is
+review material: it exists to tell a reviewer what changed and why, and
+what to check. Provenance already lives on every commit the PR contains,
+where it is attached to the specific change rather than repeated once
+per PR, so a trailer in the description is duplication in the one place
+that has no room for it. Assistants default to adding one; delete it.
+
+Neither form is a substitute for the message itself. A commit that
+explains a decision badly does not improve by naming the model that
+helped make it -- see the existing history for the standard: what
+changed, what it deviates from and why, and what a reviewer should not
+assume held still.
