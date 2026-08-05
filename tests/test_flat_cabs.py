@@ -931,17 +931,26 @@ def test_im_mowjsub_positional_image_and_hyphenated_flags():
     assert "--output_prefix" not in argv
 
 
-def test_im_mowjsub_sigma_clip_repeats_the_flag():
-    """click builds `--sigma-clip` with multiple=True, so each value needs its
-    own flag occurrence. Comma-joining them (the default list policy) reaches
-    click as one token and fails float conversion."""
+def test_im_mowjsub_sigma_clip_is_a_single_value():
+    """It was `List[float]` with a cab-level `repeat_list`, because click built
+    the flag with multiple=True. mowjsub 2.0.1 narrowed it to one value -- the
+    iterative masking it implied was never implemented, and `PixSigmaClip`
+    multiplied the whole list against the noise array in one operation, so any
+    count but one mis-broadcast. The repeat policy went with it, since nothing
+    in this cab is list-valued now.
+    """
     cab = dosho.get("im-mowjsub")
+    # `float | None` rather than `float`: the parameter is optional, so what is
+    # being pinned here is that it is not a list any more.
+    assert cab.inputs_model.model_fields["sigma_clip"].annotation == float | None
+    assert "automask_per_iter" not in cab.inputs_model.model_fields
+    assert not cab.policies.repeat_list
+
     argv = build_argv(
-        cab,
-        {"input_image": "/cube.fits", "output_prefix": "field", "sigma_clip": [5.0, 3.0]},
+        cab, {"input_image": "/cube.fits", "output_prefix": "field", "sigma_clip": 3.0}
     )
-    assert argv.count("--sigma-clip") == 2
-    assert "5.0,3.0" not in argv
+    assert argv.count("--sigma-clip") == 1
+    assert "3.0" in argv
 
 
 def test_im_mowjsub_negates_overwrite_rather_than_carrying_it():
