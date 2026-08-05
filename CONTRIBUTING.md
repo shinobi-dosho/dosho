@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing! **dosho** ("a shinobi's tool
 bag") is the native cab repository for
-[shinobi](https://github.com/SpheMakh/stimela-ninja) (stimela-ninja,
+[shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
 Stimela 3.0). It's early software, so the most valuable contributions
 right now are new tool ports, bug reports, focused fixes, tests,
 documentation, and feedback on the design.
@@ -16,7 +16,7 @@ dynamic parameter creation at loadtime. Tools must be fully defined
 when they are authored. The `ParamPattern` construct should be more
 than enough for most cases, and anything beyond that should be
 configured in the Python recipe's logic. See
-**[`AGENTS.md`](https://github.com/SpheMakh/dosho/blob/main/AGENTS.md)**
+**[`AGENTS.md`](https://github.com/shinobi-dosho/dosho/blob/main/AGENTS.md)**
 for the full design rationale and tool-authoring conventions; read it
 before porting a new tool or touching `dosho/_builder.py`/
 `dosho/registry.py`.
@@ -29,7 +29,7 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
   Every ported tool needs a test that checks real CLI/schema shape, not
   just that the object constructs without error.
 - **Report bugs** and request features via
-  [issues](https://github.com/SpheMakh/dosho/issues).
+  [issues](https://github.com/shinobi-dosho/dosho/issues).
 - **Improve documentation** under `docs/` or the docstrings that feed the
   API reference.
 - **Sizable change/addition** -- if you're considering a larger change,
@@ -43,7 +43,7 @@ published on PyPI, so a plain `uv sync` resolves it like any other
 dependency:
 
 ```bash
-git clone https://github.com/SpheMakh/dosho.git
+git clone https://github.com/shinobi-dosho/dosho.git
 cd dosho
 uv sync --group dev
 uv run pytest

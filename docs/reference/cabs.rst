@@ -7536,7 +7536,7 @@ msutils addcol: add a column to an MS, cloning shape/type from an existing one
 
 :Command: ``msutils addcol``
 :Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
-:Source: https://github.com/sphemakh/msutils
+:Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
 
@@ -7589,7 +7589,7 @@ msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev
 
 :Command: ``msutils addnoise``
 :Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
-:Source: https://github.com/sphemakh/msutils
+:Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
 
@@ -7642,7 +7642,7 @@ msutils copycol: copy one column's data to another (creating it if needed)
 
 :Command: ``msutils copycol``
 :Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
-:Source: https://github.com/sphemakh/msutils
+:Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
 
@@ -7687,7 +7687,7 @@ msutils flagstats: out-of-core flag statistics + matplotlib summary plot
 
 :Command: ``msutils flagstats``
 :Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
-:Source: https://github.com/sphemakh/msutils
+:Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
 
@@ -7743,7 +7743,7 @@ msutils sumcols: sum (or, with --subtract, difference) MS columns into a new col
 
 :Command: ``msutils sumcols``
 :Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
-:Source: https://github.com/sphemakh/msutils
+:Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
 
@@ -7792,7 +7792,7 @@ msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)
 
 :Command: ``msutils summary``
 :Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
-:Source: https://github.com/sphemakh/msutils
+:Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
 
