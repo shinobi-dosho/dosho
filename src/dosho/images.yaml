@@ -87,7 +87,7 @@ images:
 
   MSUTILS:
     name: msutils
-    source: "https://github.com/sphemakh/msutils"
+    source: "https://github.com/shinobi-dosho/msutils"
     build:
       version: "2.0.0b1"
       base: BASE_ASTRO

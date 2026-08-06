@@ -17,7 +17,7 @@ From GitHub
 
 .. code-block:: console
 
-    $ pip install git+https://github.com/SpheMakh/dosho.git
+    $ pip install git+https://github.com/shinobi-dosho/dosho.git
 
 This installs the importable ``dosho`` package, and registers it under
 shinobi's ``shinobi.cabs`` entry-point group -- so ``ninja cabs
@@ -33,7 +33,7 @@ dependency:
 
 .. code-block:: console
 
-    $ git clone https://github.com/SpheMakh/dosho.git
+    $ git clone https://github.com/shinobi-dosho/dosho.git
     $ cd dosho
     $ uv sync --group dev
     $ uv run pytest

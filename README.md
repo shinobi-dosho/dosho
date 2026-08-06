@@ -3,7 +3,7 @@
 *A shinobi's tool bag.*
 
 `dosho` is the native cab repository for
-[shinobi](https://github.com/SpheMakh/stimela-ninja) (stimela-ninja,
+[shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
 Stimela 3.0). Every tool is authored directly in Python -- a
 `shinobi.Cab` object for a real binary, or a `@shinobi.pystep`-produced
 `StepRef` for a Python-package tool with no standalone binary (CASA tasks,
