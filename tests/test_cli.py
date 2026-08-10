@@ -248,6 +248,26 @@ def test_dev_build_injects_the_framework_dev_pin():
     assert "simms@main" in install and "stimela-ninja@main" in install
 
 
+def test_ddfacet_dev_build_keeps_the_release_extras():
+    # DDFacet's dev image exists for a fix that only lives on `master` (joint
+    # imaging of multiple MSs), and its spec is a PEP 508 direct URL rather
+    # than a bare `git+` one precisely so the release's extras survive the swap
+    # -- losing them would silently drop the beam/kMS/dft backends.
+    extras = (
+        "[testing-requirements,fits-beam-support,kms-support,alternate-data-backends,dft-support]"
+    )
+    result = CliRunner().invoke(cli.main, ["images", "build", "DDFACET", "--dev", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "# tag: ghcr.io/shinobi-dosho/ddfacet:dev" in result.output
+    assert f"DDFacet{extras} @ git+https://github.com/saopicc/DDFacet@master" in result.output
+    assert f"DDFacet{extras}==1.0.0.0" not in result.output  # the release pin is replaced
+
+    release = CliRunner().invoke(cli.main, ["images", "build", "DDFACET", "--dry-run"])
+    install = next(ln for ln in release.output.splitlines() if 'pip install --use-pep517 "' in ln)
+    assert f"DDFacet{extras}==1.0.0.0" in install
+    assert "@master" not in install
+
+
 def test_release_build_is_untouched_by_the_dev_block():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
     assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output

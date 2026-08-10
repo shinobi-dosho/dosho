@@ -374,8 +374,21 @@ images:
     name: ddfacet
     build:
       version: "1.0.0.0"
+      package: "DDFacet[testing-requirements,fits-beam-support,kms-support,alternate-data-backends,dft-support]==1.0.0.0"
       cmd: "DDF.py --help"
       dockerfile: ddfacet/Dockerfile
+    # Released DDFacet cannot jointly image multiple MSs -- the "joint" image
+    # comes out with only one source in it. The fix lives on upstream `master`,
+    # which no release carries (master is still self-versioned 1.0.0.0, so a
+    # version bump can't express it either): hence a dev image, built from the
+    # same recipe with the pip spec pointed at the branch. PEP 508 direct-URL
+    # form (`name[extras] @ git+...`) rather than a bare `git+` URL, so the
+    # release's extras survive the swap; pip clones with submodules, so the
+    # from-source build needs nothing upstream's own docker.2404 doesn't.
+    # `metadata.dev_deps` is appended to `extra_deps`, which this Dockerfile
+    # doesn't reference -- correctly so, DDFacet is not written against shinobi.
+    dev:
+      package: "DDFacet[testing-requirements,fits-beam-support,kms-support,alternate-data-backends,dft-support] @ git+https://github.com/saopicc/DDFacet@master"
   KILLMS:
     source: "https://github.com/saopicc/killMS"
     name: killms
