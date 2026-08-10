@@ -8,8 +8,9 @@
 # which assumes being built from inside a DDFacet checkout -- DDFacet 1.0.0.0
 # publishes the same source as a real sdist, so a straight `pip install`
 # reaches the same result without needing that local build context).
-# Rendered by `dosho images build DDFACET` ({version} = DDFacet's own pip
-# version, {cmd} = sanity check).
+# Rendered by `dosho images build DDFACET` ({package} = the manifest's pip
+# spec -- a pinned release, or, under --dev, the same extras against
+# `git+...@master`; {cmd} = sanity check).
 FROM ubuntu:24.04
 
 RUN echo "*         -   memlock     unlimited" > /etc/security/limits.conf
@@ -166,8 +167,7 @@ RUN wget https://github.com/bennahugo/LOFARBeam/archive/refs/tags/DDF_KMS_22.04.
 # isn't ABI compatible (same pin the real upstream Dockerfile carries)
 RUN echo "tensorflow==2.19.0" > /opt/constraints.txt
 ENV PIP_CONSTRAINT=/opt/constraints.txt
-RUN . /opt/venv/bin/activate && python -m pip install --use-pep517 \
-    "DDFacet[testing-requirements,fits-beam-support,kms-support,alternate-data-backends,dft-support]=={version}"
+RUN . /opt/venv/bin/activate && python -m pip install --use-pep517 "{package}"
 
 # ensure bdsf backend still works
 RUN . /opt/venv/bin/activate && python -c "import bdsf"
