@@ -97,13 +97,23 @@ images:
       cmd: "msutils --help"
       dockerfile: pip/Dockerfile
 
+  # `version` carries a build-variant suffix rather than being wsclean's
+  # version alone: 3.6-d0.1.0 is published and immutable, and this image is the
+  # same wsclean built *differently* -- with IDG and EveryBeam, which the first
+  # build silently omitted. Suffixing moves the tag (so CI's
+  # `build-plan --missing-only` sees a missing one to build) without spending a
+  # version bump or a bundle_version bump on it. `idg_version` is an IDG repo
+  # tag, `everybeam_version` an EveryBeam one minus its `v` -- both bounded by
+  # wsclean 3.6's CMake; see cargo/wsclean/Dockerfile.
   WSCLEAN:
     source: "https://gitlab.com/aroffringa/wsclean"
     name: wsclean
     build:
-      version: "3.6"
+      version: "3.6-idg"
       kern_version: "10"
       package_version: "3.6"
+      idg_version: "1.2.0"
+      everybeam_version: "0.7.4"
       cmd: "wsclean --version"
       dockerfile: wsclean/Dockerfile
   # cubical 1.6.4 predates Python 3.10 (`from collections import Iterator` in
