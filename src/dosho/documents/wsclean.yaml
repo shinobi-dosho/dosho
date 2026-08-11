@@ -438,5 +438,9 @@ cabs:
         implicit: '{prefix}-MFS-psf.fits'
       source-list:
         dtype: File
+        # Written by -save-source-list. Unlike the FITS products it keeps an
+        # undecorated name at any -channels-out: wsclean writes one component
+        # list carrying the fitted spectral terms, so there is no _mfs sibling.
+        implicit: '{prefix}-sources.txt'
       temp-dir:
         dtype: Directory

@@ -82,6 +82,8 @@ def test_implicit_output_templates_resolve_against_prepared_prefix():
     assert str(result.outputs.model) == "deep-model.fits"
     assert str(result.outputs.psf) == "deep-psf.fits"
     assert str(result.outputs.dirty_mfs) == "deep-MFS-dirty.fits"
+    # The component list has no _mfs sibling -- one file at any -channels-out.
+    assert str(result.outputs.source_list) == "deep-sources.txt"
 
 
 def test_output_patterns_validate_combinatorial_names_without_resolving_them():
