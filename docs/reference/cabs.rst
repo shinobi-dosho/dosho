@@ -1481,7 +1481,7 @@ chgcentre
 chgcentre: recompute UVWs and rotate visibilities to a new phase centre (https://wsclean.readthedocs.io)
 
 :Command: ``chgcentre``
-:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-d0.1.0`` (``WSCLEAN`` 3.6, build)
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-d0.1.0`` (``WSCLEAN`` 3.6-idg, build)
 :Source: https://gitlab.com/aroffringa/wsclean
 
 **Inputs**
@@ -13825,7 +13825,7 @@ wsclean
 WSClean imager (https://wsclean.readthedocs.io)
 
 :Command: ``wsclean``
-:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-d0.1.0`` (``WSCLEAN`` 3.6, build)
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-d0.1.0`` (``WSCLEAN`` 3.6-idg, build)
 :Source: https://gitlab.com/aroffringa/wsclean
 
 **Inputs**
