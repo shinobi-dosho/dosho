@@ -1,0 +1,23 @@
+cabs:
+  msutils-flags-restore:
+    command: msutils flags restore
+    image: MSUTILS
+    info: 'msutils flags restore: restore an MS''s flags from a saved version'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to restore flags into
+        policies:
+          positional: true
+        mutable: true
+      name:
+        dtype: str
+        required: true
+        info: Saved flag version to restore
+        policies:
+          positional: true
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set with the restored flags

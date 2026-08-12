@@ -6011,6 +6011,214 @@ Solve for temporal gains from calibrator observations.
      - ``Path``
      - \-
 
+gainutils-fluxscale
+-------------------
+
+gainutils fluxscale: bootstrap a calibrator's flux density from a reference calibrator's gains (CASA caltable or QuartiCal store)
+
+:Command: ``gainutils fluxscale``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``transfer``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``reference``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``transfer_field``
+     - ``str``
+     - *required*
+     - \-
+   * - ``reference_field``
+     - ``str``
+     - *required*
+     - \-
+   * - ``reference_flux``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``output``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``gain_threshold``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``statistic``
+     - ``Literal['median', 'mean'] | None``
+     - ``'median'``
+     - \-
+   * - ``term``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output``
+     - ``Path | None``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - \-
+
+gainutils-normalise
+-------------------
+
+gainutils normalise: divide a scale out of a gain table, leaving its shape behind
+
+:Command: ``gainutils normalise``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``gains``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``statistic``
+     - ``Literal['median', 'mean'] | None``
+     - ``'median'``
+     - \-
+   * - ``axis``
+     - ``Literal['all', 'time', 'freq'] | None``
+     - ``'all'``
+     - \-
+   * - ``scope``
+     - ``Literal['antenna', 'correlation', 'block'] | None``
+     - ``'antenna'``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``term``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output``
+     - ``Path | None``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - \-
+
+gainutils-smooth
+----------------
+
+gainutils smooth: filter a gain table in time and/or frequency (phase and amplitude separately, then recombined)
+
+:Command: ``gainutils smooth``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``gains``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``output``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``time_window``
+     - ``int | str | None``
+     - ``None``
+     - \-
+   * - ``freq_window``
+     - ``int | str | None``
+     - ``None``
+     - \-
+   * - ``kernel``
+     - ``Literal['boxcar', 'gaussian'] | None``
+     - ``'boxcar'``
+     - \-
+   * - ``fill``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``term``
+     - ``str | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output``
+     - ``Path | None``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - \-
+
 gencal
 ------
 
@@ -7535,7 +7743,7 @@ msutils-addcol
 msutils addcol: add a column to an MS, cloning shape/type from an existing one
 
 :Command: ``msutils addcol``
-:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7588,7 +7796,7 @@ msutils-addnoise
 msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev)
 
 :Command: ``msutils addnoise``
-:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7635,13 +7843,179 @@ msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev
      - ``Path | None``
      - \-
 
+msutils-average
+---------------
+
+msutils average: time- and channel-average an MS into a new one (needs msutils' 'average' extra)
+
+:Command: ``msutils average``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``time_bin``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``chan_bin``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spw``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``scan``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``taql``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``datacolumn``
+     - ``str | None``
+     - ``'DATA'``
+     - \-
+   * - ``reindex``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``overwrite``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outms``
+     - ``Path | None``
+     - \-
+
+msutils-check
+-------------
+
+msutils check: validate an MS against the MSv2 standard (exits non-zero on errors)
+
+:Command: ``msutils check``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``as_json``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+msutils-convert
+---------------
+
+msutils convert: convert an MSv2 to an MSv4 processing set (needs msutils' 'convert' extra)
+
+:Command: ``msutils convert``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outpath``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``partition``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``no_pointing``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``overwrite``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outpath``
+     - ``Path | None``
+     - \-
+
 msutils-copycol
 ---------------
 
 msutils copycol: copy one column's data to another (creating it if needed)
 
 :Command: ``msutils copycol``
-:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7680,13 +8054,249 @@ msutils copycol: copy one column's data to another (creating it if needed)
      - ``Path | None``
      - \-
 
+msutils-delcol
+--------------
+
+msutils delcol: remove columns from an MS (e.g. CORRECTED_DATA, to reclaim disk)
+
+:Command: ``msutils delcol``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``colnames``
+     - ``list[str]``
+     - *required*
+     - \-
+   * - ``force``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-du
+----------
+
+msutils du: report where an MS's bytes are, by storage manager and subtable
+
+:Command: ``msutils du``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``as_json``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
+
+msutils-flags-backup
+--------------------
+
+msutils flags backup: save an MS's current flags as a named version
+
+:Command: ``msutils flags backup``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``name``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``description``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``overwrite``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-flags-delete
+--------------------
+
+msutils flags delete: delete a saved flag version from an MS
+
+:Command: ``msutils flags delete``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``name``
+     - ``str``
+     - *required*
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-flags-list
+------------------
+
+msutils flags list: list an MS's saved flag versions
+
+:Command: ``msutils flags list``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+
+**Outputs**
+
+*(none)*
+
+msutils-flags-restore
+---------------------
+
+msutils flags restore: restore an MS's flags from a saved version
+
+:Command: ``msutils flags restore``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``name``
+     - ``str``
+     - *required*
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
 msutils-flagstats
 -----------------
 
 msutils flagstats: out-of-core flag statistics + matplotlib summary plot
 
 :Command: ``msutils flagstats``
-:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7719,6 +8329,18 @@ msutils flagstats: out-of-core flag statistics + matplotlib summary plot
      - ``list[str] | None``
      - ``None``
      - \-
+   * - ``spw``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``scan``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``quiet``
+     - ``bool | None``
+     - ``None``
+     - \-
 
 **Outputs**
 
@@ -7736,13 +8358,200 @@ msutils flagstats: out-of-core flag statistics + matplotlib summary plot
      - ``Path | None``
      - \-
 
+msutils-info
+------------
+
+msutils info: report MS metadata (fields, SPWs, scans, antennas, columns), for MSv2 or MSv4
+
+:Command: ``msutils info``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``verbose``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``level``
+     - ``Literal['meta', 'full', 'data'] | None``
+     - ``'full'``
+     - \-
+   * - ``json_out``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``json_stdout``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``format``
+     - ``Literal['MSv2', 'MSv4'] | None``
+     - ``None``
+     - \-
+   * - ``engine``
+     - ``Literal['casacore', 'zarr', 'xradio', 'xarray-ms'] | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``json_out``
+     - ``Path | None``
+     - \-
+
+msutils-renamecol
+-----------------
+
+msutils renamecol: rename a column in an MS
+
+:Command: ``msutils renamecol``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``fromcol``
+     - ``str``
+     - *required*
+     - \-
+   * - ``tocol``
+     - ``str``
+     - *required*
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``Path | None``
+     - \-
+
+msutils-subset
+--------------
+
+msutils subset: write the selected rows of an MS to a new MS (optionally averaging on the way out)
+
+:Command: ``msutils subset``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outms``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``field``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``spw``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``scan``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``taql``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``time_bin``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``chan_bin``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``datacolumn``
+     - ``str | None``
+     - ``'DATA'``
+     - \-
+   * - ``reindex``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``overwrite``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outms``
+     - ``Path | None``
+     - \-
+
 msutils-sumcols
 ---------------
 
 msutils sumcols: sum (or, with --subtract, difference) MS columns into a new column
 
 :Command: ``msutils sumcols``
-:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7788,10 +8597,10 @@ msutils sumcols: sum (or, with --subtract, difference) MS columns into a new col
 msutils-summary
 ---------------
 
-msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)
+msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations). Deprecated upstream since msutils 3.0 -- it prints a warning and keeps the legacy dict layout; use msutils-info, which also reads MSv4.
 
 :Command: ``msutils summary``
-:Image: ``ghcr.io/shinobi-dosho/msutils:2.0.0b1-d0.1.0`` (``MSUTILS`` 2.0.0b1, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7829,6 +8638,42 @@ msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)
    * - ``json_out``
      - ``Path | None``
      - \-
+
+msutils-taql
+------------
+
+msutils taql: run a TaQL query against an MS and print the result columns
+
+:Command: ``msutils taql``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``query``
+     - ``str``
+     - *required*
+     - \-
+   * - ``ms``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``as_json``
+     - ``bool | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+*(none)*
 
 msuvbin
 -------

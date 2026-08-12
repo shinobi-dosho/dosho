@@ -10,6 +10,7 @@ cabs:
         info: Measurement set to operate on
         policies:
           positional: true
+        mutable: true
       cols:
         dtype: List[str]
         required: true

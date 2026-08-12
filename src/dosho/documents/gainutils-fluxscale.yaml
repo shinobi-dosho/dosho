@@ -1,0 +1,66 @@
+cabs:
+  gainutils-fluxscale:
+    command: gainutils fluxscale
+    image: MSUTILS
+    info: 'gainutils fluxscale: bootstrap a calibrator''s flux density from a reference calibrator''s
+      gains (CASA caltable or QuartiCal store)'
+    inputs:
+      transfer:
+        dtype: Directory
+        required: true
+        info: Gain table/store of the calibrator whose flux is unknown. Both calibrators must have been
+          solved the same way -- the reference against a model carrying its true flux, the transfer against
+          an assumed one.
+        policies:
+          positional: true
+      reference:
+        dtype: Directory
+        info: 'Gain table/store of the calibrator with a known flux [default: TRANSFER, i.e. both fields
+          in one table].'
+      transfer-field:
+        dtype: str
+        required: true
+        info: Field id or name whose flux is unknown.
+      reference-field:
+        dtype: str
+        required: true
+        info: Field id or name to measure against.
+      reference-flux:
+        dtype: float
+        default: 1.0
+        info: Flux density (Jy) the reference was solved against. 1.0 whenever its model carried its true
+          flux, which leaves its gains instrumental.
+      output:
+        dtype: Directory
+        write_path: true
+        abbreviation: o
+        info: Write the rescaled transfer gains here. Never written in place; must not exist.
+      json_out:
+        dtype: File
+        write_path: true
+        nom_de_guerre: json
+        info: Write the measurement to this JSON file. The number exists nowhere else once the process
+          exits, so a pipeline should always ask for it.
+      gain-threshold:
+        dtype: float
+        default: 0.0
+        info: Drop gain amplitudes deviating from the median by more than this fraction. 0 disables.
+      statistic:
+        dtype: str
+        default: median
+        choices:
+        - median
+        - mean
+        info: How to collapse each antenna's amplitudes over time/frequency. 'median' resists a bad scan;
+          'mean' is what reproduces CASA.
+      term:
+        dtype: str
+        info: Term to read from a QuartiCal store holding several.
+    outputs:
+      output:
+        dtype: Directory
+        info: The rescaled transfer gains
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: The measured flux density

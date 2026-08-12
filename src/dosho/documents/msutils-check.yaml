@@ -1,0 +1,16 @@
+cabs:
+  msutils-check:
+    command: msutils check
+    image: MSUTILS
+    info: 'msutils check: validate an MS against the MSv2 standard (exits non-zero on errors)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to validate
+        policies:
+          positional: true
+      as_json:
+        dtype: bool
+        nom_de_guerre: json
+        info: Print JSON instead of the text report.

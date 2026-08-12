@@ -1,0 +1,27 @@
+cabs:
+  msutils-flags-backup:
+    command: msutils flags backup
+    image: MSUTILS
+    info: 'msutils flags backup: save an MS''s current flags as a named version'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set whose flags to save
+        policies:
+          positional: true
+        mutable: true
+      name:
+        dtype: str
+        info: 'Version name [default: a timestamp]. Give one whenever a later step has to restore it
+          by name.'
+      description:
+        dtype: str
+        info: Note stored with the version.
+      overwrite:
+        dtype: bool
+        info: Replace a version of this name.
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set carrying the saved flag version

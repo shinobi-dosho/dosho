@@ -1,0 +1,20 @@
+cabs:
+  msutils-taql:
+    command: msutils taql
+    image: MSUTILS
+    info: 'msutils taql: run a TaQL query against an MS and print the result columns'
+    inputs:
+      query:
+        dtype: str
+        required: true
+        info: 'TaQL command to run (the CLI''s COMMAND argument). Refer to the MS given by --ms as $1,
+          e.g. ''SELECT DISTINCT FIELD_ID FROM $1''.'
+        policies:
+          positional: true
+      ms:
+        dtype: MS
+        info: MS bound to $1 in the query.
+      as_json:
+        dtype: bool
+        nom_de_guerre: json
+        info: Print JSON instead of the column listing.

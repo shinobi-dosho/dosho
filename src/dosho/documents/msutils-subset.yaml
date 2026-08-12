@@ -1,0 +1,59 @@
+cabs:
+  msutils-subset:
+    command: msutils subset
+    image: MSUTILS
+    info: 'msutils subset: write the selected rows of an MS to a new MS (optionally averaging on the
+      way out)'
+    policies:
+      repeat_list: true
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to select from
+        policies:
+          positional: true
+      outms:
+        dtype: MS
+        required: true
+        write_path: true
+        info: Measurement set to write. Field and SPW ids are preserved unless --reindex is given, rather
+          than renumbered the way CASA split does.
+        policies:
+          positional: true
+      field:
+        dtype: List[str]
+        info: Field id/name to keep (repeatable).
+      spw:
+        dtype: List[str]
+        info: Spectral window id/name to keep (repeatable).
+      scan:
+        dtype: List[int]
+        info: Scan number to keep (repeatable).
+      antenna:
+        dtype: List[str]
+        info: Antenna id/name to keep (repeatable).
+      taql:
+        dtype: str
+        info: Extra TaQL predicate, ANDed with the other selections.
+      time-bin:
+        dtype: float
+        info: Also average into bins this many seconds wide (needs the 'average' extra).
+      chan-bin:
+        dtype: int
+        info: Also average this many channels together (needs the 'average' extra).
+      datacolumn:
+        dtype: str
+        default: DATA
+        info: Visibility column to average. Ignored unless averaging.
+      reindex:
+        dtype: bool
+        info: Renumber field and SPW ids from 0 and drop the subtable rows the output no longer uses,
+          as CASA split does.
+      overwrite:
+        dtype: bool
+        info: Replace the output MS if it exists.
+    outputs:
+      outms:
+        dtype: MS
+        info: The selected subset

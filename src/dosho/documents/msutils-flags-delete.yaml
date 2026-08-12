@@ -1,0 +1,23 @@
+cabs:
+  msutils-flags-delete:
+    command: msutils flags delete
+    image: MSUTILS
+    info: 'msutils flags delete: delete a saved flag version from an MS'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to delete the flag version from
+        policies:
+          positional: true
+        mutable: true
+      name:
+        dtype: str
+        required: true
+        info: Saved flag version to delete
+        policies:
+          positional: true
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set the version was deleted from

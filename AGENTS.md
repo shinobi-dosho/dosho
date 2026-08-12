@@ -82,7 +82,7 @@ published one -- `bdsf.py`'s `catalog` wraps `ctx.import_func("process_image",
 "bdsf")` in a typed signature and its own orchestration. That is why the move
 to documents left them alone: the static-data rule above governs `Cab`
 definitions, which is the half that *is* configuration. Pysteps outnumber
-document cabs 68 to 44, though most of the former are thin `casatasks`
+document cabs 68 to 61, though most of the former are thin `casatasks`
 pass-throughs.
 
 ## Never import/execute an external Cab's own schema-generation code
@@ -164,7 +164,7 @@ A tool here is one of two things, and which one is not a matter of taste
 -- see the Core rule above. A **binary cab** (a real executable, argv-built
 and shelled out to) is a YAML document under `documents/`; a **pystep** (a
 Python-package function call with no standalone binary) is a decorated
-function under `cabs/`. Today: 112 tools, 44 documents and 68 pysteps.
+function under `cabs/`. Today: 129 tools, 61 documents and 68 pysteps.
 
 ```
 src/dosho/

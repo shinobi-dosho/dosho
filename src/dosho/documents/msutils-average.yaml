@@ -1,0 +1,60 @@
+cabs:
+  msutils-average:
+    command: msutils average
+    image: MSUTILS
+    info: 'msutils average: time- and channel-average an MS into a new one (needs msutils'' ''average''
+      extra)'
+    policies:
+      repeat_list: true
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to average
+        policies:
+          positional: true
+      outms:
+        dtype: MS
+        required: true
+        write_path: true
+        info: Measurement set to write
+        policies:
+          positional: true
+      time-bin:
+        dtype: float
+        default: 1.0
+        info: Averaging interval in seconds.
+      chan-bin:
+        dtype: int
+        default: 1
+        info: Channels per output channel.
+      field:
+        dtype: List[str]
+        info: Field id/name to keep (repeatable).
+      spw:
+        dtype: List[str]
+        info: Spectral window id/name to keep (repeatable).
+      scan:
+        dtype: List[int]
+        info: Scan number to keep (repeatable).
+      antenna:
+        dtype: List[str]
+        info: Antenna id/name to keep (repeatable).
+      taql:
+        dtype: str
+        info: Extra TaQL predicate, ANDed with the other selections.
+      datacolumn:
+        dtype: str
+        default: DATA
+        info: Visibility column to average.
+      reindex:
+        dtype: bool
+        info: Renumber field and SPW ids from 0 and drop the subtable rows the output no longer uses,
+          as CASA split does.
+      overwrite:
+        dtype: bool
+        info: Replace the output MS if it exists.
+    outputs:
+      outms:
+        dtype: MS
+        info: The averaged measurement set

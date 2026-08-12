@@ -10,6 +10,7 @@ cabs:
         info: Measurement set to add the column to
         policies:
           positional: true
+        mutable: true
       colname:
         dtype: str
         required: true
