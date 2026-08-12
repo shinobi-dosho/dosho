@@ -1,6 +1,7 @@
 """Tests for the `dosho images` build CLI (no docker required)."""
 
 import json
+import re
 
 from click.testing import CliRunner
 
@@ -240,12 +241,19 @@ def test_dev_build_injects_the_framework_dev_pin():
     # a tool built from its own `main` is written against shinobi `main`, but
     # `pip install` would resolve the plain dependency from PyPI (a tool's
     # [tool.uv.sources] git pin is uv-only, stripped from published metadata)
+    pin = _images.manifest["metadata"]["dev_deps"]
+    # a commit, not a branch: `:dev` is a mutable tag, so what a given dev
+    # image installed is otherwise unknowable after the fact and a rebuild
+    # picks up whatever shinobi landed meanwhile
+    assert re.fullmatch(
+        r"git\+https://github\.com/shinobi-dosho/stimela-ninja@[0-9a-f]{40}", pin
+    ), pin
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dev", "--dry-run"])
-    assert "git+https://github.com/shinobi-dosho/stimela-ninja@main" in result.output
+    assert pin in result.output
     # ...on the same pip line as the tool, so the resolver prefers both URLs
     # over the PyPI fallback instead of installing it and stepping on it
     install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
-    assert "simms@main" in install and "stimela-ninja@main" in install
+    assert "simms@main" in install and pin in install
 
 
 def test_ddfacet_dev_build_keeps_the_release_extras():
@@ -266,6 +274,29 @@ def test_ddfacet_dev_build_keeps_the_release_extras():
     install = next(ln for ln in release.output.splitlines() if 'pip install --use-pep517 "' in ln)
     assert f"DDFacet{extras}==1.0.0.0" in install
     assert "@master" not in install
+
+
+def test_msutils_dev_build_keeps_the_release_extras_as_one_shell_word():
+    # msutils' dev image exists because `main` carries the whole `gainutils`
+    # script and subset/average's --taql/--reindex, none of which 3.0.0 has.
+    # Its spec is the same PEP 508 direct-URL form as DDFacet's, so it has a
+    # space in it -- and unlike DDFacet's dedicated Dockerfile the shared pip
+    # template used to interpolate it bare, which pip reads as three separate
+    # requirements ("msutils[all]", "@", the URL) and installs no extras.
+    result = CliRunner().invoke(cli.main, ["images", "build", "MSUTILS", "--dev", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "# tag: ghcr.io/shinobi-dosho/msutils:dev" in result.output
+    install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
+    assert '"msutils[all] @ git+https://github.com/shinobi-dosho/msutils@main"' in install
+    assert "msutils[all]==3.0.0" not in install  # the release pin is replaced
+
+
+def test_pip_template_quotes_the_package_but_not_the_extra_deps():
+    # extra_deps is a list of specs (SHADEMS: three of them), so quoting it
+    # whole would hand pip one unresolvable requirement.
+    result = CliRunner().invoke(cli.main, ["images", "build", "SHADEMS", "--dry-run"])
+    install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
+    assert install.endswith('"shadems==0.5.4" pyarrow pandas "dask<2025.1"')
 
 
 def test_release_build_is_untouched_by_the_dev_block():

@@ -46,7 +46,15 @@ metadata:
   # tool's `[tool.uv.sources]` git pin is uv-only and stripped from the
   # published metadata. Injecting it here rather than per-entry means a new dev
   # image cannot forget it.
-  dev_deps: "git+https://github.com/shinobi-dosho/stimela-ninja@main"
+  #
+  # A commit, not `@main`. Both tags are mutable, so the only thing separating
+  # two `:dev` builds of the same tool is what they installed -- with a branch
+  # name that is unknowable after the fact, and a rebuild silently picks up
+  # whatever shinobi landed meanwhile. Naming the commit puts the moving part
+  # in this file, where a bump is a diff someone reviews rather than a
+  # coincidence of timing. Bump it deliberately (`git rev-parse origin/main` in
+  # a stimela-ninja checkout) when a dev image needs something newer.
+  dev_deps: "git+https://github.com/shinobi-dosho/stimela-ninja@a855c3638503e3436da2f1e48fc2049b62081d34"
 
 images:
   # Shared base image: KERN suite base + python + casacore + common astro stack.
@@ -89,13 +97,25 @@ images:
     name: msutils
     source: "https://github.com/shinobi-dosho/msutils"
     build:
-      version: "2.0.0b1"
+      version: "3.0.0"
       base: BASE_ASTRO
-      # [all] pulls the flagstats (dask-ms, matplotlib) + plots (scipy) extras
-      # so `msutils flagstats` works out of the box.
-      package: "msutils[all]==2.0.0b1"
+      # [all] pulls every optional stack: plots (matplotlib, for flagstats),
+      # average (codex-africanus), gains + msv4 (xarray, zarr), xarray-ms and
+      # convert (xradio) -- so every wrapped subcommand works out of the box
+      # rather than dying on an ImportError the cab cannot express.
+      package: "msutils[all]==3.0.0"
       cmd: "msutils --help"
       dockerfile: pip/Dockerfile
+    # The cabs describe msutils `main`, which is ahead of 3.0.0 by the whole
+    # `gainutils` console script and by subset/average's --taql/--reindex and
+    # binning options. That is the release image above, so `msutils-subset
+    # --reindex` and every `gainutils-*` cab need this one until the next
+    # release: `dosho images build MSUTILS --dev --push`, then point a
+    # deployment at it with DOSHO_IMAGE_MSUTILS (pin the digest, not `:dev`).
+    # PEP 508 direct-URL form rather than a bare `git+` URL, so `[all]`
+    # survives the swap -- without it the git build installs no extras at all.
+    dev:
+      package: "msutils[all] @ git+https://github.com/shinobi-dosho/msutils@main"
 
   # `version` carries a build-variant suffix rather than being wsclean's
   # version alone: 3.6-d0.1.0 is published and immutable, and this image is the
