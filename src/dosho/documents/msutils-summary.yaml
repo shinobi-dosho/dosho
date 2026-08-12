@@ -2,7 +2,9 @@ cabs:
   msutils-summary:
     command: msutils summary
     image: MSUTILS
-    info: 'msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations)'
+    info: 'msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations). Deprecated
+      upstream since msutils 3.0 -- it prints a warning and keeps the legacy dict layout; use msutils-info,
+      which also reads MSv4.'
     inputs:
       ms:
         dtype: MS

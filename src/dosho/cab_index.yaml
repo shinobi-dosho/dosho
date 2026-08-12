@@ -183,6 +183,15 @@ cabs:
     attr: gaincal
     module: dosho.cabs.casatasks
     symbol: gaincal
+  gainutils-fluxscale:
+    attr: gainutils_fluxscale
+    document: gainutils-fluxscale.yaml
+  gainutils-normalise:
+    attr: gainutils_normalise
+    document: gainutils-normalise.yaml
+  gainutils-smooth:
+    attr: gainutils_smooth
+    document: gainutils-smooth.yaml
   gencal:
     attr: gencal
     module: dosho.cabs.casatasks
@@ -241,18 +250,57 @@ cabs:
   msutils-addnoise:
     attr: addnoise
     document: msutils-addnoise.yaml
+  msutils-average:
+    attr: msutils_average
+    document: msutils-average.yaml
+  msutils-check:
+    attr: msutils_check
+    document: msutils-check.yaml
+  msutils-convert:
+    attr: msutils_convert
+    document: msutils-convert.yaml
   msutils-copycol:
     attr: copycol
     document: msutils-copycol.yaml
+  msutils-delcol:
+    attr: delcol
+    document: msutils-delcol.yaml
+  msutils-du:
+    attr: msutils_du
+    document: msutils-du.yaml
+  msutils-flags-backup:
+    attr: msutils_flags_backup
+    document: msutils-flags-backup.yaml
+  msutils-flags-delete:
+    attr: msutils_flags_delete
+    document: msutils-flags-delete.yaml
+  msutils-flags-list:
+    attr: msutils_flags_list
+    document: msutils-flags-list.yaml
+  msutils-flags-restore:
+    attr: msutils_flags_restore
+    document: msutils-flags-restore.yaml
   msutils-flagstats:
     attr: flagstats
     document: msutils-flagstats.yaml
+  msutils-info:
+    attr: msutils_info
+    document: msutils-info.yaml
+  msutils-renamecol:
+    attr: renamecol
+    document: msutils-renamecol.yaml
+  msutils-subset:
+    attr: msutils_subset
+    document: msutils-subset.yaml
   msutils-sumcols:
     attr: sumcols
     document: msutils-sumcols.yaml
   msutils-summary:
     attr: summary
     document: msutils-summary.yaml
+  msutils-taql:
+    attr: msutils_taql
+    document: msutils-taql.yaml
   msuvbin:
     attr: msuvbin
     module: dosho.cabs.casatasks

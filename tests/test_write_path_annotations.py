@@ -100,6 +100,20 @@ DESTINATIONS = {
     ("msutils-flagstats", "json_out"),
     ("msutils-flagstats", "plot"),
     ("msutils-summary", "json_out"),
+    ("msutils-info", "json_out"),
+    # msutils subset/average/convert refuse an existing output unless told
+    # `--overwrite`, so the stale product has to go before a re-run.
+    ("msutils-average", "outms"),
+    ("msutils-convert", "outpath"),
+    ("msutils-subset", "outms"),
+    # gainutils never writes gains in place: `-o` must not exist, which makes
+    # the previous run's copy this step's to clear.
+    ("gainutils-fluxscale", "json_out"),
+    ("gainutils-fluxscale", "output"),
+    ("gainutils-normalise", "json_out"),
+    ("gainutils-normalise", "output"),
+    ("gainutils-smooth", "json_out"),
+    ("gainutils-smooth", "output"),
     ("owlcat_plotelev", "output_name"),
     ("ragavi-gains", "htmlname"),
     ("ragavi-gains", "plotname"),
@@ -140,6 +154,11 @@ NOT_DESTINATIONS = {
             ("msutils-addcol", "ms"),
             ("msutils-addnoise", "ms"),
             ("msutils-copycol", "ms"),
+            ("msutils-delcol", "ms"),
+            ("msutils-flags-backup", "ms"),
+            ("msutils-flags-delete", "ms"),
+            ("msutils-flags-restore", "ms"),
+            ("msutils-renamecol", "ms"),
             ("msutils-sumcols", "ms"),
             ("msuvbinflag", "binnedvis"),
             ("quartical-restore", "ms_path"),

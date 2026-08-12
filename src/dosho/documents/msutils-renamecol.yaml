@@ -1,8 +1,8 @@
 cabs:
-  msutils-copycol:
-    command: msutils copycol
+  msutils-renamecol:
+    command: msutils renamecol
     image: MSUTILS
-    info: 'msutils copycol: copy one column''s data to another (creating it if needed)'
+    info: 'msutils renamecol: rename a column in an MS'
     inputs:
       ms:
         dtype: MS
@@ -14,18 +14,16 @@ cabs:
       fromcol:
         dtype: str
         required: true
-        info: Source column to copy from
+        info: Column to rename
         policies:
           positional: true
       tocol:
         dtype: str
         required: true
-        info: Destination column (created if it does not exist)
+        info: New column name
         policies:
           positional: true
     outputs:
       ms:
         dtype: MS
-        info: Measurement set to operate on
-        policies:
-          positional: true
+        info: Measurement set the column was renamed in

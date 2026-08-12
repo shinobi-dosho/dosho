@@ -27,6 +27,15 @@ cabs:
       antenna:
         dtype: List[str]
         info: Antenna id/name to include (repeatable).
+      spw:
+        dtype: List[str]
+        info: Spectral window id/name to include (repeatable).
+      scan:
+        dtype: List[int]
+        info: Scan number to include (repeatable).
+      quiet:
+        dtype: bool
+        info: Do not print the report.
     outputs:
       plot:
         dtype: File

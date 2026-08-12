@@ -1,0 +1,53 @@
+cabs:
+  gainutils-smooth:
+    command: gainutils smooth
+    image: MSUTILS
+    info: 'gainutils smooth: filter a gain table in time and/or frequency (phase and amplitude separately,
+      then recombined)'
+    inputs:
+      gains:
+        dtype: Directory
+        required: true
+        info: Gain table (CASA caltable) or QuartiCal store to smooth
+        policies:
+          positional: true
+      output:
+        dtype: Directory
+        write_path: true
+        abbreviation: o
+        info: Write the smoothed gains here. Never written in place; must not exist.
+      time-window:
+        dtype: Union[int, str]
+        info: 'Window along time: a sample count, or a physical interval (''120s'', ''5min''). The physical
+          form means the same thing on differently-averaged data.'
+      freq-window:
+        dtype: Union[int, str]
+        info: 'Window along frequency: a sample count, or a physical width (''8MHz'').'
+      kernel:
+        dtype: str
+        default: boxcar
+        choices:
+        - boxcar
+        - gaussian
+        info: Kernel shape. A gaussian's window is read as its FWHM.
+      fill:
+        dtype: bool
+        default: false
+        info: Unflag solutions whose window contained real data (the general form of CASA's fillgaps).
+          Off means a flagged solution stays flagged however many neighbours it has.
+      json_out:
+        dtype: File
+        write_path: true
+        nom_de_guerre: json
+        info: Write the report to this JSON file, including what each physical window resolved to in samples.
+      term:
+        dtype: str
+        info: Term to read from a QuartiCal store holding several.
+    outputs:
+      output:
+        dtype: Directory
+        info: The smoothed gains
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: The smoothing report

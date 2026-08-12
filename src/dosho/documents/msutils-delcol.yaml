@@ -1,0 +1,27 @@
+cabs:
+  msutils-delcol:
+    command: msutils delcol
+    image: MSUTILS
+    info: 'msutils delcol: remove columns from an MS (e.g. CORRECTED_DATA, to reclaim disk)'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to operate on
+        policies:
+          positional: true
+        mutable: true
+      colnames:
+        dtype: List[str]
+        required: true
+        info: Columns to remove (one or more).
+        policies:
+          positional: true
+          repeat: list
+      force:
+        dtype: bool
+        info: Allow removing columns the MSv2 standard requires.
+    outputs:
+      ms:
+        dtype: MS
+        info: Measurement set the columns were removed from

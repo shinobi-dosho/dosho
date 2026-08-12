@@ -1,0 +1,16 @@
+cabs:
+  msutils-du:
+    command: msutils du
+    image: MSUTILS
+    info: 'msutils du: report where an MS''s bytes are, by storage manager and subtable'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to measure
+        policies:
+          positional: true
+      as_json:
+        dtype: bool
+        nom_de_guerre: json
+        info: Print JSON instead of the text report.

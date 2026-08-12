@@ -10,6 +10,7 @@ cabs:
         info: Measurement set to operate on
         policies:
           positional: true
+        mutable: true
       column:
         dtype: str
         default: MODEL_DATA

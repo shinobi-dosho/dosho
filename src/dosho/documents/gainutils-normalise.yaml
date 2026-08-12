@@ -1,0 +1,60 @@
+cabs:
+  gainutils-normalise:
+    command: gainutils normalise
+    image: MSUTILS
+    info: 'gainutils normalise: divide a scale out of a gain table, leaving its shape behind'
+    inputs:
+      gains:
+        dtype: Directory
+        required: true
+        info: Gain table (CASA caltable) or QuartiCal store to normalise
+        policies:
+          positional: true
+      output:
+        dtype: Directory
+        write_path: true
+        abbreviation: o
+        info: Write the normalised gains here. Never written in place; must not exist.
+      statistic:
+        dtype: str
+        default: median
+        choices:
+        - median
+        - mean
+        info: Average to divide out. 'median' resists a bad scan; 'mean' is CASA's solnorm.
+      axis:
+        dtype: str
+        default: all
+        choices:
+        - all
+        - time
+        - freq
+        info: Axes the factor is averaged over. 'freq' is bandpass normalisation (unit amplitude per spectrum,
+          time variation kept); 'all' takes out one level.
+      scope:
+        dtype: str
+        default: antenna
+        choices:
+        - antenna
+        - correlation
+        - block
+        info: How widely one factor applies. 'antenna' matches CASA and does NOT preserve relative antenna
+          amplitudes; 'block' preserves them and removes only the overall level, which is what moving
+          a flux scale between terms needs.
+      json_out:
+        dtype: File
+        write_path: true
+        nom_de_guerre: json
+        info: Write the factors taken out to this JSON file. That scale has left the table; a pipeline
+          that cannot find it later cannot put it back.
+      term:
+        dtype: str
+        info: Term to read from a QuartiCal store holding several.
+    outputs:
+      output:
+        dtype: Directory
+        info: The normalised gains
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: The factors that were divided out

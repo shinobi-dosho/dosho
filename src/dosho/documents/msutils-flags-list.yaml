@@ -1,0 +1,12 @@
+cabs:
+  msutils-flags-list:
+    command: msutils flags list
+    image: MSUTILS
+    info: 'msutils flags list: list an MS''s saved flag versions'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set to list saved flag versions for
+        policies:
+          positional: true

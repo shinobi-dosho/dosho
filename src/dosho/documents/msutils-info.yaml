@@ -1,0 +1,52 @@
+cabs:
+  msutils-info:
+    command: msutils info
+    image: MSUTILS
+    info: 'msutils info: report MS metadata (fields, SPWs, scans, antennas, columns), for MSv2 or MSv4'
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set (MSv2 table) or MSv4 processing set to report on
+        policies:
+          positional: true
+      verbose:
+        dtype: bool
+        info: Also list scans, antennas and columns in full.
+      level:
+        dtype: str
+        default: full
+        choices:
+        - meta
+        - full
+        - data
+        info: 'meta: subtables only (no main-table scan); full: one pass over the index columns; data:
+          also read UVW and FLAG.'
+      json_out:
+        write_path: true
+        dtype: File
+        nom_de_guerre: json
+        info: Write the structured metadata to this JSON file.
+      json-stdout:
+        dtype: bool
+        info: Print JSON to stdout instead of the text report.
+      format:
+        dtype: str
+        choices:
+        - MSv2
+        - MSv4
+        info: Force the format instead of auto-detecting.
+      engine:
+        dtype: str
+        choices:
+        - casacore
+        - zarr
+        - xradio
+        - xarray-ms
+        info: 'How to read the data. MSv2 defaults to casacore (TaQL); ''xarray-ms'' reads an MSv2 through
+          the MSv4 schema.'
+    outputs:
+      json_out:
+        dtype: File
+        nom_de_guerre: json
+        info: Write the structured metadata to this JSON file.

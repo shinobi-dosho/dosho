@@ -1,0 +1,36 @@
+cabs:
+  msutils-convert:
+    command: msutils convert
+    image: MSUTILS
+    info: 'msutils convert: convert an MSv2 to an MSv4 processing set (needs msutils'' ''convert'' extra)'
+    policies:
+      repeat_list: true
+    inputs:
+      ms:
+        dtype: MS
+        required: true
+        info: Measurement set (MSv2) to convert
+        policies:
+          positional: true
+      outpath:
+        dtype: Directory
+        required: true
+        write_path: true
+        info: MSv4 processing set to write
+        policies:
+          positional: true
+      partition:
+        dtype: List[str]
+        info: 'Extra column to partition on, repeatable: FIELD_ID, SCAN_NUMBER, STATE_ID or ANTENNA1.
+          (Not `choices:` -- that narrows a field to a `Literal` of the whole value, which a repeatable
+          option cannot be; msutils'' own click.Choice rejects a wrong one.)'
+      no-pointing:
+        dtype: bool
+        info: Skip the POINTING subtable (often large and unused).
+      overwrite:
+        dtype: bool
+        info: Replace the output processing set if it exists.
+    outputs:
+      outpath:
+        dtype: Directory
+        info: The MSv4 processing set
