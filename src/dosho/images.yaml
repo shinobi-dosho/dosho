@@ -151,9 +151,18 @@ images:
     source: "https://github.com/ratt-ru/QuartiCal"
     name: quartical
     build:
-      version: "0.2.7"
+      # Held at 0.2.5 deliberately. 0.2.6 and 0.2.7 SIGSEGV on any solve with
+      # two or more gain terms AND two or more model directions
+      # (ratt-ru/QuartiCal#435) -- which is every cycle of a self-cal loop
+      # doing compact-source subtraction, since the compact model must be its
+      # own direction and previously-solved terms must be listed to stay in
+      # the correction. 0.2.5 is the last good release: 0.2.7 pinned to the
+      # exact numba/numpy 0.2.5 resolves still faults, so it is QuartiCal's
+      # regression and a dependency bump will not lift it. Do not bump until
+      # #435 is fixed.
+      version: "0.2.5"
       base: BASE_ASTRO
-      package: "quartical==0.2.7"
+      package: "quartical==0.2.5"
       pip_install_flags: "--no-build-isolation"
       # goquartical is config-file-driven and rejects --help; import-check instead.
       cmd: "python3 -c 'import quartical'"
