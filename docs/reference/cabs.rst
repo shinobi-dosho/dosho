@@ -9573,7 +9573,7 @@ quartical
 QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
 
 :Command: ``goquartical``
-:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.5-d0.1.0`` (``QUARTICAL`` 0.2.5, build)
 :Source: https://github.com/ratt-ru/QuartiCal
 
 **Inputs**
@@ -9813,7 +9813,7 @@ quartical-backup
 goquartical-backup: back up a measurement set column to zarr
 
 :Command: ``goquartical-backup``
-:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.5-d0.1.0`` (``QUARTICAL`` 0.2.5, build)
 :Source: https://github.com/ratt-ru/QuartiCal
 
 **Inputs**
@@ -9870,7 +9870,7 @@ quartical-plotter
 goquartical-plot: rudimentary plotter for QuartiCal gain solutions
 
 :Command: ``goquartical-plot``
-:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.5-d0.1.0`` (``QUARTICAL`` 0.2.5, build)
 :Source: https://github.com/ratt-ru/QuartiCal
 
 **Inputs**
@@ -9963,7 +9963,7 @@ quartical-restore
 goquartical-restore: restore a zarr column backup into a measurement set
 
 :Command: ``goquartical-restore``
-:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.7-d0.1.0`` (``QUARTICAL`` 0.2.7, build)
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.5-d0.1.0`` (``QUARTICAL`` 0.2.5, build)
 :Source: https://github.com/ratt-ru/QuartiCal
 
 **Inputs**
