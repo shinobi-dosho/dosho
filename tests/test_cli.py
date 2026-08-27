@@ -291,6 +291,26 @@ def test_msutils_dev_build_keeps_the_release_extras_as_one_shell_word():
     assert "msutils[all]==3.0.0" not in install  # the release pin is replaced
 
 
+def test_quartical_dev_build_installs_the_fix_branch_with_build_isolation():
+    # QuartiCal's dev image exists because the #435 SIGSEGV fix (a
+    # direction-axis mismatch when collapsing a chain of terms) lives only on
+    # `v0.2.8-dev`; the release entry is pinned back at 0.2.5 for want of it.
+    # Its `--no-build-isolation` is dropped here on purpose: 0.2.5/0.2.7 ship
+    # wheels so the flag has no build to act on, but a git URL is built from
+    # source and without isolation that needs hatchling in the image.
+    result = CliRunner().invoke(cli.main, ["images", "build", "QUARTICAL", "--dev", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "# tag: ghcr.io/shinobi-dosho/quartical:dev" in result.output
+    install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
+    assert '"git+https://github.com/ratt-ru/QuartiCal@v0.2.8-dev"' in install
+    assert "quartical==0.2.5" not in install  # the held-back release pin is replaced
+    assert "--no-build-isolation" not in install
+
+    release = CliRunner().invoke(cli.main, ["images", "build", "QUARTICAL", "--dry-run"])
+    install = next(ln for ln in release.output.splitlines() if ln.startswith("RUN pip install"))
+    assert "--no-build-isolation" in install and '"quartical==0.2.5"' in install
+
+
 def test_pip_template_quotes_the_package_but_not_the_extra_deps():
     # extra_deps is a list of specs (SHADEMS: three of them), so quoting it
     # whole would hand pip one unresolvable requirement.

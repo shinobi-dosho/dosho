@@ -158,8 +158,9 @@ images:
       # own direction and previously-solved terms must be listed to stay in
       # the correction. 0.2.5 is the last good release: 0.2.7 pinned to the
       # exact numba/numpy 0.2.5 resolves still faults, so it is QuartiCal's
-      # regression and a dependency bump will not lift it. Do not bump until
-      # #435 is fixed.
+      # regression and a dependency bump will not lift it. Do not bump to a
+      # released version until one carries the #435 fix -- 0.2.7 is still the
+      # latest, so that is not yet 0.2.8; see the `dev:` block below.
       version: "0.2.5"
       base: BASE_ASTRO
       package: "quartical==0.2.5"
@@ -167,6 +168,28 @@ images:
       # goquartical is config-file-driven and rejects --help; import-check instead.
       cmd: "python3 -c 'import quartical'"
       dockerfile: pip/Dockerfile
+    # #435 is fixed upstream by ratt-ru/QuartiCal#437 -- the fault was a
+    # direction-axis mismatch when a chain of terms is collapsed into one
+    # (`solver.collapse_chain`), not the numba/numpy suspicion the release pin
+    # above was chosen around. The fix lives only on the `v0.2.8-dev` branch;
+    # no release carries it, so until 0.2.8 ships this is the only image that
+    # can run a two-term, two-direction solve, and upstream explicitly asked
+    # for stress testing on that branch. Bare `git+` URL rather than DDFacet's
+    # PEP 508 direct-URL form because the release spec carries no extras to
+    # preserve. `metadata.dev_deps` is appended to `extra_deps`, which this
+    # image does not need -- QuartiCal is not written against shinobi -- but
+    # the pin is inert here: stimela-ninja's own dependencies are pydantic,
+    # pyyaml, click, rich and packaging, none of which can move the numba/numpy
+    # resolution this build is sensitive to.
+    dev:
+      package: "git+https://github.com/ratt-ru/QuartiCal@v0.2.8-dev"
+      # ...and `--no-build-isolation` is dropped, which is not a policy change:
+      # 0.2.5 and 0.2.7 both publish wheels, so the flag never had a build to
+      # act on there. A git URL does -- pip builds the branch from source --
+      # and without isolation that build needs hatchling already in the image,
+      # which base-astro has no reason to carry. Isolation only governs the
+      # build env, so restoring it cannot move the installed dependency set.
+      pip_install_flags: ""
   AOFLAGGER:
     source: "https://gitlab.com/aroffringa/aoflagger"
     name: aoflagger
