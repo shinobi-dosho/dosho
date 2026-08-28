@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-run = ["stimela-ninja>=0.1.0b5"]
+run = ["stimela-ninja>=0.1.0b6"]
 
 [dependency-groups]
 dev = [
