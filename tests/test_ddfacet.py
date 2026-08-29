@@ -5,6 +5,7 @@ shape (case-preserved, comma-joined list values) -- not exhaustive
 per-field coverage, given the scale (273 fields).
 """
 
+import pytest
 from shinobi.policies import build_argv
 
 import dosho
@@ -225,3 +226,63 @@ def test_ddfacet_wisdom_dir_stays_undeclared_because_its_default_is_home_relativ
     cab = dosho.get("ddfacet")
     assert cab.inputs_model.model_fields["cache_dir_wisdom_fftw"].default == "~/.fftw_wisdom"
     assert not any("wisdom" in pattern for pattern in cab.scratch)
+
+
+def _default_argv(**inputs):
+    """The argv a real dispatch builds -- defaults filled in, not just the
+    handful of fields a caller names. `build_argv` alone sees only what it is
+    handed, which is why the bare-flag defect below is invisible to every
+    field-level test above.
+    """
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    recorder = RecordingBackend()
+    register_step_backend("ddf-argv", recorder)
+    cab = dosho.get("ddfacet").model_copy(update={"backend": "ddf-argv"})
+    _dispatch(cab, None, **inputs)
+    return recorder.calls[-1][1]
+
+
+def test_ddfacet_hmp_scales_carries_no_default_because_one_item_lists_render_bare():
+    """`build_argv` renders a list by joining on `,`, so a one-item list has no
+    comma left to join on: `[0]` reached DDFacet as the bare token `0`, a
+    scalar, and `ClassMultiScaleMachine.MakeListScales` died on `if 0 in
+    LScales` ("argument of type 'int' is not iterable") -- after a full
+    gridding + PSF pass, so both slow and remote from its cause. The default
+    dosho copied out of `DefaultParset.cfg` is DDFacet's own internal default,
+    so omitting the flag carries exactly the same information (dosho #23).
+    Quartical's two one-item defaults are not affected: its `repeat: '[]'`
+    policy renders them bracketed (`solver.terms=[G]`), with nothing to join.
+    """
+    cab = dosho.get("ddfacet")
+    assert cab.inputs_model.model_fields["hmp_scales"].default is None
+    assert "--HMP-Scales" not in _default_argv(data_ms=["/obs.ms"], output_name="img/run1")
+    # a caller who does want scales still gets the real comma-joined shape
+    argv = build_argv(cab, {"hmp_scales": [0, 2, 4]})
+    assert argv[argv.index("--HMP-Scales") + 1] == "0,2,4"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="shinobi has no 0/1 boolean policy yet -- dosho #23 item 1. Its "
+    "`explicit_true`/`explicit_false` emit lowercase `true`/`false`, which "
+    "DDFacet's parser reads as a non-empty (truthy) *string*, so neither "
+    "setting renders a boolean it can read. Turn this into a plain test once "
+    "the policy lands upstream and ddfacet.yaml sets it.",
+)
+def test_ddfacet_bools_never_render_as_a_bare_flag():
+    """DDFacet takes an explicit value for every option, booleans included
+    (`--Output-Clobber 0|1`). A bare flag makes its optparse swallow the *next*
+    option as this one's value, so everything after it is misread. 13 of the 39
+    bool fields default to `true`, so this does not wait on a caller: the argv
+    a bare `data_ms`/`output_name` dispatch builds is already malformed.
+    """
+    argv = _default_argv(data_ms=["/obs.ms"], output_name="img/run1")
+    bare = [
+        token
+        for index, token in enumerate(argv)
+        if token.startswith("--") and (index + 1 == len(argv) or argv[index + 1].startswith("--"))
+    ]
+    assert bare == []

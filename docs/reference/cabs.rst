@@ -3315,7 +3315,7 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - \-
    * - ``hmp_scales``
      - ``list[float] | None``
-     - ``[0]``
+     - ``None``
      - \-
    * - ``hmp_ratios``
      - ``list[str] | None``
