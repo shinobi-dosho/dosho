@@ -24,6 +24,18 @@ def test_bdsf_catalog_uses_the_pinned_bdsf_image():
     assert catalog.step.image == images.BDSF
 
 
+def test_bdsf_image_pins_numpy_below_2():
+    """PyBDSF 1.14.1 cannot source-find under numpy 2 -- its convex-hull
+    deficiency test calls `np.cross` on 2-D vectors, which numpy 2.0 removed,
+    so every island big enough to be split dies in Gaussian fitting (#75).
+    The image pins numpy back; nothing else in the tree records that, and a
+    rebuild is the only other thing that would notice it going missing.
+    """
+    build = images.manifest["images"]["BDSF"]["build"]
+    assert build["package"] == "bdsf==1.14.1"
+    assert "numpy<2" in build["extra_deps"]
+
+
 def test_bdsf_catalog_resolves_through_the_registry():
     resolved = dosho.get("bdsf-catalog")
     assert resolved.name == "bdsf-catalog"

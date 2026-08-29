@@ -418,14 +418,44 @@ images:
       package: "astro-tigger-lsm==1.8.0"
       cmd: "tigger-convert --help"
       dockerfile: pip/Dockerfile
+  # PyBDSF 1.14.1 cannot source-find at all against numpy 2 (#75): its
+  # convex-hull deficiency test calls `np.cross` on 2-D vectors, a form numpy
+  # 2.0 removed after deprecating it through 1.x, and every island big enough
+  # to be a split candidate takes that path -- so Gaussian fitting dies on any
+  # image holding an island bigger than `splitisl_maxsize` (50) beam areas,
+  # which is to say every real one. No PyBDSF release carries a fix, so pin
+  # numpy back instead. `version` carries a build-variant suffix rather than being
+  # PyBDSF's version alone, as WSCLEAN's does: 1.14.1-d0.1.0 is published and
+  # immutable, and this is the same PyBDSF built differently, so suffixing
+  # moves the tag (giving CI's `build-plan --missing-only` one to build)
+  # without spending a version or bundle_version bump on it.
   BDSF:
     source: "https://github.com/lofar-astron/PyBDSF"
     name: bdsf
     build:
-      version: "1.14.1"
+      version: "1.14.1-numpy1"
       base: BASE_ASTRO
       package: "bdsf==1.14.1"
-      cmd: "python3 -c 'import bdsf'"
+      extra_deps: '"numpy<2"'
+      # The sanity check has to actually source-find, and on the right kind
+      # of image. PyBDSF has no CLI to --help, `import bdsf` succeeds under
+      # the broken pairing, and so does a single compact source: #75's crash
+      # is in the island-*splitting* path, reached only once an island is
+      # larger than `splitisl_maxsize` (50) beam areas. So this is a blend of
+      # seven beam-sized Gaussians sharing one ~70-beam island -- it takes
+      # that path, and it fails on numpy 2 exactly as the issue reports.
+      cmd: >-
+        python3 -c 'import numpy as np, bdsf; from astropy.io import fits;
+        y, x = np.mgrid[0:160, 0:160];
+        c = [(64, 64), (76, 70), (88, 76), (76, 88), (64, 78), (94, 88), (88, 62)];
+        d = np.random.default_rng(0).normal(0, 1, (160, 160)) + sum(500*np.exp(-((x-cx)**2 + (y-cy)**2)/13.52) for cx, cy in c);
+        h = fits.Header(dict(CTYPE1="RA---SIN", CRVAL1=0.0, CDELT1=-0.5/3600, CRPIX1=80, CUNIT1="deg",
+        CTYPE2="DEC--SIN", CRVAL2=-30.0, CDELT2=0.5/3600, CRPIX2=80, CUNIT2="deg",
+        BMAJ=3/3600, BMIN=3/3600, BPA=0.0, BUNIT="Jy/beam"));
+        fits.writeto("/tmp/smoke.fits", d.astype("float32"), h, overwrite=True);
+        img = bdsf.process_image("/tmp/smoke.fits", thresh_isl=3.0, thresh_pix=5.0, frequency=1.4e9, quiet=True);
+        assert img.nsrc >= 1, img.nsrc;
+        print("bdsf", bdsf.__version__, "numpy", np.__version__, "sources", img.nsrc)'
       dockerfile: pip/Dockerfile
   # DDFacet's real runtime deps (SOFA, blitz, CASAREST, MAKEMS, MeqTrees-timba)
   # aren't KERN-suite/BASE_ASTRO packages, so this is a dedicated, from-source

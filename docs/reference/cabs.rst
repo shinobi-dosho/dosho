@@ -1115,7 +1115,7 @@ bdsf-catalog
 
 Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/or source catalog (`write_catalog`).
 
-:Image: ``ghcr.io/shinobi-dosho/bdsf:1.14.1-d0.1.0`` (``BDSF`` 1.14.1, build)
+:Image: ``ghcr.io/shinobi-dosho/bdsf:1.14.1-numpy1-d0.1.0`` (``BDSF`` 1.14.1-numpy1, build)
 :Source: https://github.com/lofar-astron/PyBDSF
 
 **Inputs**
