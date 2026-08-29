@@ -1023,8 +1023,6 @@ cabs:
         info: 'List of alphas to fit. (Default: [-1.0, 1.0, 11])'
       hmp_scales:
         dtype: List[float]
-        default:
-        - 0
         nom_de_guerre: HMP-Scales
         info: 'List of scales to use. (Default: [0])'
       hmp_ratios:
