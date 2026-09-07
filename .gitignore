@@ -223,6 +223,7 @@ tests/.slurmwork/
 # Agents
 .claude/
 .opencode/
+.codex/
 
 # shinobi run-time output (cache, run manifests)
 .shinobi/
