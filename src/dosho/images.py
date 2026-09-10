@@ -2,10 +2,10 @@
 manifest and exposed as one module constant per tool (``images.WSCLEAN``,
 ``images.CASA6``, ...). Cab modules import these unchanged.
 
-The manifest is the single source of truth linking each cab to its image (and,
-once dosho builds its own images, to a build recipe -- see the build subsystem
-and `images.yaml`'s own header for the schema). Each entry resolves to a full
-image reference:
+The manifest is the single source of truth linking each cab to its image and,
+for the ones dosho builds itself, to the recipe that builds it -- see `cli.py`'s
+`dosho images` commands and `images.yaml`'s own header for the schema. Each
+entry resolves to a full image reference:
 
 * ``ref:``   -- used verbatim (an existing published image / placeholder);
 * ``build:`` -- composed as ``{registry}/{name}:{version}-{bundle_version}``

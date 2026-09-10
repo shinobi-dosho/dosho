@@ -4,13 +4,13 @@
 
 `dosho` is the native cab repository for
 [shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
-Stimela 3.0). Every tool is authored directly in Python -- a
-`shinobi.Cab` object for a real binary, or a `@shinobi.pystep`-produced
-`StepRef` for a Python-package tool with no standalone binary (CASA tasks,
-simms 3.0's `skysim`/`telsim`/`primary-beam`). A cab is parameter
-configuration and stays declarative whatever carries it, so there's no
-`dynamic_schema`-style Python-execution step at cab-load time, no expression
-language, and no dtype coverage gaps.
+Stimela 3.0). A tool is one of two shapes: a real binary is a YAML
+*document*, built into a `shinobi.Cab` on demand; a Python-package tool
+with no standalone binary (CASA tasks, simms 3.0's
+`skysim`/`telsim`/`primary-beam`) is a `@shinobi.pystep`-produced
+`StepRef`. A cab is parameter configuration and stays declarative whatever
+carries it, so there's no `dynamic_schema`-style Python-execution step at
+cab-load time, no expression language, and no dtype coverage gaps.
 
 ## Installing
 
@@ -53,9 +53,9 @@ $ ninja cabs show wsclean
 
 ## Status
 
-`dosho` currently hosts 42 real-binary `Cab`s (`wsclean`, `cubical`,
+`dosho` currently hosts 61 real-binary `Cab`s (`wsclean`, `cubical`,
 `quartical`, `ddfacet`, `killms`, `aoflagger`, `tricolour`, `crystalball`,
-`shadems`, `ragavi`, `sofia2`, `mosaic-queen`, classic `simms`, ...) and 62
+`shadems`, `ragavi`, `sofia2`, `mosaic-queen`, classic `simms`, ...) and 68
 `@shinobi.pystep` wrappers around Python-package tools with no standalone
 binary -- CASA tasks (`listobs`, `mstransform`, `gaincal`, `bandpass`,
 `applycal`, `tclean`, ...) and simms 3.0's `skysim`/`telsim`/`primary-beam`

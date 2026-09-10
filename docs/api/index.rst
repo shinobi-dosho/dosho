@@ -13,14 +13,30 @@ Top-level package
 Registry (string-keyed lookup)
 ----------------------------------
 
+``dosho.get``/``dosho.list_cabs`` above are re-exports from here. The rest
+of this module is the ``shinobi.cabs`` provider protocol: ``get_document``
+(preferred -- hands shinobi the raw document, so nothing here parses it)
+and ``loader_options`` (the resolved image map the document names by key).
+
 .. automodule:: dosho.registry
+   :members:
+
+Container images
+--------------------
+
+The resolved image reference for every cab, and the per-deployment
+overrides that repoint one without editing ``dosho`` -- see
+:doc:`../concepts/authoring` for the manifest's own schema and the
+``dosho images`` build CLI.
+
+.. automodule:: dosho.images
    :members:
 
 Cab-authoring helper
 ------------------------
 
 ``dosho``'s own cabs are YAML documents (see
-:doc:`../concepts/authoring`), so nothing in this repository calls this.
+:doc:`../concepts/authoring`), so no cab in this repository uses this.
 It remains supported, and tested, for a downstream project that would
 rather define cabs in Python than maintain documents.
 
@@ -34,7 +50,8 @@ Every ``Cab``/pystep dosho ports, by name -- see
 how it is registered. A ``Cab``'s schema is in its document rather than a
 docstring, and the pystep modules explain each tool's provenance and any
 real-tool quirks preserved, so neither is documented one-by-one here;
-import or inspect them directly, e.g.:
+read them in the generated :doc:`cab catalog <../reference/cabs>`, or
+import and inspect them directly, e.g.:
 
 .. code-block:: python
 

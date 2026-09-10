@@ -11,11 +11,14 @@ sphinx:
   configuration: docs/conf.py
   fail_on_warning: false
 
-# Install the package itself (so autodoc can import `dosho`) plus the
-# documentation toolchain. Keep docs/requirements.txt in sync with the `docs`
-# dependency group in pyproject.toml.
+# Install the package itself plus the documentation toolchain. The `run` extra
+# is what pulls in shinobi: autodoc imports it, and the cab_catalog extension
+# builds every cab from the live registry. Keep docs/requirements.txt in sync
+# with the `docs` dependency group in pyproject.toml.
 python:
   install:
     - method: pip
       path: .
+      extra_requirements:
+        - run
     - requirements: docs/requirements.txt

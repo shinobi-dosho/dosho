@@ -1,7 +1,19 @@
 # dosho as a data registry: static cabs, optional shinobi
 
-**Status:** v3 — **partly implemented.** Steps 0, 1 and the comparator have
-landed; §9 step 3 is the gate; §8.1 should be answered before §9 step 5.
+**Status:** v3 — **implemented; kept as the record of why.** The design
+landed: cabs are documents, `shinobi` is the `dosho[run]` extra, and `import
+dosho` is shinobi-free (pinned by `tests/test_import_is_shinobi_free.py`).
+§9 steps 1–6 are done; step 0 is the one that was *not* taken — the
+`[tool.uv.sources]` redirect is still there, deliberately, and
+`pyproject.toml` now carries the verified reason it is safe to keep.
+
+Everything below is the design as argued at the time, including its
+file:line citations, its counts (42 binary cabs then, 61 now) and its
+sequencing. It is a historical record and is **not** maintained against the
+tree; for what the repository does today, read
+[`concepts/authoring.rst`](concepts/authoring.rst) and `AGENTS.md`. It is
+excluded from the Sphinx build for that reason.
+
 **Context:** spans this repo and stimela-ninja (`shinobi`). §9 marks which steps
 land where.
 

@@ -1,8 +1,9 @@
 """Sphinx configuration for the dosho documentation.
 
-Autodoc imports the ``dosho`` package (and, transitively, ``shinobi``), so
-the build environment must have both installed (``uv sync --group docs``
-locally; Read the Docs installs them via ``.readthedocs.yaml`` /
+Autodoc imports the ``dosho`` package, and the ``cab_catalog`` extension
+builds every cab, so the build environment needs shinobi as well as dosho --
+i.e. dosho's ``run`` extra (``uv sync --extra run --group docs`` locally;
+Read the Docs installs it via ``.readthedocs.yaml`` /
 ``docs/requirements.txt``). The package lives under ``src/``, added to
 sys.path below so an editable/uninstalled checkout also builds.
 """
@@ -50,7 +51,7 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
-    "design_data_registry.md",
+    "design_*.md",
 ]
 
 # Treat warnings as build-relevant but don't fail the build on missing

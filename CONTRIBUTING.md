@@ -42,13 +42,13 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
 ## Development setup
 
 The project uses [uv](https://docs.astral.sh/uv/). `stimela-ninja` is
-published on PyPI, so a plain `uv sync` resolves it like any other
-dependency:
+dosho's `run` extra rather than a hard dependency, and the test suite
+builds real cabs -- so a development sync needs `--extra run`:
 
 ```bash
 git clone https://github.com/shinobi-dosho/dosho.git
 cd dosho
-uv sync --group dev
+uv sync --extra run --group dev
 uv run pytest
 uv run ruff check .
 
@@ -56,9 +56,12 @@ uv run ruff check .
 git config core.hooksPath .githooks
 ```
 
-If you're working against an unreleased `stimela-ninja` change, clone
-it next to this repo and layer it in for the duration of a command with
-`uv run --with-editable ../stimela-ninja -- <command>` instead.
+A development checkout resolves `stimela-ninja` from its `main` branch
+rather than the last PyPI release -- `[tool.uv.sources]` in
+`pyproject.toml` says so, and explains why that is safe to carry -- which
+is what lets a cab use a schema feature the day it lands. `uv.lock` pins
+the commit, so it does not follow `main` on its own; refresh it with
+`uv lock --upgrade-package stimela-ninja`.
 
 ### The pre-commit hook
 
@@ -110,11 +113,17 @@ actually dispatch/execute them.
 
 ## Documentation
 
+The build imports both `dosho` and shinobi -- autodoc needs the first,
+the cab-catalog extension builds every cab with the second -- so it needs
+the `run` extra too:
+
 ```bash
-uv sync --group docs
+uv sync --extra run --group docs
 uv run sphinx-build -b html docs docs/_build/html
 open docs/_build/html/index.html
 ```
+
+CI builds with `-W`, so a warning is a failure.
 
 ## Pull requests
 

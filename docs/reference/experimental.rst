@@ -13,13 +13,16 @@ shows up in three places:
 
 * ``ninja cabs list`` / ``ninja cabs show`` and the :doc:`cab catalog <cabs>`,
   where the cab's description begins with ``EXPERIMENTAL:``;
-* a ``UserWarning`` the first time :func:`dosho.get` resolves the name, quoting
-  the reason and the unsupported modes;
+* a ``UserWarning`` the first time the name is resolved, quoting the reason and
+  the unsupported modes;
 * this page.
 
-Fetching one by direct import (``from dosho.cabs import ddfacet``) skips the
-warning -- there is no hook to fire on an attribute access -- so the reason is
-carried on the cab's own ``info`` as well.
+The warning fires once per name per process, from :func:`dosho.get` -- and so
+also from a direct ``from dosho.cabs import ddfacet``, which resolves through
+the same function. It is a ``UserWarning``, so ``python -W ignore::UserWarning``
+or a :func:`warnings.catch_warnings` block silences it; the reason is carried on
+the cab's own ``info`` as well, which is what reaches ``ninja cabs show`` and the
+catalog.
 
 Why a tool ends up here
 -----------------------
@@ -31,9 +34,9 @@ the tool's own code. Where that fails, every gap an audit turns up is a patch
 dosho would carry forever for a tool it does not control, and the burden
 accumulates quietly. dosho states the limitation instead.
 
-Both cabs below have their I/O fully declared -- products as output fields and
-``harvest`` globs, caches and logs as ``scratch`` (mounted, never rescued into
-your workspace). **Nothing is silently lost.** What is left in each case is a
+Both cabs below have their I/O fully declared -- products as output fields
+(plus, for ``ddfacet``, a ``harvest`` glob), caches and logs as ``scratch``
+(mounted, never rescued into your workspace). **Nothing is silently lost.** What is left in each case is a
 wiring limitation, plus the standing expectation that an upstream release may
 move the schema under the cab.
 

@@ -96,12 +96,17 @@ def _warn_if_experimental(name: str) -> None:
     """Warn, once per name per process, that a cab is experimental and which
     modes it doesn't cover.
 
-    `get()` is the hook because it is where a name becomes a cab -- for the
-    CLI, for `shinobi.cabs` discovery, and for any recipe built by name. A
-    direct `from dosho.cabs import ddfacet` bypasses it, which is why the
-    marker also rides on the cab's own `info` (see `_builder.define_cab`):
-    warning at construction time instead would fire for every importer of
-    `dosho.cabs`, which builds every cab in the repo.
+    Resolution is the hook, because that is where a name becomes a cab: `get()`
+    -- for the CLI, for `shinobi.cabs` discovery, for any recipe built by name,
+    and for `dosho.cabs.__getattr__`, which routes through the same function, so
+    a direct `from dosho.cabs import ddfacet` warns too -- and `get_document()`,
+    for the provider protocol's document path. Warning at cab *construction*
+    time instead would fire for every cab in the repo at once, which is what the
+    catalog generator does.
+
+    The marker also rides on the cab's own `info` (see `_builder.define_cab`),
+    for a reader that resolves no name at all: anything reading a built cab's
+    description, `ninja cabs show` and the catalog page included.
     """
     reason = _index().get(name, {}).get("experimental")
     if reason is None or name in _warned_experimental:
