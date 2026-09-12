@@ -62,3 +62,7 @@ binary -- CASA tasks (`listobs`, `mstransform`, `gaincal`, `bandpass`,
 (pysteps as of simms 3.0, no longer a `simms` sub-command binary) -- the
 set a real pipeline
 ([caracal2](https://github.com/caracal-pipeline/caracal2)) needs.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

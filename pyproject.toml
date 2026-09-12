@@ -7,7 +7,8 @@ name = "dosho"
 version = "0.1.0b4"
 description = "A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11"
 authors = [
     { name = "Sphesihle Makhathini", email = "sphemakh@gmail.com" },
@@ -84,6 +85,7 @@ include = [
     "/src/dosho",
     "/README.md",
     "/LICENSE",
+    "/NOTICE",
     "/AGENTS.md",
     "/CONTRIBUTING.md",
     "/pyproject.toml",
