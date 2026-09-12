@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: dosho
+type: software
+authors:
+- family-names: Makhathini
+  given-names: Sphesihle
+  email: sphemakh@gmail.com
+  orcid: https://orcid.org/0000-0001-9565-9622
+abstract: A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository
+version: 0.1.0b4
+keywords:
+- radio astronomy
+- pipelines
+license: Apache-2.0
+repository-code: https://github.com/shinobi-dosho/dosho
+url: https://github.com/shinobi-dosho/dosho
