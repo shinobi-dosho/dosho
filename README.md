@@ -1,10 +1,5 @@
 # dosho
 
-Please acknowledge this project and its contributors when using the work
-in research, and cite the associated publications and software release
-where applicable. This is a scholarly request, not an additional licence
-condition.
-
 *A shinobi's tool bag.*
 
 `dosho` is the native cab repository for
@@ -17,6 +12,13 @@ with no standalone binary (CASA tasks, simms 3.0's
 carries it, so there's no `dynamic_schema`-style Python-execution step at
 cab-load time, no expression language, and no dtype coverage gaps.
 
+## Academic ethinal standards apply
+Please acknowledge this project and its contributors when using the work
+in research, and cite the associated publications and software release
+where applicable. This is a scholarly request, not an additional licence
+condition. Citation information can be found in [CITIATION](link-to-citation-md).
+
+
 ## Installing
 
 ```
@@ -27,9 +29,6 @@ pip install dosho[run]     # ...plus stimela-ninja, to build and run them
 The definitions are data — YAML documents under `dosho/documents/`, readable
 without the framework. `dosho.cabs.<tool>` and `dosho.get(...)` turn one into a
 `Cab`, which needs the `run` extra.
-
-See [`AGENTS.md`](./AGENTS.md) for the design rationale and
-tool-authoring conventions.
 
 ## Usage
 
@@ -55,18 +54,6 @@ provider, `dosho` included):
 $ ninja cabs list
 $ ninja cabs show wsclean
 ```
-
-## Status
-
-`dosho` currently hosts 61 real-binary `Cab`s (`wsclean`, `cubical`,
-`quartical`, `ddfacet`, `killms`, `aoflagger`, `tricolour`, `crystalball`,
-`shadems`, `ragavi`, `sofia2`, `mosaic-queen`, classic `simms`, ...) and 68
-`@shinobi.pystep` wrappers around Python-package tools with no standalone
-binary -- CASA tasks (`listobs`, `mstransform`, `gaincal`, `bandpass`,
-`applycal`, `tclean`, ...) and simms 3.0's `skysim`/`telsim`/`primary-beam`
-(pysteps as of simms 3.0, no longer a `simms` sub-command binary) -- the
-set a real pipeline
-([caracal2](https://github.com/caracal-pipeline/caracal2)) needs.
 
 ## License
 
