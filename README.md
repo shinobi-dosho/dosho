@@ -12,12 +12,13 @@ with no standalone binary (CASA tasks, simms 3.0's
 carries it, so there's no `dynamic_schema`-style Python-execution step at
 cab-load time, no expression language, and no dtype coverage gaps.
 
-## Academic ethinal standards apply
+## Academic attribution
+
 Please acknowledge this project and its contributors when using the work
 in research, and cite the associated publications and software release
 where applicable. This is a scholarly request, not an additional licence
-condition. Citation information can be found in [CITIATION](link-to-citation-md).
-
+condition.
+Citation information can be found in [CITATION.md](CITATION.md).
 
 ## Installing
 

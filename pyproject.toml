@@ -86,6 +86,7 @@ include = [
     "/README.md",
     "/LICENSE",
     "/NOTICE",
+    "/CITATION.md",
     "/AGENTS.md",
     "/CONTRIBUTING.md",
     "/pyproject.toml",
