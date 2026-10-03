@@ -18,7 +18,8 @@ from __future__ import annotations
 import re
 import warnings
 from pathlib import Path
-from typing import Any
+from types import UnionType
+from typing import Annotated, Any, Union, get_args, get_origin
 
 _SECTIONS = ("Args:", "Arguments:", "Returns:", "Yields:", "Raises:", "Parameters:")
 
@@ -62,7 +63,26 @@ def _summary(info: str | None) -> str:
     return " ".join(out)
 
 
-def _type_name(annotation: Any) -> str:
+# shinobi's strict dataset annotations, by their declared kind. A strict
+# field's annotation is a plain `Path` with the declaration in its metadata, so
+# without this the catalog would print `Path` for an `MSv2` and hide the one
+# thing that distinguishes it from a path-only `MS`.
+_DATASET_LABELS = {"measurement-set-v2": "MSv2", "casa-table": "CasaTab"}
+
+
+def _dataset_label(metadata: Any) -> str | None:
+    """`"MSv2"`/`"CasaTab"` when `metadata` carries a strict dataset
+    declaration, else None. Duck-typed on `.kind.value` rather than importing
+    shinobi's `DatasetType`, so the extension still renders a catalog for a
+    shinobi without one."""
+    for item in metadata:
+        kind = getattr(getattr(item, "kind", None), "value", None)
+        if kind in _DATASET_LABELS:
+            return _DATASET_LABELS[kind]
+    return None
+
+
+def _type_name(annotation: Any, metadata: tuple = ()) -> str:
     """Version-stable rendering of a field annotation. `__name__` is only
     trusted for plain classes: for parameterized/union annotations it
     varies by Python version (3.10 presents `list[X] | None` as
@@ -71,7 +91,21 @@ def _type_name(annotation: Any) -> str:
     it -- the committed copy is diffed against a fresh regeneration by
     the freshness gates (CI, pre-commit, pytest). `Optional[X]` is
     normalised to the `X | None` spelling 3.11+ produces natively.
+
+    A strict dataset field renders as its shinobi name (`MSv2`), whether
+    pydantic moved the declaration onto the field's `metadata` (a required
+    field) or left it `Annotated` inside a union (`MSv2 | None`).
     """
+    label = _dataset_label(metadata)
+    if label:
+        return label
+    if get_origin(annotation) is Annotated:
+        return _dataset_label(annotation.__metadata__) or _type_name(get_args(annotation)[0])
+    args = get_args(annotation)
+    if get_origin(annotation) in (Union, UnionType) and any(
+        get_origin(arg) is Annotated for arg in args
+    ):
+        return " | ".join("None" if arg is type(None) else _type_name(arg) for arg in args)
     # The __args__ guard matters on <=3.10, where a parameterized generic
     # like `list[Path]` still passes isinstance(..., type) (its __name__ is
     # a bare "list"); 3.11+ made those fail the isinstance check.
@@ -124,7 +158,7 @@ def _field_table(model: Any, with_default: bool) -> list[str]:
     lines.append("   * - " + header[0])
     lines += [f"     - {h}" for h in header[1:]]
     for name, field in model.model_fields.items():
-        row = [f"``{name}``", f"``{_type_name(field.annotation)}``"]
+        row = [f"``{name}``", f"``{_type_name(field.annotation, tuple(field.metadata))}``"]
         if with_default:
             row.append("*required*" if field.is_required() else f"``{field.default!r}``")
         row.append(_rst_cell(field.description or ""))

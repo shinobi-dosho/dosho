@@ -2,15 +2,16 @@ cabs:
   msutils-flags-backup:
     command: msutils flags backup
     image: MSUTILS
-    info: 'msutils flags backup: save an MS''s current flags as a named version'
+    info: 'msutils flags backup: save an MS''s current flags as a named version. Run it with
+      `cache=False`: the saved version is not a declared output, so a cache hit skips the step even
+      when <ms>.flagversions has been deleted (stimela-ninja#180).'
     inputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         required: true
         info: Measurement set whose flags to save
         policies:
           positional: true
-        mutable: true
       name:
         dtype: str
         info: 'Version name [default: a timestamp]. Give one whenever a later step has to restore it
@@ -21,7 +22,16 @@ cabs:
       overwrite:
         dtype: bool
         info: Replace a version of this name.
-    outputs:
-      ms:
-        dtype: MS
-        info: Measurement set carrying the saved flag version
+    # A reader: backup never writes the MS itself, so `ms` is neither mutable
+    # (a mutable field may not declare only a read) nor echoed as an output (a
+    # same-named output makes it a filesystem write). Nor can <ms>.flagversions
+    # be an output: shinobi clears a declared output before each run, which
+    # would delete every saved version. Undeclared, it is invisible to the
+    # cache -- hence the `cache=False` advice in `info` until the document can
+    # say `cache: false` itself (stimela-ninja#180).
+    dataset_accesses:
+      # msutils flags.py: reads FLAG and FLAG_ROW, copies them to <ms>.flagversions/ beside the MS.
+      - field: ms
+        mode: read
+        columns:
+          read: [FLAG, FLAG_ROW]

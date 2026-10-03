@@ -5,9 +5,11 @@ cabs:
     info: Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
     inputs:
       ms:
-        dtype: MS
+        dtype: MSv2
+        required: true
         policies:
           positional: true
+        mutable: true
       config:
         dtype: File
       ignore-flags:
@@ -39,6 +41,12 @@ cabs:
         dtype: str
     outputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         policies:
           positional: true
+    dataset_accesses:
+      # Columns unset (whole dataset): the columns read are the `data-column`
+      # and `subtract-model-column` parameters, which a static list cannot
+      # follow (stimela-ninja#176). tricolour 0.2.1 writes MAIN.FLAG only.
+      - field: ms
+        mode: write

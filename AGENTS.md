@@ -208,6 +208,8 @@ tests/
   test_documents.py  # every document loads, resolves its image, declares a
                       # dtype; index and documents agree about what exists
   test_registry.py
+  test_dataset_contracts.py  # the strict MSv2 set and each cab's exact
+                              # dataset_accesses; planning without casacore
   test_<tool>.py     # per ported tool: round-trip through build_argv for a
                       # Cab, inputs_model/Recipe wiring for a pystep
 docs/_ext/cab_catalog.py  # generates docs/reference/cabs.rst from the live
@@ -246,6 +248,36 @@ ported tool gets a test: for a `Cab`, round-trip a representative param
 set through `build_argv` and check the real CLI token shape; for a
 pystep, check its `inputs_model` schema shape and that it wires into a
 `Recipe` -- not just that the object constructs without error.
+
+## Strict MeasurementSet contracts
+
+An MS field typed `MSv2` (YAML `dtype: MSv2`) plus a cab-level
+`dataset_accesses` list makes a cab **strict**: shinobi plans, claims,
+snapshots and checks that MS around the step instead of passing an opaque
+path. `dtype: MS` stays path-only. Conversion is opt-in per cab, and the
+strict set is listed in `tests/test_dataset_contracts.py`, which fails until
+a new contract is recorded there.
+
+Strict is not free. shinobi refuses a strict contract under scatter, in a
+nested recipe, through the legacy argv compiler, and on the `slurm` step and
+`kubernetes` backends. Within one recipe a strict MS is wired from one recipe
+input (`InputRef`) into every step that touches it: it cannot reach a strict
+input through an `OutputRef`, nor be handed to a path-only cab. So convert a
+cab only when its pipeline partners can be strict too -- that is why imaging
+after `simms` waits for stimela-ninja#177.
+
+Writing one:
+
+- `columns` is complete or unset. A column list is a promise about every
+  column the tool touches; where those are parameters (`data-column`,
+  skysim's `column`) leave it unset, which means the whole dataset
+  (stimela-ninja#176).
+- A writer is `mutable: true` with an `MSv2` passthrough output of the same
+  name. A reader is neither -- shinobi reads either as a write and refuses a
+  read contract that contradicts it (`msutils-flags-backup`).
+- Every non-MAIN table the tool touches must be declared, since shinobi checks
+  the tables a writer changed against the ones it declared. aoflagger stays
+  path-only because it writes its `QUALITY_*` statistics subtables.
 
 ## Attribution: commit trailers yes, PR trailers no
 

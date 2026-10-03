@@ -155,7 +155,6 @@ NOT_DESTINATIONS = {
             ("msutils-addnoise", "ms"),
             ("msutils-copycol", "ms"),
             ("msutils-delcol", "ms"),
-            ("msutils-flags-backup", "ms"),
             ("msutils-flags-delete", "ms"),
             ("msutils-flags-restore", "ms"),
             ("msutils-renamecol", "ms"),

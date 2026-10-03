@@ -125,6 +125,47 @@ rescued into your workspace -- caches, logs, wisdom files. See
    without maintaining documents. It is simply not how this repository
    describes its own.
 
+Strict MeasurementSet contracts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``dtype: MS`` is a plain path. ``dtype: MSv2`` with a cab-level
+``dataset_accesses`` list makes the cab *strict*: shinobi plans, claims,
+snapshots and checks the MS around the step, from what the cab says it
+reads and writes. ``msutils-flags-restore`` is the shape of a writer:
+
+.. code-block:: yaml
+
+    inputs:
+      ms:
+        dtype: MSv2
+        required: true
+        mutable: true
+    outputs:
+      ms:
+        dtype: MSv2
+    dataset_accesses:
+      - field: ms
+        mode: write
+        columns:
+          write: [FLAG, FLAG_ROW]
+
+A reader (``msutils-flags-backup``) declares ``mode: read`` and is neither
+``mutable`` nor echoed as an output. ``columns`` is complete or left out;
+left out means the whole dataset. Strict steps are wired from one recipe
+input rather than an ``OutputRef``, and a strict MS cannot be handed to a
+path-only cab in the same recipe, so only a handful of cabs are strict
+today -- ``tests/test_dataset_contracts.py`` lists them.
+
+A side effect outside the MS that is not a declared output is invisible to
+shinobi's step cache. ``msutils-flags-backup`` writes ``<ms>.flagversions``,
+which cannot be declared (a declared output is cleared before each run, which
+would delete every saved version), so a cache hit skips it even when that
+directory is gone. Run the backup step with ``cache=False`` until a document
+can say ``cache: false`` itself (stimela-ninja#180). See shinobi's
+`datasets documentation
+<https://stimela-ninja.readthedocs.io/en/latest/concepts/datasets.html>`_
+for the modes, the planner and the execution routes that support them.
+
 Choices and CLI abbreviations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

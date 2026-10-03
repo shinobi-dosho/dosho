@@ -54,7 +54,6 @@ IN_PLACE = [
     "msutils-renamecol",
     "msutils-sumcols",
     "msutils-addnoise",
-    "msutils-flags-backup",
     "msutils-flags-restore",
     "msutils-flags-delete",
 ]
@@ -82,6 +81,17 @@ def test_an_ms_changed_in_place_is_declared_mutable(name):
     pipeline sees nothing.
     """
     assert dosho.get(name).mutability_of("ms") is Mutability.MUTABLE
+
+
+def test_flags_backup_is_a_reader():
+    """`flags backup` reads FLAG/FLAG_ROW and writes `<ms>.flagversions/`
+    beside the MS, never the MS itself. Its strict read contract depends on
+    both of these: a mutable `ms`, or an `ms` output echoing the input, is a
+    write, and shinobi refuses a read contract that contradicts one.
+    """
+    cab = dosho.get("msutils-flags-backup")
+    assert cab.mutability_of("ms") is Mutability.IMMUTABLE
+    assert "ms" not in cab.outputs_model.model_fields
 
 
 def test_flags_subcommands_are_three_argv_tokens():

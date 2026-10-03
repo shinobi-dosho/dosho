@@ -8134,7 +8134,7 @@ msutils du: report where an MS's bytes are, by storage manager and subtable
 msutils-flags-backup
 --------------------
 
-msutils flags backup: save an MS's current flags as a named version
+msutils flags backup: save an MS's current flags as a named version. Run it with `cache=False`: the saved version is not a declared output, so a cache hit skips the step even when <ms>.flagversions has been deleted (stimela-ninja#180).
 
 :Command: ``msutils flags backup``
 :Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
@@ -8151,7 +8151,7 @@ msutils flags backup: save an MS's current flags as a named version
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``name``
@@ -8169,16 +8169,7 @@ msutils flags backup: save an MS's current flags as a named version
 
 **Outputs**
 
-.. list-table::
-   :header-rows: 1
-   :widths: 30 25 45
-
-   * - Field
-     - Type
-     - Description
-   * - ``ms``
-     - ``Path | None``
-     - \-
+*(none)*
 
 msutils-flags-delete
 --------------------
@@ -8269,7 +8260,7 @@ msutils flags restore: restore an MS's flags from a saved version
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``name``
@@ -8287,7 +8278,7 @@ msutils flags restore: restore an MS's flags from a saved version
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 msutils-flagstats
@@ -11766,7 +11757,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - Measurement set.
    * - ``ascii_sky``
@@ -11932,7 +11923,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 simms-telsim
@@ -11954,7 +11945,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - Observation name/id/label
    * - ``telescope``
@@ -12072,7 +12063,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 smoothcal
@@ -14038,8 +14029,8 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - Default
      - Description
    * - ``ms``
-     - ``Path | None``
-     - ``None``
+     - ``MSv2``
+     - *required*
      - \-
    * - ``config``
      - ``Path | None``
@@ -14108,7 +14099,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 uvcontsub
