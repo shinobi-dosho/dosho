@@ -6,11 +6,13 @@ implicit-template outputs against real WSClean CLI conventions.
 """
 
 from shinobi.backends.recording import RecordingBackend
+from shinobi.loaders import yaml_cab
 from shinobi.policies import build_argv
 from shinobi.steps import register_step_backend
 from shinobi.steps.dispatch import _dispatch
 
 import dosho
+from dosho import registry
 
 
 def _cab():
@@ -71,8 +73,21 @@ def test_data_column_default_column_flag_is_data_column_not_column():
     assert cab.field_meta["column"].nom_de_guerre == "data-column"
 
 
+def _path_only_cab():
+    """The same document with its strict MS contract taken out. A recording
+    backend has no dataset lifecycle, so shinobi rightly refuses to dispatch
+    the strict cab to it; the output templates under test do not depend on
+    the MS contract either way."""
+    _, text = registry.get_document("wsclean")
+    text = text.replace("dtype: List[MSv2]", "dtype: List[MS]", 1)
+    start = text.index("    dataset_accesses:\n")
+    end = text.index("    output_patterns:\n")
+    return yaml_cab.loads(text[:start] + text[end:], **registry.loader_options())["wsclean"]
+
+
 def test_implicit_output_templates_resolve_against_prepared_prefix():
-    cab = _cab().model_copy(update={"backend": "wsclean-record"})
+    cab = _path_only_cab().model_copy(update={"backend": "wsclean-record"})
+    assert not cab.dataset_accesses
     register_step_backend("wsclean-record", RecordingBackend())
     result = _dispatch(cab, None, ms=["obs.ms"], prefix="deep", size=(4096, 4096), scale="1.3asec")
     assert str(result.outputs.image) == "deep-image.fits"

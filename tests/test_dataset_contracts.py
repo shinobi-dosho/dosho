@@ -29,24 +29,59 @@ from shinobi.dataset_access import (
 from shinobi.datasets import DatasetKind, dataset_declarations
 from shinobi.loaders import yaml_cab
 from shinobi.loaders.yaml_cab import CabLoadError
-from shinobi.steps.schema import Cab, InputRef, Mutability, StepRef, mutated_path_fields
+from shinobi.steps.schema import Cab, InputRef, Mutability, OutputRef, StepRef, mutated_path_fields
 
 from dosho import registry
 
 FLAGS = DatasetColumns(write=("FLAG", "FLAG_ROW"))
 
-# The exact declaration each strict cab carries. Column lists appear only
-# where they are complete; a cab whose columns are parameters declares none
-# (stimela-ninja#176), which shinobi reads as the whole dataset.
+AOFLAGGER_STATISTICS = (
+    "QUALITY_KIND_NAME",
+    "QUALITY_TIME_STATISTIC",
+    "QUALITY_FREQUENCY_STATISTIC",
+    "QUALITY_BASELINE_STATISTIC",
+)
+
+# The exact declaration each strict cab carries. A column chosen by a
+# parameter is a template over the cab's own input; a cab whose column set
+# varies with flags shinobi cannot see (wsclean) declares none, which shinobi
+# reads as the whole dataset.
 CONTRACTS: dict[str, list[DatasetAccess]] = {
     "simms-telsim": [DatasetAccess(field="ms", mode="create")],
-    "simms-skysim": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
+    "simms-skysim": [
+        DatasetAccess(
+            field="ms",
+            mode="write",
+            columns=DatasetColumns(create=("{column}",)),
+            allow_schema_change=True,
+        )
+    ],
     "msutils-flags-backup": [
         DatasetAccess(field="ms", mode="read", columns=DatasetColumns(read=("FLAG", "FLAG_ROW")))
     ],
     "msutils-flags-restore": [DatasetAccess(field="ms", mode="write", columns=FLAGS)],
-    "tricolour": [DatasetAccess(field="ms", mode="write")],
+    "tricolour": [
+        DatasetAccess(
+            field="ms",
+            mode="write",
+            columns=DatasetColumns(read=("{data_column}",), write=("FLAG",)),
+        )
+    ],
+    "aoflagger": [
+        DatasetAccess(
+            field="msname",
+            mode="write",
+            columns=DatasetColumns(read=("{column}",), write=("FLAG",)),
+            allow_present_subtable_rewrite=True,
+            allow_subtable_change=AOFLAGGER_STATISTICS,
+        ),
+        DatasetAccess(field="msname", mode="write", table="HISTORY", allow_row_count_change=True),
+    ],
+    "wsclean": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
 }
+
+# Cabs that must never be skipped by the step cache (see the document).
+UNCACHED = {"msutils-flags-backup"}
 
 
 def _scope(cab):
@@ -86,19 +121,24 @@ def assert_strict(scope, expected: list[DatasetAccess]) -> None:
     mutated = mutated_path_fields(scope)
     for access in expected:
         field = access.field
-        assert field in inputs, f"{scope.name}.{field} is not a strict input"
-        assert inputs[field].kind is DatasetKind.MEASUREMENT_SET_V2
+        # A list field's declaration is keyed by its element path.
+        listed = f"{field}[]" in inputs
+        key = f"{field}[]" if listed else field
+        assert key in inputs, f"{scope.name}.{field} is not a strict input"
+        assert inputs[key].kind is DatasetKind.MEASUREMENT_SET_V2
         if field in scope.outputs_model.model_fields:
-            assert field in outputs, f"{scope.name}.{field} output is not strict"
-            assert outputs[field].kind is DatasetKind.MEASUREMENT_SET_V2
+            assert key in outputs, f"{scope.name}.{field} output is not strict"
+            assert outputs[key].kind is DatasetKind.MEASUREMENT_SET_V2
         # A filesystem write -- dual declaration, MUTABLE or a write access --
         # exactly when the contract is not a read.
         assert (field in mutated) is (access.mode.value != "read")
         if isinstance(scope, Cab):
-            # Documents spell a writer `mutable: true`; a reader or a creator
-            # is not mutable (a mutable field may not declare only a read).
+            # Documents spell a scalar writer `mutable: true`; a reader or a
+            # creator is not mutable (a mutable field may not declare only a
+            # read), and shinobi refuses MUTABLE on a list writer.
             mutable = scope.mutability_of(field) is Mutability.MUTABLE
-            assert mutable is (access.mode.value == "write")
+            assert mutable is (access.mode.value == "write" and not listed)
+    assert (scope.cache is False) is (scope.name in UNCACHED)
 
 
 def test_strict_set_is_exactly_contracted():
@@ -178,7 +218,7 @@ def no_closure(monkeypatch):
 
 def _pipeline(backup: Cab) -> Recipe:
     """telsim -> flags backup -> tricolour -> flags restore, every step wired
-    from the one recipe input, as strict steps have to be."""
+    from the one recipe input, so every ordering edge is an access hazard."""
     ms = InputRef(field="ms")
     recipe = Recipe(name="strict-flagging", inputs_model=_MS, outputs_model=_Empty)
     recipe.add_step("sim", registry.get("simms-telsim"), ms=ms, telescope="meerkat")
@@ -209,7 +249,7 @@ def test_a_strict_flagging_pipeline_plans_in_order(no_closure, tmp_path):
     # shinobi inferred, each with the reason it gives.
     assert plan.reasons == {
         ("backup", "sim"): ("read-after-write: sim.ms, MAIN.FLAG",),
-        ("flag", "backup"): ("write-after-read: sim.ms",),
+        ("flag", "backup"): ("write-after-read: sim.ms, MAIN.FLAG",),
         ("restore", "flag"): ("write-after-write: sim.ms, MAIN.FLAG",),
     }
     names = plan.graph.names
@@ -247,3 +287,39 @@ def test_telsim_declared_as_a_reader_is_refused(no_closure, tmp_path):
     recipe.add_step("resim", reader, ms=ms, telescope="meerkat")
     with pytest.raises(DatasetAccessError, match="declares READ access"):
         plan_recipe_accesses(recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
+
+
+def test_a_simulate_flag_image_chain_plans_through_output_refs(no_closure, tmp_path):
+    """The Paper I shape, with lineage: each strict step takes the MS from its
+    producer's passthrough output, and wsclean takes a list of one."""
+    recipe = Recipe(name="simulate-image", inputs_model=_MS, outputs_model=_Empty)
+    recipe.add_step(
+        "sim", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+    )
+    recipe.add_step("sky", registry.get("simms-skysim"), ms=OutputRef(step="sim", field="ms"))
+    recipe.add_step("flag", registry.get("aoflagger"), msname=OutputRef(step="sky", field="ms"))
+    recipe.add_step(
+        "image",
+        registry.get("wsclean"),
+        ms=[OutputRef(step="flag", field="msname")],
+        prefix=str(tmp_path / "img"),
+    )
+    plan = plan_recipe_accesses(recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
+
+    modes = {
+        step: [(a.mode.value, a.declaration.table.value) for a in accesses]
+        for step, accesses in plan.accesses.items()
+    }
+    assert modes == {
+        "sim": [("create", "MAIN")],
+        "sky": [("write", "MAIN")],
+        "flag": [("write", "MAIN"), ("write", "HISTORY")],
+        "image": [("write", "MAIN")],
+    }
+    # Every step resolved the one MS the recipe named, through its producer.
+    roots = {a.root for accesses in plan.accesses.values() for a in accesses}
+    assert roots == {(tmp_path / "sim.ms").resolve()}
+    # Templates resolve against each step's own inputs: the defaults here.
+    [sky] = plan.accesses["sky"]
+    assert sky.declaration.columns.create == ("DATA",)
+    assert plan.accesses["flag"][0].declaration.columns.read == ("DATA",)

@@ -41,6 +41,10 @@ def test_aoflagger_single_dash_cli():
     assert argv[0] == "aoflagger"
     assert "-v" in argv
     assert "-j" in argv and "4" in argv
+    # The MS is aoflagger's trailing positional argument; `-msname` is not
+    # an option it knows (it exits 10, "parameter not understood").
+    assert argv[-1] == "/x.ms"
+    assert "-msname" not in argv
 
 
 def test_tricolour_positional_ms_and_double_dash_flags():
@@ -684,11 +688,13 @@ def test_spimple_output_filename_is_a_prefix_not_a_directory():
     assert "--output-filename" in argv and "/out/beam.fits" in argv
 
 
-def test_spimple_binterp_output_passes_the_input_value_through():
+def test_spimple_binterp_output_passes_the_input_value_through(tmp_path):
+    # Under tmp_path: dispatch creates a declared output's parent before launch.
     cab = dosho.get("spimple-binterp").model_copy(update={"backend": "spimple-record"})
     register_step_backend("spimple-record", RecordingBackend())
-    result = _dispatch(cab, None, image="/img.fits", output_filename="/out/beam.fits")
-    assert str(result.outputs.output_filename) == "/out/beam.fits"
+    beam = tmp_path / "out" / "beam.fits"
+    result = _dispatch(cab, None, image="/img.fits", output_filename=str(beam))
+    assert str(result.outputs.output_filename) == str(beam)
 
 
 def test_spimple_imconv_products_resolve_to_the_suffixes_the_tool_writes():
@@ -730,18 +736,25 @@ def test_spimple_spifit_products_resolve_to_the_suffixes_the_tool_writes():
     assert "residual" not in cab.outputs_model.model_fields
 
 
-def test_sofia2_every_moment_map_resolves_not_just_mom2():
+def test_sofia2_every_moment_map_resolves_not_just_mom2(tmp_path, monkeypatch):
     # One `output.writeMoments` toggle writes four files; mom0/mom1 used to be
     # declared without a template, so they validated but never resolved.
+    # Under tmp_path: dispatch creates a declared output's parent before launch.
+    monkeypatch.chdir(tmp_path)  # one workspace for inputs, outputs and cwd
     cab = dosho.get("sofia2").model_copy(update={"backend": "sofia-record"})
     register_step_backend("sofia-record", RecordingBackend())
+    out = tmp_path / "out"
     result = _dispatch(
-        cab, None, input_data="/cube.fits", output_directory="/out", output_filename="run1"
+        cab,
+        None,
+        input_data=str(tmp_path / "cube.fits"),
+        output_directory=str(out),
+        output_filename="run1",
     )
-    assert str(result.outputs.mom0) == "/out/run1_mom0.fits"
-    assert str(result.outputs.mom1) == "/out/run1_mom1.fits"
-    assert str(result.outputs.mom2) == "/out/run1_mom2.fits"
-    assert str(result.outputs.chan_map) == "/out/run1_chan.fits"
+    assert str(result.outputs.mom0) == f"{out}/run1_mom0.fits"
+    assert str(result.outputs.mom1) == f"{out}/run1_mom1.fits"
+    assert str(result.outputs.mom2) == f"{out}/run1_mom2.fits"
+    assert str(result.outputs.chan_map) == f"{out}/run1_chan.fits"
 
 
 def test_spimple_spifit_model_and_residual_lists():

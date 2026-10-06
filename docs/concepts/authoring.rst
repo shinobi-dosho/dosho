@@ -150,18 +150,16 @@ reads and writes. ``msutils-flags-restore`` is the shape of a writer:
           write: [FLAG, FLAG_ROW]
 
 A reader (``msutils-flags-backup``) declares ``mode: read`` and is neither
-``mutable`` nor echoed as an output. ``columns`` is complete or left out;
-left out means the whole dataset. Strict steps are wired from one recipe
-input rather than an ``OutputRef``, and a strict MS cannot be handed to a
-path-only cab in the same recipe, so only a handful of cabs are strict
-today -- ``tests/test_dataset_contracts.py`` lists them.
+``mutable`` nor echoed as an output. A column chosen by a parameter is a
+template over the cab's own input, as in tricolour's ``read:
+["{data_column}"]``; ``columns`` left out means the whole dataset. A strict
+MS cannot be handed to a path-only cab in the same recipe, so only some cabs
+are strict -- ``tests/test_dataset_contracts.py`` lists them.
 
-A side effect outside the MS that is not a declared output is invisible to
-shinobi's step cache. ``msutils-flags-backup`` writes ``<ms>.flagversions``,
-which cannot be declared (a declared output is cleared before each run, which
-would delete every saved version), so a cache hit skips it even when that
-directory is gone. Run the backup step with ``cache=False`` until a document
-can say ``cache: false`` itself (stimela-ninja#180). See shinobi's
+``msutils-flags-backup`` also sets ``cache: false``: the version it saves in
+``<ms>.flagversions`` cannot be a declared output (a declared output is
+cleared before each run, which would delete every saved version), so a cache
+hit could not notice that directory had gone. See shinobi's
 `datasets documentation
 <https://stimela-ninja.readthedocs.io/en/latest/concepts/datasets.html>`_
 for the modes, the planner and the execution routes that support them.

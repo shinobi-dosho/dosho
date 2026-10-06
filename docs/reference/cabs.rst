@@ -601,7 +601,7 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
      - Default
      - Description
    * - ``msname``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``verbose``
@@ -659,7 +659,7 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
      - Type
      - Description
    * - ``msname``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 apparentsens
@@ -8134,7 +8134,7 @@ msutils du: report where an MS's bytes are, by storage manager and subtable
 msutils-flags-backup
 --------------------
 
-msutils flags backup: save an MS's current flags as a named version. Run it with `cache=False`: the saved version is not a declared output, so a cache hit skips the step even when <ms>.flagversions has been deleted (stimela-ninja#180).
+msutils flags backup: save an MS's current flags as a named version
 
 :Command: ``msutils flags backup``
 :Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
@@ -14062,7 +14062,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - \-
    * - ``data_column``
      - ``str | None``
-     - ``None``
+     - ``'DATA'``
      - \-
    * - ``field_names``
      - ``str | None``
@@ -14675,7 +14675,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Default
      - Description
    * - ``ms``
-     - ``list[Path]``
+     - ``list[Annotated[Path, DatasetType(kind=<MEASUREMENT_SET_V2: 'measurement-set-v2'>, profile='msv2-structural/v1'), WithJsonSchema(json_schema={'type': 'string', 'format': 'path', 'x-shinobi-dataset': {'kind': 'measurement-set-v2', 'profile': 'msv2-structural/v1'}}, mode=None)]]``
      - *required*
      - \-
    * - ``prefix``

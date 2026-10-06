@@ -9,6 +9,17 @@ cabs:
         _: '-'
     harvest:
     - '{prefix}-*'
+    dataset_accesses:
+      # One joint write over every MS in `ms`. WSClean writes `model-column`
+      # (MODEL_DATA) after deconvolution unless `no-update-model-required`, and
+      # on `predict`; a static contract cannot follow those flags, so every run
+      # is a writer. Columns are left unset (whole dataset) because a column
+      # named under `create` must exist afterwards -- a dirty-image run
+      # (niter=0) never writes MODEL_DATA -- and `store-imaging-weights` adds
+      # IMAGING_WEIGHT, which a known column list would refuse.
+      - field: ms
+        mode: write
+        allow_schema_change: true
     output_patterns:
     - segments:
       - attrs:
@@ -27,7 +38,7 @@ cabs:
       - regex: .+
     inputs:
       ms:
-        dtype: List[MS]
+        dtype: List[MSv2]
         required: true
         policies:
           positional: true

@@ -260,24 +260,32 @@ a new contract is recorded there.
 
 Strict is not free. shinobi refuses a strict contract under scatter, in a
 nested recipe, through the legacy argv compiler, and on the `slurm` step and
-`kubernetes` backends. Within one recipe a strict MS is wired from one recipe
-input (`InputRef`) into every step that touches it: it cannot reach a strict
-input through an `OutputRef`, nor be handed to a path-only cab. So convert a
-cab only when its pipeline partners can be strict too -- that is why imaging
-after `simms` waits for stimela-ninja#177.
+`kubernetes` backends, and a strict MS cannot be handed to a path-only cab in
+the same recipe. So convert a cab only when its pipeline partners can be
+strict too.
 
 Writing one:
 
-- `columns` is complete or unset. A column list is a promise about every
-  column the tool touches; where those are parameters (`data-column`,
-  skysim's `column`) leave it unset, which means the whole dataset
-  (stimela-ninja#176).
-- A writer is `mutable: true` with an `MSv2` passthrough output of the same
-  name. A reader is neither -- shinobi reads either as a write and refuses a
-  read contract that contradicts it (`msutils-flags-backup`).
-- Every non-MAIN table the tool touches must be declared, since shinobi checks
-  the tables a writer changed against the ones it declared. aoflagger stays
-  path-only because it writes its `QUALITY_*` statistics subtables.
+- A column name that is a parameter is a template over the cab's own string
+  input: `read: ["{data_column}"]` (sanitized names). Give that input the
+  tool's own default, or an unset value drops the whole access to
+  whole-dataset intent. Leave out columns read only through an *optional*
+  input for the same reason; shinobi records reads but does not verify or
+  schedule on them.
+- A column under `create` must exist after every run. Where the tool only
+  sometimes writes or adds a column (wsclean's MODEL_DATA, IMAGING_WEIGHT),
+  leave `columns` unset with `allow_schema_change` -- the whole dataset.
+- A scalar writer is `mutable: true` with an `MSv2` passthrough output of the
+  same name. A `List[MSv2]` writer declares an explicit `write` and is not
+  `mutable`. A reader is neither -- shinobi reads mutability or a same-name
+  output as a write and refuses a read contract that contradicts it
+  (`msutils-flags-backup`).
+- Every table the tool changes is declared: a standard subtable as its own
+  access (aoflagger's HISTORY row), an opaque keyword-linked one through
+  `allow_subtable_change` on the MAIN access (aoflagger's `QUALITY_*`).
+- A side effect outside the MS that cannot be a declared output is invisible
+  to the step cache; such a reader sets `cache: false`
+  (`msutils-flags-backup`). A strict writer cannot.
 
 ## Attribution: commit trailers yes, PR trailers no
 
