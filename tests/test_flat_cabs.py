@@ -684,11 +684,12 @@ def test_spimple_output_filename_is_a_prefix_not_a_directory():
     assert "--output-filename" in argv and "/out/beam.fits" in argv
 
 
-def test_spimple_binterp_output_passes_the_input_value_through():
+def test_spimple_binterp_output_passes_the_input_value_through(tmp_path):
     cab = dosho.get("spimple-binterp").model_copy(update={"backend": "spimple-record"})
     register_step_backend("spimple-record", RecordingBackend())
-    result = _dispatch(cab, None, image="/img.fits", output_filename="/out/beam.fits")
-    assert str(result.outputs.output_filename) == "/out/beam.fits"
+    output = tmp_path / "beam.fits"
+    result = _dispatch(cab, None, image="/img.fits", output_filename=str(output))
+    assert str(result.outputs.output_filename) == str(output)
 
 
 def test_spimple_imconv_products_resolve_to_the_suffixes_the_tool_writes():
@@ -730,18 +731,19 @@ def test_spimple_spifit_products_resolve_to_the_suffixes_the_tool_writes():
     assert "residual" not in cab.outputs_model.model_fields
 
 
-def test_sofia2_every_moment_map_resolves_not_just_mom2():
+def test_sofia2_every_moment_map_resolves_not_just_mom2(tmp_path, monkeypatch):
     # One `output.writeMoments` toggle writes four files; mom0/mom1 used to be
     # declared without a template, so they validated but never resolved.
     cab = dosho.get("sofia2").model_copy(update={"backend": "sofia-record"})
     register_step_backend("sofia-record", RecordingBackend())
+    monkeypatch.chdir(tmp_path)
     result = _dispatch(
-        cab, None, input_data="/cube.fits", output_directory="/out", output_filename="run1"
+        cab, None, input_data="/cube.fits", output_directory=str(tmp_path), output_filename="run1"
     )
-    assert str(result.outputs.mom0) == "/out/run1_mom0.fits"
-    assert str(result.outputs.mom1) == "/out/run1_mom1.fits"
-    assert str(result.outputs.mom2) == "/out/run1_mom2.fits"
-    assert str(result.outputs.chan_map) == "/out/run1_chan.fits"
+    assert str(result.outputs.mom0) == str(tmp_path / "run1_mom0.fits")
+    assert str(result.outputs.mom1) == str(tmp_path / "run1_mom1.fits")
+    assert str(result.outputs.mom2) == str(tmp_path / "run1_mom2.fits")
+    assert str(result.outputs.chan_map) == str(tmp_path / "run1_chan.fits")
 
 
 def test_spimple_spifit_model_and_residual_lists():

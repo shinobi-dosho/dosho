@@ -10,10 +10,14 @@ real execution.
 """
 
 import contextlib
+import sys
+from importlib import import_module
 from pathlib import Path
+from types import ModuleType
 
+import pytest
 from pydantic import BaseModel
-from shinobi import Recipe
+from shinobi import ExecContext, Recipe
 
 import dosho
 from dosho import images
@@ -186,10 +190,11 @@ def test_every_pystep_body_quiets_casa_logging_before_importing_casatasks():
         assert src.index("_quiet_casa(ctx)") < src.index("ctx.import_func("), ref.name
 
 
-def test_quiet_casa_writes_site_config_and_redirects_casalog():
+@pytest.mark.parametrize("module", ["casatasks", "casaplotms"])
+def test_quiet_casa_writes_site_config_and_redirects_casalog(module, monkeypatch):
     import os
 
-    from dosho.cabs.casatasks import _quiet_casa
+    _quiet_casa = import_module("dosho.cabs." + module)._quiet_casa
 
     class FakeLog:
         def __init__(self):
@@ -198,27 +203,26 @@ def test_quiet_casa_writes_site_config_and_redirects_casalog():
         def setlogfile(self, path):
             self.logfile = path
 
-    class FakeCtx:
-        def __init__(self):
-            self.log = FakeLog()
-
-        def import_func(self, name, module):
-            assert (name, module) == ("casalog", "casatasks")
-            return self.log
+    # Exercise shinobi's real import API with CASA's non-callable logsink
+    # shape. A fake context could hide a change in import_func's behaviour.
+    casa = ModuleType("casatasks")
+    log = FakeLog()
+    casa.casalog = log
+    monkeypatch.setitem(sys.modules, "casatasks", casa)
+    ctx = ExecContext(listobs.step, {"vis": "obs.ms", "listfile": "obs.txt"})
 
     had = os.environ.pop("CASASITECONFIG", None)
     config = None
     try:
-        ctx = FakeCtx()
         _quiet_casa(ctx)
         config = os.environ["CASASITECONFIG"]
         with open(config) as f:
             content = f.read()
         assert "nologfile = True" in content
         assert "telemetry_enabled = False" in content
-        assert ctx.log.logfile == os.devnull
+        assert log.logfile == os.devnull
         # idempotent: a second call must not clobber an existing config
-        _quiet_casa(FakeCtx())
+        _quiet_casa(ctx)
         assert os.environ["CASASITECONFIG"] == config
     finally:
         os.environ.pop("CASASITECONFIG", None)
