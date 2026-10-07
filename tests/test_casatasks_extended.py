@@ -8,7 +8,11 @@ so these check schema shape and the in-place-mutation-as-output
 convention, not real execution.
 """
 
+import sys
 from pathlib import Path
+from types import ModuleType
+
+import pytest
 
 import dosho
 from dosho import images
@@ -230,9 +234,17 @@ class _StubLog:
         self.logfile = path
 
 
+@pytest.fixture
+def casa_logging(monkeypatch):
+    casa = ModuleType("casatasks")
+    casa.casalog = _StubLog()
+    monkeypatch.setitem(sys.modules, "casatasks", casa)
+    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+
+
 class _FakeCtx:
     """Enough of an ExecContext to drive a pystep body in-process: hands
-    `_quiet_casa` a stub casalog and every task a kwargs-swallowing stub.
+    every task a kwargs-swallowing stub; `casa_logging` supplies casalog.
     """
 
     def __init__(self, task_result=None):
@@ -248,16 +260,8 @@ class _FakeCtx:
 
         return task_fn
 
-    def import_module(self, module):
-        from types import SimpleNamespace
 
-        assert module == "casatasks"
-        return SimpleNamespace(casalog=_StubLog())
-
-
-def test_flagdata_declares_saved_params_file_as_output(monkeypatch):
-    # preset so _quiet_casa doesn't write a site-config file into the env
-    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+def test_flagdata_declares_saved_params_file_as_output(casa_logging):
     from dosho.cabs.casatasks import flagdata
 
     body = flagdata.func.__wrapped__
@@ -268,8 +272,7 @@ def test_flagdata_declares_saved_params_file_as_output(monkeypatch):
     assert body(_FakeCtx(), vis=Path("x.ms"), outfile="cmds.txt").outfile is None
 
 
-def test_flagcmd_declares_saved_params_and_plot_files_as_outputs(monkeypatch):
-    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+def test_flagcmd_declares_saved_params_and_plot_files_as_outputs(casa_logging):
     from dosho.cabs.casatasks import flagcmd
 
     body = flagcmd.func.__wrapped__
@@ -281,8 +284,7 @@ def test_flagcmd_declares_saved_params_and_plot_files_as_outputs(monkeypatch):
     assert out.plotfile is None
 
 
-def test_fluxscale_declares_listfile_as_output(monkeypatch):
-    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+def test_fluxscale_declares_listfile_as_output(casa_logging):
     from dosho.cabs.casatasks import fluxscale
 
     body = fluxscale.func.__wrapped__
@@ -296,8 +298,7 @@ def test_fluxscale_declares_listfile_as_output(monkeypatch):
     assert body(_FakeCtx(), **kwargs).listfile is None
 
 
-def test_predictcomp_declares_savefig_as_output(monkeypatch):
-    monkeypatch.setenv("CASASITECONFIG", "preset-by-test")
+def test_predictcomp_declares_savefig_as_output(casa_logging):
     from dosho.cabs.casatasks import predictcomp
 
     body = predictcomp.func.__wrapped__

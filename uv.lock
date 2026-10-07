@@ -862,7 +862,7 @@ wheels = [
 [[package]]
 name = "stimela-ninja"
 version = "0.1.0b7"
-source = { git = "https://github.com/shinobi-dosho/stimela-ninja?branch=main#91e76e277afacd1f7a74a2c501082d41f1ab702c" }
+source = { git = "https://github.com/shinobi-dosho/stimela-ninja?branch=main#04ab64860e663e5b7422ff7d9d0e30ec15b49a65" }
 dependencies = [
     { name = "click" },
     { name = "packaging" },
