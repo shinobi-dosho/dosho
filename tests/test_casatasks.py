@@ -10,8 +10,11 @@ real execution.
 """
 
 import contextlib
+from importlib import import_module
 from pathlib import Path
+from types import SimpleNamespace
 
+import pytest
 from pydantic import BaseModel
 from shinobi import Recipe
 
@@ -186,10 +189,11 @@ def test_every_pystep_body_quiets_casa_logging_before_importing_casatasks():
         assert src.index("_quiet_casa(ctx)") < src.index("ctx.import_func("), ref.name
 
 
-def test_quiet_casa_writes_site_config_and_redirects_casalog():
+@pytest.mark.parametrize("module", ["casatasks", "casaplotms"])
+def test_quiet_casa_writes_site_config_and_redirects_casalog(module):
     import os
 
-    from dosho.cabs.casatasks import _quiet_casa
+    _quiet_casa = import_module("dosho.cabs." + module)._quiet_casa
 
     class FakeLog:
         def __init__(self):
@@ -203,8 +207,11 @@ def test_quiet_casa_writes_site_config_and_redirects_casalog():
             self.log = FakeLog()
 
         def import_func(self, name, module):
-            assert (name, module) == ("casalog", "casatasks")
-            return self.log
+            raise TypeError(f"{module}.{name} is not callable")
+
+        def import_module(self, module):
+            assert module == "casatasks"
+            return SimpleNamespace(casalog=self.log)
 
     had = os.environ.pop("CASASITECONFIG", None)
     config = None

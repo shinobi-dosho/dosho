@@ -40,7 +40,7 @@ def _quiet_casa(ctx) -> None:
                 "nologfile = True\ntelemetry_enabled = False\ncrashreporter_enabled = False\n"
             )
         os.environ["CASASITECONFIG"] = config.name
-    casalog = ctx.import_func("casalog", "casatasks")
+    casalog = ctx.import_module("casatasks").casalog
     casalog.setlogfile(os.devnull)
 
 

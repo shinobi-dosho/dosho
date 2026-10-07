@@ -240,14 +240,19 @@ class _FakeCtx:
         self._task_result = task_result
 
     def import_func(self, name, module):
-        if name == "casalog":
-            return _StubLog()
+        assert name != "casalog", "import_func only accepts callables"
 
         def task_fn(**kwargs):
             self.task_kwargs = kwargs
             return self._task_result
 
         return task_fn
+
+    def import_module(self, module):
+        from types import SimpleNamespace
+
+        assert module == "casatasks"
+        return SimpleNamespace(casalog=_StubLog())
 
 
 def test_flagdata_declares_saved_params_file_as_output(monkeypatch):
