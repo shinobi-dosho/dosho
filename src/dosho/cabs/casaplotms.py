@@ -31,6 +31,7 @@ def _quiet_casa(ctx) -> None:
     """
     import os
     import tempfile
+    from importlib import import_module
 
     if "CASASITECONFIG" not in os.environ:
         with tempfile.NamedTemporaryFile(
@@ -40,7 +41,8 @@ def _quiet_casa(ctx) -> None:
                 "nologfile = True\ntelemetry_enabled = False\ncrashreporter_enabled = False\n"
             )
         os.environ["CASASITECONFIG"] = config.name
-    casalog = ctx.import_func("casalog", "casatasks")
+    # casalog is a non-callable logsink; ctx.import_module is absent in b6.
+    casalog = import_module("casatasks").casalog
     casalog.setlogfile(os.devnull)
 
 
