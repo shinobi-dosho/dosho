@@ -114,7 +114,7 @@ cabs:
         nom_de_guerre: FITSFile
         info: ''
       beam_fits_par_angle_inc_deg:
-        dtype: int
+        dtype: float
         default: 5
         nom_de_guerre: FITSParAngleIncDeg
         info: ''
@@ -138,7 +138,7 @@ cabs:
         nom_de_guerre: FITSVerbosity
         info: ''
       beam_feed_angle:
-        dtype: int
+        dtype: float
         default: 0
         nom_de_guerre: FeedAngle
         info: ''
@@ -275,7 +275,7 @@ cabs:
         nom_de_guerre: WeightUVMinMax
         info: ''
       weighting_wtuv:
-        dtype: int
+        dtype: float
         default: 1
         nom_de_guerre: WTUV
         info: ''
@@ -394,7 +394,7 @@ cabs:
         nom_de_guerre: PolMode
         info: ''
       solvers_dt:
-        dtype: int
+        dtype: float
         default: 30
         nom_de_guerre: dt
         info: ''
@@ -409,7 +409,7 @@ cabs:
         nom_de_guerre: NIterLM
         info: ''
       coh_jones_lambda_lm:
-        dtype: int
+        dtype: float
         default: 1
         nom_de_guerre: LambdaLM
         info: ''
@@ -434,7 +434,7 @@ cabs:
         nom_de_guerre: InitLM
         info: ''
       kafca_init_l_mdt:
-        dtype: int
+        dtype: float
         default: 5
         nom_de_guerre: InitLMdt
         info: ''

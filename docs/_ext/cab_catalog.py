@@ -19,7 +19,7 @@ import re
 import warnings
 from pathlib import Path
 from types import UnionType
-from typing import Annotated, Any, Union, get_args, get_origin
+from typing import Annotated, Any, Literal, Union, get_args, get_origin
 
 _SECTIONS = ("Args:", "Arguments:", "Returns:", "Yields:", "Raises:", "Parameters:")
 
@@ -94,18 +94,25 @@ def _type_name(annotation: Any, metadata: tuple = ()) -> str:
 
     A strict dataset field renders as its shinobi name (`MSv2`), whether
     pydantic moved the declaration onto the field's `metadata` (a required
-    field) or left it `Annotated` inside a union (`MSv2 | None`).
+    field) or left it `Annotated` inside a union or generic container.
     """
     label = _dataset_label(metadata)
     if label:
         return label
-    if get_origin(annotation) is Annotated:
+    if annotation is type(None):
+        return "None"
+    if annotation is Ellipsis:
+        return "..."
+    origin = get_origin(annotation)
+    if origin is Annotated:
         return _dataset_label(annotation.__metadata__) or _type_name(get_args(annotation)[0])
     args = get_args(annotation)
-    if get_origin(annotation) in (Union, UnionType) and any(
-        get_origin(arg) is Annotated for arg in args
-    ):
-        return " | ".join("None" if arg is type(None) else _type_name(arg) for arg in args)
+    if origin in (Union, UnionType):
+        return " | ".join(_type_name(arg) for arg in args)
+    # Generic arguments are types, except Literal choices, which are values
+    # whose quoted spelling must survive module-qualifier stripping.
+    if origin is not None and args and origin is not Literal:
+        return f"{_type_name(origin)}[{', '.join(_type_name(arg) for arg in args)}]"
     # The __args__ guard matters on <=3.10, where a parameterized generic
     # like `list[Path]` still passes isinstance(..., type) (its __name__ is
     # a bare "list"); 3.11+ made those fail the isinstance check.

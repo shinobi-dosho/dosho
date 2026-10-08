@@ -6914,7 +6914,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'beam_$(corr)_$(reim).fits'``
      - \-
    * - ``beam_fits_par_angle_inc_deg``
-     - ``int | None``
+     - ``float | None``
      - ``5``
      - \-
    * - ``beam_fitsl_axis``
@@ -6934,7 +6934,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``1``
      - \-
    * - ``beam_feed_angle``
-     - ``int | None``
+     - ``float | None``
      - ``0``
      - \-
    * - ``beam_apply_p_jones``
@@ -7054,7 +7054,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``None``
      - \-
    * - ``weighting_wtuv``
-     - ``int | None``
+     - ``float | None``
      - ``1``
      - \-
    * - ``actions_do_plot``
@@ -7150,7 +7150,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'Scalar'``
      - \-
    * - ``solvers_dt``
-     - ``int | None``
+     - ``float | None``
      - ``30``
      - \-
    * - ``solvers_n_chan_sols``
@@ -7162,7 +7162,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``7``
      - \-
    * - ``coh_jones_lambda_lm``
-     - ``int | None``
+     - ``float | None``
      - ``1``
      - \-
    * - ``coh_jones_lambda_tk``
@@ -7182,7 +7182,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``0``
      - \-
    * - ``kafca_init_l_mdt``
-     - ``int | None``
+     - ``float | None``
      - ``5``
      - \-
    * - ``kafca_cov_p``
@@ -14681,7 +14681,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Default
      - Description
    * - ``ms``
-     - ``list[Annotated[Path, DatasetType(kind=<MEASUREMENT_SET_V2: 'measurement-set-v2'>, profile='msv2-structural/v1'), WithJsonSchema(json_schema={'type': 'string', 'format': 'path', 'x-shinobi-dataset': {'kind': 'measurement-set-v2', 'profile': 'msv2-structural/v1'}}, mode=None)]]``
+     - ``list[MSv2]``
      - *required*
      - \-
    * - ``prefix``

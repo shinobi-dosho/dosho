@@ -98,6 +98,8 @@ killMS's 94 flags now use the flat spelling in `read_options
 e.g. ``--MSName`` and ``--SolsDir``. Python field names stay stable.
 Booleans receive ``0``/``1``; bracketed pre-apply lists preserve the native
 empty-list sentinel. ``TChunk`` and ``DtBeamMin`` accept fractional values.
+``FITSParAngleIncDeg``, ``FeedAngle``, ``WTUV``, ``dt``, ``LambdaLM`` and ``InitLMdt`` also
+accept fractional values, matching the native float option declarations.
 The driver writes solutions and companion parsets below the explicit root;
 its default of writing inside the MS is unavailable through this cab.
 

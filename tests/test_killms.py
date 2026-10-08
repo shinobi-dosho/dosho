@@ -4,6 +4,7 @@ Checks registration, field-count sanity, real argv shape, and that killms
 builds on top of dosho's own DDFACET image.
 """
 
+import pytest
 from shinobi.policies import build_argv
 
 import dosho
@@ -210,3 +211,22 @@ def test_empty_preapply_lists_preserve_native_list_shape():
         dosho.get("killms"), {"pre_apply_pre_apply_sols": [], "pre_apply_pre_apply_mode": []}
     )
     assert argv == ["kMS.py", "--PreApplySols", "[]", "--PreApplyMode", "[]"]
+
+
+@pytest.mark.parametrize(
+    "field,flag",
+    [
+        ("beam_fits_par_angle_inc_deg", "FITSParAngleIncDeg"),
+        ("beam_feed_angle", "FeedAngle"),
+        ("weighting_wtuv", "WTUV"),
+        ("solvers_dt", "dt"),
+        ("coh_jones_lambda_lm", "LambdaLM"),
+        ("kafca_init_l_mdt", "InitLMdt"),
+    ],
+)
+def test_native_float_options_preserve_fractional_values(field, flag):
+    """These flags are float options in killMS 3.3.0's read_options table."""
+    cab = dosho.get("killms")
+    inputs = cab.inputs_model(vis_data_ms_name="obs.ms", solutions_sols_dir="sols", **{field: 2.5})
+    assert getattr(inputs, field) == 2.5
+    assert build_argv(cab, {field: getattr(inputs, field)}) == ["kMS.py", f"--{flag}", "2.5"]

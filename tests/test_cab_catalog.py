@@ -9,6 +9,10 @@ import importlib.util
 import sys
 import types
 from pathlib import Path
+from typing import Literal
+
+import pytest
+from shinobi import CasaTab, MSv2
 
 _EXT = Path(__file__).resolve().parents[1] / "docs" / "_ext" / "cab_catalog.py"
 _spec = importlib.util.spec_from_file_location("cab_catalog", _EXT)
@@ -128,3 +132,25 @@ def test_the_catalog_shows_a_real_cab_as_strict():
         )
     }
     assert rendered == {"in": "MSv2", "out": "MSv2 | None"}
+
+
+@pytest.mark.parametrize(
+    "annotation,expected",
+    [
+        (list[MSv2], "list[MSv2]"),
+        (list[MSv2] | None, "list[MSv2] | None"),
+        (dict[str, list[MSv2 | None]], "dict[str, list[MSv2 | None]]"),
+        (tuple[CasaTab, MSv2], "tuple[CasaTab, MSv2]"),
+        (tuple[MSv2, ...], "tuple[MSv2, ...]"),
+        (list[Literal["ms.image.fits", "other"]], "list[Literal['ms.image.fits', 'other']]"),
+    ],
+)
+def test_nested_generic_annotations_use_public_dataset_types(annotation, expected):
+    assert cab_catalog._type_name(annotation) == expected
+
+
+def test_wsclean_ms_list_renders_as_the_public_type():
+    from dosho import registry
+
+    field = registry.get("wsclean").inputs_model.model_fields["ms"]
+    assert cab_catalog._type_name(field.annotation, tuple(field.metadata)) == "list[MSv2]"
