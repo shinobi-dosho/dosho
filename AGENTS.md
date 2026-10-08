@@ -97,13 +97,20 @@ eval()/exec() a cab's `command`". Instead:
   are expressed as a hand-authored `ParamPattern` -- transcribed once from
   the tool's own template/docs, not generated. This is static data, not
   code.
-- **Dynamic output paths** (wsclean's `{prefix}-MFS-image.fits`-shaped
-  outputs) are expressed as a `ParamMeta.implicit` string template,
-  resolved by shinobi's `_fill_outputs` via plain `str.format` against a
-  step's own validated inputs -- never eval, never an expression language.
-  Only the handful of outputs a real pipeline actually wires as a
-  dependency need a resolved `implicit` template; anything more exotic
-  stays validation-only via `output_patterns`.
+- **Dynamic output paths** are static templates over a step's validated
+  inputs. A scalar path uses `ParamMeta.implicit` and plain `str.format`.
+  Dimensional outputs (WSClean's time/frequency/polarization FITS products)
+  use `ProductFamily[File]` with declarative `family` rules: bounded axes,
+  singleton suffixes, finite mode conditions, and explicit coordinates.
+  Capture publishes products the invocation emitted or explicitly reused; caches
+  validate the saved members. More exotic unclassified products can remain
+  harvested without inventing a dependency path. No callbacks, evaluation,
+  or expression language are involved.
+  Opaque gain/solution stores use `ProductFamily[DirectoryBundle]`, owning
+  one explicit directory and inventorying its children. They do not split
+  internal array dimensions into separately owned paths. killMS requires
+  `solutions_sols_dir` outside the input MS; family preflight rejects
+  overlapping trees, including symlink aliases, before execution.
 
 If a tool's dynamic behavior can't be expressed this way, don't invent a
 new mechanism speculatively -- leave the field/output out and come back

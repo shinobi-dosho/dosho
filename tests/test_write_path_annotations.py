@@ -126,6 +126,10 @@ DESTINATIONS = {
     ("doppler-mowjsub", "output_ms"),
 }
 
+# Explicit roots of inventoried stores have different input/output field names.
+FAMILY_ROOTS = {("quartical", "output_gain_directory"), ("killms", "solutions_sols_dir")}
+SCRATCH_PATHS = {("wsclean", "temp_dir")}
+
 # Every other dual declaration, and why deleting it would be wrong. Grouped by
 # the reason, because the reasons are what a new cab has to be checked against
 # -- not the names.
@@ -235,7 +239,7 @@ def test_every_marked_field_is_accounted_for():
     marked = {
         (name, field) for name, scope in _all_scopes().items() for field in write_path_fields(scope)
     }
-    assert marked == STEMS | DESTINATIONS
+    assert marked == STEMS | DESTINATIONS | FAMILY_ROOTS | SCRATCH_PATHS
 
 
 def test_every_dual_declaration_is_classified():
@@ -377,3 +381,17 @@ def test_the_index_and_the_audit_agree_on_what_exists():
 
     index = yaml.safe_load(pathlib.Path("src/dosho/cab_index.yaml").read_text())["cabs"]
     assert set(_all_scopes()) == set(index)
+
+
+def test_owned_store_roots_and_scratch_paths_have_declarations():
+    scopes = _all_scopes()
+    for name, field in FAMILY_ROOTS:
+        scope = scopes[name]
+        families = [meta.family for meta in scope.field_meta.values() if meta.family is not None]
+        assert any(family.root == "{" + field + "}" for family in families)
+        assert declared_output_dirs(scope, {field: "/tmp/dosho-probe/store"})
+    for name, field in SCRATCH_PATHS:
+        scope = scopes[name]
+        assert field in path_fields(scope.inputs_model)
+        assert "{" + field + "}/*" in scope.scratch
+        assert field not in scope.outputs_model.model_fields

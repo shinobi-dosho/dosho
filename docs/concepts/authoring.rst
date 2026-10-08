@@ -219,16 +219,81 @@ tables.
 Dynamic output paths
 ----------------------
 
-Some tools' output *paths* depend on other resolved input values --
-WSClean's ``{prefix}-MFS-image.fits``-shaped outputs, for example. An
-``implicit`` string template, resolved via plain ``str.format`` against a
-step's own validated inputs (never ``eval``, never an expression
-language), covers exactly this. Only the handful of outputs a real
-pipeline actually wires as a dependency need a resolved ``implicit``
-template; anything more exotic (WSClean's open-ended
-per-band/per-interval combinatorics) stays validation-only via
-``output_patterns``, with a ``harvest`` glob to rescue the files
-themselves out of a sandboxed run. See ``dosho/documents/wsclean.yaml``.
+A scalar output whose path depends on inputs uses an ``implicit`` string
+resolved by plain ``str.format`` against the step's validated inputs.
+Dimensional products use ``ProductFamily[File]`` with a static ``family``
+declaration. WSClean's ``image``, ``dirty``, ``residual`` and ``model`` families
+have ``time``, ``frequency``, ``polarization`` and ``component`` coordinates.
+Its shared ``psf`` family has only ``time`` and ``frequency``. The defaults
+are one channel, one interval, and Stokes I, matching WSClean 3.6.
+
+Every run returns a resolved collection of the products actually emitted
+or explicitly reused.
+Dirty imaging can leave ``model`` and ``residual`` empty; a singleton
+frequency has no MFS member. The former scalar ``*_mfs`` fields are replaced
+by selection from the corresponding family:
+
+.. code-block:: python
+
+   # result is the executed WSClean step's result.
+   image = result.outputs.image.select(
+       time=0, frequency="mfs", polarization="Q", component="real"
+   )
+   psf = result.outputs.psf.select(time=0, frequency="mfs")
+
+Use ``frequency=0`` for a single-channel image. Selection requires exactly
+one matching member and fails when the requested product is absent or
+ambiguous. ``source_list`` is an optional family without dimensions;
+``source_list.select()`` returns its one file when ``-save-source-list``
+actually emitted it.
+
+Rules reproduce WSClean's suppression of singleton filename suffixes and
+its ``-XY``/``-XYi`` real/imaginary pairing (YX is combined with XY).
+Prediction and dry runs reserve no family products. Continuation rules
+explicitly preserve and accept the existing model images that ``-continue``
+reads before updating them. Output paths stay
+inside the run's working directory, including any prefix subdirectory.
+The prefix ``harvest`` glob also preserves supplementary products such as
+weights and beams, without classifying them as one of these families.
+Changing a family declaration or deleting a recorded member invalidates
+the cache; an unchanged leftover file is not a newly produced member.
+
+The filename and availability rules are transcribed from the pinned
+`WSClean 3.6 filename implementation
+<https://gitlab.com/aroffringa/wsclean/-/blob/v3.6/io/imagefilename.h>`_ and
+`imaging implementation
+<https://gitlab.com/aroffringa/wsclean/-/blob/v3.6/main/wsclean.cpp>`_. The
+cab remains inert YAML data; these sources are never executed to load it.
+
+Other product families use the same mechanism. DDFacet declares FITS
+representations, flux scales and discovered saved cycles; its time, frequency
+and Stokes axes stay inside a FITS cube. SoFiA declares catalogue formats,
+moment products and cubelets discovered by source ID and product kind.
+
+QuartiCal's ``gain_directory`` and killMS's ``solutions`` are
+``ProductFamily[DirectoryBundle]``. Each captures one whole owned store with
+no filename dimensions. Its internal chunks, group metadata and companion
+files are inventoried together; losing any recorded child invalidates the
+cache. Select the bundle and use its path when a downstream tool expects a
+directory:
+
+.. code-block:: python
+
+   gain_store = quartical_result.outputs.gain_directory.select().path
+   solutions_root = killms_result.outputs.solutions.select().path
+   cubelet = sofia_result.outputs.cubelets.select(
+       source=4, product="cube", format="fits"
+   )
+   restored = ddf_result.outputs.restored.select(
+       representation="mean", flux_scale="apparent"
+   )
+
+killMS requires an explicit ``solutions_sols_dir`` outside the input MS.
+The shared preflight rejects equal, nested or aliased overlapping trees
+before running the tool, preserving the MS's separate caching and provenance.
+QuartiCal's bundle declaration supports local stores; S3 stores and group
+addresses are rejected rather than reported as local directories. See
+:doc:`../audits/output_family_migration` for version and mode qualification.
 
 Container images
 -------------------

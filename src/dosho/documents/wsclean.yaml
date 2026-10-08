@@ -9,6 +9,7 @@ cabs:
         _: '-'
     harvest:
     - '{prefix}-*'
+    scratch: ['{temp_dir}/*']
     dataset_accesses:
       # One joint write over every MS in `ms`. WSClean writes `model-column`
       # (MODEL_DATA) after deconvolution unless `no-update-model-required`, and
@@ -58,6 +59,8 @@ cabs:
         dtype: str
       nchan:
         dtype: int
+        default: 1
+        info: Number of output channels (-channels-out); multiple channels also produce MFS images.
         nom_de_guerre: channels-out
       deconvolution-channels:
         dtype: int
@@ -67,18 +70,22 @@ cabs:
           repeat: list
       channel-division-frequencies:
         dtype: List[float]
-        policies:
-          repeat: list
       gap-channel-division:
         dtype: bool
       pol:
         dtype: Union[str, List[str]]
+        default: I
+        info: Polarizations; case insensitive, comma separated or packed (e.g. IQUV).
+        policies:
+          repeat: ","
       join-polarizations:
         dtype: bool
       link-polarizations:
         dtype: Union[str, List[str]]
       intervals-out:
         dtype: int
+        default: 1
+        info: Number of output time intervals inside the selected interval.
       interval:
         dtype: Tuple[int, int]
         policies:
@@ -105,9 +112,9 @@ cabs:
       max-mpi-message-size:
         dtype: str
       mem:
-        dtype: int
+        dtype: float
       abs-mem:
-        dtype: int
+        dtype: float
       verbose:
         dtype: bool
         nom_de_guerre: v
@@ -129,6 +136,7 @@ cabs:
         dtype: bool
       no-dirty:
         dtype: bool
+        default: false
       save-first-residual:
         dtype: bool
       save-weights:
@@ -143,6 +151,7 @@ cabs:
         dtype: bool
       make-psf-only:
         dtype: bool
+        default: false
       weight:
         dtype: Union[str, Tuple[str, float]]
         policies:
@@ -172,7 +181,7 @@ cabs:
       store-imaging-weights:
         dtype: bool
       size:
-        dtype: Union[int, Tuple[int, int]]
+        dtype: Tuple[int, int]
         required: true
         policies:
           repeat: list
@@ -183,8 +192,10 @@ cabs:
         required: true
       predict:
         dtype: bool
+        default: false
       continue:
         dtype: bool
+        default: false
       subtract-model:
         dtype: bool
       gridder:
@@ -192,7 +203,7 @@ cabs:
       use-wgridder:
         dtype: bool
       shift:
-        dtype: List[str]
+        dtype: Tuple[str, str]
         policies:
           repeat: list
       facet-regions:
@@ -220,7 +231,7 @@ cabs:
         dtype: float
         nom_de_guerre: nwlayers-factor
       wstack-nwlayers-for-size:
-        dtype: List[int]
+        dtype: Tuple[int, int]
         policies:
           repeat: list
       wstack-grid-mode:
@@ -240,7 +251,7 @@ cabs:
       grid-with-beam:
         dtype: bool
       beam-aterm-update:
-        dtype: int
+        dtype: float
       aterm-kernel-size:
         dtype: float
       apply-facet-solutions:
@@ -256,7 +267,7 @@ cabs:
       apply-facet-beam:
         dtype: bool
       facet-beam-update:
-        dtype: int
+        dtype: float
       save-aterms:
         dtype: bool
       apply-primary-beam:
@@ -267,8 +278,6 @@ cabs:
         dtype: bool
       primary-beam-limit:
         dtype: float
-      scalar-beam:
-        dtype: bool
       mwa-path:
         dtype: Directory
       save-psf-pb:
@@ -276,7 +285,7 @@ cabs:
       pb-grid-size:
         dtype: int
       dd-psf-grid:
-        dtype: List[int]
+        dtype: Tuple[int, int]
         policies:
           repeat: list
       beam-model:
@@ -287,6 +296,7 @@ cabs:
         dtype: str
       dry-run:
         dtype: bool
+        default: false
       maxuvw-m:
         dtype: float
       minuvw-m:
@@ -299,23 +309,25 @@ cabs:
         dtype: float
       niter:
         dtype: int
+        default: 0
+        info: Maximum number of deconvolution iterations; zero performs dirty imaging.
       nmiter:
         dtype: int
       auto-threshold:
         dtype: float
       abs-threshold:
-        dtype: float
+        dtype: Union[str, float]
         nom_de_guerre: threshold
       auto-mask:
         dtype: float
       abs-auto-mask:
-        dtype: float
+        dtype: Union[str, float]
       local-rms:
         dtype: bool
       local-rms-strength:
         dtype: float
       local-rms-window:
-        dtype: int
+        dtype: float
       local-rms-method:
         dtype: str
       gain:
@@ -325,7 +337,7 @@ cabs:
       join-channels:
         dtype: bool
       spectral-correction:
-        dtype: List[Union[float, str]]
+        dtype: Tuple[float, str]
         policies:
           repeat: list
       no-fast-subminor:
@@ -364,6 +376,7 @@ cabs:
         dtype: List[float]
       save-source-list:
         dtype: bool
+        default: false
       clean-border:
         dtype: float
       fits-mask:
@@ -391,17 +404,17 @@ cabs:
       deconvolution-threads:
         dtype: int
       restore:
-        dtype: List[File]
+        dtype: Tuple[File, File, File]
         policies:
           repeat: list
       restore-list:
-        dtype: List[File]
+        dtype: Tuple[File, File, File]
         policies:
           repeat: list
       beam-size:
-        dtype: float
+        dtype: Union[str, float]
       beam-shape:
-        dtype: List[Union[str, float]]
+        dtype: Tuple[Union[str, float], Union[str, float], Union[str, float]]
         policies:
           repeat: list
       fit-beam:
@@ -416,42 +429,133 @@ cabs:
         dtype: bool
       elliptical-beam:
         dtype: bool
-    outputs:
-      dirty:
+      local-rms-image:
         dtype: File
-        implicit: '{prefix}-dirty.fits'
-      image:
-        dtype: File
-        implicit: '{prefix}-image.fits'
-      residual:
-        dtype: File
-        implicit: '{prefix}-residual.fits'
-      model:
-        dtype: File
-        implicit: '{prefix}-model.fits'
-      psf:
-        dtype: File
-        implicit: '{prefix}-psf.fits'
-      dirty_mfs:
-        dtype: File
-        implicit: '{prefix}-MFS-dirty.fits'
-      image_mfs:
-        dtype: File
-        implicit: '{prefix}-MFS-image.fits'
-      residual_mfs:
-        dtype: File
-        implicit: '{prefix}-MFS-residual.fits'
-      model_mfs:
-        dtype: File
-        implicit: '{prefix}-MFS-model.fits'
-      psf_mfs:
-        dtype: File
-        implicit: '{prefix}-MFS-psf.fits'
-      source-list:
-        dtype: File
-        # Written by -save-source-list. Unlike the FITS products it keeps an
-        # undecorated name at any -channels-out: wsclean writes one component
-        # list carrying the fitted spectral terms, so there is no _mfs sibling.
-        implicit: '{prefix}-sources.txt'
+        info: Precomputed local RMS image used for local-noise thresholding.
+      direct-ft-precision:
+        dtype: str
+        choices: [float, double, ldouble]
+        info: Arithmetic precision for the direct Fourier transform gridder.
       temp-dir:
         dtype: Directory
+        mutable: true
+        write_path: true
+        info: Scratch location for temporary reordered MeasurementSets.
+    # Filename rules transcribed from WSClean v3.6 io/imagefilename.h and
+    # main/wsclean.cpp (https://gitlab.com/aroffringa/wsclean/-/tree/v3.6).
+    # Optional rules capture newly written/changed products, or explicit reuse
+    # of a model in continuation mode.
+    # Prediction reads model images at this prefix, so it must reserve no FITS
+    # outputs (in particular, stale-output clearing must not delete its inputs).
+    outputs:
+      image:
+        dtype: ProductFamily[File]
+        info: Image FITS products indexed by time, frequency, polarization and component.
+        family:
+          coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-image.fits'
+              coordinates: {component: real}
+              when: &imaging_mode {predict: [false], dry_run: [false], make_psf_only: [false]}
+              axes: &image_axes
+                time: &time_axis
+                  count_input: intervals_out
+                  suffix: '-t{index:04d}'
+                  singleton_suffix: ''
+                frequency: &frequency_axis
+                  count_input: nchan
+                  suffix: '-{index:04d}'
+                  singleton_suffix: ''
+                  aggregate: {value: mfs, suffix: '-MFS', only_multiple: true}
+                polarization: &polarization_axis
+                  values_input: pol
+                  tokens: [I, Q, U, V, XX, XY, YX, YY, RR, RL, LR, LL]
+                  # YX is combined with XY, never written separately.
+                  include: [I, Q, U, V, XX, XY, YY, RR, RL, LR, LL]
+                  uppercase: true
+                  split: csv_or_compact
+                  suffix: '-{value}'
+                  singleton_suffix: ''
+            - path: '{prefix}{time}{frequency}{polarization}-image.fits'
+              coordinates: {component: imaginary}
+              when: *imaging_mode
+              axes: &imaginary_axes
+                time: *time_axis
+                frequency: *frequency_axis
+                polarization:
+                  <<: *polarization_axis
+                  include: [XY]
+                  suffix: '-{value}i'
+      dirty:
+        dtype: ProductFamily[File]
+        info: Dirty FITS products indexed by time, frequency, polarization and component.
+        family:
+          coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-dirty.fits'
+              coordinates: {component: real}
+              when: &dirty_mode {predict: [false], dry_run: [false], make_psf_only: [false], no_dirty: [false]}
+              axes: *image_axes
+            - path: '{prefix}{time}{frequency}{polarization}-dirty.fits'
+              coordinates: {component: imaginary}
+              when: *dirty_mode
+              axes: *imaginary_axes
+      residual:
+        dtype: ProductFamily[File]
+        info: Residual FITS products indexed by time, frequency, polarization and component.
+        family:
+          coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-residual.fits'
+              coordinates: {component: real}
+              when: *imaging_mode
+              axes: *image_axes
+            - path: '{prefix}{time}{frequency}{polarization}-residual.fits'
+              coordinates: {component: imaginary}
+              when: *imaging_mode
+              axes: *imaginary_axes
+      model:
+        dtype: ProductFamily[File]
+        info: Model FITS products indexed by time, frequency, polarization and component.
+        family:
+          coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [false]}
+              axes: *image_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [false]}
+              axes: *imaginary_axes
+            # -continue reads this invocation's prefix model before updating
+            # it. Explicit reuse keeps stale-output clearing from removing it.
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: &continuation_mode {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true]}
+              axes: *image_axes
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: *continuation_mode
+              axes: *imaginary_axes
+              accept_existing: true
+      psf:
+        dtype: ProductFamily[File]
+        info: Shared PSF FITS products indexed by time and frequency; no polarization axis.
+        family:
+          coordinates: {time: int, frequency: [int, str]}
+          rules:
+            - path: '{prefix}{time}{frequency}-psf.fits'
+              when: {predict: [false], dry_run: [false]}
+              axes:
+                time: *time_axis
+                frequency: *frequency_axis
+      source-list:
+        dtype: ProductFamily[File]
+        info: Component list emitted by -save-source-list; no channel or polarization suffix.
+        family:
+          coordinates: {}
+          rules:
+            - path: '{prefix}-sources.txt'
+              when: {predict: [false], dry_run: [false], save_source_list: [true]}

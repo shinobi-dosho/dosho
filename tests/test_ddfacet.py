@@ -1,11 +1,10 @@
 """dosho.cabs.ddfacet -- ported from DDFacet's own DefaultParset.cfg (see
 that module's docstring for the sourcing/parsing methodology). Checks
 registration, field-count sanity, and real `--Section-OptionName` argv
-shape (case-preserved, comma-joined list values) -- not exhaustive
+shape (case-preserved, bracketed list values) -- not exhaustive
 per-field coverage, given the scale (273 fields).
 """
 
-import pytest
 from shinobi.policies import build_argv
 
 import dosho
@@ -26,7 +25,7 @@ def test_ddfacet_full_field_count():
     assert len(dosho.get("ddfacet").inputs_model.model_fields) == 274
 
 
-def test_ddfacet_case_preserved_flags_and_comma_joined_ms_list():
+def test_ddfacet_case_preserved_flags_and_bracketed_ms_list():
     cab = dosho.get("ddfacet")
     argv = build_argv(
         cab,
@@ -41,7 +40,7 @@ def test_ddfacet_case_preserved_flags_and_comma_joined_ms_list():
     assert argv[0] == "DDF.py"
     # real flags are case-sensitive: --Data-MS, --Image-NPix, not lowercase
     assert "--Data-MS" in argv
-    assert "a.MS,b.MS" in argv  # comma-joined, not repeated flags
+    assert "[a.MS,b.MS]" in argv  # preserves the list, including singletons
     assert "--Image-NPix" in argv and "6000" in argv
     assert "--Output-Name" in argv and "myimage" in argv
     assert "--Deconv-Mode" in argv and "HMP" in argv
@@ -132,7 +131,7 @@ def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
         dosho.get("ddfacet"),
         {"data_ms": ["/x.ms"], "mask_external": "/m.fits", "dde_solutions_sols_dir": "/sols"},
     )
-    assert "--Data-MS" in argv and "/x.ms" in argv
+    assert "--Data-MS" in argv and "[/x.ms]" in argv
     assert "--Mask-External" in argv and "/m.fits" in argv
     assert "--DDESolutions-SolsDir" in argv and "/sols" in argv
 
@@ -148,15 +147,9 @@ def test_ddfacet_declares_the_products_a_pipeline_wires():
     register_step_backend("ddf-record", RecordingBackend())
     cab = dosho.get("ddfacet").model_copy(update={"backend": "ddf-record"})
     result = _dispatch(cab, None, data_ms=["/obs.ms"], output_name="img/run1")
-    assert str(result.outputs.app_restored) == "img/run1.app.restored.fits"
-    assert str(result.outputs.int_restored) == "img/run1.int.restored.fits"
-    assert str(result.outputs.app_residual) == "img/run1.app.residual.fits"
-    assert str(result.outputs.int_residual) == "img/run1.int.residual.fits"
-    assert str(result.outputs.app_model) == "img/run1.app.model.fits"
-    assert str(result.outputs.dirty) == "img/run1.dirty.fits"
-    assert str(result.outputs.psf) == "img/run1.psf.fits"
-    # the DicoModel killMS and DDFacet's own Predict-InitDicoModel consume
-    assert str(result.outputs.dico_model) == "img/run1.DicoModel"
+    for name in ("dirty", "psf", "restored", "model", "residual", "dico_model"):
+        family = getattr(result.outputs, name)
+        assert family.resolved and family.members == ()
 
 
 def test_ddfacet_harvest_covers_the_letter_code_family():
@@ -177,8 +170,8 @@ def test_ddfacet_experimental_marker_names_only_the_wiring_residual():
 
     reason = _index()["ddfacet"]["experimental"]
     # the residual is a *wiring* limit now, not a lost write
-    assert "cannot be wired" in reason
-    assert "nothing is silently lost" in reason.lower()
+    assert "cycle" in reason
+    assert "qualification" in reason.lower()
     assert dosho.get("ddfacet").info.startswith("EXPERIMENTAL:")
 
 
@@ -245,33 +238,20 @@ def _default_argv(**inputs):
     return recorder.calls[-1][1]
 
 
-def test_ddfacet_hmp_scales_carries_no_default_because_one_item_lists_render_bare():
-    """`build_argv` renders a list by joining on `,`, so a one-item list has no
-    comma left to join on: `[0]` reached DDFacet as the bare token `0`, a
-    scalar, and `ClassMultiScaleMachine.MakeListScales` died on `if 0 in
-    LScales` ("argument of type 'int' is not iterable") -- after a full
-    gridding + PSF pass, so both slow and remote from its cause. The default
-    dosho copied out of `DefaultParset.cfg` is DDFacet's own internal default,
-    so omitting the flag carries exactly the same information (dosho #23).
-    Quartical's two one-item defaults are not affected: its `repeat: '[]'`
-    policy renders them bracketed (`solver.terms=[G]`), with nothing to join.
+def test_ddfacet_hmp_scales_preserves_one_item_lists():
+    """Bracketed lists preserve DDFacet's list type, including a singleton.
+
+    Omitted scales still use the native default. Explicit values must not
+    become scalars after command-line serialization.
     """
     cab = dosho.get("ddfacet")
     assert cab.inputs_model.model_fields["hmp_scales"].default is None
     assert "--HMP-Scales" not in _default_argv(data_ms=["/obs.ms"], output_name="img/run1")
-    # a caller who does want scales still gets the real comma-joined shape
+    # Explicit lists use the bracket form accepted by ReadCFG.
     argv = build_argv(cab, {"hmp_scales": [0, 2, 4]})
-    assert argv[argv.index("--HMP-Scales") + 1] == "0,2,4"
+    assert argv[argv.index("--HMP-Scales") + 1] == "[0,2,4]"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="shinobi has no 0/1 boolean policy yet -- dosho #23 item 1. Its "
-    "`explicit_true`/`explicit_false` emit lowercase `true`/`false`, which "
-    "DDFacet's parser reads as a non-empty (truthy) *string*, so neither "
-    "setting renders a boolean it can read. Turn this into a plain test once "
-    "the policy lands upstream and ddfacet.yaml sets it.",
-)
 def test_ddfacet_bools_never_render_as_a_bare_flag():
     """DDFacet takes an explicit value for every option, booleans included
     (`--Output-Clobber 0|1`). A bare flag makes its optparse swallow the *next*
@@ -286,3 +266,11 @@ def test_ddfacet_bools_never_render_as_a_bare_flag():
         if token.startswith("--") and (index + 1 == len(argv) or argv[index + 1].startswith("--"))
     ]
     assert bare == []
+
+
+def test_ddfacet_boolean_tokens_and_singleton_list_match_its_parser():
+    cab = dosho.get("ddfacet")
+    argv = build_argv(cab, {"output_clobber": False, "data_sort": True, "hmp_scales": [0]})
+    assert argv[argv.index("--Output-Clobber") + 1] == "0"
+    assert argv[argv.index("--Data-Sort") + 1] == "1"
+    assert argv[argv.index("--HMP-Scales") + 1] == "[0]"

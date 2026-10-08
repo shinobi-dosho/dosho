@@ -766,46 +766,521 @@ cabs:
         info: If set to true, then a data cube containing the raw, binary source mask produced by the
           source finder prior to linking will be written in FITS format. The raw mask cube will have the
           suffix _mask-raw.fits.
+      input_primaryBeam:
+        dtype: File
+        nom_de_guerre: input.primaryBeam
+        info: Optional primary-beam cube used in source parameterisation.
+      flag_cube:
+        dtype: File
+        nom_de_guerre: flag.cube
+        info: Optional integer flag cube applied before source finding.
+      output_dataFormat:
+        dtype: str
+        nom_de_guerre: output.dataFormat
+        info: Image/cube format; hdf5 falls back to fits when unsupported by the build.
+        default: fits
+      output_writeLogFile:
+        dtype: bool
+        nom_de_guerre: output.writeLogFile
+        info: Write pipeline messages to the output log file.
+        default: true
+      output_writePV:
+        dtype: bool
+        nom_de_guerre: output.writePV
+        info: Write source major/minor-axis PV diagrams when cubelets are enabled.
+        default: false
+      output_writeKarma:
+        dtype: bool
+        nom_de_guerre: output.writeKarma
+        info: Write catalogue labels in Karma annotation format.
+        default: false
+      output_marginAperSpec:
+        dtype: int
+        nom_de_guerre: output.marginAperSpec
+        info: Aperture-spectrum margin in channels; -1 uses the entire spectral axis.
+        default: -1
+      output_showPreviewImage:
+        dtype: bool
+        nom_de_guerre: output.showPreviewImage
+        info: Show an image preview in the terminal.
+        default: false
+      output_writeDiagnosticPlot:
+        dtype: bool
+        nom_de_guerre: output.writeDiagnosticPlot
+        info: Write the source-finding diagnostic plot.
+        default: true
+    # v2.7.0 and v2.7.1 share these parameter/output spellings. Source IDs
+    # come from actual cubelet names, not from a guessed detection count.
+    # src/sofia.c and src/DataCube.c at a7434d9f define the finite suffix table.
+    harvest:
+    - '{output_directory}/{output_filename}_*.fits'
+    - '{output_directory}/{output_filename}_*.hdf5'
+    - '{output_directory}/{output_filename}_*.txt'
+    - '{output_directory}/{output_filename}_*.xml'
+    - '{output_directory}/{output_filename}_*.sql'
+    - '{output_directory}/{output_filename}_*.ann'
+    - '{output_directory}/{output_filename}_*.eps'
+    - '{output_directory}/{output_filename}_*.log'
     outputs:
-      cat_ascii:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_cat.txt'
-      cat_sql:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_cat.sql'
-      cat_xml:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_cat.xml'
-      cubelets:
-        dtype: Directory
-        implicit: '{output_directory}/{output_filename}_cubelets'
+      catalogue:
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}'
+          coordinates:
+            format: str
+          rules:
+          - path: '{output_filename}_cat.txt'
+            coordinates:
+              format: ascii
+            when:
+              output_writeCatASCII:
+              - true
+          - path: '{output_filename}_cat.xml'
+            coordinates:
+              format: xml
+            when:
+              output_writeCatXML:
+              - true
+          - path: '{output_filename}_cat.sql'
+            coordinates:
+              format: sql
+            when:
+              output_writeCatSQL:
+              - true
+          - path: '{output_filename}_cat.ann'
+            coordinates:
+              format: karma
+            when:
+              output_writeKarma:
+              - true
       filtered:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_filtered.fits'
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}'
+          coordinates:
+            format: str
+          rules:
+          - path: '{output_filename}_filtered.fits'
+            coordinates:
+              format: fits
+            when:
+              output_writeFiltered:
+              - true
+          - path: '{output_filename}_filtered.hdf5'
+            coordinates:
+              format: hdf5
+            when:
+              output_writeFiltered:
+              - true
       mask:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_mask.fits'
-      mask_2d:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_mask-2d.fits'
-      mask_raw:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_mask-raw.fits'
-      mom0:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_mom0.fits'
-      mom1:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_mom1.fits'
-      mom2:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_mom2.fits'
-      chan_map:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_chan.fits'
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}'
+          coordinates:
+            representation: str
+            format: str
+          rules:
+          - path: '{output_filename}_mask.fits'
+            coordinates:
+              representation: cube
+              format: fits
+            when:
+              output_writeMask:
+              - true
+          - path: '{output_filename}_mask.hdf5'
+            coordinates:
+              representation: cube
+              format: hdf5
+            when:
+              output_writeMask:
+              - true
+          - path: '{output_filename}_mask-2d.fits'
+            coordinates:
+              representation: projection
+              format: fits
+            when:
+              output_writeMask2d:
+              - true
+          - path: '{output_filename}_mask-2d.hdf5'
+            coordinates:
+              representation: projection
+              format: hdf5
+            when:
+              output_writeMask2d:
+              - true
+          - path: '{output_filename}_mask-raw.fits'
+            coordinates:
+              representation: raw
+              format: fits
+            when:
+              output_writeRawMask:
+              - true
+          - path: '{output_filename}_mask-raw.hdf5'
+            coordinates:
+              representation: raw
+              format: hdf5
+            when:
+              output_writeRawMask:
+              - true
+      moments:
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}'
+          coordinates:
+            product: str
+            format: str
+          rules:
+          - path: '{output_filename}_mom0.fits'
+            coordinates:
+              product: mom0
+              format: fits
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_mom0.hdf5'
+            coordinates:
+              product: mom0
+              format: hdf5
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_mom1.fits'
+            coordinates:
+              product: mom1
+              format: fits
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_mom1.hdf5'
+            coordinates:
+              product: mom1
+              format: hdf5
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_mom2.fits'
+            coordinates:
+              product: mom2
+              format: fits
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_mom2.hdf5'
+            coordinates:
+              product: mom2
+              format: hdf5
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_chan.fits'
+            coordinates:
+              product: chan
+              format: fits
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_chan.hdf5'
+            coordinates:
+              product: chan
+              format: hdf5
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_snr.fits'
+            coordinates:
+              product: snr
+              format: fits
+            when:
+              output_writeMoments:
+              - true
+          - path: '{output_filename}_snr.hdf5'
+            coordinates:
+              product: snr
+              format: hdf5
+            when:
+              output_writeMoments:
+              - true
       noise:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_noise.fits'
-      noise_txt:
-        dtype: File
-        implicit: '{output_directory}/{output_filename}_noise.txt'
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}'
+          coordinates:
+            format: str
+          rules:
+          - path: '{output_filename}_noise.fits'
+            coordinates:
+              format: fits
+            when:
+              output_writeNoise:
+              - true
+          - path: '{output_filename}_noise.hdf5'
+            coordinates:
+              format: hdf5
+            when:
+              output_writeNoise:
+              - true
+          - path: '{output_filename}_noise.txt'
+            coordinates:
+              format: txt
+            when:
+              output_writeNoise:
+              - true
+      cubelets:
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}/{output_filename}_cubelets'
+          coordinates:
+            source: int
+            product: str
+            format: str
+          rules:
+          - path: '{output_filename}_{source}_cube.fits'
+            coordinates:
+              product: cube
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_cube.hdf5'
+            coordinates:
+              product: cube
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mask.fits'
+            coordinates:
+              product: mask
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mask.hdf5'
+            coordinates:
+              product: mask
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mom0.fits'
+            coordinates:
+              product: mom0
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mom0.hdf5'
+            coordinates:
+              product: mom0
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mom1.fits'
+            coordinates:
+              product: mom1
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mom1.hdf5'
+            coordinates:
+              product: mom1
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mom2.fits'
+            coordinates:
+              product: mom2
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_mom2.hdf5'
+            coordinates:
+              product: mom2
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_chan.fits'
+            coordinates:
+              product: chan
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_chan.hdf5'
+            coordinates:
+              product: chan
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_snr.fits'
+            coordinates:
+              product: snr
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_snr.hdf5'
+            coordinates:
+              product: snr
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_spec.txt'
+            coordinates:
+              product: spec
+              format: txt
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_spec_aperture.txt'
+            coordinates:
+              product: spec_aperture
+              format: txt
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv.fits'
+            coordinates:
+              product: pv
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv.hdf5'
+            coordinates:
+              product: pv
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv_min.fits'
+            coordinates:
+              product: pv_min
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv_min.hdf5'
+            coordinates:
+              product: pv_min
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv_mask.fits'
+            coordinates:
+              product: pv_mask
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv_mask.hdf5'
+            coordinates:
+              product: pv_mask
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv_min_mask.fits'
+            coordinates:
+              product: pv_min_mask
+              format: fits
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+          - path: '{output_filename}_{source}_pv_min_mask.hdf5'
+            coordinates:
+              product: pv_min_mask
+              format: hdf5
+            when:
+              output_writeCubelets:
+              - true
+            captures:
+              source: int
+      diagnostics:
+        dtype: ProductFamily[File]
+        family:
+          root: '{output_directory}'
+          coordinates:
+            product: str
+          rules:
+          - path: '{output_filename}_logfile.log'
+            coordinates:
+              product: log
+            when:
+              output_writeLogFile:
+              - true
+          - path: '{output_filename}_diagnostic.eps'
+            coordinates:
+              product: diagnostic_plot
+            when:
+              output_writeDiagnosticPlot:
+              - true
+          - path: '{output_filename}_rel.eps'
+            coordinates:
+              product: reliability_plot
+          - path: '{output_filename}_skellam.eps'
+            coordinates:
+              product: skellam_plot
+          - path: '{output_filename}_rel_cat_neg.xml'
+            coordinates:
+              product: negative_catalogue
+          - path: '{output_filename}_rel_cat_pos.xml'
+            coordinates:
+              product: positive_catalogue
+          - path: '{output_filename}_flags.log'
+            coordinates:
+              product: flags

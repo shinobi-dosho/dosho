@@ -2786,11 +2786,11 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - ``15``
      - \-
    * - ``image_n_pix``
-     - ``int | None``
+     - ``int | tuple[int, int] | None``
      - ``5000``
      - \-
    * - ``image_cell``
-     - ``float | None``
+     - ``float | tuple[float, float] | None``
      - ``5.0``
      - \-
    * - ``image_phase_center_radec``
@@ -3756,31 +3756,22 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - Type
      - Description
    * - ``dirty``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``restored``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``model``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``residual``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``psf``
-     - ``Path | None``
-     - \-
-   * - ``app_restored``
-     - ``Path | None``
-     - \-
-   * - ``int_restored``
-     - ``Path | None``
-     - \-
-   * - ``app_residual``
-     - ``Path | None``
-     - \-
-   * - ``int_residual``
-     - ``Path | None``
-     - \-
-   * - ``app_model``
-     - ``Path | None``
-     - \-
-   * - ``int_model``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``dico_model``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
 
 deconvolve
@@ -6843,11 +6834,11 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``None``
      - \-
    * - ``vis_data_ms_name``
-     - ``Path | None``
-     - ``None``
+     - ``Path``
+     - *required*
      - \-
    * - ``vis_data_t_chunk``
-     - ``int | None``
+     - ``float | None``
      - ``15``
      - \-
    * - ``vis_data_in_col``
@@ -6907,7 +6898,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'AE'``
      - \-
    * - ``beam_dt_beam_min``
-     - ``int | None``
+     - ``float | None``
      - ``5``
      - \-
    * - ``beam_center_norm``
@@ -7131,8 +7122,8 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``0``
      - \-
    * - ``solutions_sols_dir``
-     - ``str | None``
-     - ``None``
+     - ``str``
+     - *required*
      - \-
    * - ``compression_compression_mode``
      - ``str | None``
@@ -7228,8 +7219,8 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
    * - Field
      - Type
      - Description
-   * - ``solutions_sols_dir``
-     - ``Path | None``
+   * - ``solutions``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 listobs
@@ -9795,7 +9786,7 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
      - ``Path | None``
      - \-
    * - ``gain_directory``
-     - ``Path | None``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 quartical-backup
@@ -12601,6 +12592,42 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``bool | None``
      - ``False``
      - \-
+   * - ``input_primaryBeam``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``flag_cube``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``output_dataFormat``
+     - ``str | None``
+     - ``'fits'``
+     - \-
+   * - ``output_writeLogFile``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``output_writePV``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_writeKarma``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_marginAperSpec``
+     - ``int | None``
+     - ``-1``
+     - \-
+   * - ``output_showPreviewImage``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_writeDiagnosticPlot``
+     - ``bool | None``
+     - ``True``
+     - \-
 
 **Outputs**
 
@@ -12611,47 +12638,26 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
    * - Field
      - Type
      - Description
-   * - ``cat_ascii``
-     - ``Path | None``
-     - \-
-   * - ``cat_sql``
-     - ``Path | None``
-     - \-
-   * - ``cat_xml``
-     - ``Path | None``
-     - \-
-   * - ``cubelets``
-     - ``Path | None``
+   * - ``catalogue``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``filtered``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``mask``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
-   * - ``mask_2d``
-     - ``Path | None``
-     - \-
-   * - ``mask_raw``
-     - ``Path | None``
-     - \-
-   * - ``mom0``
-     - ``Path | None``
-     - \-
-   * - ``mom1``
-     - ``Path | None``
-     - \-
-   * - ``mom2``
-     - ``Path | None``
-     - \-
-   * - ``chan_map``
-     - ``Path | None``
+   * - ``moments``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``noise``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
-   * - ``noise_txt``
-     - ``Path | None``
+   * - ``cubelets``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``diagnostics``
+     - ``ProductFamily[Path] | None``
      - \-
 
 spimple-binterp
@@ -14696,7 +14702,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``nchan``
      - ``int | None``
-     - ``None``
+     - ``1``
      - \-
    * - ``deconvolution_channels``
      - ``int | None``
@@ -14716,7 +14722,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``pol``
      - ``str | list[str] | None``
-     - ``None``
+     - ``'I'``
      - \-
    * - ``join_polarizations``
      - ``bool | None``
@@ -14728,7 +14734,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``intervals_out``
      - ``int | None``
-     - ``None``
+     - ``1``
      - \-
    * - ``interval``
      - ``tuple[int, int] | None``
@@ -14775,11 +14781,11 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``mem``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``abs_mem``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``verbose``
@@ -14820,7 +14826,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``no_dirty``
      - ``bool | None``
-     - ``None``
+     - ``False``
      - \-
    * - ``save_first_residual``
      - ``bool | None``
@@ -14848,7 +14854,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``make_psf_only``
      - ``bool | None``
-     - ``None``
+     - ``False``
      - \-
    * - ``weight``
      - ``str | tuple[str, float] | None``
@@ -14903,7 +14909,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``size``
-     - ``int | tuple[int, int]``
+     - ``tuple[int, int]``
      - *required*
      - \-
    * - ``padding``
@@ -14916,11 +14922,11 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``predict``
      - ``bool | None``
-     - ``None``
+     - ``False``
      - \-
    * - ``continue_``
      - ``bool | None``
-     - ``None``
+     - ``False``
      - \-
    * - ``subtract_model``
      - ``bool | None``
@@ -14935,7 +14941,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``shift``
-     - ``list[str] | None``
+     - ``tuple[str, str] | None``
      - ``None``
      - \-
    * - ``facet_regions``
@@ -14983,7 +14989,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``wstack_nwlayers_for_size``
-     - ``list[int] | None``
+     - ``tuple[int, int] | None``
      - ``None``
      - \-
    * - ``wstack_grid_mode``
@@ -15019,7 +15025,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``beam_aterm_update``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``aterm_kernel_size``
@@ -15047,7 +15053,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``facet_beam_update``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``save_aterms``
@@ -15070,10 +15076,6 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``float | None``
      - ``None``
      - \-
-   * - ``scalar_beam``
-     - ``bool | None``
-     - ``None``
-     - \-
    * - ``mwa_path``
      - ``Path | None``
      - ``None``
@@ -15087,7 +15089,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``dd_psf_grid``
-     - ``list[int] | None``
+     - ``tuple[int, int] | None``
      - ``None``
      - \-
    * - ``beam_model``
@@ -15104,7 +15106,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``dry_run``
      - ``bool | None``
-     - ``None``
+     - ``False``
      - \-
    * - ``maxuvw_m``
      - ``float | None``
@@ -15128,7 +15130,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``niter``
      - ``int | None``
-     - ``None``
+     - ``0``
      - \-
    * - ``nmiter``
      - ``int | None``
@@ -15139,7 +15141,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``abs_threshold``
-     - ``float | None``
+     - ``str | float | None``
      - ``None``
      - \-
    * - ``auto_mask``
@@ -15147,7 +15149,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``abs_auto_mask``
-     - ``float | None``
+     - ``str | float | None``
      - ``None``
      - \-
    * - ``local_rms``
@@ -15159,7 +15161,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``local_rms_window``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``local_rms_method``
@@ -15179,7 +15181,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``spectral_correction``
-     - ``list[float | str] | None``
+     - ``tuple[float, str] | None``
      - ``None``
      - \-
    * - ``no_fast_subminor``
@@ -15252,7 +15254,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``save_source_list``
      - ``bool | None``
-     - ``None``
+     - ``False``
      - \-
    * - ``clean_border``
      - ``float | None``
@@ -15307,19 +15309,19 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``restore``
-     - ``list[Path] | None``
+     - ``tuple[Path, Path, Path] | None``
      - ``None``
      - \-
    * - ``restore_list``
-     - ``list[Path] | None``
+     - ``tuple[Path, Path, Path] | None``
      - ``None``
      - \-
    * - ``beam_size``
-     - ``float | None``
+     - ``str | float | None``
      - ``None``
      - \-
    * - ``beam_shape``
-     - ``list[str | float] | None``
+     - ``tuple[str | float, str | float, str | float] | None``
      - ``None``
      - \-
    * - ``fit_beam``
@@ -15346,6 +15348,18 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``bool | None``
      - ``None``
      - \-
+   * - ``local_rms_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``direct_ft_precision``
+     - ``Literal['float', 'double', 'ldouble'] | None``
+     - ``None``
+     - \-
+   * - ``temp_dir``
+     - ``Path | None``
+     - ``None``
+     - \-
 
 **Outputs**
 
@@ -15356,41 +15370,23 @@ WSClean imager (https://wsclean.readthedocs.io)
    * - Field
      - Type
      - Description
-   * - ``dirty``
-     - ``Path | None``
-     - \-
    * - ``image``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``dirty``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``residual``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``model``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``psf``
-     - ``Path | None``
-     - \-
-   * - ``dirty_mfs``
-     - ``Path | None``
-     - \-
-   * - ``image_mfs``
-     - ``Path | None``
-     - \-
-   * - ``residual_mfs``
-     - ``Path | None``
-     - \-
-   * - ``model_mfs``
-     - ``Path | None``
-     - \-
-   * - ``psf_mfs``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``source_list``
-     - ``Path | None``
-     - \-
-   * - ``temp_dir``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
 
 wvrgcal

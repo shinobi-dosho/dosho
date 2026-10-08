@@ -126,7 +126,7 @@ def test_ragavi_vis_emits_htmlname_so_the_caller_controls_the_output_path():
 def test_sofia2_real_param_count():
     cab = dosho.get("sofia2")
     assert cab.name == "sofia2"
-    assert len(cab.inputs_model.model_fields) == 100
+    assert len(cab.inputs_model.model_fields) == 109
 
 
 def test_sofia2_renders_settings_not_flags():
@@ -751,10 +751,8 @@ def test_sofia2_every_moment_map_resolves_not_just_mom2(tmp_path, monkeypatch):
         output_directory=str(out),
         output_filename="run1",
     )
-    assert str(result.outputs.mom0) == f"{out}/run1_mom0.fits"
-    assert str(result.outputs.mom1) == f"{out}/run1_mom1.fits"
-    assert str(result.outputs.mom2) == f"{out}/run1_mom2.fits"
-    assert str(result.outputs.chan_map) == f"{out}/run1_chan.fits"
+    assert result.outputs.moments.resolved
+    assert result.outputs.moments.members == ()
 
 
 def test_spimple_spifit_model_and_residual_lists():
