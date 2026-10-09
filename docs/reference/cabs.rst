@@ -14064,7 +14064,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - ``None``
      - \-
    * - ``flagging_strategy``
-     - ``str | None``
+     - ``Literal['standard', 'polarisation', 'total_power'] | None``
      - ``None``
      - \-
    * - ``row_chunks``
@@ -14100,7 +14100,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - ``True``
      - \-
    * - ``window_backend``
-     - ``str | None``
+     - ``Literal['numpy', 'zarr-disk'] | None``
      - ``None``
      - \-
    * - ``temporary_directory``
