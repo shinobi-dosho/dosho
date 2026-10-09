@@ -5,9 +5,11 @@ cabs:
     info: Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
     inputs:
       ms:
-        dtype: MS
+        dtype: MSv2
+        required: true
         policies:
           positional: true
+        mutable: true
       config:
         dtype: File
       ignore-flags:
@@ -24,6 +26,8 @@ cabs:
         dtype: Union[int,str]
       data-column:
         dtype: str
+        # tricolour's own default, stated so the access below can name it.
+        default: DATA
       field-names:
         dtype: str
       scan_numbers:
@@ -39,6 +43,17 @@ cabs:
         dtype: str
     outputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         policies:
           positional: true
+    dataset_accesses:
+      # tricolour 0.2.1 writes MAIN.FLAG only (FLAG_ROW untouched). The
+      # optional `subtract-model-column` read is left out: a template naming
+      # an unset input drops the whole access to whole-dataset intent, which
+      # would cost the default run its column detail. Shinobi records reads
+      # but does not verify or schedule on them.
+      - field: ms
+        mode: write
+        columns:
+          read: ["{data_column}"]
+          write: [FLAG]

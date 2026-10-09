@@ -601,7 +601,7 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
      - Default
      - Description
    * - ``msname``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``verbose``
@@ -659,7 +659,7 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
      - Type
      - Description
    * - ``msname``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 apparentsens
@@ -2786,11 +2786,11 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - ``15``
      - \-
    * - ``image_n_pix``
-     - ``int | None``
+     - ``int | tuple[int, int] | None``
      - ``5000``
      - \-
    * - ``image_cell``
-     - ``float | None``
+     - ``float | tuple[float, float] | None``
      - ``5.0``
      - \-
    * - ``image_phase_center_radec``
@@ -3756,31 +3756,22 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - Type
      - Description
    * - ``dirty``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``restored``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``model``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``residual``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``psf``
-     - ``Path | None``
-     - \-
-   * - ``app_restored``
-     - ``Path | None``
-     - \-
-   * - ``int_restored``
-     - ``Path | None``
-     - \-
-   * - ``app_residual``
-     - ``Path | None``
-     - \-
-   * - ``int_residual``
-     - ``Path | None``
-     - \-
-   * - ``app_model``
-     - ``Path | None``
-     - \-
-   * - ``int_model``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``dico_model``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
 
 deconvolve
@@ -6843,11 +6834,11 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``None``
      - \-
    * - ``vis_data_ms_name``
-     - ``Path | None``
-     - ``None``
+     - ``Path``
+     - *required*
      - \-
    * - ``vis_data_t_chunk``
-     - ``int | None``
+     - ``float | None``
      - ``15``
      - \-
    * - ``vis_data_in_col``
@@ -6907,7 +6898,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'AE'``
      - \-
    * - ``beam_dt_beam_min``
-     - ``int | None``
+     - ``float | None``
      - ``5``
      - \-
    * - ``beam_center_norm``
@@ -6923,7 +6914,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'beam_$(corr)_$(reim).fits'``
      - \-
    * - ``beam_fits_par_angle_inc_deg``
-     - ``int | None``
+     - ``float | None``
      - ``5``
      - \-
    * - ``beam_fitsl_axis``
@@ -6943,7 +6934,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``1``
      - \-
    * - ``beam_feed_angle``
-     - ``int | None``
+     - ``float | None``
      - ``0``
      - \-
    * - ``beam_apply_p_jones``
@@ -7063,7 +7054,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``None``
      - \-
    * - ``weighting_wtuv``
-     - ``int | None``
+     - ``float | None``
      - ``1``
      - \-
    * - ``actions_do_plot``
@@ -7127,12 +7118,12 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'AP'``
      - \-
    * - ``solutions_skip_existing_sols``
-     - ``int | None``
+     - ``Literal[0, 1]``
      - ``0``
      - \-
    * - ``solutions_sols_dir``
-     - ``str | None``
-     - ``None``
+     - ``str``
+     - *required*
      - \-
    * - ``compression_compression_mode``
      - ``str | None``
@@ -7159,7 +7150,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'Scalar'``
      - \-
    * - ``solvers_dt``
-     - ``int | None``
+     - ``float | None``
      - ``30``
      - \-
    * - ``solvers_n_chan_sols``
@@ -7171,7 +7162,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``7``
      - \-
    * - ``coh_jones_lambda_lm``
-     - ``int | None``
+     - ``float | None``
      - ``1``
      - \-
    * - ``coh_jones_lambda_tk``
@@ -7191,7 +7182,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``0``
      - \-
    * - ``kafca_init_l_mdt``
-     - ``int | None``
+     - ``float | None``
      - ``5``
      - \-
    * - ``kafca_cov_p``
@@ -7228,8 +7219,8 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
    * - Field
      - Type
      - Description
-   * - ``solutions_sols_dir``
-     - ``Path | None``
+   * - ``solutions``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 listobs
@@ -8151,7 +8142,7 @@ msutils flags backup: save an MS's current flags as a named version
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``name``
@@ -8176,8 +8167,8 @@ msutils flags backup: save an MS's current flags as a named version
    * - Field
      - Type
      - Description
-   * - ``ms``
-     - ``Path | None``
+   * - ``flagversions``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 msutils-flags-delete
@@ -8269,7 +8260,7 @@ msutils flags restore: restore an MS's flags from a saved version
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``name``
@@ -8287,7 +8278,7 @@ msutils flags restore: restore an MS's flags from a saved version
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 msutils-flagstats
@@ -9804,7 +9795,7 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
      - ``Path | None``
      - \-
    * - ``gain_directory``
-     - ``Path | None``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 quartical-backup
@@ -11766,7 +11757,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - Measurement set.
    * - ``ascii_sky``
@@ -11932,7 +11923,7 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 simms-telsim
@@ -11954,7 +11945,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - Observation name/id/label
    * - ``telescope``
@@ -12072,7 +12063,7 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 smoothcal
@@ -12610,6 +12601,42 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - ``bool | None``
      - ``False``
      - \-
+   * - ``input_primaryBeam``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``flag_cube``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``output_dataFormat``
+     - ``str | None``
+     - ``'fits'``
+     - \-
+   * - ``output_writeLogFile``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``output_writePV``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_writeKarma``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_marginAperSpec``
+     - ``int | None``
+     - ``-1``
+     - \-
+   * - ``output_showPreviewImage``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_writeDiagnosticPlot``
+     - ``bool | None``
+     - ``True``
+     - \-
 
 **Outputs**
 
@@ -12620,47 +12647,26 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
    * - Field
      - Type
      - Description
-   * - ``cat_ascii``
-     - ``Path | None``
-     - \-
-   * - ``cat_sql``
-     - ``Path | None``
-     - \-
-   * - ``cat_xml``
-     - ``Path | None``
-     - \-
-   * - ``cubelets``
-     - ``Path | None``
+   * - ``catalogue``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``filtered``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``mask``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
-   * - ``mask_2d``
-     - ``Path | None``
-     - \-
-   * - ``mask_raw``
-     - ``Path | None``
-     - \-
-   * - ``mom0``
-     - ``Path | None``
-     - \-
-   * - ``mom1``
-     - ``Path | None``
-     - \-
-   * - ``mom2``
-     - ``Path | None``
-     - \-
-   * - ``chan_map``
-     - ``Path | None``
+   * - ``moments``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``noise``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
-   * - ``noise_txt``
-     - ``Path | None``
+   * - ``cubelets``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``diagnostics``
+     - ``ProductFamily[Path] | None``
      - \-
 
 spimple-binterp
@@ -14038,8 +14044,8 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - Default
      - Description
    * - ``ms``
-     - ``Path | None``
-     - ``None``
+     - ``MSv2``
+     - *required*
      - \-
    * - ``config``
      - ``Path | None``
@@ -14071,7 +14077,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - \-
    * - ``data_column``
      - ``str | None``
-     - ``None``
+     - ``'DATA'``
      - \-
    * - ``field_names``
      - ``str | None``
@@ -14108,7 +14114,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MSv2 | None``
      - \-
 
 uvcontsub
@@ -14684,7 +14690,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Default
      - Description
    * - ``ms``
-     - ``list[Path]``
+     - ``list[MSv2]``
      - *required*
      - \-
    * - ``prefix``
@@ -14704,8 +14710,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``nchan``
-     - ``int | None``
-     - ``None``
+     - ``int``
+     - ``1``
      - \-
    * - ``deconvolution_channels``
      - ``int | None``
@@ -14724,8 +14730,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``pol``
-     - ``str | list[str] | None``
-     - ``None``
+     - ``str | list[str]``
+     - ``'I'``
      - \-
    * - ``join_polarizations``
      - ``bool | None``
@@ -14736,8 +14742,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``intervals_out``
-     - ``int | None``
-     - ``None``
+     - ``int``
+     - ``1``
      - \-
    * - ``interval``
      - ``tuple[int, int] | None``
@@ -14784,11 +14790,11 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``mem``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``abs_mem``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``verbose``
@@ -14828,8 +14834,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``no_dirty``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``save_first_residual``
      - ``bool | None``
@@ -14856,8 +14862,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``make_psf_only``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``weight``
      - ``str | tuple[str, float] | None``
@@ -14912,7 +14918,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``size``
-     - ``int | tuple[int, int]``
+     - ``tuple[int, int]``
      - *required*
      - \-
    * - ``padding``
@@ -14924,12 +14930,12 @@ WSClean imager (https://wsclean.readthedocs.io)
      - *required*
      - \-
    * - ``predict``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``continue_``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``subtract_model``
      - ``bool | None``
@@ -14944,7 +14950,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``shift``
-     - ``list[str] | None``
+     - ``tuple[str, str] | None``
      - ``None``
      - \-
    * - ``facet_regions``
@@ -14992,7 +14998,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``wstack_nwlayers_for_size``
-     - ``list[int] | None``
+     - ``tuple[int, int] | None``
      - ``None``
      - \-
    * - ``wstack_grid_mode``
@@ -15024,11 +15030,11 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``grid_with_beam``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``beam_aterm_update``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``aterm_kernel_size``
@@ -15052,11 +15058,11 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``apply_facet_beam``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``facet_beam_update``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``save_aterms``
@@ -15079,10 +15085,6 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``float | None``
      - ``None``
      - \-
-   * - ``scalar_beam``
-     - ``bool | None``
-     - ``None``
-     - \-
    * - ``mwa_path``
      - ``Path | None``
      - ``None``
@@ -15096,7 +15098,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``dd_psf_grid``
-     - ``list[int] | None``
+     - ``tuple[int, int] | None``
      - ``None``
      - \-
    * - ``beam_model``
@@ -15112,8 +15114,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``dry_run``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``maxuvw_m``
      - ``float | None``
@@ -15137,7 +15139,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - \-
    * - ``niter``
      - ``int | None``
-     - ``None``
+     - ``0``
      - \-
    * - ``nmiter``
      - ``int | None``
@@ -15148,7 +15150,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``abs_threshold``
-     - ``float | None``
+     - ``str | float | None``
      - ``None``
      - \-
    * - ``auto_mask``
@@ -15156,7 +15158,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``abs_auto_mask``
-     - ``float | None``
+     - ``str | float | None``
      - ``None``
      - \-
    * - ``local_rms``
@@ -15168,7 +15170,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``local_rms_window``
-     - ``int | None``
+     - ``float | None``
      - ``None``
      - \-
    * - ``local_rms_method``
@@ -15188,7 +15190,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``spectral_correction``
-     - ``list[float | str] | None``
+     - ``tuple[float, str] | None``
      - ``None``
      - \-
    * - ``no_fast_subminor``
@@ -15260,8 +15262,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``save_source_list``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``clean_border``
      - ``float | None``
@@ -15316,19 +15318,19 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``restore``
-     - ``list[Path] | None``
+     - ``tuple[Path, Path, Path] | None``
      - ``None``
      - \-
    * - ``restore_list``
-     - ``list[Path] | None``
+     - ``tuple[Path, Path, Path] | None``
      - ``None``
      - \-
    * - ``beam_size``
-     - ``float | None``
+     - ``str | float | None``
      - ``None``
      - \-
    * - ``beam_shape``
-     - ``list[str | float] | None``
+     - ``tuple[str | float, str | float, str | float] | None``
      - ``None``
      - \-
    * - ``fit_beam``
@@ -15355,6 +15357,18 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``bool | None``
      - ``None``
      - \-
+   * - ``local_rms_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``direct_ft_precision``
+     - ``Literal['float', 'double', 'ldouble'] | None``
+     - ``None``
+     - \-
+   * - ``temp_dir``
+     - ``Path | None``
+     - ``None``
+     - \-
 
 **Outputs**
 
@@ -15365,41 +15379,29 @@ WSClean imager (https://wsclean.readthedocs.io)
    * - Field
      - Type
      - Description
-   * - ``dirty``
-     - ``Path | None``
-     - \-
    * - ``image``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``dirty``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``residual``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``model``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``psf``
-     - ``Path | None``
-     - \-
-   * - ``dirty_mfs``
-     - ``Path | None``
-     - \-
-   * - ``image_mfs``
-     - ``Path | None``
-     - \-
-   * - ``residual_mfs``
-     - ``Path | None``
-     - \-
-   * - ``model_mfs``
-     - ``Path | None``
-     - \-
-   * - ``psf_mfs``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
    * - ``source_list``
-     - ``Path | None``
+     - ``ProductFamily[Path] | None``
      - \-
-   * - ``temp_dir``
-     - ``Path | None``
+   * - ``continued_beam_model``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``continued_facet_beam_model``
+     - ``ProductFamily[Path] | None``
      - \-
 
 wvrgcal

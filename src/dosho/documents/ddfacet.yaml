@@ -3,6 +3,12 @@ cabs:
     command: DDF.py
     image: DDFACET
     info: 'EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.com/saopicc/DDFacet)'
+    policies:
+      explicit_true: true
+      explicit_false: true
+      true_token: '1'
+      false_token: '0'
+      repeat: '[]'
     harvest:
     - '{output_name}.*'
     scratch:
@@ -202,12 +208,12 @@ cabs:
         info: 'Multiple of the RMS in final residual which determines threshold for fitting alpha map.
           (Default: 15)'
       image_n_pix:
-        dtype: int
+        dtype: Union[int, Tuple[int, int]]
         default: 5000
         nom_de_guerre: Image-NPix
         info: 'Image size. (Default: 5000)'
       image_cell:
-        dtype: float
+        dtype: Union[float, Tuple[float, float]]
         default: 5.0
         nom_de_guerre: Image-Cell
         info: 'Cell size. (Default: 5.0)'
@@ -1625,31 +1631,257 @@ cabs:
         nom_de_guerre: katdal-ApplyCal
         info: 'List of calibration solutions to apply to data as a string of comma-separated names, e.g.
           ''l1'' or #''K,B,G''. Use ''default'' for L1 + L2 and ''all'' for all available products.'
+    # Image/frequency/Stokes axes stay inside each FITS cube. Only physical
+    # representations, flux scales and saved cycle ordinals identify files.
+    # Source: DDFacet/Imager/ClassDeconvMachine.py at 2fe05ab4.
     outputs:
       dirty:
-        dtype: File
-        implicit: '{output_name}.dirty.fits'
+        dtype: ProductFamily[File]
+        family:
+          coordinates:
+            representation: str
+            flux_scale: str
+          rules:
+          - path: '{output_name}.dirty.fits'
+            coordinates:
+              representation: mean
+              flux_scale: apparent
+            when: &dirty_id001
+              output_mode:
+              - Dirty
+              - Clean
+              - PSF
+          - path: '{output_name}.dirty.corr.fits'
+            coordinates:
+              representation: mean
+              flux_scale: intrinsic
+            when: *dirty_id001
+          - path: '{output_name}.cube.dirty.fits'
+            coordinates:
+              representation: cube
+              flux_scale: apparent
+            when: *dirty_id001
+          - path: '{output_name}.cube.dirty.corr.fits'
+            coordinates:
+              representation: cube
+              flux_scale: intrinsic
+            when: *dirty_id001
+      restored:
+        dtype: ProductFamily[File]
+        family:
+          coordinates:
+            representation: str
+            flux_scale: str
+          rules:
+          - path: '{output_name}.app.restored.fits'
+            coordinates:
+              representation: mean
+              flux_scale: apparent
+            when: &restored_id001
+              output_mode:
+              - Clean
+          - path: '{output_name}.int.restored.fits'
+            coordinates:
+              representation: mean
+              flux_scale: intrinsic
+            when: *restored_id001
+          - path: '{output_name}.cube.app.restored.fits'
+            coordinates:
+              representation: cube
+              flux_scale: apparent
+            when: *restored_id001
+          - path: '{output_name}.cube.int.restored.fits'
+            coordinates:
+              representation: cube
+              flux_scale: intrinsic
+            when: *restored_id001
+          - path: '{output_name}.app.restored_mfs.fits'
+            coordinates:
+              representation: mfs
+              flux_scale: apparent
+            when: *restored_id001
+          - path: '{output_name}.int.restored_mfs.fits'
+            coordinates:
+              representation: mfs
+              flux_scale: intrinsic
+            when: *restored_id001
+          - path: '{output_name}.restored.fits'
+            coordinates:
+              representation: mean
+              flux_scale: mixed
+            when: *restored_id001
+      model:
+        dtype: ProductFamily[File]
+        family:
+          coordinates:
+            representation: str
+            flux_scale: str
+          rules:
+          - path: '{output_name}.app.model.fits'
+            coordinates:
+              representation: mean
+              flux_scale: apparent
+            when: &model_id001
+              output_mode:
+              - Clean
+          - path: '{output_name}.int.model.fits'
+            coordinates:
+              representation: mean
+              flux_scale: intrinsic
+            when: *model_id001
+          - path: '{output_name}.cube.app.model.fits'
+            coordinates:
+              representation: cube
+              flux_scale: apparent
+            when: *model_id001
+          - path: '{output_name}.cube.int.model.fits'
+            coordinates:
+              representation: cube
+              flux_scale: intrinsic
+            when: *model_id001
+      residual:
+        dtype: ProductFamily[File]
+        family:
+          coordinates:
+            representation: str
+            flux_scale: str
+            cycle:
+            - int
+            - str
+          rules:
+          - path: '{output_name}.app.residual.fits'
+            coordinates:
+              representation: mean
+              flux_scale: apparent
+              cycle: final
+            when: &residual_id001
+              output_mode:
+              - Clean
+          - path: '{output_name}.stokes.app.residual.fits'
+            coordinates:
+              representation: stokes_mean
+              flux_scale: apparent
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.int.residual.fits'
+            coordinates:
+              representation: mean
+              flux_scale: intrinsic
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.stokes.int.residual.fits'
+            coordinates:
+              representation: stokes_mean
+              flux_scale: intrinsic
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.cube.app.residual.fits'
+            coordinates:
+              representation: cube
+              flux_scale: apparent
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.cube.stokes.app.residual.fits'
+            coordinates:
+              representation: stokes_cube
+              flux_scale: apparent
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.cube.int.residual.fits'
+            coordinates:
+              representation: cube
+              flux_scale: intrinsic
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.cube.stokes.int.residual.fits'
+            coordinates:
+              representation: stokes_cube
+              flux_scale: intrinsic
+              cycle: final
+            when: *residual_id001
+          - path: '{output_name}.residual{cycle}.fits'
+            coordinates:
+              representation: mean
+              flux_scale: apparent
+            when: *residual_id001
+            captures:
+              cycle: int
+          - path: '{output_name}.cube.residual{cycle}.fits'
+            coordinates:
+              representation: cube
+              flux_scale: apparent
+            when: *residual_id001
+            captures:
+              cycle: int
       psf:
-        dtype: File
-        implicit: '{output_name}.psf.fits'
-      app_restored:
-        dtype: File
-        implicit: '{output_name}.app.restored.fits'
-      int_restored:
-        dtype: File
-        implicit: '{output_name}.int.restored.fits'
-      app_residual:
-        dtype: File
-        implicit: '{output_name}.app.residual.fits'
-      int_residual:
-        dtype: File
-        implicit: '{output_name}.int.residual.fits'
-      app_model:
-        dtype: File
-        implicit: '{output_name}.app.model.fits'
-      int_model:
-        dtype: File
-        implicit: '{output_name}.int.model.fits'
+        dtype: ProductFamily[File]
+        family:
+          coordinates:
+            representation: str
+            correction: str
+            cycle:
+            - int
+            - str
+          rules:
+          - path: '{output_name}.psf.fits'
+            coordinates:
+              representation: mean
+              correction: none
+              cycle: final
+            when: &psf_id001
+              output_mode:
+              - Dirty
+              - Clean
+              - PSF
+          - path: '{output_name}.{cycle}.psf.fits'
+            coordinates:
+              representation: mean
+              correction: none
+            when: *psf_id001
+            captures:
+              cycle: int
+          - path: '{output_name}.cube.psf.fits'
+            coordinates:
+              representation: cube
+              correction: none
+              cycle: final
+            when: *psf_id001
+          - path: '{output_name}.{cycle}.cube.psf.fits'
+            coordinates:
+              representation: cube
+              correction: none
+            when: *psf_id001
+            captures:
+              cycle: int
+          - path: '{output_name}.cube.psf.corr.fits'
+            coordinates:
+              representation: cube
+              correction: corrected
+              cycle: final
+            when: *psf_id001
+          - path: '{output_name}.{cycle}.cube.psf.corr.fits'
+            coordinates:
+              representation: cube
+              correction: corrected
+            when: *psf_id001
+            captures:
+              cycle: int
       dico_model:
-        dtype: File
-        implicit: '{output_name}.DicoModel'
+        dtype: ProductFamily[File]
+        family:
+          coordinates:
+            cycle:
+            - int
+            - str
+          rules:
+          - path: '{output_name}.DicoModel'
+            coordinates:
+              cycle: final
+            when: &dico_model_id001
+              output_mode:
+              - Clean
+          - path: '{output_name}.{cycle}.DicoModel'
+            coordinates: {}
+            when: *dico_model_id001
+            captures:
+              cycle: int

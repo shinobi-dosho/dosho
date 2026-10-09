@@ -4,6 +4,7 @@ Checks registration, field-count sanity, real argv shape, and that killms
 builds on top of dosho's own DDFACET image.
 """
 
+import pytest
 from shinobi.policies import build_argv
 
 import dosho
@@ -36,9 +37,9 @@ def test_killms_case_preserved_flags():
         },
     )
     assert argv[0] == "kMS.py"
-    assert "--VisData-MSName" in argv and "obs.MS" in argv
-    assert "--SkyModel-SkyModel" in argv and "model.lsm.html" in argv
-    assert "--Solvers-SolverType" in argv and "CohJones" in argv
+    assert "--MSName" in argv and "obs.MS" in argv
+    assert "--SkyModel" in argv and "model.lsm.html" in argv
+    assert "--SolverType" in argv and "CohJones" in argv
 
 
 def test_killms_parset_is_a_bare_head_positional_at_argv_1():
@@ -56,7 +57,7 @@ def test_killms_parset_omitted_when_not_given():
     cab = dosho.get("killms")
     argv = build_argv(cab, {"vis_data_ms_name": "obs.MS"})
     assert "base.parset" not in argv
-    assert argv[1] == "--VisData-MSName"
+    assert argv[1] == "--MSName"
 
 
 def test_every_real_path_option_is_a_path_dtype_not_a_str():
@@ -91,9 +92,9 @@ def test_ms_is_typed_so_it_gets_bound_and_anchored():
     cab = dosho.get("killms")
     assert is_file_dtype("MS")
     assert "vis_data_ms_name" in cab.inputs_model.model_fields
-    # the dtype change must not touch the argv shape: still --VisData-MSName
+    # the dtype change must not touch the argv shape: still --MSName
     argv = build_argv(cab, {"vis_data_ms_name": "obs.MS"})
-    assert argv == ["kMS.py", "--VisData-MSName", "obs.MS"]
+    assert argv == ["kMS.py", "--MSName", "obs.MS"]
 
 
 def test_write_targets_and_name_components_stay_str():
@@ -137,7 +138,9 @@ def test_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
 
     cab = dosho.get("killms")
     (ms := tmp_path / "obs.MS").mkdir()
-    params = {"vis_data_ms_name": str(ms)}
+    params = cab.inputs_model(
+        vis_data_ms_name=str(ms), solutions_sols_dir=str(tmp_path / "sols")
+    ).model_dump()
     before = compute_cache_key(cab, None, params, None)
     (ms / "CORRECTED_DATA").write_text("written by kMS.py itself")
     invalidate_path_hashes()
@@ -150,48 +153,38 @@ def test_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
     assert compute_cache_key(naive, None, params, None) != stale
 
 
-def test_killms_declares_the_solutions_directory_it_writes():
-    """The `.sols.npz` filename is built internally (`reformat(MSName)`), so the
-    *directory* is what gets declared -- and it is what a pipeline wires, since
-    DDFacet consumes SolsDir plus a solution name, never the file.
-    """
-    from shinobi.steps.schema import path_fields
+def test_killms_solution_bundle_has_a_separate_owned_root():
+    from pathlib import Path
+
+    from shinobi.products import DirectoryBundle, FamilyPlan
 
     cab = dosho.get("killms")
-    assert "solutions_sols_dir" in cab.outputs_model.model_fields
-    # input stays `str` (relative under a sandbox); the output side is path-typed
-    assert "solutions_sols_dir" not in path_fields(cab.inputs_model)
-    assert "solutions_sols_dir" in path_fields(cab.outputs_model)
-    # the flag still renders: field_meta merges output over input, so an
-    # output-side ParamMeta would have dropped the nom_de_guerre
-    assert cab.field_meta["solutions_sols_dir"].nom_de_guerre == "Solutions-SolsDir"
+    inputs = cab.inputs_model(vis_data_ms_name="obs.ms", solutions_sols_dir="sols").model_dump()
+    assert inputs["solutions_sols_dir"] == "sols"
+    plan = FamilyPlan(cab.field_meta["solutions"].family, DirectoryBundle, inputs, Path.cwd())
+    assert plan.root == Path.cwd() / "sols"
     argv = build_argv(cab, {"vis_data_ms_name": "/obs.ms", "solutions_sols_dir": "/sols"})
-    assert "--Solutions-SolsDir" in argv and "/sols" in argv
+    assert "--SolsDir" in argv and "/sols" in argv
 
 
-def test_killms_solsdir_passthrough_resolves_and_stays_none_when_unset():
+def test_killms_unproduced_solutions_are_an_empty_family(tmp_path, monkeypatch):
     from shinobi.backends.recording import RecordingBackend
     from shinobi.steps import register_step_backend
     from shinobi.steps.dispatch import _dispatch
 
+    monkeypatch.chdir(tmp_path)
     register_step_backend("killms-record", RecordingBackend())
     cab = dosho.get("killms").model_copy(update={"backend": "killms-record"})
-
-    result = _dispatch(cab, None, vis_data_ms_name="/obs.ms", solutions_sols_dir="/sols")
-    assert str(result.outputs.solutions_sols_dir) == "/sols"
-
-    # unset declares nothing, which is right: the solutions then land inside the
-    # MS directory, already mounted as an input
-    result = _dispatch(cab, None, vis_data_ms_name="/obs.ms")
-    assert result.outputs.solutions_sols_dir is None
+    result = _dispatch(cab, None, vis_data_ms_name="obs.ms", solutions_sols_dir="sols")
+    assert result.outputs.solutions.resolved and result.outputs.solutions.members == ()
 
 
 def test_killms_experimental_marker_names_only_the_residual():
     from dosho.registry import _index
 
     reason = _index()["killms"]["experimental"]
-    assert "sols.npz" in reason  # the unnameable file, wired as dir + name instead
-    assert "nothing is silently lost" in reason.lower()
+    assert "inventoried" in reason
+    assert "batch" in reason.lower()
     assert dosho.get("killms").info.startswith("EXPERIMENTAL:")
 
 
@@ -205,9 +198,133 @@ def test_killms_cache_dir_is_scratch_not_an_output():
 
 
 def test_killms_scratch_declares_nothing_when_the_cache_is_unset():
+    from pathlib import Path
+
     from shinobi.steps.schema import declared_output_dirs
 
     cab = dosho.get("killms")
-    dirs = [str(d) for d, _ in declared_output_dirs(cab, {"solutions_sols_dir": "sols/r1"})]
+    dirs = [
+        str(d)
+        for d, _ in declared_output_dirs(
+            cab, {"solutions_sols_dir": "sols/r1", "solutions_skip_existing_sols": 0}
+        )
+    ]
     assert "None" not in dirs
-    assert dirs == ["sols"]
+    assert any(Path(d).name in {"sols", "r1"} for d in dirs)
+
+
+def test_empty_preapply_lists_preserve_native_list_shape():
+    argv = build_argv(
+        dosho.get("killms"), {"pre_apply_pre_apply_sols": [], "pre_apply_pre_apply_mode": []}
+    )
+    assert argv == ["kMS.py", "--PreApplySols", "[]", "--PreApplyMode", "[]"]
+
+
+@pytest.mark.parametrize(
+    "field,flag",
+    [
+        ("beam_fits_par_angle_inc_deg", "FITSParAngleIncDeg"),
+        ("beam_feed_angle", "FeedAngle"),
+        ("weighting_wtuv", "WTUV"),
+        ("solvers_dt", "dt"),
+        ("coh_jones_lambda_lm", "LambdaLM"),
+        ("kafca_init_l_mdt", "InitLMdt"),
+    ],
+)
+def test_native_float_options_preserve_fractional_values(field, flag):
+    """These flags are float options in killMS 3.3.0's read_options table."""
+    cab = dosho.get("killms")
+    inputs = cab.inputs_model(vis_data_ms_name="obs.ms", solutions_sols_dir="sols", **{field: 2.5})
+    assert getattr(inputs, field) == 2.5
+    assert build_argv(cab, {field: getattr(inputs, field)}) == ["kMS.py", f"--{flag}", "2.5"]
+
+
+@pytest.mark.parametrize("skip", [0, 1])
+def test_solution_history_clearing_matches_skip_mode(tmp_path, skip):
+    from shinobi.products import DirectoryBundle, FamilyPlan
+    from shinobi.sandbox import clear_stale_outputs
+
+    cab = dosho.get("killms")
+    root = tmp_path / "sols"
+    root.mkdir()
+    npz = root / "killMS.old.sols.npz"
+    parset = root / "killMS.old.sols.parset"
+    npz.write_text("solutions")
+    parset.write_text("parset")
+    inputs = cab.inputs_model(
+        vis_data_ms_name="obs.ms", solutions_sols_dir=str(root), solutions_skip_existing_sols=skip
+    ).model_dump()
+    plan = FamilyPlan(cab.field_meta["solutions"].family, DirectoryBundle, inputs, tmp_path)
+    assert len(plan.candidates) == 1
+    assert plan.candidates[0].rule.accept_existing is bool(skip)
+    clear_stale_outputs(cab, inputs, tmp_path, sandboxed=False)
+    assert npz.exists() is bool(skip)
+    assert parset.exists() is bool(skip)
+
+
+@pytest.mark.parametrize("value", [2, None])
+def test_skip_mode_rejects_values_without_an_output_contract(value):
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        dosho.get("killms").inputs_model(
+            vis_data_ms_name="obs.ms", solutions_sols_dir="sols", solutions_skip_existing_sols=value
+        )
+
+
+@pytest.mark.parametrize("sandbox", [False, True])
+def test_skip_mode_captures_unchanged_solution_history(tmp_path, monkeypatch, sandbox):
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "sols"
+    root.mkdir()
+    (root / "old.sols.npz").write_text("solutions")
+    (root / "old.sols.parset").write_text("parset")
+    monkeypatch.setenv("SHINOBI_SANDBOX__DIR", str(tmp_path / "sandboxes"))
+    register_step_backend("killms-skip-record", RecordingBackend())
+    cab = dosho.get("killms").model_copy(
+        update={"backend": "killms-skip-record", "cache": False, "sandbox": sandbox}
+    )
+    result = _dispatch(
+        cab,
+        None,
+        vis_data_ms_name="obs.ms",
+        solutions_sols_dir=str(root),
+        solutions_skip_existing_sols=1,
+    )
+    assert result.outputs.solutions.select().path.resolve() == root
+    assert (root / "old.sols.npz").read_text() == "solutions"
+    assert (root / "old.sols.parset").read_text() == "parset"
+
+
+def test_relative_sandbox_reuse_stages_and_preserves_history(tmp_path, monkeypatch):
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("SHINOBI_SANDBOX__DIR", str(tmp_path / "sandboxes"))
+    (tmp_path / "obs.ms").mkdir()
+    root = tmp_path / "sols"
+    root.mkdir()
+    (root / "old.sols.npz").write_text("solutions")
+    (root / "old.sols.parset").write_text("parset")
+    backend = RecordingBackend()
+    register_step_backend("killms-relative-skip", backend)
+    cab = dosho.get("killms").model_copy(
+        update={"backend": "killms-relative-skip", "sandbox": True, "cache": False}
+    )
+    result = _dispatch(
+        cab,
+        None,
+        vis_data_ms_name="obs.ms",
+        solutions_sols_dir="sols",
+        solutions_skip_existing_sols=1,
+    )
+    assert len(backend.calls) == 1
+    assert result.outputs.solutions.select().path.resolve() == root
+    assert (root / "old.sols.npz").read_text() == "solutions"
+    assert (root / "old.sols.parset").read_text() == "parset"

@@ -34,6 +34,14 @@ The original, pre-3.0 `simms` command is a genuinely different tool -- its
 own image, no sub-command, a real standalone binary -- and lives in
 `dosho/cabs/simms_classic.py` as a `define_cab` `Cab`. It is *not* an older
 interface to anything below.
+
+`skysim` and `telsim` take a strict `MSv2` with a declared `DatasetAccess`
+(contracts checked against simms 3.0.2): `telsim` creates the MS, `skysim`
+writes into it. Both return the MS as a strict passthrough, so a downstream
+step can take it by `OutputRef`; it still cannot be handed to a path-only
+(`dtype: MS`) consumer in the same recipe. `create` refuses an existing
+target, so re-running a recipe with a strict `telsim` needs
+`--overwrite <step>`.
 """
 
 from __future__ import annotations
@@ -44,20 +52,21 @@ from typing import Literal
 
 import shinobi
 from pydantic import BaseModel, Field
+from shinobi import DatasetAccess, DatasetColumns, MSv2
 
 from dosho import images
 
 
 class SkysimOutputs(BaseModel):
-    """Passthrough MS path, so `skysim` can be wired into a shinobi Recipe."""
+    """Passthrough MS (strict `MSv2`), so `skysim` can be wired into a shinobi Recipe."""
 
-    ms: Path | None = None
+    ms: MSv2 | None = None
 
 
 class TelsimOutputs(BaseModel):
-    """Passthrough MS path, so `telsim` can be wired into a shinobi Recipe."""
+    """Passthrough MS (strict `MSv2`), so `telsim` can be wired into a shinobi Recipe."""
 
-    ms: Path | None = None
+    ms: MSv2 | None = None
 
 
 class PrimaryBeamOutputs(BaseModel):
@@ -89,10 +98,22 @@ def _opts(local_vars: dict) -> SimpleNamespace:
     name="simms-skysim",
     image=images.SIMMS,
     info="Predict model visibilities from a sky model into an MS (simms 3.0 skysim).",
+    # `column` (DATA by default) is created when absent (mode="sim") or
+    # written in place (add/subtract) -- both are a `create` entry with schema
+    # permission. The optional `input_column` read is left out: a template
+    # naming an unset input drops the whole access to whole-dataset intent.
+    dataset_accesses=[
+        DatasetAccess(
+            field="ms",
+            mode="write",
+            columns=DatasetColumns(create=("{column}",)),
+            allow_schema_change=True,
+        )
+    ],
 )
 def skysim(
     ctx,
-    ms: Path = Field(..., description="Measurement set."),
+    ms: MSv2 = Field(..., description="Measurement set."),
     ascii_sky: Path | None = Field(
         None,
         description="Catalogue of sources. See the documentation for accepted units.",
@@ -270,10 +291,11 @@ def skysim(
     image=images.SIMMS,
     info="Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).",
     write_paths=["ms"],
+    dataset_accesses=[DatasetAccess(field="ms", mode="create")],
 )
 def telsim(
     ctx,
-    ms: Path = Field(..., description="Observation name/id/label"),
+    ms: MSv2 = Field(..., description="Observation name/id/label"),
     telescope: str = Field(
         ...,
         description="Name of telescope you are simulating.",

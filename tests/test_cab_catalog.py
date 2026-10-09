@@ -9,6 +9,10 @@ import importlib.util
 import sys
 import types
 from pathlib import Path
+from typing import Literal
+
+import pytest
+from shinobi import CasaTab, MSv2
 
 _EXT = Path(__file__).resolve().parents[1] / "docs" / "_ext" / "cab_catalog.py"
 _spec = importlib.util.spec_from_file_location("cab_catalog", _EXT)
@@ -91,3 +95,62 @@ def test_main_reports_fresh_catalog():
     before = committed.read_text()
     assert cab_catalog.main() == 0
     assert committed.read_text() == before
+
+
+def test_strict_dataset_fields_render_as_their_shinobi_type():
+    """A strict field is a `Path` carrying a dataset declaration, so a naive
+    rendering prints `Path` and hides the contract. pydantic moves the
+    declaration onto `field.metadata` for a required field and leaves it
+    `Annotated` inside a union, so both shapes are checked.
+    """
+    from pydantic import BaseModel
+    from shinobi import MSv2
+
+    class Model(BaseModel):
+        required: MSv2
+        optional: MSv2 | None = None
+        plain: Path | None = None
+
+    def rendered(name):
+        field = Model.model_fields[name]
+        return cab_catalog._type_name(field.annotation, tuple(field.metadata))
+
+    assert rendered("required") == "MSv2"
+    assert rendered("optional") == "MSv2 | None"
+    assert rendered("plain") == "Path | None"
+
+
+def test_the_catalog_shows_a_real_cab_as_strict():
+    from dosho import registry
+
+    tricolour = registry.get("tricolour")
+    rendered = {
+        side: cab_catalog._type_name(field.annotation, tuple(field.metadata))
+        for side, field in (
+            ("in", tricolour.inputs_model.model_fields["ms"]),
+            ("out", tricolour.outputs_model.model_fields["ms"]),
+        )
+    }
+    assert rendered == {"in": "MSv2", "out": "MSv2 | None"}
+
+
+@pytest.mark.parametrize(
+    "annotation,expected",
+    [
+        (list[MSv2], "list[MSv2]"),
+        (list[MSv2] | None, "list[MSv2] | None"),
+        (dict[str, list[MSv2 | None]], "dict[str, list[MSv2 | None]]"),
+        (tuple[CasaTab, MSv2], "tuple[CasaTab, MSv2]"),
+        (tuple[MSv2, ...], "tuple[MSv2, ...]"),
+        (list[Literal["ms.image.fits", "other"]], "list[Literal['ms.image.fits', 'other']]"),
+    ],
+)
+def test_nested_generic_annotations_use_public_dataset_types(annotation, expected):
+    assert cab_catalog._type_name(annotation) == expected
+
+
+def test_wsclean_ms_list_renders_as_the_public_type():
+    from dosho import registry
+
+    field = registry.get("wsclean").inputs_model.model_fields["ms"]
+    assert cab_catalog._type_name(field.annotation, tuple(field.metadata)) == "list[MSv2]"

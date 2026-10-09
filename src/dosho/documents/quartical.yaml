@@ -100,6 +100,8 @@ cabs:
         default: false
       output.gain_directory:
         dtype: URI
+        required: true
+        write_path: true
         default: gains.qc
         mutable: true
       output.log_directory:
@@ -193,6 +195,13 @@ cabs:
       ms:
         dtype: MS
         implicit: '{input_ms_path}'
+      # A Zarr store is one owned bundle. Gain terms, net terms and BLCORR
+      # remain store-internal groups, not independently owned file products.
       gain_directory:
-        dtype: Directory
-        implicit: '{output_gain_directory}'
+        dtype: ProductFamily[DirectoryBundle]
+        family:
+          root: '{output_gain_directory}'
+          coordinates: {}
+          rules:
+            - path: '.'
+        info: Complete local gain store, including every group, metadata file and chunk.

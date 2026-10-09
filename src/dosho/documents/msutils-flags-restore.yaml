@@ -5,7 +5,7 @@ cabs:
     info: 'msutils flags restore: restore an MS''s flags from a saved version'
     inputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         required: true
         info: Measurement set to restore flags into
         policies:
@@ -19,5 +19,22 @@ cabs:
           positional: true
     outputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         info: Measurement set with the restored flags
+    dataset_accesses:
+      # Exact and complete: msutils flags.py writes FLAG and FLAG_ROW from the
+      # saved version and nothing else in the MS. Its saved-version dependency
+      # is a separately declared read, never a stale-cleared output.
+      - field: ms
+        mode: write
+        columns:
+          write: [FLAG, FLAG_ROW]
+    derived_reads:
+      saved_version:
+        member: directory
+        family:
+          root: '{ms}.flagversions'
+          coordinates: {}
+          rules:
+            - path: 'flags.{name}'
+              required: true

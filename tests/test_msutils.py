@@ -54,7 +54,6 @@ IN_PLACE = [
     "msutils-renamecol",
     "msutils-sumcols",
     "msutils-addnoise",
-    "msutils-flags-backup",
     "msutils-flags-restore",
     "msutils-flags-delete",
 ]
@@ -82,6 +81,17 @@ def test_an_ms_changed_in_place_is_declared_mutable(name):
     pipeline sees nothing.
     """
     assert dosho.get(name).mutability_of("ms") is Mutability.MUTABLE
+
+
+def test_flags_backup_is_a_reader():
+    """`flags backup` reads FLAG/FLAG_ROW and writes `<ms>.flagversions/`
+    beside the MS, never the MS itself. Its strict read contract depends on
+    both of these: a mutable `ms`, or an `ms` output echoing the input, is a
+    write, and shinobi refuses a read contract that contradicts one.
+    """
+    cab = dosho.get("msutils-flags-backup")
+    assert cab.mutability_of("ms") is Mutability.IMMUTABLE
+    assert "ms" not in cab.outputs_model.model_fields
 
 
 def test_flags_subcommands_are_three_argv_tokens():
@@ -221,3 +231,43 @@ def test_smooth_windows_take_a_count_or_a_physical_width():
     assert tokens[tokens.index("--time-window") + 1] == "5min"
     assert "--fill" in tokens  # `--fill/--no-fill`; off is the default, so False emits nothing
     assert "--fill" not in argv("gainutils-smooth", {"gains": "g.qc", "fill": False})
+
+
+@pytest.mark.parametrize("sandbox", [False, True])
+@pytest.mark.parametrize("alias", [False, True])
+def test_flag_history_preserves_old_versions_beside_native_ms_path(tmp_path, sandbox, alias):
+    from shinobi.products import DirectoryBundle, FamilyPlan
+    from shinobi.sandbox import ProductCapture, absolutize_path_inputs, clear_stale_outputs
+
+    cab = dosho.get("msutils-flags-backup")
+    real_ms = tmp_path / "real.ms"
+    real_ms.mkdir()
+    ms = tmp_path / "obs.ms"
+    if alias:
+        ms.symlink_to(real_ms, target_is_directory=True)
+    else:
+        ms.mkdir()
+    history = tmp_path / "obs.ms.flagversions"
+    history.mkdir()
+    (history / "flags.old").write_text("previous flags")
+    (history / "FLAG_VERSION_LIST").write_text("old : previous flags")
+    inputs = cab.inputs_model(ms="obs.ms", name="new").model_dump()
+    if sandbox:
+        inputs = absolutize_path_inputs(cab, inputs, tmp_path)
+    clear_stale_outputs(cab, inputs, tmp_path, sandboxed=sandbox)
+    assert (history / "flags.old").read_text() == "previous flags"
+    assert (history / "FLAG_VERSION_LIST").read_text() == "old : previous flags"
+    sandbox_dir = tmp_path / "sandbox" if sandbox else None
+    if sandbox_dir:
+        sandbox_dir.mkdir()
+    plan = FamilyPlan(
+        cab.field_meta["flagversions"].family, DirectoryBundle, inputs, sandbox_dir or tmp_path
+    )
+    # msutils appends its suffix to abspath(ms), retaining the lexical alias.
+    assert plan.root == history
+    capture = ProductCapture(cab, inputs, tmp_path, sandbox_dir=sandbox_dir)
+    (history / "flags.new").write_text("new flags")
+    family = capture.resolve_families(True)["flagversions"]
+    assert (tmp_path / family.select().path).resolve() == history
+    assert (history / "flags.old").exists()
+    assert not (tmp_path / "real.ms.flagversions").exists()

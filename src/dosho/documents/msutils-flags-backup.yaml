@@ -3,14 +3,16 @@ cabs:
     command: msutils flags backup
     image: MSUTILS
     info: 'msutils flags backup: save an MS''s current flags as a named version'
+    # Always create the requested version: shared history is an owned output,
+    # but its existing contents cannot prove this invocation already ran.
+    cache: false
     inputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         required: true
         info: Measurement set whose flags to save
         policies:
           positional: true
-        mutable: true
       name:
         dtype: str
         info: 'Version name [default: a timestamp]. Give one whenever a later step has to restore it
@@ -21,7 +23,22 @@ cabs:
       overwrite:
         dtype: bool
         info: Replace a version of this name.
+    # A reader: backup never writes the MS itself, so `ms` is neither mutable
+    # (a mutable field may not declare only a read) nor echoed as an output (a
+    # same-named output makes it a filesystem write).
+    dataset_accesses:
+      # msutils flags.py: reads FLAG and FLAG_ROW, copies them to <ms>.flagversions/ beside the MS.
+      - field: ms
+        mode: read
+        columns:
+          read: [FLAG, FLAG_ROW]
     outputs:
-      ms:
-        dtype: MS
-        info: Measurement set carrying the saved flag version
+      flagversions:
+        dtype: ProductFamily[DirectoryBundle]
+        info: Shared flag-version history beside the MS; existing versions are preserved.
+        family:
+          root: '{ms}.flagversions'
+          coordinates: {}
+          rules:
+            - path: '.'
+              accept_existing: true

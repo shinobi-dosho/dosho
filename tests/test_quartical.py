@@ -108,7 +108,7 @@ def test_parset_omitted_when_not_given():
     assert argv == ["goquartical", "input_ms.path=/x.ms"]
 
 
-def test_ms_and_gain_directory_outputs_are_real_passthroughs():
+def test_ms_passthrough_does_not_fabricate_an_unproduced_gain_store():
     from shinobi.backends.recording import RecordingBackend
     from shinobi.steps import register_step_backend
     from shinobi.steps.dispatch import _dispatch
@@ -117,7 +117,8 @@ def test_ms_and_gain_directory_outputs_are_real_passthroughs():
     register_step_backend("quartical-record", RecordingBackend())
     result = _dispatch(cab, None, input_ms_path="/obs.ms", output_gain_directory="gains.qc")
     assert str(result.outputs.ms) == "/obs.ms"
-    assert str(result.outputs.gain_directory) == "gains.qc"
+    assert result.outputs.gain_directory.resolved
+    assert result.outputs.gain_directory.members == ()
 
 
 def test_in_place_ms_write_is_declared_mutable_not_just_echoed_as_an_output():

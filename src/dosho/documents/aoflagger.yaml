@@ -7,9 +7,13 @@ cabs:
       prefix: '-'
     inputs:
       msname:
-        dtype: MS
+        dtype: MSv2
         required: true
+        mutable: true
         info: MS name(s) to be flagged
+        # `aoflagger [options] <obs.ms>`: the MS is the trailing argument.
+        policies:
+          positional: true
       verbose:
         dtype: bool
         default: false
@@ -60,5 +64,31 @@ cabs:
         info: Field ID(s). Comma separated string if more than one field
     outputs:
       msname:
-        dtype: MS
+        dtype: MSv2
         info: MS name(s) to be flagged
+    dataset_accesses:
+      # Checked against AOFlagger 3.5's default strategy: it flags MAIN.FLAG
+      # from `column` (FLAG_ROW untouched), adds one HISTORY row, and writes
+      # its statistics as four opaque QUALITY_* tables linked from MAIN
+      # keywords. A strategy without `collect_statistics` adds no QUALITY_*
+      # tables; the permission allows them, it does not require them.
+      # UVW is read by memory/indirect readers as well as explicit -uvw.
+      # Memory and indirect reads (the default `auto_read_mode` picks one)
+      # open the MS for update through casacore, which rewrites the files of
+      # every subtable present, optional ones included; `-direct-read` does
+      # not. The present-subtable grant covers those rewrites, not schema.
+      - field: msname
+        mode: write
+        columns:
+          read: ["{column}", UVW]
+          write: [FLAG]
+        allow_present_subtable_rewrite: true
+        allow_subtable_change:
+          - QUALITY_KIND_NAME
+          - QUALITY_TIME_STATISTIC
+          - QUALITY_FREQUENCY_STATISTIC
+          - QUALITY_BASELINE_STATISTIC
+      - field: msname
+        mode: write
+        table: HISTORY
+        allow_row_count_change: true

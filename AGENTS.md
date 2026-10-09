@@ -97,13 +97,20 @@ eval()/exec() a cab's `command`". Instead:
   are expressed as a hand-authored `ParamPattern` -- transcribed once from
   the tool's own template/docs, not generated. This is static data, not
   code.
-- **Dynamic output paths** (wsclean's `{prefix}-MFS-image.fits`-shaped
-  outputs) are expressed as a `ParamMeta.implicit` string template,
-  resolved by shinobi's `_fill_outputs` via plain `str.format` against a
-  step's own validated inputs -- never eval, never an expression language.
-  Only the handful of outputs a real pipeline actually wires as a
-  dependency need a resolved `implicit` template; anything more exotic
-  stays validation-only via `output_patterns`.
+- **Dynamic output paths** are static templates over a step's validated
+  inputs. A scalar path uses `ParamMeta.implicit` and plain `str.format`.
+  Dimensional outputs (WSClean's time/frequency/polarization FITS products)
+  use `ProductFamily[File]` with declarative `family` rules: bounded axes,
+  singleton suffixes, finite mode conditions, and explicit coordinates.
+  Capture publishes products the invocation emitted or explicitly reused; caches
+  validate the saved members. More exotic unclassified products can remain
+  harvested without inventing a dependency path. No callbacks, evaluation,
+  or expression language are involved.
+  Opaque gain/solution stores use `ProductFamily[DirectoryBundle]`, owning
+  one explicit directory and inventorying its children. They do not split
+  internal array dimensions into separately owned paths. killMS requires
+  `solutions_sols_dir` outside the input MS; family preflight rejects
+  overlapping trees, including symlink aliases, before execution.
 
 If a tool's dynamic behavior can't be expressed this way, don't invent a
 new mechanism speculatively -- leave the field/output out and come back
@@ -208,6 +215,8 @@ tests/
   test_documents.py  # every document loads, resolves its image, declares a
                       # dtype; index and documents agree about what exists
   test_registry.py
+  test_dataset_contracts.py  # the strict MSv2 set and each cab's exact
+                              # dataset_accesses; planning without casacore
   test_<tool>.py     # per ported tool: round-trip through build_argv for a
                       # Cab, inputs_model/Recipe wiring for a pystep
 docs/_ext/cab_catalog.py  # generates docs/reference/cabs.rst from the live
@@ -246,6 +255,47 @@ ported tool gets a test: for a `Cab`, round-trip a representative param
 set through `build_argv` and check the real CLI token shape; for a
 pystep, check its `inputs_model` schema shape and that it wires into a
 `Recipe` -- not just that the object constructs without error.
+
+## Strict MeasurementSet contracts
+
+An MS field typed `MSv2` (YAML `dtype: MSv2`) plus a cab-level
+`dataset_accesses` list makes a cab **strict**: shinobi plans, claims,
+snapshots and checks that MS around the step instead of passing an opaque
+path. `dtype: MS` stays path-only. Conversion is opt-in per cab, and the
+strict set is listed in `tests/test_dataset_contracts.py`, which fails until
+a new contract is recorded there.
+
+Strict is not free. shinobi refuses a strict contract under scatter, in a
+nested recipe, through the legacy argv compiler, and on the `slurm` step and
+`kubernetes` backends, and a strict MS cannot be handed to a path-only cab in
+the same recipe. So convert a cab only when its pipeline partners can be
+strict too.
+
+Writing one:
+
+- A column name that is a parameter is a template over the cab's own string
+  input: `read: ["{data_column}"]` (sanitized names). Give that input the
+  tool's own default, or an unset value drops the whole access to
+  whole-dataset intent. Leave out columns read only through an *optional*
+  input for the same reason; shinobi records reads but does not verify or
+  schedule on them.
+- A column under `create` must exist after every run. Where the tool only
+  sometimes writes or adds a column (wsclean's MODEL_DATA, IMAGING_WEIGHT),
+  leave `columns` unset with `allow_schema_change` -- the whole dataset.
+- A scalar writer is `mutable: true` with an `MSv2` passthrough output of the
+  same name. A `List[MSv2]` writer declares an explicit `write` and is not
+  `mutable`. A reader is neither -- shinobi reads mutability or a same-name
+  output as a write and refuses a read contract that contradicts it
+  (`msutils-flags-backup`). An unrelated sidecar output does not turn the
+  MS reader into a writer.
+- Every table the tool changes is declared: a standard subtable as its own
+  access (aoflagger's HISTORY row), an opaque keyword-linked one through
+  `allow_subtable_change` on the MAIN access (aoflagger's `QUALITY_*`).
+- Shared sidecar history can be an owned `ProductFamily[DirectoryBundle]`
+  output with `accept_existing: true`, which preserves earlier versions and
+  orders writers to the same directory. `msutils-flags-backup` owns
+  `{ms}.flagversions` while reading the MS. It keeps `cache: false` so every
+  invocation creates its requested version.
 
 ## Attribution: commit trailers yes, PR trailers no
 
