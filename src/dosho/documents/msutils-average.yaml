@@ -40,6 +40,9 @@ cabs:
       antenna:
         dtype: List[str]
         info: Antenna id/name to keep (repeatable).
+      corr:
+        dtype: List[str]
+        info: Correlation name or zero-based index to keep (repeatable, in order).
       taql:
         dtype: str
         info: Extra TaQL predicate, ANDed with the other selections.

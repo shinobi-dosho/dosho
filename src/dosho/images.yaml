@@ -107,9 +107,9 @@ images:
       cmd: "msutils --help"
       dockerfile: pip/Dockerfile
     # The cabs describe msutils `main`, which is ahead of 3.0.0 by the whole
-    # `gainutils` console script and by subset/average's --taql/--reindex and
-    # binning options. That is the release image above, so `msutils-subset
-    # --reindex` and every `gainutils-*` cab need this one until the next
+    # `gainutils` console script and by subset/average's --taql/--reindex,
+    # --corr and binning options. The release image above lacks these, so
+    # correlation selection and every `gainutils-*` cab need this one until the next
     # release: `dosho images build MSUTILS --dev --push`, then point a
     # deployment at it with DOSHO_IMAGE_MSUTILS (pin the digest, not `:dev`).
     # PEP 508 direct-URL form rather than a bare `git+` URL, so `[all]`
