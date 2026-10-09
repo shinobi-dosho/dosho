@@ -152,6 +152,23 @@ def test_repeatable_positional_columns_are_separate_tokens():
     assert tokens == ["msutils", "delcol", "obs.ms", "CORRECTED_DATA", "MODEL_DATA"]
 
 
+@pytest.mark.parametrize("cab", ["msutils-subset", "msutils-average"])
+@pytest.mark.parametrize("corr,expected", [(["YY", "XX"], ["YY", "XX"]), (["3", "0"], ["3", "0"])])
+def test_correlation_selection_repeats_flags_in_requested_order(cab, corr, expected):
+    tokens = argv(cab, {"ms": "obs.ms", "outms": "parallel.ms", "corr": corr})
+    index = tokens.index("--corr")
+    assert tokens[index : index + 4] == ["--corr", expected[0], "--corr", expected[1]]
+    assert tokens[-2:] == ["obs.ms", "parallel.ms"]
+
+
+@pytest.mark.parametrize("cab", ["msutils-subset", "msutils-average"])
+@pytest.mark.parametrize("selection", [{}, {"corr": None}, {"corr": []}])
+def test_unset_correlation_selection_keeps_all_correlations(cab, selection):
+    tokens = argv(cab, {"ms": "obs.ms", "outms": "all.ms", **selection})
+    assert "--corr" not in tokens
+    assert tokens[-2:] == ["obs.ms", "all.ms"]
+
+
 def test_subset_and_average_carry_the_options_no_release_has_yet():
     """The reason the MSUTILS `dev:` image exists: 3.0.0's subset takes only
     the four selections, and neither command reindexes.

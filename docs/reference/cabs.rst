@@ -7885,6 +7885,10 @@ msutils average: time- and channel-average an MS into a new one (needs msutils' 
      - ``list[str] | None``
      - ``None``
      - \-
+   * - ``corr``
+     - ``list[str] | None``
+     - ``None``
+     - \-
    * - ``taql``
      - ``str | None``
      - ``None``
@@ -8495,6 +8499,10 @@ msutils subset: write the selected rows of an MS to a new MS (optionally averagi
      - ``None``
      - \-
    * - ``antenna``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``corr``
      - ``list[str] | None``
      - ``None``
      - \-
