@@ -59,8 +59,7 @@ cabs:
     inputs:
       parset:
         dtype: File
-        info: Optional parset to load before applying all other parameters (cult-cargo's own cubical.yml
-          wording)
+        info: Optional parset to load before applying all other parameters
         policies:
           positional_head: true
       data-ms:
