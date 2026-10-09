@@ -355,8 +355,13 @@ cabs:
       solutions_skip_existing_sols:
         dtype: int
         default: 0
+        choices: [0, 1]
+        nullable: false
         nom_de_guerre: SkipExistingSols
-        info: ''
+        info: Integer switch (0/1). Mode 1 preserves the solutions directory during framework preparation;
+          scalar native execution can still overwrite selected solutions. Native skipping applies
+          only to batch/list-MS execution, unsupported by this scalar cab.
+          Existing history at a relative sandbox root is staged from the declared dependency.
       solutions_sols_dir:
         dtype: str
         # Require a separate owned tree; native None writes into the MS.
@@ -476,3 +481,16 @@ cabs:
           coordinates: {}
           rules:
             - path: '.'
+              when: {solutions_skip_existing_sols: [0]}
+            - path: '.'
+              when: {solutions_skip_existing_sols: [1]}
+              accept_existing: true
+    derived_reads:
+      preserved_solutions:
+        member: directory
+        family:
+          root: '{solutions_sols_dir}'
+          coordinates: {}
+          rules:
+            - path: '.'
+              when: {solutions_skip_existing_sols: [1]}

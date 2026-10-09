@@ -389,7 +389,12 @@ def test_owned_store_roots_and_scratch_paths_have_declarations():
         scope = scopes[name]
         families = [meta.family for meta in scope.field_meta.values() if meta.family is not None]
         assert any(family.root == "{" + field + "}" for family in families)
-        assert declared_output_dirs(scope, {field: "/tmp/dosho-probe/store"})
+        defaults = {
+            name: model_field.default
+            for name, model_field in scope.inputs_model.model_fields.items()
+            if not model_field.is_required()
+        }
+        assert declared_output_dirs(scope, {**defaults, field: "/tmp/dosho-probe/store"})
     for name, field in SCRATCH_PATHS:
         scope = scopes[name]
         assert field in path_fields(scope.inputs_model)

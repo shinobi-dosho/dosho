@@ -3,10 +3,8 @@ cabs:
     command: msutils flags backup
     image: MSUTILS
     info: 'msutils flags backup: save an MS''s current flags as a named version'
-    # Never skipped by the step cache: the saved version lives in
-    # <ms>.flagversions, which cannot be a declared output (shinobi clears a
-    # declared output before each run, deleting every saved version), so a
-    # cache hit could not tell that directory had gone.
+    # Always create the requested version: shared history is an owned output,
+    # but its existing contents cannot prove this invocation already ran.
     cache: false
     inputs:
       ms:
@@ -34,3 +32,13 @@ cabs:
         mode: read
         columns:
           read: [FLAG, FLAG_ROW]
+    outputs:
+      flagversions:
+        dtype: ProductFamily[DirectoryBundle]
+        info: Shared flag-version history beside the MS; existing versions are preserved.
+        family:
+          root: '{ms}.flagversions'
+          coordinates: {}
+          rules:
+            - path: '.'
+              accept_existing: true

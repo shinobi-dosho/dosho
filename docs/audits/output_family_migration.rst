@@ -4,8 +4,10 @@ Shared scientific output families
 =================================
 
 Implemented and checked 2026-10-08. All five cabs use the shared output-family
-API from stimela-ninja PR #195, pinned in ``uv.lock`` at
-``63cae373ccf5403fa085a8efb13b6f171e77469a`` (including PR #197). No external schema-generation
+API from stimela-ninja PR #195. The lock was refreshed 2026-10-09 to merged-main
+commit ``57bb5de3d8cc5c752e60d0efd7fd8a1bb66ae5af``, including PR #197 and
+PR #198's finite derived-read, presence and nullability support. The source and
+native qualification date remains 2026-10-08. No external schema-generation
 function is imported or executed to load a cab. Image versions are unchanged.
 The latest source parameter inventory is in :doc:`output_family_parameters`;
 WSClean's dimensional filename checks are in :doc:`wsclean_output_families`.
@@ -102,6 +104,15 @@ empty-list sentinel. ``TChunk`` and ``DtBeamMin`` accept fractional values.
 accept fractional values, matching the native float option declarations.
 The driver writes solutions and companion parsets below the explicit root;
 its default of writing inside the MS is unavailable through this cab.
+``SkipExistingSols`` accepts the integer switch values 0 and 1. Mode 0 clears
+stale solutions; mode 1 preserves the solutions directory during framework
+preparation and inventories the resulting bundle. Scalar native execution can
+still overwrite selected solutions.
+Native skipping is implemented only for batch/list-MS execution, which this
+scalar cab does not support; preservation is not a claim of native reuse.
+Existing history at a relative sandbox root is staged from the declared
+optional directory dependency before execution. Unmodified sibling history
+is preserved on successful harvest. Undeclared reuse still requires an absolute root or direct execution.
 
 SoFiA's `authoritative default table
 <https://gitlab.com/SoFiA-Admin/SoFiA-2/-/blob/a7434d9f91605cd738f2b13cd31b1450304fbc11/src/Parameter.c>`_

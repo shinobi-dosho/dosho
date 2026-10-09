@@ -286,13 +286,16 @@ Writing one:
   same name. A `List[MSv2]` writer declares an explicit `write` and is not
   `mutable`. A reader is neither -- shinobi reads mutability or a same-name
   output as a write and refuses a read contract that contradicts it
-  (`msutils-flags-backup`).
+  (`msutils-flags-backup`). An unrelated sidecar output does not turn the
+  MS reader into a writer.
 - Every table the tool changes is declared: a standard subtable as its own
   access (aoflagger's HISTORY row), an opaque keyword-linked one through
   `allow_subtable_change` on the MAIN access (aoflagger's `QUALITY_*`).
-- A side effect outside the MS that cannot be a declared output is invisible
-  to the step cache; such a reader sets `cache: false`
-  (`msutils-flags-backup`). A strict writer cannot.
+- Shared sidecar history can be an owned `ProductFamily[DirectoryBundle]`
+  output with `accept_existing: true`, which preserves earlier versions and
+  orders writers to the same directory. `msutils-flags-backup` owns
+  `{ms}.flagversions` while reading the MS. It keeps `cache: false` so every
+  invocation creates its requested version.
 
 ## Attribution: commit trailers yes, PR trailers no
 

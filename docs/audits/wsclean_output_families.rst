@@ -4,9 +4,12 @@ WSClean output-family migration
 ===============================
 
 Checked 2026-10-08 against ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-d0.1.0``.
-The lock pins shinobi commit ``63cae373ccf5403fa085a8efb13b6f171e77469a``,
-which includes the shared output-family implementation from PR #195 and
-the string constraint implementation and offload fixes from PR #197.
+The lock was refreshed 2026-10-09 to merged-main shinobi commit
+``57bb5de3d8cc5c752e60d0efd7fd8a1bb66ae5af``, which includes the shared
+output-family implementation from PR #195, the string constraint implementation
+and offload fixes from PR #197, and finite derived-read, presence and nullability
+support from PR #198. The source and native qualification date remains
+2026-10-08.
 
 Sources and declarations
 ------------------------
@@ -81,3 +84,32 @@ not the MS mutation/cache profile. The production document retains its
 ``List[MSv2]`` writer contract unchanged, covered by the dataset declaration
 tests. Full CLI schema refresh, restoration and reuse modes, primary-beam
 products and direction-dependent PSF families remain separate audit work.
+
+Declared model inputs and joint continuation
+--------------------------------------------
+
+The production cab declares finite model reads using WSClean 3.6's
+``PredictModelFileSuffix()`` in ``main.h``. Facet-beam correction selects
+``-model-fpb.fits``; otherwise beam gridding, an a-term configuration or
+facet solutions select ``-model-pb.fits``; the remaining modes select
+``-model.fits``. Prediction and continuation read channel models, including
+XY's imaginary component, and never read MFS model aggregates. Only these
+selected continuation inputs accept existing output members. MFS models
+and ordinary model outputs under beam modes are newly captured products.
+
+These declarations use shinobi's shared derived-read prerequisite. Readonly
+models contribute physical fingerprints before cache lookup and are staged
+into relative sandboxes without being republished as products. Continuation
+uses the same strict snapshot group for the MS and existing model files;
+resuming a logical step selects its original predecessor. Explicit null
+values for filename/mode controls are refused rather than silently dropping
+an input or output contract.
+
+Additional Docker probes exercised the unmodified production strict cab:
+prediction reused an unchanged model and missed after an external model edit;
+continuation updated the MS and model together and then reused the committed
+result. A two-polarization, two-channel, two-interval probe also passed
+prediction invalidation and continuation reuse with eight declared model inputs.
+Saved-flag restoration similarly missed after a saved version changed.
+The earlier output-only native tests retain their narrower qualification.
+These probes do not qualify every beam/facet imaging combination.

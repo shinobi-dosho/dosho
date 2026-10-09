@@ -420,3 +420,67 @@ def test_temp_dir_is_an_input_scratch_destination():
     assert (
         cab.inputs_model(**_inputs(direct_ft_precision="ldouble")).direct_ft_precision == "ldouble"
     )
+
+
+@pytest.mark.parametrize(
+    "controls,suffix",
+    [
+        ({}, "model"),
+        ({"grid_with_beam": True}, "model-pb"),
+        ({"aterm_config": "aterms.conf"}, "model-pb"),
+        ({"apply_facet_solutions": ["sols.h5"]}, "model-pb"),
+        ({"apply_facet_beam": True, "grid_with_beam": True}, "model-fpb"),
+    ],
+)
+def test_prediction_and_continuation_inputs_match_native_suffix_and_axes(
+    tmp_path, controls, suffix
+):
+    from shinobi.derived import derived_reads
+
+    cab = _cab()
+    for mode in ["predict", "continue_"]:
+        inputs = cab.inputs_model(
+            **_inputs(
+                **{mode: True},
+                prefix="deep",
+                nchan=2,
+                intervals_out=2,
+                pol="XX,XY,YX,YY",
+                **controls,
+            )
+        ).model_dump()
+        reads = derived_reads(cab, inputs, tmp_path)
+        assert len(reads) == 16  # XX, XY real+imaginary, YY; YX shares XY.
+        assert all(read.required and read.path.name.endswith(f"-{suffix}.fits") for read in reads)
+        assert all("MFS" not in read.path.name and "YX" not in read.path.name for read in reads)
+        assert all(read.mutable == (mode == "continue_") for read in reads)
+        if mode == "continue_":
+            reused = {
+                candidate.path
+                for name, meta in cab.field_meta.items()
+                if meta.family
+                for candidate in FamilyPlan(meta.family, Path, inputs, tmp_path).candidates
+                if candidate.rule.accept_existing
+            }
+            assert reused == {read.path for read in reads}
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "predict",
+        "continue_",
+        "dry_run",
+        "make_psf_only",
+        "nchan",
+        "intervals_out",
+        "pol",
+        "grid_with_beam",
+        "apply_facet_beam",
+    ],
+)
+def test_family_controls_refuse_explicit_null(field):
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        _cab().inputs_model(**_inputs(**{field: None}))

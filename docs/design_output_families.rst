@@ -259,9 +259,11 @@ Discovery must use the existing execution product capture and validate
 members against the declared family. Prediction and continuation inputs
 must also remain protected during stale-output handling.
 
-This requires handling deliberate reuse: killMS ``SkipExistingSols`` and
-QuartiCal ``overwrite=False`` do not imply that every accepted output was
-newly modified. Pre-existing members may count only when explicitly resolved
+This requires handling deliberate preservation: killMS ``SkipExistingSols``
+mode 1 and QuartiCal ``overwrite=False`` do not imply that every accepted
+output was newly modified. killMS implements native skipping only in its
+batch/list-MS branch; this scalar cab preserves history without claiming
+that native skipping occurred. Pre-existing members may count only when explicitly resolved
 and evidenced under the successful run's contract. A pre-existing glob
 match alone is insufficient. Shared output directories are never cleared
 wholesale just because one nested member changed.

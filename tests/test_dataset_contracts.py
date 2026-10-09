@@ -71,7 +71,7 @@ CONTRACTS: dict[str, list[DatasetAccess]] = {
         DatasetAccess(
             field="msname",
             mode="write",
-            columns=DatasetColumns(read=("{column}",), write=("FLAG",)),
+            columns=DatasetColumns(read=("{column}", "UVW"), write=("FLAG",)),
             allow_present_subtable_rewrite=True,
             allow_subtable_change=AOFLAGGER_STATISTICS,
         ),
@@ -247,10 +247,13 @@ def test_a_strict_flagging_pipeline_plans_in_order(no_closure, tmp_path):
     }
     # Nothing is wired step-to-step, so every edge below is an access hazard
     # shinobi inferred, each with the reason it gives.
+    # The sidecar output conservatively reserves its parent as a generic
+    # write too; the MS access itself remains READ above.
     assert plan.reasons == {
         ("backup", "sim"): ("read-after-write: sim.ms, MAIN.FLAG",),
-        ("flag", "backup"): ("write-after-read: sim.ms, MAIN.FLAG",),
+        ("flag", "backup"): ("write-after-write: sim.ms, MAIN.FLAG",),
         ("restore", "flag"): ("write-after-write: sim.ms, MAIN.FLAG",),
+        ("restore", "backup"): (f"read-after-write: {tmp_path / 'sim.ms.flagversions/flags.pre'}",),
     }
     names = plan.graph.names
     for child, parent in plan.reasons:
@@ -262,8 +265,8 @@ def test_backup_with_its_old_output_is_a_contradictory_reader(no_closure, tmp_pa
     filesystem write, which a read contract contradicts."""
     text = _replace(
         _document("msutils-flags-backup"),
-        "    dataset_accesses:\n",
-        "    outputs:\n      ms:\n        dtype: MSv2\n    dataset_accesses:\n",
+        "    outputs:\n",
+        "    outputs:\n      ms:\n        dtype: MSv2\n",
     )
     backup = _load("msutils-flags-backup", text)
     with pytest.raises(DatasetAccessError, match="declares READ access"):
@@ -322,4 +325,47 @@ def test_a_simulate_flag_image_chain_plans_through_output_refs(no_closure, tmp_p
     # Templates resolve against each step's own inputs: the defaults here.
     [sky] = plan.accesses["sky"]
     assert sky.declaration.columns.create == ("DATA",)
-    assert plan.accesses["flag"][0].declaration.columns.read == ("DATA",)
+    assert plan.accesses["flag"][0].declaration.columns.read == ("DATA", "UVW")
+
+
+@pytest.mark.parametrize("second_name", ["pre", "post"])
+def test_backups_order_on_shared_flag_history(no_closure, tmp_path, second_name):
+    recipe = Recipe(name="backups", inputs_model=_MS, outputs_model=_Empty)
+    ms = InputRef(field="ms")
+    recipe.add_step("sim", registry.get("simms-telsim"), ms=ms, telescope="meerkat")
+    backup = registry.get("msutils-flags-backup")
+    assert "ms" not in backup.outputs_model.model_fields
+    assert "flagversions" in backup.outputs_model.model_fields
+    for step, version in [("first", "pre"), ("second", second_name)]:
+        recipe.add_step(step, StepRef(name=step, step=backup, params={"name": version}), ms=ms)
+    plan = plan_recipe_accesses(recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
+    first = plan.graph.names.index("first")
+    second = plan.graph.names.index("second")
+    assert first in plan.graph.deps[second]
+    assert any("flagversions" in reason for reason in plan.reasons[("second", "first")])
+    assert [access.mode.value for access in plan.accesses["second"]] == ["read"]
+
+
+def test_aoflagger_orders_after_a_uvw_writer(no_closure, tmp_path):
+    writer = Cab(
+        name="uvw-writer",
+        command="true",
+        inputs_model=_MS,
+        outputs_model=_Empty,
+        input_mutability={"ms": Mutability.MUTABLE},
+        dataset_accesses=[
+            DatasetAccess(field="ms", mode="write", columns=DatasetColumns(write=("UVW",)))
+        ],
+    )
+    recipe = Recipe(name="uvw-flagging", inputs_model=_MS, outputs_model=_Empty)
+    ms = InputRef(field="ms")
+    recipe.add_step("sim", registry.get("simms-telsim"), ms=ms, telescope="meerkat")
+    recipe.add_step("uvw", writer, ms=ms)
+    recipe.add_step("flag", registry.get("aoflagger"), msname=ms)
+    plan = plan_recipe_accesses(recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
+    assert plan.accesses["uvw"][0].declaration.columns.write == ("UVW",)
+    assert "UVW" in plan.accesses["flag"][0].declaration.columns.read
+    # Current shinobi orders whole MS closures, so the edge diagnostic names
+    # AOFlagger's FLAG write rather than the read column causing contention.
+    assert ("flag", "uvw") in plan.reasons
+    assert plan.graph.names.index("uvw") in plan.graph.deps[plan.graph.names.index("flag")]

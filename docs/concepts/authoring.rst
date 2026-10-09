@@ -156,10 +156,12 @@ template over the cab's own input, as in tricolour's ``read:
 MS cannot be handed to a path-only cab in the same recipe, so only some cabs
 are strict -- ``tests/test_dataset_contracts.py`` lists them.
 
-``msutils-flags-backup`` also sets ``cache: false``: the version it saves in
-``<ms>.flagversions`` cannot be a declared output (a declared output is
-cleared before each run, which would delete every saved version), so a cache
-hit could not notice that directory had gone. See shinobi's
+``msutils-flags-backup`` declares ``flagversions`` as a
+``ProductFamily[DirectoryBundle]`` rooted at ``{ms}.flagversions`` beside
+its MS. ``accept_existing: true`` preserves earlier versions and the shared
+output orders backups even when their version names differ. This unrelated
+output leaves the MS read contract intact. ``cache: false`` ensures each
+invocation creates its requested version. See shinobi's
 `datasets documentation
 <https://stimela-ninja.readthedocs.io/en/latest/concepts/datasets.html>`_
 for the modes, the planner and the execution routes that support them.
@@ -402,3 +404,13 @@ map, so a deployment's ``$DOSHO_IMAGES``/``$DOSHO_IMAGE_<KEY>``
 overrides still decide the reference at load time. A pystep has no
 document, so ``get_document`` raises ``KeyError`` for one and the
 protocol falls through to ``get``.
+
+Finite files read through a stem or directory can be declared with
+``derived_reads`` rather than pretending a stem is an input file. Each named
+read declares ``member: file`` or ``directory`` and a finite ``family`` of
+paths; required members are checked before cache lookup. The flag-restore
+cab declares the saved version inside ``{ms}.flagversions`` this way, and
+WSClean declares its selected channel model files. These declarations need
+shinobi's shared derived-read support; they remain static data and never
+execute tool code to discover a schema. ``nullable: false`` on defaulted
+mode controls accepts omission and rejects an explicit null.

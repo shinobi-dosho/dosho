@@ -58,6 +58,7 @@ cabs:
       model-storage-manager:
         dtype: str
       nchan:
+        nullable: false
         dtype: int
         default: 1
         info: Number of output channels (-channels-out); multiple channels also produce MFS images.
@@ -73,6 +74,7 @@ cabs:
       gap-channel-division:
         dtype: bool
       pol:
+        nullable: false
         dtype: Union[str, List[str]]
         default: I
         info: Polarizations; case insensitive, comma separated or packed (e.g. IQUV).
@@ -83,6 +85,7 @@ cabs:
       link-polarizations:
         dtype: Union[str, List[str]]
       intervals-out:
+        nullable: false
         dtype: int
         default: 1
         info: Number of output time intervals inside the selected interval.
@@ -135,6 +138,7 @@ cabs:
       no-update-model-required:
         dtype: bool
       no-dirty:
+        nullable: false
         dtype: bool
         default: false
       save-first-residual:
@@ -150,6 +154,7 @@ cabs:
       make-psf:
         dtype: bool
       make-psf-only:
+        nullable: false
         dtype: bool
         default: false
       weight:
@@ -191,9 +196,11 @@ cabs:
         dtype: Union[str, float]
         required: true
       predict:
+        nullable: false
         dtype: bool
         default: false
       continue:
+        nullable: false
         dtype: bool
         default: false
       subtract-model:
@@ -250,6 +257,8 @@ cabs:
         dtype: File
       grid-with-beam:
         dtype: bool
+        default: false
+        nullable: false
       beam-aterm-update:
         dtype: float
       aterm-kernel-size:
@@ -266,6 +275,8 @@ cabs:
         dtype: bool
       apply-facet-beam:
         dtype: bool
+        default: false
+        nullable: false
       facet-beam-update:
         dtype: float
       save-aterms:
@@ -295,6 +306,7 @@ cabs:
       beam-normalisation-mode:
         dtype: str
       dry-run:
+        nullable: false
         dtype: bool
         default: false
       maxuvw-m:
@@ -375,6 +387,7 @@ cabs:
       moresane-sl:
         dtype: List[float]
       save-source-list:
+        nullable: false
         dtype: bool
         default: false
       clean-border:
@@ -438,7 +451,6 @@ cabs:
         info: Arithmetic precision for the direct Fourier transform gridder.
       temp-dir:
         dtype: Directory
-        mutable: true
         write_path: true
         info: Scratch location for temporary reordered MeasurementSets.
     # Filename rules transcribed from WSClean v3.6 io/imagefilename.h and
@@ -528,18 +540,94 @@ cabs:
               coordinates: {component: imaginary}
               when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [false]}
               axes: *imaginary_axes
-            # -continue reads this invocation's prefix model before updating
-            # it. Explicit reuse keeps stale-output clearing from removing it.
+            # Only channel models selected by native prediction are reused.
             - path: '{prefix}{time}{frequency}{polarization}-model.fits'
               coordinates: {component: real}
-              when: &continuation_mode {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true]}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              axes: &continued_real_axes
+                time: *time_axis
+                frequency: &continued_frequency_real
+                  count_input: nchan
+                  suffix: '-{index:04d}'
+                  singleton_suffix: ''
+                polarization: *polarization_axis
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              axes:
+                time: *time_axis
+                frequency:
+                  <<: *frequency_axis
+                  include: []
+                polarization: *polarization_axis
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [true]}
               axes: *image_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [true]}
+              axes: *image_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              axes: *image_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              axes: *image_axes
+            # Only channel models selected by native prediction are reused.
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              axes: &continued_imaginary_axes
+                time: *time_axis
+                frequency: &continued_frequency_imaginary
+                  count_input: nchan
+                  suffix: '-{index:04d}'
+                  singleton_suffix: ''
+                polarization:
+                  <<: *polarization_axis
+                  include: [XY]
+                  suffix: '-{value}i'
               accept_existing: true
             - path: '{prefix}{time}{frequency}{polarization}-model.fits'
               coordinates: {component: imaginary}
-              when: *continuation_mode
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              axes:
+                time: *time_axis
+                frequency:
+                  <<: *frequency_axis
+                  include: []
+                polarization:
+                  <<: *polarization_axis
+                  include: [XY]
+                  suffix: '-{value}i'
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [true]}
               axes: *imaginary_axes
-              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [true]}
+              axes: *imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              axes: *imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], dry_run: [false], make_psf_only: [false], continue_: [true], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              axes: *imaginary_axes
       psf:
         dtype: ProductFamily[File]
         info: Shared PSF FITS products indexed by time and frequency; no polarization axis.
@@ -559,3 +647,203 @@ cabs:
           rules:
             - path: '{prefix}-sources.txt'
               when: {predict: [false], dry_run: [false], save_source_list: [true]}
+      continued_beam_model:
+        dtype: ProductFamily[File]
+        info: Existing beam-corrected model files read and updated in continuation mode.
+        family:
+          coordinates: {time: int, frequency: int, polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [true]}
+              axes: &beam_read_real_axes
+                time: *time_axis
+                frequency: &beam_read_frequency_axis
+                  count_input: nchan
+                  suffix: '-{index:04d}'
+                  singleton_suffix: ''
+                polarization: *polarization_axis
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [true]}
+              axes: &beam_read_imaginary_axes
+                time: *time_axis
+                frequency: *beam_read_frequency_axis
+                polarization:
+                  <<: *polarization_axis
+                  include: [XY]
+                  suffix: '-{value}i'
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              axes: *beam_read_real_axes
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              axes: *beam_read_imaginary_axes
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              axes: *beam_read_real_axes
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              axes: *beam_read_imaginary_axes
+              accept_existing: true
+      continued_facet_beam_model:
+        dtype: ProductFamily[File]
+        info: Existing beam-corrected model files read and updated in continuation mode.
+        family:
+          coordinates: {time: int, frequency: int, polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-model-fpb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [true]}
+              axes: *beam_read_real_axes
+              accept_existing: true
+            - path: '{prefix}{time}{frequency}{polarization}-model-fpb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [true]}
+              axes: *beam_read_imaginary_axes
+              accept_existing: true
+    # PredictModelFileSuffix() (v3.6 main.h): facet beam wins over a-term
+    # gridding/facet solutions, then the ordinary model suffix. No MFS reads.
+    derived_reads:
+      input_models:
+        member: file
+        family:
+          coordinates: {time: int, frequency: int, polarization: str, component: str}
+          rules:
+            - path: '{prefix}{time}{frequency}{polarization}-model-fpb.fits'
+              coordinates: {component: real}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [true]}
+              required: true
+              axes: &read_real_axes
+                time: *time_axis
+                frequency: &read_frequency_axis
+                  count_input: nchan
+                  suffix: '-{index:04d}'
+                  singleton_suffix: ''
+                polarization: *polarization_axis
+            - path: '{prefix}{time}{frequency}{polarization}-model-fpb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [true]}
+              required: true
+              axes: &read_imaginary_axes
+                time: *time_axis
+                frequency: *read_frequency_axis
+                polarization:
+                  <<: *polarization_axis
+                  include: [XY]
+                  suffix: '-{value}i'
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [true]}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [true]}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [true], dry_run: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-fpb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [true]}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-fpb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [true]}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [true]}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [true]}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: true}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: true}
+              required: true
+              axes: *read_imaginary_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: real}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              required: true
+              axes: *read_real_axes
+            - path: '{prefix}{time}{frequency}{polarization}-model.fits'
+              coordinates: {component: imaginary}
+              when: {predict: [false], continue_: [true], dry_run: [false], make_psf_only: [false], apply_facet_beam: [false], grid_with_beam: [false]}
+              when_set: {aterm_config: false, apply_facet_solutions: false}
+              required: true
+              axes: *read_imaginary_axes

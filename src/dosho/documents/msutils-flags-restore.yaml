@@ -23,10 +23,18 @@ cabs:
         info: Measurement set with the restored flags
     dataset_accesses:
       # Exact and complete: msutils flags.py writes FLAG and FLAG_ROW from the
-      # saved version and nothing else in the MS. The <ms>.flagversions/ store it
-      # reads is not declared -- as an output, clear_stale_outputs would delete
-      # the saved versions before the step ran.
+      # saved version and nothing else in the MS. Its saved-version dependency
+      # is a separately declared read, never a stale-cleared output.
       - field: ms
         mode: write
         columns:
           write: [FLAG, FLAG_ROW]
+    derived_reads:
+      saved_version:
+        member: directory
+        family:
+          root: '{ms}.flagversions'
+          coordinates: {}
+          rules:
+            - path: 'flags.{name}'
+              required: true

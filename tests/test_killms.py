@@ -138,7 +138,9 @@ def test_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
 
     cab = dosho.get("killms")
     (ms := tmp_path / "obs.MS").mkdir()
-    params = {"vis_data_ms_name": str(ms)}
+    params = cab.inputs_model(
+        vis_data_ms_name=str(ms), solutions_sols_dir=str(tmp_path / "sols")
+    ).model_dump()
     before = compute_cache_key(cab, None, params, None)
     (ms / "CORRECTED_DATA").write_text("written by kMS.py itself")
     invalidate_path_hashes()
@@ -201,7 +203,12 @@ def test_killms_scratch_declares_nothing_when_the_cache_is_unset():
     from shinobi.steps.schema import declared_output_dirs
 
     cab = dosho.get("killms")
-    dirs = [str(d) for d, _ in declared_output_dirs(cab, {"solutions_sols_dir": "sols/r1"})]
+    dirs = [
+        str(d)
+        for d, _ in declared_output_dirs(
+            cab, {"solutions_sols_dir": "sols/r1", "solutions_skip_existing_sols": 0}
+        )
+    ]
     assert "None" not in dirs
     assert any(Path(d).name in {"sols", "r1"} for d in dirs)
 
@@ -230,3 +237,94 @@ def test_native_float_options_preserve_fractional_values(field, flag):
     inputs = cab.inputs_model(vis_data_ms_name="obs.ms", solutions_sols_dir="sols", **{field: 2.5})
     assert getattr(inputs, field) == 2.5
     assert build_argv(cab, {field: getattr(inputs, field)}) == ["kMS.py", f"--{flag}", "2.5"]
+
+
+@pytest.mark.parametrize("skip", [0, 1])
+def test_solution_history_clearing_matches_skip_mode(tmp_path, skip):
+    from shinobi.products import DirectoryBundle, FamilyPlan
+    from shinobi.sandbox import clear_stale_outputs
+
+    cab = dosho.get("killms")
+    root = tmp_path / "sols"
+    root.mkdir()
+    npz = root / "killMS.old.sols.npz"
+    parset = root / "killMS.old.sols.parset"
+    npz.write_text("solutions")
+    parset.write_text("parset")
+    inputs = cab.inputs_model(
+        vis_data_ms_name="obs.ms", solutions_sols_dir=str(root), solutions_skip_existing_sols=skip
+    ).model_dump()
+    plan = FamilyPlan(cab.field_meta["solutions"].family, DirectoryBundle, inputs, tmp_path)
+    assert len(plan.candidates) == 1
+    assert plan.candidates[0].rule.accept_existing is bool(skip)
+    clear_stale_outputs(cab, inputs, tmp_path, sandboxed=False)
+    assert npz.exists() is bool(skip)
+    assert parset.exists() is bool(skip)
+
+
+@pytest.mark.parametrize("value", [2, None])
+def test_skip_mode_rejects_values_without_an_output_contract(value):
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        dosho.get("killms").inputs_model(
+            vis_data_ms_name="obs.ms", solutions_sols_dir="sols", solutions_skip_existing_sols=value
+        )
+
+
+@pytest.mark.parametrize("sandbox", [False, True])
+def test_skip_mode_captures_unchanged_solution_history(tmp_path, monkeypatch, sandbox):
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "sols"
+    root.mkdir()
+    (root / "old.sols.npz").write_text("solutions")
+    (root / "old.sols.parset").write_text("parset")
+    monkeypatch.setenv("SHINOBI_SANDBOX__DIR", str(tmp_path / "sandboxes"))
+    register_step_backend("killms-skip-record", RecordingBackend())
+    cab = dosho.get("killms").model_copy(
+        update={"backend": "killms-skip-record", "cache": False, "sandbox": sandbox}
+    )
+    result = _dispatch(
+        cab,
+        None,
+        vis_data_ms_name="obs.ms",
+        solutions_sols_dir=str(root),
+        solutions_skip_existing_sols=1,
+    )
+    assert result.outputs.solutions.select().path.resolve() == root
+    assert (root / "old.sols.npz").read_text() == "solutions"
+    assert (root / "old.sols.parset").read_text() == "parset"
+
+
+def test_relative_sandbox_reuse_stages_and_preserves_history(tmp_path, monkeypatch):
+    from shinobi.backends.recording import RecordingBackend
+    from shinobi.steps import register_step_backend
+    from shinobi.steps.dispatch import _dispatch
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("SHINOBI_SANDBOX__DIR", str(tmp_path / "sandboxes"))
+    (tmp_path / "obs.ms").mkdir()
+    root = tmp_path / "sols"
+    root.mkdir()
+    (root / "old.sols.npz").write_text("solutions")
+    (root / "old.sols.parset").write_text("parset")
+    backend = RecordingBackend()
+    register_step_backend("killms-relative-skip", backend)
+    cab = dosho.get("killms").model_copy(
+        update={"backend": "killms-relative-skip", "sandbox": True, "cache": False}
+    )
+    result = _dispatch(
+        cab,
+        None,
+        vis_data_ms_name="obs.ms",
+        solutions_sols_dir="sols",
+        solutions_skip_existing_sols=1,
+    )
+    assert len(backend.calls) == 1
+    assert result.outputs.solutions.select().path.resolve() == root
+    assert (root / "old.sols.npz").read_text() == "solutions"
+    assert (root / "old.sols.parset").read_text() == "parset"

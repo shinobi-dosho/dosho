@@ -72,6 +72,7 @@ cabs:
       # its statistics as four opaque QUALITY_* tables linked from MAIN
       # keywords. A strategy without `collect_statistics` adds no QUALITY_*
       # tables; the permission allows them, it does not require them.
+      # UVW is read by memory/indirect readers as well as explicit -uvw.
       # Memory and indirect reads (the default `auto_read_mode` picks one)
       # open the MS for update through casacore, which rewrites the files of
       # every subtable present, optional ones included; `-direct-read` does
@@ -79,7 +80,7 @@ cabs:
       - field: msname
         mode: write
         columns:
-          read: ["{column}"]
+          read: ["{column}", UVW]
           write: [FLAG]
         allow_present_subtable_rewrite: true
         allow_subtable_change:

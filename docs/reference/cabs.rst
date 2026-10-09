@@ -7118,7 +7118,7 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - ``'AP'``
      - \-
    * - ``solutions_skip_existing_sols``
-     - ``int | None``
+     - ``Literal[0, 1]``
      - ``0``
      - \-
    * - ``solutions_sols_dir``
@@ -8160,7 +8160,16 @@ msutils flags backup: save an MS's current flags as a named version
 
 **Outputs**
 
-*(none)*
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``flagversions``
+     - ``ProductFamily[DirectoryBundle] | None``
+     - \-
 
 msutils-flags-delete
 --------------------
@@ -14701,7 +14710,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``nchan``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``deconvolution_channels``
@@ -14721,7 +14730,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``pol``
-     - ``str | list[str] | None``
+     - ``str | list[str]``
      - ``'I'``
      - \-
    * - ``join_polarizations``
@@ -14733,7 +14742,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``intervals_out``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``interval``
@@ -14825,7 +14834,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``no_dirty``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``save_first_residual``
@@ -14853,7 +14862,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``make_psf_only``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``weight``
@@ -14921,11 +14930,11 @@ WSClean imager (https://wsclean.readthedocs.io)
      - *required*
      - \-
    * - ``predict``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``continue_``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``subtract_model``
@@ -15021,8 +15030,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``grid_with_beam``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``beam_aterm_update``
      - ``float | None``
@@ -15049,8 +15058,8 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``apply_facet_beam``
-     - ``bool | None``
-     - ``None``
+     - ``bool``
+     - ``False``
      - \-
    * - ``facet_beam_update``
      - ``float | None``
@@ -15105,7 +15114,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``dry_run``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``maxuvw_m``
@@ -15253,7 +15262,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``None``
      - \-
    * - ``save_source_list``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``clean_border``
@@ -15386,6 +15395,12 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``ProductFamily[Path] | None``
      - \-
    * - ``source_list``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``continued_beam_model``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``continued_facet_beam_model``
      - ``ProductFamily[Path] | None``
      - \-
 
