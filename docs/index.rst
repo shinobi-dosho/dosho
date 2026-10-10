@@ -63,6 +63,7 @@ generated from the live registry at build time.
    :caption: Concepts
 
    concepts/authoring
+   concepts/msv2_contracts
 
 .. toctree::
    :maxdepth: 2

@@ -16,6 +16,7 @@ cabs:
         dtype: bool
       flagging-strategy:
         dtype: str
+        choices: [standard, polarisation, total_power]
       row-chunks:
         dtype: int
       baseline-chunks:
@@ -32,11 +33,13 @@ cabs:
         dtype: str
       scan_numbers:
         dtype: str
+        nom_de_guerre: scan-numbers
       disable-post-mortem:
         dtype: bool
         default: true
       window-backend:
         dtype: str
+        choices: [numpy, zarr-disk]
       temporary-directory:
         dtype: Directory
       subtract-model-column:

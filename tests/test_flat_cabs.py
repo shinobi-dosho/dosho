@@ -56,6 +56,23 @@ def test_tricolour_positional_ms_and_double_dash_flags():
     assert "--data-column" in argv
 
 
+def test_tricolour_scan_selection_matches_the_native_parser():
+    cab = dosho.get("tricolour")
+    values = cab.inputs_model(ms="/x.ms", scan_numbers="1~3", nworkers=2).model_dump()
+    argv = build_argv(cab, values)
+    assert argv[argv.index("--scan-numbers") : argv.index("--scan-numbers") + 2] == [
+        "--scan-numbers",
+        "1~3",
+    ]
+    assert "--scan_numbers" not in argv
+
+
+@pytest.mark.parametrize("params", [{"flagging_strategy": "unknown"}, {"window_backend": "disk"}])
+def test_tricolour_rejects_modes_the_native_parser_does_not_support(params):
+    with pytest.raises(ValidationError):
+        dosho.get("tricolour").inputs_model(ms="/x.ms", **params)
+
+
 def test_crystalball_required_fields_and_argv():
     cab = dosho.get("crystalball")
     assert cab.name == "crystalball"
