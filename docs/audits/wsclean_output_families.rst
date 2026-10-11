@@ -113,3 +113,14 @@ prediction invalidation and continuation reuse with eight declared model inputs.
 Saved-flag restoration similarly missed after a saved version changed.
 The earlier output-only native tests retain their narrower qualification.
 These probes do not qualify every beam/facet imaging combination.
+
+Image family structural validation
+----------------------------------
+
+The image, dirty, residual, model and PSF families declare
+``ProductFamily[FITSImage]``. Each emitted or explicitly reused member must
+contain a supported physical image HDU with explicit WCS whose coordinate
+dimensions match the physical image axes. Fresh and cached members pass the
+same header-only validation before the enclosing MS mutation commits. These
+families grant no FITS file mutation authority; prediction dependencies and
+other dynamic products keep their existing declarations.

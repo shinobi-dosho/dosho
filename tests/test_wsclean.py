@@ -162,6 +162,16 @@ def test_source_list_is_an_optional_undecorated_product(tmp_path):
     assert [(c.path.name, c.coordinates) for c in plan.candidates] == [("deep-sources.txt", {})]
 
 
+def _fits_image(path, value=0):
+    # Real image contracts: the selected image has explicit, consistent WCS.
+    fits = pytest.importorskip("astropy.io.fits")
+    numpy = pytest.importorskip("numpy")
+    hdu = fits.PrimaryHDU(numpy.full((2, 2), value, dtype=numpy.float32))
+    hdu.header["CTYPE1"] = "LINEAR"
+    hdu.header["CTYPE2"] = "LINEAR"
+    hdu.writeto(path, overwrite=True)
+
+
 class _EmittingBackend(RecordingBackend):
     def __init__(self, filenames):
         super().__init__()
@@ -171,7 +181,10 @@ class _EmittingBackend(RecordingBackend):
         result = super().run(cab, argv, inputs, **kwargs)
         root = Path(kwargs.get("cwd") or Path.cwd())
         for filename in self.filenames:
-            (root / filename).write_text(f"emission {len(self.calls)}")
+            if filename.endswith(".fits"):
+                _fits_image(root / filename, len(self.calls))
+            else:
+                (root / filename).write_text(f"emission {len(self.calls)}")
         return result
 
 
@@ -241,11 +254,12 @@ def test_prediction_stale_clearing_preserves_model_inputs(tmp_path, monkeypatch)
 
 def test_continuation_preserves_existing_model_and_updates_its_family(tmp_path, monkeypatch):
     model = tmp_path / "deep-model.fits"
-    model.write_text("previous model")
+    _fits_image(model)
+    before = model.read_bytes()
     cab, _, inputs, result = _dispatch_fixture(tmp_path, monkeypatch, [], continue_=True)
     prepared = cab.inputs_model(**inputs).model_dump()
     clear_stale_outputs(cab, prepared, tmp_path, sandboxed=False)
-    assert model.read_text() == "previous model"
+    assert model.read_bytes() == before
     assert (
         result.outputs.model.select(
             time=0, frequency=0, polarization="I", component="real"
@@ -484,3 +498,20 @@ def test_family_controls_refuse_explicit_null(field):
 
     with pytest.raises(ValidationError):
         _cab().inputs_model(**_inputs(**{field: None}))
+
+
+def test_emitted_and_reused_image_contracts_refuse_invalid_fits(tmp_path, monkeypatch):
+    from shinobi.exceptions import DatasetLifecycleViolationError
+
+    model = tmp_path / "deep-model.fits"
+    model.write_bytes(b"invalid reused model")
+    with pytest.raises(DatasetLifecycleViolationError, match="FITS output"):
+        _dispatch_fixture(tmp_path, monkeypatch, [], continue_=True)
+
+
+def test_corrupt_saved_member_invalidates_cache(tmp_path, monkeypatch):
+    cab, backend, inputs, first = _dispatch_fixture(tmp_path, monkeypatch, ["deep-image.fits"], cache=True)
+    selected = first.outputs.image.select(time=0, frequency=0, polarization="I", component="real")
+    selected.write_bytes(b"corrupt cached FITS")
+    repaired = _dispatch(cab, None, **inputs)
+    assert not repaired.cached and len(backend.calls) == 2
