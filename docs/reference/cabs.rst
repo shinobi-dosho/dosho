@@ -15388,19 +15388,19 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Type
      - Description
    * - ``image``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``dirty``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``residual``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``model``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``psf``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``source_list``
      - ``ProductFamily[Path] | None``

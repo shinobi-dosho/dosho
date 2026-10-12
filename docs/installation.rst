@@ -48,11 +48,21 @@ real cabs, so it needs the ``run`` extra:
     $ git clone https://github.com/shinobi-dosho/dosho.git
     $ cd dosho
     $ uv sync --extra run --group dev
+
     $ uv run pytest
     $ uv run ruff check .
 
     # enable the pre-commit hook, once per clone (see Contributing)
     $ git config core.hooksPath .githooks
+
+The development group includes Astropy for real FITS product-validation tests.
+Pure catalog reading still needs no shinobi or astronomy runtime. Applications
+using the WSClean FITS contracts from current shinobi main install its FITS
+extra explicitly (without waiting for a package release):
+
+.. code-block:: console
+
+    $ pip install "stimela-ninja[fits] @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main"
 
 A development checkout deliberately resolves ``stimela-ninja`` from its
 ``main`` branch rather than the last PyPI release --

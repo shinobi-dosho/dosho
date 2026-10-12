@@ -461,7 +461,7 @@ cabs:
     # outputs (in particular, stale-output clearing must not delete its inputs).
     outputs:
       image:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Image FITS products indexed by time, frequency, polarization and component.
         family:
           coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
@@ -499,7 +499,7 @@ cabs:
                   include: [XY]
                   suffix: '-{value}i'
       dirty:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Dirty FITS products indexed by time, frequency, polarization and component.
         family:
           coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
@@ -513,7 +513,7 @@ cabs:
               when: *dirty_mode
               axes: *imaginary_axes
       residual:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Residual FITS products indexed by time, frequency, polarization and component.
         family:
           coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
@@ -527,7 +527,7 @@ cabs:
               when: *imaging_mode
               axes: *imaginary_axes
       model:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Model FITS products indexed by time, frequency, polarization and component.
         family:
           coordinates: {time: int, frequency: [int, str], polarization: str, component: str}
@@ -629,7 +629,7 @@ cabs:
               when_set: {aterm_config: false, apply_facet_solutions: true}
               axes: *imaginary_axes
       psf:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Shared PSF FITS products indexed by time and frequency; no polarization axis.
         family:
           coordinates: {time: int, frequency: [int, str]}

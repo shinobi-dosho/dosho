@@ -67,7 +67,12 @@ def _summary(info: str | None) -> str:
 # field's annotation is a plain `Path` with the declaration in its metadata, so
 # without this the catalog would print `Path` for an `MSv2` and hide the one
 # thing that distinguishes it from a path-only `MS`.
-_DATASET_LABELS = {"measurement-set-v2": "MSv2", "casa-table": "CasaTab"}
+_DATASET_LABELS = {
+    "measurement-set-v2": "MSv2",
+    "casa-table": "CasaTab",
+    "fits-image": "FITSImage",
+    "fits-table": "FITSTable",
+}
 
 
 def _dataset_label(metadata: Any) -> str | None:
@@ -103,6 +108,11 @@ def _type_name(annotation: Any, metadata: tuple = ()) -> str:
         return "None"
     if annotation is Ellipsis:
         return "..."
+    # Pydantic's concrete generic model classes store origin/args separately
+    # from typing aliases; their generated __name__ embeds Annotated internals.
+    generic = getattr(annotation, "__pydantic_generic_metadata__", None)
+    if generic and generic.get("origin") is not None and generic.get("args"):
+        return f"{_type_name(generic['origin'])}[{', '.join(_type_name(arg) for arg in generic['args'])}]"
     origin = get_origin(annotation)
     if origin is Annotated:
         return _dataset_label(annotation.__metadata__) or _type_name(get_args(annotation)[0])
