@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Literal
 
 import pytest
-from shinobi import CasaTab, MSv2
+from shinobi import CasaTab, FITSImage, FITSTable, MSv2, ProductFamily, ProductMember
 
 _EXT = Path(__file__).resolve().parents[1] / "docs" / "_ext" / "cab_catalog.py"
 _spec = importlib.util.spec_from_file_location("cab_catalog", _EXT)
@@ -154,3 +154,31 @@ def test_wsclean_ms_list_renders_as_the_public_type():
 
     field = registry.get("wsclean").inputs_model.model_fields["ms"]
     assert cab_catalog._type_name(field.annotation, tuple(field.metadata)) == "list[MSv2]"
+
+
+@pytest.mark.parametrize(
+    "annotation,expected",
+    [
+        (FITSImage, "FITSImage"),
+        (FITSTable, "FITSTable"),
+        (ProductFamily[FITSImage], "ProductFamily[FITSImage]"),
+        (ProductMember[FITSTable], "ProductMember[FITSTable]"),
+        (ProductFamily[FITSImage] | None, "ProductFamily[FITSImage] | None"),
+        (list[ProductMember[FITSTable]], "list[ProductMember[FITSTable]]"),
+        (tuple[ProductFamily[FITSImage], ...], "tuple[ProductFamily[FITSImage], ...]"),
+    ],
+)
+def test_fits_product_annotations_render_public_types(annotation, expected):
+    assert cab_catalog._type_name(annotation) == expected
+
+
+def test_wsclean_image_families_render_public_fits_contracts():
+    from dosho import registry
+
+    cab = registry.get("wsclean")
+    for name in ("image", "dirty", "residual", "model", "psf"):
+        field = cab.outputs_model.model_fields[name]
+        assert (
+            cab_catalog._type_name(field.annotation, tuple(field.metadata))
+            == "ProductFamily[FITSImage] | None"
+        )

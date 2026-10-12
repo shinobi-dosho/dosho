@@ -164,9 +164,10 @@ def test_source_list_is_an_optional_undecorated_product(tmp_path):
 
 def _fits_image(path, value=0):
     # Real image contracts: the selected image has explicit, consistent WCS.
-    fits = pytest.importorskip("astropy.io.fits")
-    numpy = pytest.importorskip("numpy")
-    hdu = fits.PrimaryHDU(numpy.full((2, 2), value, dtype=numpy.float32))
+    import numpy as np
+    from astropy.io import fits
+
+    hdu = fits.PrimaryHDU(np.full((2, 2), value, dtype=np.float32))
     hdu.header["CTYPE1"] = "LINEAR"
     hdu.header["CTYPE2"] = "LINEAR"
     hdu.writeto(path, overwrite=True)
@@ -510,7 +511,9 @@ def test_emitted_and_reused_image_contracts_refuse_invalid_fits(tmp_path, monkey
 
 
 def test_corrupt_saved_member_invalidates_cache(tmp_path, monkeypatch):
-    cab, backend, inputs, first = _dispatch_fixture(tmp_path, monkeypatch, ["deep-image.fits"], cache=True)
+    cab, backend, inputs, first = _dispatch_fixture(
+        tmp_path, monkeypatch, ["deep-image.fits"], cache=True
+    )
     selected = first.outputs.image.select(time=0, frequency=0, polarization="I", component="real")
     selected.write_bytes(b"corrupt cached FITS")
     repaired = _dispatch(cab, None, **inputs)

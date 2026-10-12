@@ -10,7 +10,7 @@ import runpy
 from pathlib import Path
 
 from pydantic import BaseModel
-from shinobi import MSv2, ProductFamily, Recipe
+from shinobi import FITSImage, MSv2, ProductFamily, Recipe
 from shinobi.steps.schema import InputRef, OutputRef, StepRef
 
 import dosho
@@ -34,7 +34,7 @@ class Inputs(BaseModel):
 class Outputs(BaseModel):
     ms: MSv2
     summary: dict[str, int | list[int]]
-    image: ProductFamily[Path]
+    image: ProductFamily[FITSImage]
 
 
 pipeline = Recipe(name="strict-ms-pipeline", inputs_model=Inputs, outputs_model=Outputs)

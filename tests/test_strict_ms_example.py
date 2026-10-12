@@ -41,7 +41,15 @@ def test_example_plans_only_strict_ms_ports(no_dataset_closure, tmp_path):
             assert declaration.kind is DatasetKind.MEASUREMENT_SET_V2
         for model in [scope.inputs_model, scope.outputs_model]:
             for field, declaration in dataset_declarations(model).items():
-                assert declaration.kind is DatasetKind.MEASUREMENT_SET_V2, field
+                if declaration.kind is DatasetKind.FITS_IMAGE:
+                    assert ref.name == "image" and model is scope.outputs_model
+                    assert field.split(".")[0] in {"image", "dirty", "residual", "model", "psf"}
+                else:
+                    assert declaration.kind is DatasetKind.MEASUREMENT_SET_V2, field
+    assert (
+        dataset_declarations(recipe.outputs_model)["image.members[].value"].kind
+        is DatasetKind.FITS_IMAGE
+    )
     assert plan.accesses["summary"][0].declaration.columns.read == ("UVW", "DATA", "FLAG")
     assert ("restore", "backup") in plan.reasons
     assert ("flag", "backup") in plan.reasons
