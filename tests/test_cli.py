@@ -33,15 +33,16 @@ def test_build_dry_run_renders_dockerfile_and_tag():
     assert result.exit_code == 0, result.output
     assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
     # simms builds FROM the shared base-astro image (base: resolved to a full ref)
-    assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
+    assert "FROM ghcr.io/shinobi-dosho/base-astro:noble-kern10-d0.1.0" in result.output
     assert "--break-system-packages" in result.output and "simms==3.0.2" in result.output
 
 
-def test_base_image_builds_from_kern_without_a_base_ref():
+def test_base_image_configures_kern_ppa_without_a_base_ref():
     result = CliRunner().invoke(cli.main, ["images", "build", "BASE_ASTRO", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
-    assert "FROM kernsuite/base:10" in result.output
+    assert "ghcr.io/shinobi-dosho/base-astro:noble-kern10-d0.1.0" in result.output
+    assert "FROM ubuntu:24.04" in result.output
+    assert "ppa.launchpadcontent.net/kernsuite/kern-10" in result.output
 
 
 def test_build_package_override_changes_installed_spec_but_not_tag():
@@ -298,7 +299,7 @@ def test_dev_build_installs_from_the_branch_and_tags_dev():
     assert "git+https://github.com/shinobi-dosho/simms@main" in result.output
     assert "simms==3.0.2" not in result.output  # the release spec is replaced
     # ...on the same base, from the same `build:` block
-    assert "FROM ghcr.io/shinobi-dosho/base-astro:kern10-d0.1.0" in result.output
+    assert "FROM ghcr.io/shinobi-dosho/base-astro:noble-kern10-d0.1.0" in result.output
 
 
 def test_dev_build_injects_the_framework_dev_pin():
