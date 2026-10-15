@@ -1,8 +1,7 @@
-# dosho image: AOFlagger RFI flagger, installed from the curated KERN suite
-# apt packages (KERN ships a current aoflagger). Rendered by
-# `dosho images build AOFLAGGER`.
-FROM kernsuite/base:{kern_version}
-
-RUN docker-apt-install aoflagger
-
+# KERN-10 publishes native AOFlagger packages for AMD64 and ARM64.
+FROM {base_image}
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -o APT::Update::Error-Mode=any \
+    && apt-get install -y --no-install-recommends aoflagger \
+    && rm -rf /var/lib/apt/lists/*
 CMD {cmd}

@@ -44,7 +44,7 @@ be checked against the installed casacore C++ ABI. The base provides Python
 | Group | Image keys | Registered tools | Audit finding |
 | --- | --- | ---: | --- |
 | Shared pip children | `SIMMS`, `FITSTOOLZ`, `MSUTILS`, `QUARTICAL`, `TRICOLOUR`, `CRYSTALBALL`, `OWLCAT`, `SHADEMS`, `MOSAIC_QUEEN`, `MOWJSUB`, `BREIZORRO`, `AIMFAST`, `EIDOS`, `SMOPS`, `AEGEAN`, `RM_TOOLS`, `RFINDER`, `PYDDI`, `SPIMPLE`, `TIGGER_LSM`, `BDSF` | 61 | No architecture-specific command in the common Dockerfile. Build every child for ARM64 and check wheels and actual commands. |
-| C/C++ or apt tools | `WSCLEAN`, `AOFLAGGER`, `SOFIA2` | 4 | WSClean, IDG, EveryBeam, and SoFiA build native code; AOFlagger installs an apt binary. See their Dockerfiles under `src/dosho/cargo/`. |
+| C/C++ or apt tools | `WSCLEAN`, `AOFLAGGER`, `SOFIA2` | 4 | WSClean and EveryBeam build native code, IDG and AOFlagger come from KERN-10 apt, and SoFiA builds from source. See [the native-tool milestone](design_multiarch_native_tools.md). |
 | Older Python stacks | `CUBICAL`, `RAGAVI` | 3 | CubiCal requires Python 3.9 and compiles `sharedarray`; ragavi inherits `stimela/base:1.2.5` with Python 3.6. Its ARM64 availability is unverified. |
 | CASA tasks | `CASA6` at audit; now `CASA_TASKS` | 57 | The pinned [`casatools==6.7.0.31` release](https://pypi.org/project/casatools/6.7.0.31/) has no Linux ARM64 wheel or PyPI source distribution, so the pip install cannot complete natively on ARM64. These are the CASA tools to prioritize. |
 | CASA plotms, deferred | `CASA6` today | 1 | [The current Dockerfile](../src/dosho/cargo/casa6/Dockerfile) also extracts a specifically `x86_64` casaplotms AppImage. This is a separate optional package and a separate pystep; it need not gate the 57 tasks. |
@@ -101,8 +101,8 @@ lists both `amd64` and `arm64`. The package indexes contain `casacore-tools`
 3.7.1-1kern1, `python3-casacore` 3.7.1-1kern2 and `casacore-data`
 20250826-160001-5 on both architectures. The local AMD64 and emulated ARM64
 builds select the KERN packages from this PPA, rather than Ubuntu's copies.
-The PPA also contains `aoflagger` 3.5.0-1kern1 on ARM64; its binary will be
-validated in the later C/C++ tool milestone.
+The PPA also contains `aoflagger` 3.5.0-1kern1 on ARM64; its binary
+passed a local version check in the native-tool milestone.
 
 PyPI does not provide an ARM64 wheel for the current `python-casacore`
 release. Installing the PPA's architecture-specific `python3-casacore` lets

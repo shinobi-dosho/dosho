@@ -118,22 +118,16 @@ images:
     dev:
       package: "msutils[all] @ git+https://github.com/shinobi-dosho/msutils@main"
 
-  # `version` carries a build-variant suffix rather than being wsclean's
-  # version alone: 3.6-d0.1.0 is published and immutable, and this image is the
-  # same wsclean built *differently* -- with IDG and EveryBeam, which the first
-  # build silently omitted. Suffixing moves the tag (so CI's
-  # `build-plan --missing-only` sees a missing one to build) without spending a
-  # version bump or a bundle_version bump on it. `idg_version` is an IDG repo
-  # tag, `everybeam_version` an EveryBeam one minus its `v` -- both bounded by
-  # wsclean 3.6's CMake; see cargo/wsclean/Dockerfile.
+  # WSClean also provides the chgcentre cab. IDG comes from KERN-10's
+  # idg-dev package; EveryBeam 0.7 is built from source for beam support.
   WSCLEAN:
     source: "https://gitlab.com/aroffringa/wsclean"
     name: wsclean
     build:
-      version: "3.6-idg"
-      kern_version: "10"
+      version: "3.6-idg-noble"
+      base: BASE_ASTRO
+      platforms: [linux/amd64, linux/arm64]
       package_version: "3.6"
-      idg_version: "1.2.0"
       everybeam_version: "0.7.4"
       cmd: "wsclean --version"
       dockerfile: wsclean/Dockerfile
@@ -195,8 +189,9 @@ images:
     source: "https://gitlab.com/aroffringa/aoflagger"
     name: aoflagger
     build:
-      version: "kern10"
-      kern_version: "10"
+      version: "kern10-noble"
+      base: BASE_ASTRO
+      platforms: [linux/amd64, linux/arm64]
       cmd: "aoflagger --version"
       dockerfile: aoflagger/Dockerfile
   TRICOLOUR:
@@ -268,8 +263,9 @@ images:
     source: "https://gitlab.com/SoFiA-Admin/SoFiA-2"
     name: sofia2
     build:
-      version: "2.7.0"
-      kern_version: "10"
+      version: "2.7.0-noble"
+      base: BASE_ASTRO
+      platforms: [linux/amd64, linux/arm64]
       package_version: "2.7.0"
       # bare `sofia` wants a parameter file (exit 7); -h is the clean self-check.
       cmd: "sofia -h"
