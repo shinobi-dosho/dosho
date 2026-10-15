@@ -1,10 +1,10 @@
 # Multi-architecture image base: design and audit
 
-**Status:** base proposed, 2026-10-15. The audit below describes the image
-manifest before the task-only CASA change. A separate CASA tasks source-build
-recipe now passes local AMD64 and emulated ARM64 import and `listobs`
-checks on kudu. The first shared-base gate is a native ARM64 apt build with KERN-10 enabled. CASA
-plotms is **deferred**.
+**Status:** base implemented and tested locally, 2026-10-15. The audit below
+describes the image manifest before the task-only CASA change. CASA tasks pass
+local AMD64 and emulated ARM64 import and `listobs` checks on kudu. The shared
+base is built on AMD64 and under ARM64 emulation on kudu; no registry tag has
+been published. CASA plotms is **deferred**.
 
 ## Goal and boundary
 
@@ -31,13 +31,15 @@ pysteps**, or 61 registered tools. The counts were checked from the manifest
 and `src/dosho/documents/`; the pystep split comes from the image decorators
 in `src/dosho/cabs/`.
 
-The present [base Dockerfile](../src/dosho/cargo/base-astro/Dockerfile) inherits
-`kernsuite/base:10`, installs `python3-pip`, `python3-venv`, `git`, and
-`casacore-tools`, then installs `python-casacore`, `astropy`, `dask-ms[xarray]`,
-`numpy`, `scipy`, and `omegaconf` into system Python. This is the starting
-dependency inventory, not a requirement to put every one of those Python
-packages into the replacement base. In particular, downstream packages impose
-different NumPy and Python constraints.
+The earlier [base Dockerfile](../src/dosho/cargo/base-astro/Dockerfile)
+inherited `kernsuite/base:10`. The implemented image starts from Ubuntu 24.04,
+configures KERN-10 as a signed apt source, installs casacore tools, data and
+Python bindings from that PPA, and adds the common Python astronomy stack in
+`/opt/dosho/venv`. The venv exposes system site packages so it can use the apt
+casacore binding without rebuilding it. Children install into the venv and can
+override its packages; a different `python-casacore` wheel or source build must
+be checked against the installed casacore C++ ABI. The base provides Python
+3.12 only; old interpreter requirements stay with their children.
 
 | Group | Image keys | Registered tools | Audit finding |
 | --- | --- | ---: | --- |
@@ -53,102 +55,86 @@ different NumPy and Python constraints.
 table covers 129 registered tools across 30 built image tags plus one external
 reference.
 
-## Proposed base contract
+## Implemented base contract
 
-1. Start from a multi-platform Ubuntu 24.04 image. Configure the KERN-10 Noble
-   PPA with its published signing key and a `signed-by` apt source; verify the
-   key against the fingerprint on the PPA page before use. Keep Ubuntu
-   repositories available. Record which repository supplied each installed
-   KERN-related package; enabling a PPA does not mean every requested package
-   came from it.
-2. Include only broadly reused **runtime** facilities: certificates, apt
-   source configuration, the selected Python runtime, and casacore runtime
-   libraries/data and other shared astronomy libraries once the child inventory
-   proves reuse. Keep compilers, headers, `*-dev` packages, CMake, and tool
-   sources in build stages or individual child images. Install apt packages
-   without recommends and remove apt lists in the same layer.
-3. Keep `python3` on one documented default (currently Ubuntu Noble's 3.12).
-   Support older and newer Python minors explicitly, without changing that
-   default through `update-alternatives`. A wide range of interpreters is useful
-   only if children select the intended one and install their own packages for
-   its ABI. The first implementation should measure the compressed size of
-   preinstalling the versions actually used; if carrying all of them raises
-   every child's pull size substantially, use versioned Python base variants
-   or install an interpreter in the affected child. CubiCal's 3.9 and ragavi's
-   3.6 are existing cases, not evidence that all 21 shared pip children need
-   those runtimes. [uv can install multiple Python versions](https://docs.astral.sh/uv/concepts/python-versions/),
-   but its binary and managed runtimes are a choice to validate, not a required
-   part of the base.
-4. Give each child an isolated Python environment and pinned application
-   dependencies. Sharing one scientific site-packages across children risks
-   conflicting pins: the current [BDSF manifest entry](../src/dosho/images.yaml)
-   requests `numpy<2`, and [CASA6](../src/dosho/cargo/casa6/Dockerfile) pins
-   `protobuf==3.20` and handles its own NumPy installation. The exact set of
-   shared Python packages should follow measured reuse and compatible pins,
-   not the current base's package list by default.
-5. Publish a package inventory and per-architecture compressed-size report for
-   the base. Compare the total bytes a representative child pulls with the old
-   base, not just the base's layer count. A shared dependency saves registry
-   storage and build time, but still travels with every child that inherits it.
+- Ubuntu 24.04 provides the runtime; KERN-10 is a `signed-by` apt source. The
+  build downloads its key from Ubuntu's keyserver and checks fingerprint
+  `5711690ECBEB59BAC7D3CBF9813B0DC8B7D042E7` before using it. Apt uses
+  HTTP for this repository because HTTPS certificate validation failed inside
+  the build environment; signed apt metadata still authenticates packages.
+  `APT::Update::Error-Mode=any` fails the build if the PPA cannot be refreshed.
+- Runtime packages include Python 3.12, pip, venv, certificates, curl, wget,
+  git, `casacore-tools`, `casacore-data`, and `python3-casacore`. Compilers,
+  development headers, Qt, CASA measures data, and alternate interpreters stay
+  out of the base. Apt runs without recommends and removes its package lists.
+- `/opt/dosho/venv` is on `PATH` and includes system site packages. The base
+  installs NumPy 1.x, Astropy 7.2.2, SciPy 1.17.1, OmegaConf 2.4.0 and
+  `dask-ms[xarray]==0.2.21`. Dask 2024.6.0, xarray 2024.6.0 and pandas
+  2.2.2 are pinned because current Dask removed an internal function that
+  this `dask-ms` release imports. Astropy is pinned because the unpinned
+  resolver selected different releases on AMD64 and ARM64.
+  Children may install their own Python package versions in the venv; native
+  bindings require an ABI check. The apt copy of `python3-casacore` stays
+  available if a child does not override it.
+- One Python interpreter keeps the base small. CubiCal's 3.9 and ragavi's 3.6
+  need separate images or their own interpreter setup. A future shared Python
+  variant needs evidence of enough reuse to justify every child's pull cost.
 
-The supported Python versions, shared runtime package list, and size ceiling
-remain decisions to make from native builds and measurements. The base contract
-does not include CASA measures data, Qt/AppImage files, WSClean's IDG/EveryBeam
-build, or DDFacet's private source stack.
+The local images are 211,850,643 bytes unpacked on AMD64 and 207,345,438
+bytes on ARM64, compared with 634,327,575 bytes for the previous AMD64
+`kern10` base. A `docker save | gzip -1` comparison gave 210,214,314
+versus 631,725,376 bytes respectively. This is a local archive comparison,
+not a registry pull-size measurement. Skipping pip bytecode compilation
+removed roughly 26 MB and shortened the emulated ARM64 package install.
+FITSTOOLZ built and ran its CLI on both architectures with the new base. On ARM64 it installs its required NumPy 2 over the apt NumPy 1;
+`casacore.tables` still imports, but pip reports that the inherited
+`dask-ms==0.2.21` declares `numpy<2`. FITSTOOLZ does not use dask-ms;
+children needing both packages must select compatible versions and validate
+their operations, not rely on this import smoke check alone.
 
-## KERN-10 package findings and gate
+## KERN-10 package findings
 
 [KERN's installation instructions](https://kernsuite.info/installation/)
-identify KERN-10 with Ubuntu 24.04 and its PPA. The accessible
-[Launchpad PPA overview](https://launchpad.net/~kernsuite/+archive/ubuntu/kern-10)
-lists two published source packages, `casacore` 3.6.1-1kern1 and
-`casacore-data` 20250113-160001-5. It does **not** identify which binary
-architectures were built. The live PPA `Release` and `Packages` indexes and
-package build pages were inaccessible during this audit, so KERN-10 ARM64
-coverage is **unverified**. Launchpad's [PPA documentation](https://ubuntu.com/docs/launchpad/user/reference/packaging/ppas/ppa/)
-says ARM64 builds are not enabled by default. The broad
-[KERN package catalog](https://kernsuite.info/packages/) is not proof that
-those packages are published by this Noble PPA for ARM64.
+identify the Noble PPA. Its live
+[Release file](https://ppa.launchpadcontent.net/kernsuite/kern-10/ubuntu/dists/noble/Release)
+lists both `amd64` and `arm64`. The package indexes contain `casacore-tools`
+3.7.1-1kern1, `python3-casacore` 3.7.1-1kern2 and `casacore-data`
+20250826-160001-5 on both architectures. The local AMD64 and emulated ARM64
+builds select the KERN packages from this PPA, rather than Ubuntu's copies.
+The PPA also contains `aoflagger` 3.5.0-1kern1 on ARM64; its binary will be
+validated in the later C/C++ tool milestone.
 
-| Package used by dosho | Evidence available | Native-build check |
-| --- | --- | --- |
-| `casacore-dev`, `casacore-tools`, `casacore-data` | KERN-10 lists the `casacore` and `casacore-data` sources; Ubuntu Noble also publishes [casacore tools](https://packages.ubuntu.com/noble/casacore-tools) and [development files](https://packages.ubuntu.com/noble/casacore-dev). | Inspect `apt-cache policy` and install on both architectures; record selected versions and library ABI. |
-| `python3-casacore` | [Ubuntu Noble publishes it](https://packages.ubuntu.com/noble/python3-casacore); KERN uses the package name in its guide. | Check package origin and that Python can import it alongside the selected casacore libraries. |
-| `aoflagger` | [Ubuntu Noble publishes an ARM64 build](https://packages.ubuntu.com/noble/arm64/aoflagger); it is not among the two sources shown on the PPA overview. | Install with the PPA enabled and run `aoflagger --version`; verify its casacore dependency resolves with the chosen version. |
-| `wcslib-dev` | [Ubuntu Noble publishes ARM64](https://packages.ubuntu.com/noble/wcslib-dev). | Install as part of the WSClean native build, not by default in the runtime base. |
+PyPI does not provide an ARM64 wheel for the current `python-casacore`
+release. Installing the PPA's architecture-specific `python3-casacore` lets
+ARM64 children use the binding without compiling it. A forced pip install of
+`python-casacore==3.7.1` into the base venv succeeded on AMD64 while leaving
+the apt package in place. A child that requires another version can install
+into the venv, but an ARM64 source build needs
+`casacore-dev` and a runtime import/ABI test in that child.
 
-The first build gate is an AMD64 and native ARM64 Ubuntu Noble image that adds
-the KERN-10 source, records `dpkg --print-architecture` and `apt-cache policy`
-for those packages, installs them, runs `python3 -c 'import casacore.tables'`
-and an installed casacore tool, and records the resolved versions. If KERN's
-casacore binaries are absent on ARM64, test Ubuntu's casacore packages as an
-explicit alternative; do not silently mix incompatible library versions.
+## Publishing and verification
 
-## Publishing and verification implications
+`BASE_ASTRO` uses the new `noble-kern10` version and declares
+`linux/amd64` and `linux/arm64`. The CLI uses Buildx to build/push both
+platforms as one manifest, and its existence and verify checks inspect the
+manifest's platforms. The image workflow installs QEMU and Buildx for this
+base. Builds and runtime smoke tests on kudu use emulation for ARM64, as
+requested; native ARM64 hardware has not been used. A local Buildx OCI export
+contains both `linux/amd64` and `linux/arm64` image manifests under one index. The tag is not yet
+published. Existing child tags are immutable and still contain their earlier
+base layers. Each child needs its own new version and build before publication
+against this base; only children validated on ARM64 should declare ARM64.
 
-The current [CLI](../src/dosho/cli.py) uses host-architecture `docker build`,
-`docker run`, then `docker push`. Its `_image_exists` check and the weekly
-`verify` command accept an existing tag without inspecting its architectures.
-The [release workflow](../.github/workflows/images.yml) builds on
-`ubuntu-latest`; its base-first ordering remains useful. Multi-platform
-publishing needs a manifest containing both variants and a verification check
-for `linux/amd64` and `linux/arm64`. Existing release tags are treated as
-immutable, so the transition requires new tags or an explicit, reviewed
-exception to the immutability policy. Dev tags and their reported digest need
-the same platform semantics.
-
-For source-heavy tools, prefer native builders for each architecture. Docker
+For source-heavy tools, native builders may be faster. Docker
 [documents](https://docs.docker.com/build/building/multi-platform/) that QEMU
-emulation can be much slower for compilation. Build and test the base first,
-then one representative pip child, then the remaining shared-template images.
-An image should enter the ARM64 published set only after its command has run
-on ARM64. Keep unsupported images out of a claimed two-platform manifest.
+emulation can be much slower for compilation. Each child must pass an ARM64
+command check before its manifest declares ARM64.
 
 ## Later designs
 
-The **CASA tasks** require a Linux ARM64 `casatools` build; changing the base
-alone does not provide one. The
-pinned `casatasks` release is a
+The **CASA tasks** needed a Linux ARM64 `casatools` build; changing this
+shared base alone would not have provided one. The pinned `casatasks` release
+is a
 [`py3-none-any` wheel](https://pypi.org/project/casatasks/6.7.0.31/), but it
 depends on the compiled `casatools` package. The latest
 [`casatools` release](https://pypi.org/project/casatools/) still lists Linux
@@ -160,16 +146,10 @@ import functions from `casatasks`; its [plotms wrapper](../src/dosho/cabs/casapl
 imports from `casaplotms`. They shared one image at the audit snapshot. The new `CASA_TASKS` image
 serves the 57 task wrappers; `CASA6` remains assigned to plotms.
 
-There is a plausible source-build route. [CASA's own developer guide](https://open-bitbucket.nrao.edu/projects/CASA/repos/casa6/browse)
-builds libsakura, casacore, CASA C++ (`casacpp`), a `casatools` wheel, and then
-`casatasks` in that order. A native ARM64 builder could use a pinned CASA source
-revision and matching dependency revisions, install the resulting ARM64
-`casatools` wheel with the same-version `casatasks` package, and publish it
-alongside an AMD64 build under one image tag. The guide documents Ubuntu
-prerequisites tested on 22.04; it does not establish that this stack already
-builds or passes scientific tests on Ubuntu 24.04 ARM64. Reusing KERN casacore
-in that build also needs an explicit version and ABI check. A source build is
-therefore a candidate implementation, not a verified ARM64 release path.
+The separate CASA tasks milestone built `casatools` from source and passed
+local AMD64 and emulated ARM64 import and `listobs` checks. That image does
+not inherit `BASE_ASTRO`: it has its own source and dependency stack. Broader
+scientific qualification remains separate from the shared-base work.
 
 **Defer plotms.** The task-image design should omit `casaplotms`, Qt/AppImage
 extraction, and plotms-specific runtime libraries. When plotms is revisited,

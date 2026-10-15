@@ -58,15 +58,15 @@ metadata:
   dev_deps: "git+https://github.com/shinobi-dosho/stimela-ninja@a855c3638503e3436da2f1e48fc2049b62081d34"
 
 images:
-  # Shared base image: KERN suite base + python + casacore + common astro stack.
-  # Pip tools build `FROM` it (base: BASE_ASTRO) so the heavy layer is built once.
+  # Shared Ubuntu Noble image: KERN-10 apt source, Python 3.12, casacore,
+  # and the common astro Python stack. Pip children build FROM this image.
   BASE_ASTRO:
     name: base-astro
     source: "https://kernsuite.info"
     build:
-      version: "kern10"
-      kern_version: "10"
-      cmd: "python3 --version"
+      version: "noble-kern10"
+      platforms: [linux/amd64, linux/arm64]
+      cmd: "python3 -c 'import casacore.tables, astropy, daskms, numpy, scipy, omegaconf'"
       dockerfile: base-astro/Dockerfile
 
   # ---- dosho-built (everything except the deprecated SIMMS_CLASSIC ref: below) ----
