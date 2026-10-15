@@ -12,8 +12,8 @@ accor
 
 Normalize visibilities based on auto-correlations (VLA/EVLA-era normalization for non-VLA-corrected data).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -667,8 +667,8 @@ apparentsens
 
 Estimate imaging sensitivity for a proposed weighting/selection, without actually imaging. Read-only: neither `vis` nor any image is touched. The real task's own return value (a sensitivity dict) is exposed via `ApparentsensOutputs.sensitivity`.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -771,8 +771,8 @@ appendantab
 
 Append Tsys/gain-curve data from a VLBI antab file into an MS's SYSCAL/GAIN_CURVE subtables.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -827,8 +827,8 @@ applycal
 
 Apply an accumulated list of calibration tables to `vis`.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -943,8 +943,8 @@ bandpass
 
 Solve for a bandpass (per-channel gain) calibration table.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -1225,8 +1225,8 @@ blcal
 
 Calculate a baseline-based (non-antenna-based) calibration solution.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -1561,8 +1561,8 @@ clearcal
 
 Resets MODEL_DATA (and optionally adds scratch columns if they don't exist yet, `addmodel`). Operates in place -- `vis` is echoed back as the output so callers can chain a real dependency edge onto the next in-place-modifying step.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -1613,8 +1613,8 @@ clearstat
 
 Clear all autolock file locks that might block other tasks from running on the same table/file.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -1629,8 +1629,8 @@ concat
 
 Concatenate several MSs into one (additive: appends if `concatvis` already exists).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -1697,8 +1697,8 @@ conjugatevis
 
 Change the sign of the phases in every visibility column.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -2391,8 +2391,8 @@ cvel
 
 Regrid an MS to a new spectral window/channel structure or frame (the original, non-multi-MS-aware regridder; see `cvel2` for the modern replacement).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -2503,8 +2503,8 @@ cvel2
 
 Regrid an MS or multi-MS to a new spectral window/channel structure or frame (the modern, multi-MS-aware replacement for `cvel`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -3779,8 +3779,8 @@ deconvolve
 
 Image-domain-only minor-cycle deconvolution (no major cycle, no visibility gridding) against existing PSF/residual images.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -3931,8 +3931,8 @@ defintent
 
 Manually set (or append to) scan intents.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -3991,8 +3991,8 @@ delmod
 
 Delete model representations from an MS, in place.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -4184,8 +4184,8 @@ feather
 
 Combine a high-resolution (interferometric) and low-resolution (single-dish) image via their Fourier transforms.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -4657,8 +4657,8 @@ fixplanets
 
 Change FIELD/SOURCE table entries based on a user-provided direction or the POINTING table, in place, optionally fixing UVW too.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -4713,8 +4713,8 @@ fixvis
 
 Recompute (u, v, w) and/or change the phase center.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -4777,8 +4777,8 @@ flagcmd
 
 Flagging based on batches of flag-commands, from a table, a file, or an SDM Flag.xml (`inpmode='table'/'list'/'xml'`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -4879,8 +4879,8 @@ flagdata
 
 One generic wrapper covers every `mode` (`manual`/`list`/`clip`/ `quack`/`shadow`/`elevation`/`tfcrop`/`rflag`/`antint`/`extend`/ `unflag`/`summary`) -- `mode="summary"` returns the flag-count breakdown via `FlagdataOutputs.summary`, matching the real task's own return value. `rflag`'s own tunables (`winsize`/`timedev`/`freqdev`/ `timedevscale`/`freqdevscale`/`spectralmax`/`spectralmin`) and the whole `antint`/`extend` modes were missing entirely before this audit, even though oxkat's own `1GC_casa_refcal.py` drives `rflag` throughout its residual-reflagging steps.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -5221,8 +5221,8 @@ flagmanager
 
 Real CASA flag-version management (`mode="list"/"save"/"restore"/ "delete"/"rename"`). `mode="list"` returns the version list via `FlagmanagerOutputs.versionlist`, matching the real task's own return value for that mode; other modes echo `vis` only. `oldname`/`comment` (for `mode="rename"`/`"save"`) were missing before this audit. Flag- version bookkeeping conventions (e.g. a "before this worker ran" marker) are pipeline-specific orchestration, not part of this generic wrapper.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -5472,8 +5472,8 @@ fluxscale
 
 Bootstrap the flux-density scale from standard calibrators.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -5567,8 +5567,8 @@ fringefit
 
 Fringe-fit delay and rate (VLBI-style global fringe fitting).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -5731,8 +5731,8 @@ ft
 
 Fourier-transform a model image or component list into the MS's model representation, in place (either the virtual/OTF keywords, or the MODEL_DATA column when `usescratch=True`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -5823,8 +5823,8 @@ gaincal
 
 Solve for temporal gains from calibrator observations.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -6215,8 +6215,8 @@ gencal
 
 Generate a calibration table of manually-specified values, for types without a data-driven solve (`amp`/`ph`/`sbd`/`mbd`/`antpos`/ `antposvla`/`tsys`/`evlagain`/`opac`/`gc`/`gceff`/`eff`/`tecim`/ `jyperk`/`eop`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -6303,8 +6303,8 @@ getantposalma
 
 Query ALMA's web service for antenna-position corrections and write them to a JSON file (for `gencal caltype='antpos'`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -6375,8 +6375,8 @@ getcalmodvla
 
 Query a VLA web service for a calibrator's brightness-distribution component list (for `setjy standard='fluxscale'`-style use).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -6439,8 +6439,8 @@ hanningsmooth
 
 Hanning-smooth channel data to remove Gibbs ringing.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -6675,8 +6675,8 @@ impbcor
 
 Construct a primary-beam-corrected image from an image and a PB pattern image.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -6755,8 +6755,8 @@ initweights
 
 Initialize weight-related columns in the MS.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -7228,8 +7228,8 @@ listobs
 
 Write a CASA `listobs` text summary of a measurement set.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -7332,8 +7332,8 @@ makemask
 
 Make and manipulate image masks (`mode='list'/'copy'/'expand'/ 'delete'/'setdefaultmask'`). For `mode='copy'`/`'expand'`, `output` (an image name, or `imagename:internal_maskname`) is the real output product -- it may point back into `inpimage` itself for an internal T/F mask, which is exactly why it's classified as this step's output rather than treated as a side effect.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -7497,8 +7497,8 @@ mstransform
 
 Split/combine/regrid an MS and optionally average in channel/time.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -8679,8 +8679,8 @@ msuvbin
 
 Grid visibility data onto a defined uniform uv-grid, stored as an MS (additive: bins into `outputvis` if it already exists).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -8775,8 +8775,8 @@ msuvbinflag
 
 Identify UV-plane outliers in a `msuvbin`-binned MS and flag them.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -8872,8 +8872,8 @@ partition
 
 Produce a multi-MS from an MS, for parallelized processing.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -8980,8 +8980,8 @@ pccor
 
 Generate Pulse-Cal corrections for VLBA data.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -9048,8 +9048,8 @@ phaseshift
 
 Rotate an MS to a new phase center.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -9212,8 +9212,8 @@ polcal
 
 Determine instrumental polarization calibration. A genuinely different CASA task from `gaincal` (disambiguated by `poltype`, e.g. `"Xf"` crosshand phase, `"Df"` leakage -- not a variation on the `gaincal` wrapper above).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -9352,8 +9352,8 @@ polfromgain
 
 Derive linear polarization (Q, U) from the ratio of a gain table's parallel-hand amplitudes across parallactic-angle coverage.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -9404,8 +9404,8 @@ predictcomp
 
 Build a component list for a known calibrator (e.g. a solar-system object via a flux-density standard).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -10263,8 +10263,8 @@ rerefant
 
 Re-reference an existing gain table to a different reference antenna, without re-solving.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -10696,8 +10696,8 @@ rmtables
 
 Remove CASA tables cleanly (use this instead of `rm -rf`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -10723,8 +10723,8 @@ sdintimaging
 
 Joint deconvolution of interferometric visibilities and a single-dish image cube into one sky model (`tclean` plus an SD term; see `TcleanOutputs`/`tclean`'s own docstring for the shared parameter groups' conditional structure).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -11126,8 +11126,8 @@ setjy
 
 Fill MODEL_DATA (or the model representation) for a calibrator.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -12079,8 +12079,8 @@ smoothcal
 
 Smooth an existing calibration table in time.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -12993,8 +12993,8 @@ split
 
 Create a visibility subset from an existing MS, with optional channel/time averaging.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -13101,8 +13101,8 @@ statwt
 
 Compute and set visibility weights from the data's own variance, in place (WEIGHT/WEIGHT_SPECTRUM columns, and flags data outside `wtrange` unless `preview=True`).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -13233,8 +13233,8 @@ tclean
 
 Radio-interferometric image reconstruction (CLEAN with major/minor cycles) -- CASA's flagship imager. One flat wrapper covers every `specmode`/`gridder`/`deconvolver`/`weighting`/`usemask` combination, same convention as `flagdata`'s modes; see the `Args` groupings below for which parameters are conditional on which selector.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -14130,8 +14130,8 @@ uvcontsub
 
 Continuum subtraction in the uv domain.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -14214,8 +14214,8 @@ uvcontsub_old
 
 Continuum fitting and subtraction in the uv plane (the deprecated, pre-`uvcontsub` implementation). Output naming is fixed by CASA itself, not a caller-supplied path -- `{vis}.contsub` (overwritten if it already exists), plus `{vis}.cont` when `want_cont=True`.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -14285,8 +14285,8 @@ uvmodelfit
 
 Fit a single-component source model (point/Gaussian/disk) to the uv data. Read-only w.r.t. `vis`; the fitted parameters are the actual output product, optionally also written to `outfile` as a component list.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -14376,8 +14376,8 @@ uvsub
 
 Subtract (or, `reverse=True`, add) MODEL_DATA from/to CORRECTED_DATA, in place.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -14416,8 +14416,8 @@ virtualconcat
 
 Concatenate several MSs into one multi-MS, without copying the underlying data (a "virtual" concat).
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -14607,8 +14607,8 @@ widebandpbcor
 
 Wideband primary-beam correction on the output of MS-MFS (`tclean` with `deconvolver='mtmfs'`) imaging.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 
@@ -15417,8 +15417,8 @@ wvrgcal
 
 Generate a gain table from ALMA Water Vapour Radiometer data.
 
-:Image: ``ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0`` (``CASA6`` 6.7, build)
-:Source: https://casadocs.readthedocs.io
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
 
 **Inputs**
 

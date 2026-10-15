@@ -56,9 +56,9 @@ def _all_pysteps():
     }
 
 
-def test_every_casatask_pystep_uses_the_pinned_casa6_image():
+def test_every_casatask_pystep_uses_the_task_image():
     for name, ref in _all_pysteps().items():
-        assert ref.step.image == images.CASA6, name
+        assert ref.step.image == images.CASA_TASKS, name
 
 
 def test_every_casatask_pystep_resolves_through_the_registry():

@@ -90,7 +90,7 @@ def test_all_44_new_tasks_are_registered():
 def test_all_44_new_tasks_use_the_pinned_casa6_image():
     for name in _NEW_TASK_NAMES:
         ref = dosho.get(name)
-        assert ref.step.image == images.CASA6, name
+        assert ref.step.image == images.CASA_TASKS, name
 
 
 # --- in-place-mutated inputs are classified as outputs ---------------------
