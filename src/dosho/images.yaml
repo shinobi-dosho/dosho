@@ -19,6 +19,7 @@
 #         package: "<pip spec>"        # (pip tools) installed into the image
 #         dockerfile: <path under cargo/>
 #         cmd: "<sanity command>"
+#         platforms: [linux/amd64, linux/arm64]  # optional Buildx push targets
 #         # ...arbitrary extra vars consumed by the tool's Dockerfile template
 #       dev:                          # optional: a `dosho images build --dev`
 #         package: "git+<repo>@main"  #   variant, i.e. the `build:` vars above
@@ -284,6 +285,15 @@ images:
       wheel_version: "6.7.0.31"
       cmd: "python3 -c 'import casatasks, casaplotms'"
       dockerfile: casa6/Dockerfile
+  # Task-only CASA image; plotms stays on the existing CASA6 image.
+  CASA_TASKS:
+    source: "https://open-bitbucket.nrao.edu/scm/casa/casa6.git"
+    name: casa-tasks
+    build:
+      version: "6.7.0.31"
+      platforms: [linux/amd64, linux/arm64]
+      cmd: "python3 -c 'from casatasks import listobs, gaincal; from casatools import table'"
+      dockerfile: casa-tasks/Dockerfile
   # DEPRECATED: the pre-3.0 simms command, unused by any worker -- slated for removal.
   SIMMS_CLASSIC:
     source: "https://github.com/shinobi-dosho/simms"

@@ -226,7 +226,7 @@ class ListobsOutputs(BaseModel):
     listfile: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["listfile"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["listfile"])
 def listobs(
     ctx,
     vis: Path,
@@ -333,7 +333,7 @@ class MstransformOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def mstransform(
     ctx,
     vis: Path,
@@ -540,7 +540,7 @@ class FixvisOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def fixvis(
     ctx,
     vis: Path,
@@ -601,7 +601,7 @@ class ClearcalOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def clearcal(
     ctx, vis: Path, field: str = "", spw: str = "", intent: str = "", addmodel: bool = False
 ) -> ClearcalOutputs:
@@ -633,7 +633,7 @@ class InitweightsOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def initweights(
     ctx,
     vis: Path,
@@ -691,7 +691,7 @@ class FlagdataOutputs(BaseModel):
     outfile: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def flagdata(
     ctx,
     vis: Path,
@@ -975,7 +975,7 @@ class SetjyOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def setjy(
     ctx,
     vis: Path,
@@ -1072,7 +1072,7 @@ class GaincalOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def gaincal(
     ctx,
     vis: Path,
@@ -1221,7 +1221,7 @@ class PolcalOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def polcal(
     ctx,
     vis: Path,
@@ -1332,7 +1332,7 @@ class BandpassOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def bandpass(
     ctx,
     vis: Path,
@@ -1471,7 +1471,7 @@ class ApplycalOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def applycal(
     ctx,
     vis: Path,
@@ -1574,7 +1574,7 @@ class FluxscaleOutputs(BaseModel):
     listfile: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def fluxscale(
     ctx,
     vis: Path,
@@ -1663,7 +1663,7 @@ class FlagmanagerOutputs(BaseModel):
     versionlist: list[str] | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def flagmanager(
     ctx,
     vis: Path,
@@ -1730,7 +1730,7 @@ class FlagcmdOutputs(BaseModel):
     plotfile: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def flagcmd(
     ctx,
     vis: Path,
@@ -1810,7 +1810,7 @@ class MsuvbinflagOutputs(BaseModel):
     binnedvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def msuvbinflag(
     ctx,
     binnedvis: Path,
@@ -1850,7 +1850,7 @@ class AccorOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def accor(
     ctx,
     vis: Path,
@@ -1941,7 +1941,7 @@ class AppendantabOutputs(BaseModel):
     outvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outvis"])
 def appendantab(
     ctx,
     vis: Path,
@@ -1985,7 +1985,7 @@ class BlcalOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def blcal(
     ctx,
     vis: Path,
@@ -2077,7 +2077,7 @@ class DefintentOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def defintent(
     ctx,
     vis: Path,
@@ -2123,7 +2123,7 @@ class FringefitOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def fringefit(
     ctx,
     vis: Path,
@@ -2249,7 +2249,7 @@ class GencalOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def gencal(
     ctx,
     vis: Path,
@@ -2321,7 +2321,7 @@ class GetantposalmaOutputs(BaseModel):
     outfile: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outfile"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outfile"])
 def getantposalma(
     ctx,
     outfile: Path,
@@ -2381,7 +2381,7 @@ class GetcalmodvlaOutputs(BaseModel):
     outfile: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outfile"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outfile"])
 def getcalmodvla(
     ctx,
     outfile: Path,
@@ -2432,7 +2432,7 @@ class PccorOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def pccor(
     ctx,
     vis: Path,
@@ -2486,7 +2486,7 @@ class PolfromgainOutputs(BaseModel):
     caltable: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def polfromgain(
     ctx,
     vis: Path,
@@ -2524,7 +2524,7 @@ class RerefantOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def rerefant(
     ctx,
     vis: Path,
@@ -2562,7 +2562,7 @@ class SmoothcalOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def smoothcal(
     ctx,
     vis: Path,
@@ -2609,7 +2609,7 @@ class WvrgcalOutputs(BaseModel):
     caltable: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def wvrgcal(
     ctx,
     vis: Path,
@@ -2713,7 +2713,7 @@ class ApparentsensOutputs(BaseModel):
     sensitivity: dict | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def apparentsens(
     ctx,
     vis: list[str],
@@ -2802,7 +2802,7 @@ class DeconvolveOutputs(BaseModel):
     imagename: str
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def deconvolve(
     ctx,
     imagename: str,
@@ -2919,7 +2919,7 @@ class DelmodOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def delmod(ctx, vis: Path, otf: bool = True, field: str = "", scr: bool = False) -> DelmodOutputs:
     """Delete model representations from an MS, in place.
 
@@ -2946,7 +2946,7 @@ class FeatherOutputs(BaseModel):
     imagename: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["imagename"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["imagename"])
 def feather(
     ctx,
     highres: Path,
@@ -2991,7 +2991,7 @@ class FtOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def ft(
     ctx,
     vis: Path,
@@ -3064,7 +3064,7 @@ class ImpbcorOutputs(BaseModel):
     outfile: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outfile"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outfile"])
 def impbcor(
     ctx,
     imagename: Path,
@@ -3127,7 +3127,7 @@ class MakemaskOutputs(BaseModel):
     output: str
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def makemask(
     ctx,
     mode: str = "list",
@@ -3188,7 +3188,7 @@ class PredictcompOutputs(BaseModel):
     savefig: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def predictcomp(
     ctx,
     objname: str,
@@ -3267,7 +3267,7 @@ class WidebandpbcorOutputs(BaseModel):
     imagename: str
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def widebandpbcor(
     ctx,
     vis: Path,
@@ -3354,7 +3354,7 @@ class TcleanOutputs(BaseModel):
 # where the declared `.image` doesn't even exist) can't be enumerated
 # statically. One keep-glob covers every mode, same pattern as wsclean's
 # `{prefix}-*` (see shinobi.sandbox; inert unless the step runs sandboxed).
-@shinobi.pystep(image=images.CASA6, harvest=["{imagename}.*"])
+@shinobi.pystep(image=images.CASA_TASKS, harvest=["{imagename}.*"])
 def tclean(
     ctx,
     vis: list[str],
@@ -3696,7 +3696,7 @@ class SdintimagingOutputs(BaseModel):
 # harvest: same reasoning as tclean's, and stronger -- sdintimaging writes
 # its products under `{imagename}.joint.*`/`.int.*`/`.sd.*` sub-prefixes,
 # so the declared fields cover even less of the real on-disk family.
-@shinobi.pystep(image=images.CASA6, harvest=["{imagename}.*"])
+@shinobi.pystep(image=images.CASA_TASKS, harvest=["{imagename}.*"])
 def sdintimaging(
     ctx,
     vis: list[str],
@@ -4005,7 +4005,7 @@ class ClearstatOutputs(BaseModel):
     """
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def clearstat(ctx) -> ClearstatOutputs:
     """Clear all autolock file locks that might block other tasks from
     running on the same table/file.
@@ -4028,7 +4028,7 @@ class ConcatOutputs(BaseModel):
     concatvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def concat(
     ctx,
     vis: list[Path],
@@ -4084,7 +4084,7 @@ class ConjugatevisOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def conjugatevis(
     ctx, vis: Path, outputvis: Path, spwlist: list[int] | None = None, overwrite: bool = False
 ) -> ConjugatevisOutputs:
@@ -4114,7 +4114,7 @@ class CvelOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def cvel(
     ctx,
     vis: Path,
@@ -4201,7 +4201,7 @@ class Cvel2Outputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def cvel2(
     ctx,
     vis: Path,
@@ -4302,7 +4302,7 @@ class FixplanetsOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def fixplanets(
     ctx,
     vis: Path,
@@ -4347,7 +4347,7 @@ class HanningsmoothOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def hanningsmooth(
     ctx,
     vis: Path,
@@ -4421,7 +4421,7 @@ class MsuvbinOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def msuvbin(
     ctx,
     vis: Path,
@@ -4495,7 +4495,7 @@ class PartitionOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def partition(
     ctx,
     vis: Path,
@@ -4577,7 +4577,7 @@ class PhaseshiftOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def phaseshift(
     ctx,
     vis: Path,
@@ -4636,7 +4636,7 @@ class RmtablesOutputs(BaseModel):
     """
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def rmtables(ctx, tablenames: list[str]) -> RmtablesOutputs:
     """Remove CASA tables cleanly (use this instead of `rm -rf`).
 
@@ -4660,7 +4660,7 @@ class SplitOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def split(
     ctx,
     vis: Path,
@@ -4743,7 +4743,7 @@ class StatwtOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def statwt(
     ctx,
     vis: Path,
@@ -4850,7 +4850,7 @@ class UvcontsubOutputs(BaseModel):
     outputvis: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+@shinobi.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
 def uvcontsub(
     ctx,
     vis: Path,
@@ -4921,7 +4921,7 @@ class UvcontsubOldOutputs(BaseModel):
     cont_vis: Path | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def uvcontsub_old(
     ctx,
     vis: Path,
@@ -4981,7 +4981,7 @@ class UvmodelfitOutputs(BaseModel):
     result: list[float] | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def uvmodelfit(
     ctx,
     vis: Path,
@@ -5056,7 +5056,7 @@ class UvsubOutputs(BaseModel):
     vis: Path
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def uvsub(ctx, vis: Path, reverse: bool = False) -> UvsubOutputs:
     """Subtract (or, `reverse=True`, add) MODEL_DATA from/to
     CORRECTED_DATA, in place.
@@ -5089,7 +5089,7 @@ class VirtualconcatOutputs(BaseModel):
     moved_vis: list[Path] | None = None
 
 
-@shinobi.pystep(image=images.CASA6)
+@shinobi.pystep(image=images.CASA_TASKS)
 def virtualconcat(
     ctx,
     vis: list[Path],

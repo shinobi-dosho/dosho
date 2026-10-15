@@ -2,6 +2,7 @@
 
 import json
 import re
+from types import SimpleNamespace
 
 from click.testing import CliRunner
 
@@ -136,6 +137,7 @@ def test_build_plan_changed_manifest_rebuilds_everything():
 
 def _plan_missing_only(monkeypatch, exists, *changed):
     monkeypatch.setattr(cli, "_image_exists", exists)
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
     args = ["images", "build-plan", "--missing-only"]
     for c in changed:
         args += ["--changed", c]
@@ -211,6 +213,7 @@ def test_push_force_overwrites(monkeypatch):
 
 def test_verify_ok_when_present(monkeypatch):
     monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
     result = CliRunner().invoke(cli.main, ["images", "verify"])
     assert result.exit_code == 0, result.output
     assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
@@ -219,6 +222,67 @@ def test_verify_ok_when_present(monkeypatch):
 def test_verify_fails_when_missing(monkeypatch):
     monkeypatch.setattr(cli, "_image_exists", lambda tag: False)
     result = CliRunner().invoke(cli.main, ["images", "verify"])
+    assert result.exit_code != 0
+    assert "MISSING" in result.output
+
+
+
+
+def test_image_has_platforms_reads_manifest_architectures(monkeypatch):
+    manifest = {"manifests": [
+        {"platform": {"os": "linux", "architecture": "amd64"}},
+        {"platform": {"os": "linux", "architecture": "arm64"}},
+    ]}
+    monkeypatch.setattr(
+        cli.subprocess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout=json.dumps(manifest)),
+    )
+    tag = "ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0"
+    assert cli._image_has_platforms(tag, ["linux/amd64", "linux/arm64"])
+    assert not cli._image_has_platforms(tag, ["linux/ppc64le"])
+
+
+def test_casa_tasks_push_uses_buildx_for_both_platforms(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: False)
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
+    monkeypatch.setattr(cli, "_run", lambda argv, **kwargs: calls.append((argv, kwargs)))
+    result = CliRunner().invoke(cli.main, ["images", "build", "CASA_TASKS", "--push"])
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 1
+    argv, kwargs = calls[0]
+    assert argv[:5] == [
+        "docker", "buildx", "build", "--platform", "linux/amd64,linux/arm64"
+    ]
+    assert "--push" in argv
+    assert b"RUN python3 -c 'from casatasks import listobs" in kwargs["input"]
+
+
+def test_casa_tasks_single_arch_push_is_rejected(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_run", lambda argv, **kwargs: calls.append(argv))
+    result = CliRunner().invoke(cli.main, ["images", "push", "CASA_TASKS"])
+    assert result.exit_code != 0
+    assert "declares multiple platforms" in result.output
+    assert not calls
+
+
+def test_existing_casa_tasks_tag_without_arm64_is_not_overwritten(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: False)
+    monkeypatch.setattr(cli, "_run", lambda argv, **kwargs: calls.append(argv))
+    result = CliRunner().invoke(cli.main, ["images", "build", "CASA_TASKS", "--push"])
+    assert result.exit_code != 0
+    assert "exists without all declared platforms" in result.output
+    assert not calls
+
+
+def test_verify_requires_casa_tasks_arm64(monkeypatch):
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: False)
+    result = CliRunner().invoke(cli.main, ["images", "verify", "CASA_TASKS"])
     assert result.exit_code != 0
     assert "MISSING" in result.output
 
