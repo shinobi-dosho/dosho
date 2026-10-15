@@ -120,8 +120,9 @@ def test_build_plan_changed_base_rebuilds_base_and_all_dependents():
     assert plan["bases"] == ["BASE_ASTRO"]
     # base-DAG invalidation: everything built FROM base-astro comes along
     assert "SIMMS" in plan["tools"] and "QUARTICAL" in plan["tools"]
-    # a tool that does NOT build from base-astro is not pulled in
-    assert "WSCLEAN" not in plan["tools"]
+    assert {"WSCLEAN", "AOFLAGGER", "SOFIA2"} <= set(plan["tools"])
+    # an image outside this base dependency chain is not pulled in
+    assert "CASA6" not in plan["tools"]
 
 
 def test_build_plan_changed_context_file_selects_its_image():

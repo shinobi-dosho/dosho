@@ -587,7 +587,7 @@ aoflagger
 AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
 
 :Command: ``aoflagger``
-:Image: ``ghcr.io/shinobi-dosho/aoflagger:kern10-d0.1.0`` (``AOFLAGGER`` kern10, build)
+:Image: ``ghcr.io/shinobi-dosho/aoflagger:kern10-noble-d0.1.0`` (``AOFLAGGER`` kern10-noble, build)
 :Source: https://gitlab.com/aroffringa/aoflagger
 
 **Inputs**
@@ -1481,7 +1481,7 @@ chgcentre
 chgcentre: recompute UVWs and rotate visibilities to a new phase centre (https://wsclean.readthedocs.io)
 
 :Command: ``chgcentre``
-:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-d0.1.0`` (``WSCLEAN`` 3.6-idg, build)
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-noble-d0.1.0`` (``WSCLEAN`` 3.6-idg-noble, build)
 :Source: https://gitlab.com/aroffringa/wsclean
 
 **Inputs**
@@ -12196,7 +12196,7 @@ sofia2
 SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/SoFiA-Admin/SoFiA-2)
 
 :Command: ``sofia``
-:Image: ``ghcr.io/shinobi-dosho/sofia2:2.7.0-d0.1.0`` (``SOFIA2`` 2.7.0, build)
+:Image: ``ghcr.io/shinobi-dosho/sofia2:2.7.0-noble-d0.1.0`` (``SOFIA2`` 2.7.0-noble, build)
 :Source: https://gitlab.com/SoFiA-Admin/SoFiA-2
 
 **Inputs**
@@ -14684,7 +14684,7 @@ wsclean
 WSClean imager (https://wsclean.readthedocs.io)
 
 :Command: ``wsclean``
-:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-d0.1.0`` (``WSCLEAN`` 3.6-idg, build)
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-noble-d0.1.0`` (``WSCLEAN`` 3.6-idg-noble, build)
 :Source: https://gitlab.com/aroffringa/wsclean
 
 **Inputs**
