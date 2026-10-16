@@ -97,20 +97,19 @@ images:
     name: msutils
     source: "https://github.com/shinobi-dosho/msutils"
     build:
-      version: "3.0.0"
+      version: "3.1.0"
       base: BASE_ASTRO
       # [all] pulls every optional stack: plots (matplotlib, for flagstats),
       # average (codex-africanus), gains + msv4 (xarray, zarr), xarray-ms and
       # convert (xradio) -- so every wrapped subcommand works out of the box
       # rather than dying on an ImportError the cab cannot express.
-      package: "msutils[all]==3.0.0"
+      package: "msutils[all]==3.1.0"
       cmd: "msutils --help"
       dockerfile: pip/Dockerfile
-    # The cabs describe msutils `main`, which is ahead of 3.0.0 by the whole
-    # `gainutils` console script and by subset/average's --taql/--reindex,
-    # --corr and binning options. The release image above lacks these, so
-    # correlation selection and every `gainutils-*` cab need this one until the next
-    # release: `dosho images build MSUTILS --dev --push`, then point a
+    # 3.1.0 is the first release carrying everything the cabs describe: the
+    # `gainutils` console script and subset/average's --taql/--reindex, --corr
+    # and binning options. The dev image tracks msutils `main` for work not
+    # yet released: `dosho images build MSUTILS --dev --push`, then point a
     # deployment at it with DOSHO_IMAGE_MSUTILS (pin the digest, not `:dev`).
     # PEP 508 direct-URL form rather than a bare `git+` URL, so `[all]`
     # survives the swap -- without it the git build installs no extras at all.
