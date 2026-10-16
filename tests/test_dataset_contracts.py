@@ -251,11 +251,12 @@ def test_a_strict_flagging_pipeline_plans_in_order(no_closure, tmp_path):
     }
     # Nothing is wired step-to-step, so every edge below is an access hazard
     # shinobi inferred, each with the reason it gives.
-    # The sidecar output conservatively reserves its parent as a generic
-    # write too; the MS access itself remains READ above.
+    # The sidecar family reserves its exact path, not its parent directory, so
+    # backup stays a pure reader of the MS and the flagger after it is ordered
+    # by a write-after-read hazard.
     assert plan.reasons == {
         ("backup", "sim"): ("read-after-write: sim.ms, MAIN.FLAG",),
-        ("flag", "backup"): ("write-after-write: sim.ms, MAIN.FLAG",),
+        ("flag", "backup"): ("write-after-read: sim.ms, MAIN.FLAG",),
         ("restore", "flag"): ("write-after-write: sim.ms, MAIN.FLAG",),
         ("restore", "backup"): (f"read-after-write: {tmp_path / 'sim.ms.flagversions/flags.pre'}",),
     }
