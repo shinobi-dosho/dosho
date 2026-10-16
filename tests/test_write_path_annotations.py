@@ -154,6 +154,7 @@ NOT_DESTINATIONS = {
             ("aoflagger", "msname"),
             ("chgcentre", "ms"),
             ("crystalball", "ms"),
+            ("cubical", "data_ms"),
             ("flagms", "ms"),
             ("msutils-addcol", "ms"),
             ("msutils-addnoise", "ms"),

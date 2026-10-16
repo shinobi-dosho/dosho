@@ -5,6 +5,23 @@ cabs:
     info: CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
     policies:
       explicit_true: true
+    dataset_accesses:
+      # One write over the whole dataset, with schema-change permission. Which
+      # columns CubiCal touches depends on options a static list cannot follow:
+      # `out-column` (CORRECTED_DATA) is written in every mode but `so`, and
+      # created when absent; `out-model-column` and `out-weight-column` are
+      # optional writes; `out-reinit-column` removes and re-adds columns; and
+      # `flags-auto-init` inserts BITFLAG/BITFLAG_ROW into an MS that has none
+      # before `flags-save` writes them and, via `flags-save-legacy`, FLAG and
+      # FLAG_ROW. Naming any of those under `create` would demand it after
+      # every run (a solve-only run adds no output column), and leaving one out
+      # would refuse a legitimate addition. The reads (`data-column`,
+      # `weight-column`, UVW, flags) are covered by the same whole-dataset
+      # intent. CubiCal's calibration products (gain tables, plots) go to its
+      # own `out-dir`, not into the MS.
+      - field: data_ms
+        mode: write
+        allow_schema_change: true
     input_patterns:
     - separator: '-'
       segments:
@@ -63,7 +80,7 @@ cabs:
         policies:
           positional_head: true
       data-ms:
-        dtype: MS
+        dtype: MSv2
         required: true
         mutable: true
       data-column:
@@ -335,6 +352,8 @@ cabs:
       misc-random-seed:
         dtype: str
     outputs:
-      ms:
-        dtype: MS
-        implicit: '{data_ms}'
+      # The echo of `data-ms`. It carries the input's name because a strict MS
+      # output with no same-named input plans as a new dataset to CREATE, which
+      # an existing MS refuses -- so this is not `ms`.
+      data-ms:
+        dtype: MSv2
