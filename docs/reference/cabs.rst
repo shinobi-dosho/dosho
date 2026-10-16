@@ -1833,7 +1833,7 @@ CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
      - ``None``
      - \-
    * - ``data_ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``data_column``
@@ -2382,8 +2382,8 @@ CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
    * - Field
      - Type
      - Description
-   * - ``ms``
-     - ``Path | None``
+   * - ``data_ms``
+     - ``MSv2 | None``
      - \-
 
 cvel
