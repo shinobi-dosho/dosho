@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dosho"
-version = "0.1.0b4"
+version = "0.1.0"
 description = "A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository"
 readme = "README.md"
 license = "Apache-2.0"
@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-run = ["stimela-ninja>=0.1.0b6"]
+run = ["stimela-ninja>=0.1.0"]
 
 [dependency-groups]
 dev = [
