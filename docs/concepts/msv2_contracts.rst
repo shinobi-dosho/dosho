@@ -64,7 +64,7 @@ Run the example
 ---------------
 
 Use a Python 3.11 driver with dosho's locked run dependencies. The qualified
-container boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.0.0 and WSClean
+container boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.1.0 and WSClean
 3.6/IDG, resolved through ``images.yaml``. Import tool packages inside the
 running container; cab loading never imports their schema-generation code.
 

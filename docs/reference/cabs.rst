@@ -6008,7 +6008,7 @@ gainutils-fluxscale
 gainutils fluxscale: bootstrap a calibrator's flux density from a reference calibrator's gains (CASA caltable or QuartiCal store)
 
 :Command: ``gainutils fluxscale``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -6084,7 +6084,7 @@ gainutils-normalise
 gainutils normalise: divide a scale out of a gain table, leaving its shape behind
 
 :Command: ``gainutils normalise``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -6148,7 +6148,7 @@ gainutils-smooth
 gainutils smooth: filter a gain table in time and/or frequency (phase and amplitude separately, then recombined)
 
 :Command: ``gainutils smooth``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7734,7 +7734,7 @@ msutils-addcol
 msutils addcol: add a column to an MS, cloning shape/type from an existing one
 
 :Command: ``msutils addcol``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7787,7 +7787,7 @@ msutils-addnoise
 msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev)
 
 :Command: ``msutils addnoise``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7840,7 +7840,7 @@ msutils-average
 msutils average: time- and channel-average an MS into a new one (needs msutils' 'average' extra)
 
 :Command: ``msutils average``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7925,7 +7925,7 @@ msutils-check
 msutils check: validate an MS against the MSv2 standard (exits non-zero on errors)
 
 :Command: ``msutils check``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -7957,7 +7957,7 @@ msutils-convert
 msutils convert: convert an MSv2 to an MSv4 processing set (needs msutils' 'convert' extra)
 
 :Command: ``msutils convert``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8010,7 +8010,7 @@ msutils-copycol
 msutils copycol: copy one column's data to another (creating it if needed)
 
 :Command: ``msutils copycol``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8055,7 +8055,7 @@ msutils-delcol
 msutils delcol: remove columns from an MS (e.g. CORRECTED_DATA, to reclaim disk)
 
 :Command: ``msutils delcol``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8100,7 +8100,7 @@ msutils-du
 msutils du: report where an MS's bytes are, by storage manager and subtable
 
 :Command: ``msutils du``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8132,7 +8132,7 @@ msutils-flags-backup
 msutils flags backup: save an MS's current flags as a named version
 
 :Command: ``msutils flags backup``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8181,7 +8181,7 @@ msutils-flags-delete
 msutils flags delete: delete a saved flag version from an MS
 
 :Command: ``msutils flags delete``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8222,7 +8222,7 @@ msutils-flags-list
 msutils flags list: list an MS's saved flag versions
 
 :Command: ``msutils flags list``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8250,7 +8250,7 @@ msutils-flags-restore
 msutils flags restore: restore an MS's flags from a saved version
 
 :Command: ``msutils flags restore``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8291,7 +8291,7 @@ msutils-flagstats
 msutils flagstats: out-of-core flag statistics + matplotlib summary plot
 
 :Command: ``msutils flagstats``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8359,7 +8359,7 @@ msutils-info
 msutils info: report MS metadata (fields, SPWs, scans, antennas, columns), for MSv2 or MSv4
 
 :Command: ``msutils info``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8420,7 +8420,7 @@ msutils-renamecol
 msutils renamecol: rename a column in an MS
 
 :Command: ``msutils renamecol``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8465,7 +8465,7 @@ msutils-subset
 msutils subset: write the selected rows of an MS to a new MS (optionally averaging on the way out)
 
 :Command: ``msutils subset``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8550,7 +8550,7 @@ msutils-sumcols
 msutils sumcols: sum (or, with --subtract, difference) MS columns into a new column
 
 :Command: ``msutils sumcols``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8599,7 +8599,7 @@ msutils-summary
 msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations). Deprecated upstream since msutils 3.0 -- it prints a warning and keeps the legacy dict layout; use msutils-info, which also reads MSv4.
 
 :Command: ``msutils summary``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**
@@ -8644,7 +8644,7 @@ msutils-taql
 msutils taql: run a TaQL query against an MS and print the result columns
 
 :Command: ``msutils taql``
-:Image: ``ghcr.io/shinobi-dosho/msutils:3.0.0-d0.1.0`` (``MSUTILS`` 3.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-d0.1.0`` (``MSUTILS`` 3.1.0, build)
 :Source: https://github.com/shinobi-dosho/msutils
 
 **Inputs**

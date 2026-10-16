@@ -7,9 +7,8 @@ option repeats its flag or comma-joins its values, and whether `--json` takes
 a path (info, summary, flagstats, gainutils) or is a bare boolean (du, check,
 taql). These check that token shape against the real CLI.
 
-The cabs describe msutils `main`, which is ahead of the released 3.0.0 the
-manifest's `build:` installs -- see the MSUTILS `dev:` entry in images.yaml
-for what that means and how to build the image these need.
+The cabs describe msutils 3.1.0, the release the manifest's `build:`
+installs; the MSUTILS `dev:` entry in images.yaml tracks `main`.
 """
 
 import pytest
@@ -169,9 +168,9 @@ def test_unset_correlation_selection_keeps_all_correlations(cab, selection):
     assert tokens[-2:] == ["obs.ms", "all.ms"]
 
 
-def test_subset_and_average_carry_the_options_no_release_has_yet():
-    """The reason the MSUTILS `dev:` image exists: 3.0.0's subset takes only
-    the four selections, and neither command reindexes.
+def test_subset_and_average_carry_binning_and_reindex():
+    """3.1.0's options: 3.0.0's subset took only the four selections, and
+    neither command reindexed -- an image older than 3.1.0 rejects these.
     """
     tokens = argv(
         "msutils-average",
