@@ -471,7 +471,8 @@ images:
     source: "https://github.com/saopicc/DDFacet"
     name: ddfacet
     build:
-      version: "1.0.0.0"
+      version: "1.0.0.0-multiarch"
+      platforms: [linux/amd64, linux/arm64]
       package: "DDFacet[testing-requirements,fits-beam-support,kms-support,alternate-data-backends,dft-support]==1.0.0.0"
       cmd: "DDF.py --help"
       dockerfile: ddfacet/Dockerfile
@@ -491,7 +492,9 @@ images:
     source: "https://github.com/saopicc/killMS"
     name: killms
     build:
-      version: "3.3.0"
+      version: "3.3.0-multiarch"
+      package_version: "3.3.0"
+      platforms: [linux/amd64, linux/arm64]
       base: DDFACET
       cmd: "kMS.py --help"
       dockerfile: killms/Dockerfile

@@ -72,8 +72,16 @@ jobs:
           AFTER: ${{ github.event.after }}
         run: |
           if [ -n "${{ github.event.inputs.image }}" ]; then
-            bases='[]'
-            tools='["${{ github.event.inputs.image }}"]'
+            case "${{ github.event.inputs.image }}" in
+              BASE_ASTRO|DDFACET)
+                bases='["${{ github.event.inputs.image }}"]'
+                tools='[]'
+                ;;
+              *)
+                bases='[]'
+                tools='["${{ github.event.inputs.image }}"]'
+                ;;
+            esac
           else
             args=""
             # On an ordinary push (not a first push / force-push we can't diff),
@@ -105,11 +113,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - uses: docker/setup-qemu-action@v3
-        if: matrix.image == 'BASE_ASTRO'
+        if: matrix.image == 'BASE_ASTRO' || matrix.image == 'DDFACET'
         with:
           platforms: arm64
       - uses: docker/setup-buildx-action@v3
-        if: matrix.image == 'BASE_ASTRO'
+        if: matrix.image == 'BASE_ASTRO' || matrix.image == 'DDFACET'
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -119,6 +127,9 @@ jobs:
         run: |
           flags="--push"
           if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
+          if [ "${{ matrix.image }}" = "DDFACET" ]; then
+            flags="$flags --sequential-platforms --prune-between-platforms"
+          fi
           uv run dosho images build "${{ matrix.image }}" $flags
 
   build-tools:
@@ -139,11 +150,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - uses: docker/setup-qemu-action@v3
-        if: matrix.image == 'CASA_TASKS' || matrix.image == 'WSCLEAN' || matrix.image == 'AOFLAGGER' || matrix.image == 'SOFIA2'
+        if: matrix.image == 'CASA_TASKS' || matrix.image == 'WSCLEAN' || matrix.image == 'AOFLAGGER' || matrix.image == 'SOFIA2' || matrix.image == 'KILLMS'
         with:
           platforms: arm64
       - uses: docker/setup-buildx-action@v3
-        if: matrix.image == 'CASA_TASKS' || matrix.image == 'WSCLEAN' || matrix.image == 'AOFLAGGER' || matrix.image == 'SOFIA2'
+        if: matrix.image == 'CASA_TASKS' || matrix.image == 'WSCLEAN' || matrix.image == 'AOFLAGGER' || matrix.image == 'SOFIA2' || matrix.image == 'KILLMS'
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -153,6 +164,9 @@ jobs:
         run: |
           flags="--push"
           if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
+          if [ "${{ matrix.image }}" = "KILLMS" ]; then
+            flags="$flags --sequential-platforms --prune-between-platforms"
+          fi
           uv run dosho images build "${{ matrix.image }}" $flags
 
   # Scheduled health check: every build: image's tag must still be in the registry.

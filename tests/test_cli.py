@@ -125,6 +125,19 @@ def test_build_plan_changed_base_rebuilds_base_and_all_dependents():
     assert "CASA6" not in plan["tools"]
 
 
+def test_ddfacet_multiarch_build_precedes_killms():
+    assert _plan("src/dosho/cargo/ddfacet/Dockerfile") == {
+        "bases": ["DDFACET"],
+        "tools": ["KILLMS"],
+    }
+    assert _plan("src/dosho/cargo/killms/Dockerfile") == {"bases": [], "tools": ["KILLMS"]}
+    for key in ("DDFACET", "KILLMS"):
+        assert _images.manifest["images"][key]["build"]["platforms"] == [
+            "linux/amd64",
+            "linux/arm64",
+        ]
+
+
 def test_build_plan_changed_context_file_selects_its_image():
     # a non-Dockerfile file in an image's build context still selects it
     plan = _plan("src/dosho/cargo/casa6/casasiteconfig.py")
@@ -228,13 +241,13 @@ def test_verify_fails_when_missing(monkeypatch):
     assert "MISSING" in result.output
 
 
-
-
 def test_image_has_platforms_reads_manifest_architectures(monkeypatch):
-    manifest = {"manifests": [
-        {"platform": {"os": "linux", "architecture": "amd64"}},
-        {"platform": {"os": "linux", "architecture": "arm64"}},
-    ]}
+    manifest = {
+        "manifests": [
+            {"platform": {"os": "linux", "architecture": "amd64"}},
+            {"platform": {"os": "linux", "architecture": "arm64"}},
+        ]
+    }
     monkeypatch.setattr(
         cli.subprocess,
         "run",
@@ -254,11 +267,77 @@ def test_casa_tasks_push_uses_buildx_for_both_platforms(monkeypatch):
     assert result.exit_code == 0, result.output
     assert len(calls) == 1
     argv, kwargs = calls[0]
-    assert argv[:5] == [
-        "docker", "buildx", "build", "--platform", "linux/amd64,linux/arm64"
-    ]
+    assert argv[:5] == ["docker", "buildx", "build", "--platform", "linux/amd64,linux/arm64"]
     assert "--push" in argv
     assert b"RUN python3 -c 'from casatasks import listobs" in kwargs["input"]
+
+
+def test_large_multiarch_push_stages_each_platform_before_manifest(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: False)
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
+    monkeypatch.setattr(cli, "_run", lambda argv, **kwargs: calls.append(argv))
+    result = CliRunner().invoke(
+        cli.main,
+        [
+            "images",
+            "build",
+            "DDFACET",
+            "--push",
+            "--sequential-platforms",
+            "--prune-between-platforms",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    tag = "ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-multiarch-d0.1.0"
+    assert calls[0][:5] == ["docker", "buildx", "build", "--platform", "linux/amd64"]
+    assert calls[0][calls[0].index("-t") + 1] == f"{tag}-amd64"
+    assert calls[1] == ["docker", "buildx", "prune", "--all", "--force"]
+    assert calls[2][:5] == ["docker", "buildx", "build", "--platform", "linux/arm64"]
+    assert calls[2][calls[2].index("-t") + 1] == f"{tag}-arm64"
+    assert calls[3] == [
+        "docker",
+        "buildx",
+        "imagetools",
+        "create",
+        "-t",
+        tag,
+        f"{tag}-amd64",
+        f"{tag}-arm64",
+    ]
+
+
+def test_failed_second_platform_cannot_publish_manifest(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cli, "_image_exists", lambda tag: False)
+
+    def run(argv, **kwargs):
+        calls.append(argv)
+        if "linux/arm64" in argv:
+            raise RuntimeError("ARM build failed")
+
+    monkeypatch.setattr(cli, "_run", run)
+    result = CliRunner().invoke(
+        cli.main, ["images", "build", "DDFACET", "--push", "--sequential-platforms"]
+    )
+    assert result.exit_code != 0
+    assert not any(argv[:4] == ["docker", "buildx", "imagetools", "create"] for argv in calls)
+
+
+def test_ddfacet_render_preinstalls_arm64_numcodecs_without_x86_flags():
+    result = CliRunner().invoke(cli.main, ["images", "build", "DDFACET", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert 'if [ "$(dpkg --print-architecture)" = "arm64" ]' in result.output
+    assert 'CFLAGS="-O2" DISABLE_NUMCODECS_SSE2=1 DISABLE_NUMCODECS_AVX2=1' in result.output
+    assert "numcodecs==0.15.1" in result.output
+
+
+def test_killms_tag_suffix_does_not_change_upstream_package_version():
+    result = CliRunner().invoke(cli.main, ["images", "build", "KILLMS", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "killms:3.3.0-multiarch-d0.1.0" in result.output
+    assert "pip install --use-pep517 killms==3.3.0" in result.output
+    assert "killms==3.3.0-multiarch" not in result.output
 
 
 def test_casa_tasks_single_arch_push_is_rejected(monkeypatch):
@@ -337,7 +416,9 @@ def test_ddfacet_dev_build_keeps_the_release_extras():
     assert f"DDFacet{extras}==1.0.0.0" not in result.output  # the release pin is replaced
 
     release = CliRunner().invoke(cli.main, ["images", "build", "DDFACET", "--dry-run"])
-    install = next(ln for ln in release.output.splitlines() if 'pip install --use-pep517 "' in ln)
+    install = next(
+        ln for ln in release.output.splitlines() if 'pip install --use-pep517 "DDFacet[' in ln
+    )
     assert f"DDFacet{extras}==1.0.0.0" in install
     assert "@master" not in install
 

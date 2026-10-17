@@ -2636,7 +2636,7 @@ ddfacet
 EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (https://github.com/saopicc/DDFacet)
 
 :Command: ``DDF.py``
-:Image: ``ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-d0.1.0`` (``DDFACET`` 1.0.0.0, build)
+:Image: ``ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-multiarch-d0.1.0`` (``DDFACET`` 1.0.0.0-multiarch, build)
 :Source: https://github.com/saopicc/DDFacet
 
 **Inputs**
@@ -6816,7 +6816,7 @@ killms
 EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric data (https://github.com/saopicc/killMS)
 
 :Command: ``kMS.py``
-:Image: ``ghcr.io/shinobi-dosho/killms:3.3.0-d0.1.0`` (``KILLMS`` 3.3.0, build)
+:Image: ``ghcr.io/shinobi-dosho/killms:3.3.0-multiarch-d0.1.0`` (``KILLMS`` 3.3.0-multiarch, build)
 :Source: https://github.com/saopicc/killMS
 
 **Inputs**

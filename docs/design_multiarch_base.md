@@ -48,7 +48,7 @@ be checked against the installed casacore C++ ABI. The base provides Python
 | Older Python stacks | `CUBICAL`, `RAGAVI` | 3 | CubiCal requires Python 3.9 and compiles `sharedarray`; ragavi inherits `stimela/base:1.2.5` with Python 3.6. Its ARM64 availability is unverified. |
 | CASA tasks | `CASA6` at audit; now `CASA_TASKS` | 57 | The pinned [`casatools==6.7.0.31` release](https://pypi.org/project/casatools/6.7.0.31/) has no Linux ARM64 wheel or PyPI source distribution, so the pip install cannot complete natively on ARM64. These are the CASA tools to prioritize. |
 | CASA plotms, deferred | `CASA6` today | 1 | [The current Dockerfile](../src/dosho/cargo/casa6/Dockerfile) also extracts a specifically `x86_64` casaplotms AppImage. This is a separate optional package and a separate pystep; it need not gate the 57 tasks. |
-| DDFacet stack | `DDFACET`, `KILLMS` | 2 | [DDFacet](../src/dosho/cargo/ddfacet/Dockerfile) hard-codes `x86_64` compiler alternatives and builds several native dependencies; KILLMS inherits it. |
+| DDFacet stack | `DDFACET`, `KILLMS` | 2 | DDFacet builds a dedicated native stack with architecture-neutral compiler setup; killMS inherits it. See [the DDFacet/killMS milestone](design_multiarch_ddfacet_killms.md). |
 | External, deprecated | `SIMMS_CLASSIC` | 1 | The manifest uses a `ref:`; dosho cannot build its ARM64 variant. |
 
 `BASE_ASTRO` is an additional build image with no cab of its own. Thus the
@@ -157,6 +157,6 @@ give its wrapper a separate image key rather than publishing one tag whose
 capabilities differ between AMD64 and ARM64. The current plotms wrapper stays on `CASA6` and remains AMD64-only until
 its own ARM64 route is qualified.
 
-DDFACET needs a separate inventory of each native dependency and
-architecture-specific compiler setup; KILLMS depends on that result. Those
-plans follow the base package gate and are outside this design.
+The DDFACET/KILLMS milestone keeps its SOFA, Blitz, CASAREST, MAKEMS,
+MeqTrees and LOFARBeam stack out of `BASE_ASTRO`. Its compiler setup and
+validation are recorded in [the dedicated design note](design_multiarch_ddfacet_killms.md).

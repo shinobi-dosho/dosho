@@ -242,6 +242,16 @@ def images_list() -> None:
 @click.option("--push", "do_push", is_flag=True, help="push the image after building.")
 @click.option("--no-cache", is_flag=True, help="build without the docker layer cache.")
 @click.option("--network", default=None, help="Docker build network mode (e.g. host).")
+@click.option(
+    "--sequential-platforms",
+    is_flag=True,
+    help="on multi-platform --push, build each platform separately before creating the manifest.",
+)
+@click.option(
+    "--prune-between-platforms",
+    is_flag=True,
+    help="with --sequential-platforms, clear Buildx cache between builds (isolated builders only).",
+)
 @click.option("--registry", default=None, help="override the manifest registry for the tag.")
 @click.option(
     "--package", default=None, help="override the pip package/spec installed (e.g. a prerelease)."
@@ -264,6 +274,8 @@ def images_build(
     do_push: bool,
     no_cache: bool,
     network: str | None,
+    sequential_platforms: bool,
+    prune_between_platforms: bool,
     registry: str | None,
     package: str | None,
     force: bool,
@@ -282,10 +294,14 @@ def images_build(
         return
 
     platforms = entry["build"].get("platforms", [])
+    if prune_between_platforms and not sequential_platforms:
+        raise click.ClickException("--prune-between-platforms requires --sequential-platforms")
+    if sequential_platforms and not (do_push and platforms):
+        raise click.ClickException("--sequential-platforms requires multi-platform --push")
     if do_push and platforms:
-        # Buildx only publishes after every platform's Dockerfile (including
-        # its runtime RUN smoke check) succeeds. A local docker push would
-        # publish just the host architecture under the shared tag.
+        # Publish the resolved tag only after every platform's Dockerfile
+        # (including its runtime RUN check) succeeds. A local docker push
+        # would publish just the host architecture under the shared tag.
         if not (force or dev) and _image_exists(tag):
             if _image_has_platforms(tag, platforms):
                 click.echo(f"{tag} already published; skipping push (use --force to overwrite)")
@@ -294,16 +310,55 @@ def images_build(
                 f"{tag} exists without all declared platforms; bump its version "
                 "or use --force after reviewing the existing tag"
             )
-        build_argv = [
-            "docker", "buildx", "build", "--platform", ",".join(platforms),
-            "--push", "-t", tag, "-f", "-",
-        ]
-        if no_cache:
-            build_argv.append("--no-cache")
-        if network:
-            build_argv += ["--network", network]
-        build_argv.append(str(context))
-        _run(build_argv, input=dockerfile.encode())
+        if sequential_platforms:
+            # Large native stacks can exceed a standard CI runner's disk when
+            # Buildx holds two unpacked platform snapshots at once. Staging
+            # tags are published first; the public tag appears only after both
+            # platform builds (and their Dockerfile RUN checks) succeed.
+            staged_tags = []
+            for index, platform in enumerate(platforms):
+                staged = f"{tag}-{platform.rsplit('/', 1)[-1]}"
+                build_argv = [
+                    "docker",
+                    "buildx",
+                    "build",
+                    "--platform",
+                    platform,
+                    "--push",
+                    "-t",
+                    staged,
+                    "-f",
+                    "-",
+                ]
+                if no_cache:
+                    build_argv.append("--no-cache")
+                if network:
+                    build_argv += ["--network", network]
+                build_argv.append(str(context))
+                _run(build_argv, input=dockerfile.encode())
+                staged_tags.append(staged)
+                if prune_between_platforms and index < len(platforms) - 1:
+                    _run(["docker", "buildx", "prune", "--all", "--force"])
+            _run(["docker", "buildx", "imagetools", "create", "-t", tag, *staged_tags])
+        else:
+            build_argv = [
+                "docker",
+                "buildx",
+                "build",
+                "--platform",
+                ",".join(platforms),
+                "--push",
+                "-t",
+                tag,
+                "-f",
+                "-",
+            ]
+            if no_cache:
+                build_argv.append("--no-cache")
+            if network:
+                build_argv += ["--network", network]
+            build_argv.append(str(context))
+            _run(build_argv, input=dockerfile.encode())
         if not _image_has_platforms(tag, platforms):
             raise click.ClickException(f"published {tag} lacks a declared platform")
         click.echo(click.style(f"built and pushed {tag} ({', '.join(platforms)})", fg="green"))
@@ -403,7 +458,8 @@ def images_build_plan(changed: tuple[str, ...], missing_only: bool) -> None:
 
     if missing_only:
         present = {
-            k for k in keys
+            k
+            for k in keys
             if _image_exists(_tag(k, images_[k], manifest["metadata"], None))
             and _image_has_platforms(
                 _tag(k, images_[k], manifest["metadata"], None),

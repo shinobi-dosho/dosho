@@ -343,3 +343,13 @@ assume held still.
 A claim that something "doesn't exist" or "is unused" should be verified against
 the actual tree before acting on it -- a symbol absent from the diff is usually
 present in the repo.
+
+## Temporary build data
+
+Put disposable build and test directories, downloaded artifacts, image
+archives, and large caches or logs in a dedicated directory inside the active
+worktree (for example `.work-cache/`), and keep that directory out of Git.
+Set host-side `TMPDIR` and cache paths to that directory when a tool may write
+large files. Do not place large temporary data in `/tmp` or `/scratch`:
+`/tmp` shares the root filesystem with Docker and can exhaust the space needed
+for image builds. Remove disposable data when the work is finished.
