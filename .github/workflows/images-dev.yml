@@ -47,8 +47,8 @@ jobs:
     outputs:
       images: ${{ steps.plan.outputs.images }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
       - id: plan
         env:
           # workflow_dispatch input, or the repository_dispatch payload
@@ -71,9 +71,9 @@ jobs:
       matrix:
         image: ${{ fromJson(needs.discover.outputs.images) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - uses: docker/login-action@v3
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
