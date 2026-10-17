@@ -4240,7 +4240,7 @@ fitstoolz-add-axis
 
 Add an axis to a FITS image.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.2-d0.1.0`` (``FITSTOOLZ`` 0.2.2, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4324,7 +4324,7 @@ fitstoolz-header
 
 Show, add, edit or remove FITS header entries.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.2-d0.1.0`` (``FITSTOOLZ`` 0.2.2, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4388,7 +4388,7 @@ fitstoolz-remove-axis
 
 Remove an axis from a FITS image.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.2-d0.1.0`` (``FITSTOOLZ`` 0.2.2, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4456,7 +4456,7 @@ fitstoolz-slice
 
 Slice a FITS image along one or more axes.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.2-d0.1.0`` (``FITSTOOLZ`` 0.2.2, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4524,7 +4524,7 @@ fitstoolz-stack
 
 Stack FITS images along an axis.
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.2-d0.1.0`` (``FITSTOOLZ`` 0.2.2, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**
@@ -4588,7 +4588,7 @@ fitstoolz-stats
 
 Get image statistics (min, max, mean, standard deviation).
 
-:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.1-d0.1.0`` (``FITSTOOLZ`` 0.2.1, build)
+:Image: ``ghcr.io/shinobi-dosho/fitstoolz:0.2.2-d0.1.0`` (``FITSTOOLZ`` 0.2.2, build)
 :Source: https://github.com/shinobi-dosho/fitstoolz
 
 **Inputs**

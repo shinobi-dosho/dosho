@@ -85,9 +85,9 @@ images:
     name: fitstoolz
     source: "https://github.com/shinobi-dosho/fitstoolz"
     build:
-      version: "0.2.1"
+      version: "0.2.2"
       base: BASE_ASTRO
-      package: "fitstoolz==0.2.1"
+      package: "fitstoolz==0.2.2"
       cmd: "fitstoolz --help"
       dockerfile: pip/Dockerfile
     dev:

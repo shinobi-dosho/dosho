@@ -31,11 +31,11 @@ the `SimpleNamespace` (fitstoolz's own pystep builds it with
   surgery (the FREQ/STOKES axes CASA and wsclean disagree about).
 * `fitstoolz-stack` -- concatenate several images along one axis.
 
-fitstoolz's `unstack` app is deliberately not wrapped: upstream's `runit`
-is a bare `NotImplementedError`, so a cab for it would only be a more
-expensive way to fail. Its `sanitise` module is likewise empty and not
-even registered in fitstoolz's own CLI group. Both come back here when
-they do something.
+fitstoolz's `unstack` app is not wrapped yet: its `runit` was a bare
+`NotImplementedError` until 0.2.2, and it returns a list of numbered
+output paths rather than one `outfile`, so its cab is a change of its
+own. The `sanitise` module is empty and not registered in fitstoolz's
+own CLI group; it comes back here when it does something.
 """
 
 from __future__ import annotations
