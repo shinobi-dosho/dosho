@@ -301,9 +301,9 @@ images:
     source: "https://github.com/laduma-dev/mowjsub"
     name: mowjsub
     build:
-      version: "2.0.1"
+      version: "2.1.0"
       base: BASE_ASTRO
-      package: "mowjsub==2.0.1"
+      package: "mowjsub==2.1.0"
       cmd: "vis-mowjsub --help"
       dockerfile: pip/Dockerfile
   BREIZORRO:

@@ -4040,7 +4040,7 @@ doppler-mowjsub
 mowjsub: Doppler-correct an already continuum-subtracted MS onto a channel grid fixed in a chosen spectral frame (https://github.com/laduma-dev/mowjsub)
 
 :Command: ``doppler-mowjsub``
-:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0.1-d0.1.0`` (``MOWJSUB`` 2.0.1, build)
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.1.0-d0.1.0`` (``MOWJSUB`` 2.1.0, build)
 :Source: https://github.com/laduma-dev/mowjsub
 
 **Inputs**
@@ -6536,7 +6536,7 @@ im-mowjsub
 mowjsub: image-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)
 
 :Command: ``im-mowjsub``
-:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0.1-d0.1.0`` (``MOWJSUB`` 2.0.1, build)
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.1.0-d0.1.0`` (``MOWJSUB`` 2.1.0, build)
 :Source: https://github.com/laduma-dev/mowjsub
 
 **Inputs**
@@ -14484,7 +14484,7 @@ vis-mowjsub
 mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/mowjsub)
 
 :Command: ``vis-mowjsub``
-:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.0.1-d0.1.0`` (``MOWJSUB`` 2.0.1, build)
+:Image: ``ghcr.io/shinobi-dosho/mowjsub:2.1.0-d0.1.0`` (``MOWJSUB`` 2.1.0, build)
 :Source: https://github.com/laduma-dev/mowjsub
 
 **Inputs**
