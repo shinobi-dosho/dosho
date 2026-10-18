@@ -215,6 +215,8 @@ images:
       post_install: |
         RUN apt-get update && apt-get install -y --no-install-recommends python3-numcodecs && rm -rf /var/lib/apt/lists/*
         RUN python3 -c "import numpy as np, numcodecs; c=numcodecs.Blosc(); d=np.arange(16,dtype=np.int32).tobytes(); assert c.decode(c.encode(d))==d"
+        COPY tricolour_progress.py /tmp/tricolour_progress.py
+        RUN python3 /tmp/tricolour_progress.py && rm /tmp/tricolour_progress.py
       cmd: "tricolour --help"
       dockerfile: numpy2-casacore/Dockerfile
   CRYSTALBALL:
