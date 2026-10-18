@@ -57,12 +57,11 @@ real cabs, so it needs the ``run`` extra:
 
 The development group includes Astropy for real FITS product-validation tests.
 Pure catalog reading still needs no shinobi or astronomy runtime. Applications
-using the WSClean FITS contracts from current shinobi main install its FITS
-extra explicitly (without waiting for a package release):
+using the WSClean FITS contracts install shinobi's FITS extra explicitly:
 
 .. code-block:: console
 
-    $ pip install "stimela-ninja[fits] @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main"
+    $ pip install "stimela-ninja[fits]>=0.1.0"
 
 A development checkout deliberately resolves ``stimela-ninja`` from its
 ``main`` branch rather than the last PyPI release --
