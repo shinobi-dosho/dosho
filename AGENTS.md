@@ -154,9 +154,12 @@ The build/maintenance infrastructure around the manifest is landed: a
 `pip/Dockerfile` template for pip-installable tools on `BASE_ASTRO`, plus a
 dedicated per-tool dir where a tool needs one -- e.g. an era-pinned
 interpreter, as for `ragavi`/`cubical`), and the manual `images.yml` publication workflow that builds missing tags from
-an explicitly selected PR head before merge. Publication requires a human with
+an explicitly selected PR head before merge, using trusted workflow/gate/CLI
+code dispatched from protected main and candidate manifest/cargo data only.
+The secure publisher must first land on main before it can serve later PRs.
+Publication requires a human with
 repository write access, an open non-draft same-repository PR targeting main,
-a matching head branch and SHA, successful CI and all other checks, and GitHub's
+an exact candidate head SHA, successful CI and all other checks, and GitHub's
 approval decision. An administrator can override incomplete approvals only;
 changes requested, failed checks and pending checks always block publication.
 The separate `images-verify.yml` checks registry health on Mondays.

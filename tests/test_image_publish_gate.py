@@ -92,7 +92,7 @@ class API:
     def pages(self, path, key=None):
         if path == f"actions/runs?head_sha={SHA}":
             return self.runs
-        if path == "actions/runs/1/attempts/1/jobs":
+        if path == "actions/runs/1/jobs?filter=all":
             return self.jobs
         if path == f"commits/{SHA}/check-runs?filter=all":
             return self.checks
@@ -102,7 +102,14 @@ class API:
 
 def validate(api, **kwargs):
     return gate.validate(
-        api, number=93, sha=SHA, actor="human", ref="refs/heads/feature", run_id=10, **kwargs
+        api,
+        number=93,
+        sha=SHA,
+        actor="human",
+        ref="refs/heads/main",
+        dispatch_sha=SHA,
+        run_id=10,
+        **kwargs,
     )
 
 
@@ -165,7 +172,7 @@ def test_identity_and_drift(change):
     elif change == "head":
         api.pr["head"]["sha"] = "b" * 40
     elif change == "ref":
-        api.pr["head"]["ref"] = "other"
+        api.run["head_sha"] = "b" * 40
     elif change == "actor":
         api.run["actor"]["login"] = "other"
     elif change == "bot":
@@ -297,13 +304,16 @@ def test_workflow_gates_before_login_and_pins_checkouts():
     assert "packages" not in workflow["permissions"]
     for name, job in workflow["jobs"].items():
         steps = job["steps"]
-        assert steps[0]["with"]["ref"] == "${{ inputs.head_sha }}"
-        assert steps[1]["run"] == "python3 scripts/image_publish_gate.py"
+        assert steps[0]["with"]["ref"] == "${{ github.sha }}"
+        assert steps[0]["with"]["path"] == "trusted"
+        assert steps[1]["with"]["ref"] == "${{ inputs.head_sha }}"
+        assert steps[1]["with"]["path"] == "candidate"
+        assert steps[2]["run"] == "python3 scripts/image_publish_gate.py"
         login = [i for i, step in enumerate(steps) if "docker/login-action" in step.get("uses", "")]
         if name == "discover":
             assert not login
         else:
-            assert login[0] > 1
+            assert login[0] > 2
             assert job["permissions"]["packages"] == "write"
 
 
@@ -331,3 +341,24 @@ def test_failed_prior_publisher_does_not_block_retry():
         }
     )
     validate(api)
+
+
+def test_successful_partial_ci_rerun_keeps_unchanged_jobs():
+    api = API()
+    api.ci["run_attempt"] = 2
+    api.jobs.append({**api.jobs[0], "id": 10, "conclusion": "success"})
+    api.jobs[0]["conclusion"] = "failure"
+    validate(api)
+
+
+def test_dispatch_from_candidate_branch_is_rejected():
+    with pytest.raises(gate.GateError, match="protected main"):
+        gate.validate(
+            API(),
+            number=93,
+            sha=SHA,
+            actor="human",
+            ref="refs/heads/feature",
+            run_id=10,
+            dispatch_sha="b" * 40,
+        )

@@ -9,7 +9,7 @@ on:
         required: true
         type: string
       head_sha:
-        description: "Exact 40-character PR head SHA (dispatch on its head branch)"
+        description: "Exact 40-character PR head SHA (dispatch on main)"
         required: true
         type: string
       override_unreviewed:
@@ -32,10 +32,16 @@ env:
   PR_NUMBER: ${{ inputs.pr_number }}
   HEAD_SHA: ${{ inputs.head_sha }}
   OVERRIDE_UNREVIEWED: ${{ inputs.override_unreviewed }}
+  CANDIDATE_ROOT: ../candidate
   GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    working-directory: trusted
 
 jobs:
   discover:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       bases: ${{ steps.plan.outputs.bases }}
@@ -43,7 +49,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
           ref: ${{ inputs.head_sha }}
+          path: candidate
           persist-credentials: false
       - name: Require approved PR head and successful checks
         run: python3 scripts/image_publish_gate.py
@@ -52,7 +64,7 @@ jobs:
       # Public registry reads need no GHCR login or package write permission.
       - id: plan
         run: |
-          plan="$(uv run --locked dosho images build-plan --missing-only)"
+          plan="$(uv run --locked dosho images --source-root ../candidate build-plan --missing-only)"
           echo "$plan" | python3 -c 'import json,os,sys; p=json.load(sys.stdin); f=open(os.environ["GITHUB_OUTPUT"], "a"); f.write("bases="+json.dumps(p["bases"])+"\ntools="+json.dumps(p["tools"])+"\n")'
 
   build-base:
@@ -73,7 +85,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
           ref: ${{ inputs.head_sha }}
+          path: candidate
           persist-credentials: false
       - name: Require approved PR head and successful checks
         run: python3 scripts/image_publish_gate.py
@@ -95,7 +113,7 @@ jobs:
           if [ "$IMAGE" = "DDFACET" ]; then
             flags="$flags --sequential-platforms --prune-between-platforms"
           fi
-          uv run --locked dosho images build "$IMAGE" $flags
+          uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags
 
   build-tools:
     needs: [discover, build-base]
@@ -115,7 +133,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
           ref: ${{ inputs.head_sha }}
+          path: candidate
           persist-credentials: false
       - name: Require approved PR head and successful checks
         run: python3 scripts/image_publish_gate.py
@@ -137,4 +161,4 @@ jobs:
           if [ "$IMAGE" != "CASA6" ]; then
             flags="$flags --sequential-platforms --prune-between-platforms"
           fi
-          uv run --locked dosho images build "$IMAGE" $flags
+          uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags

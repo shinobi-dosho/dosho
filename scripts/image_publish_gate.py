@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.parse
 import urllib.request
@@ -80,7 +81,7 @@ def latest(items, key):
     return selected.values()
 
 
-def validate(api, *, number, sha, actor, ref, run_id, override=False):
+def validate(api, *, number, sha, actor, ref, run_id, dispatch_sha, override=False):
     require(re.fullmatch(r"[0-9a-f]{40}", sha), "Expected a full lowercase 40-character head SHA")
     require(number > 0, "Expected a positive PR number")
     user = api.request(f"/users/{urllib.parse.quote(actor, safe='')}")
@@ -103,7 +104,7 @@ def validate(api, *, number, sha, actor, ref, run_id, override=False):
         require(pr["base"]["repo"]["full_name"] == api.repository, "Unexpected base repository")
         require(pr["head"]["repo"]["full_name"] == api.repository, "Fork PRs cannot publish")
         require(pr["head"]["sha"] == sha, "PR head changed")
-        require(ref == f"refs/heads/{pr['head']['ref']}", "Dispatch must use the PR head branch")
+        require(ref == "refs/heads/main", "Dispatch must use protected main")
         require(pr["mergeable"] is True, "PR mergeability is unknown or conflicted")
         require(
             pr["mergeable_state"] in {"clean", "blocked", "unstable", "has_hooks"},
@@ -114,8 +115,8 @@ def validate(api, *, number, sha, actor, ref, run_id, override=False):
     pull()
     run = api.get(f"actions/runs/{run_id}")
     require(
-        run["event"] == "workflow_dispatch" and run["head_sha"] == sha,
-        "Dispatch run must use exact PR head",
+        run["event"] == "workflow_dispatch" and run["head_sha"] == dispatch_sha,
+        "Dispatch run must use trusted main SHA",
     )
     require(run["actor"]["login"] == actor, "Unexpected dispatch actor")
     review = api.review(number)
@@ -152,7 +153,7 @@ def validate(api, *, number, sha, actor, ref, run_id, override=False):
         ci_run["status"] == "completed" and ci_run["conclusion"] == "success",
         "Latest CI run must succeed",
     )
-    jobs = api.pages(f"actions/runs/{ci_run['id']}/attempts/{ci_run['run_attempt']}/jobs", "jobs")
+    jobs = api.pages(f"actions/runs/{ci_run['id']}/jobs?filter=all", "jobs")
     by_name = {j["name"]: j for j in latest(jobs, lambda j: j["name"])}
     for name in ("test (3.11)", "test (3.12)", "docs"):
         require(
@@ -180,6 +181,14 @@ def validate(api, *, number, sha, actor, ref, run_id, override=False):
 def main():
     try:
         api = GitHub(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"])
+        for root, expected in (
+            (".", os.environ["GITHUB_SHA"]),
+            (os.environ["CANDIDATE_ROOT"], os.environ["HEAD_SHA"]),
+        ):
+            actual = subprocess.check_output(
+                ["git", "-C", root, "rev-parse", "HEAD"], text=True
+            ).strip()
+            require(actual == expected, "Checkout SHA does not match selected source")
         validate(
             api,
             number=int(os.environ["PR_NUMBER"]),
@@ -187,6 +196,7 @@ def main():
             actor=os.environ["GITHUB_TRIGGERING_ACTOR"],
             ref=os.environ["GITHUB_REF"],
             run_id=int(os.environ["GITHUB_RUN_ID"]),
+            dispatch_sha=os.environ["GITHUB_SHA"],
             override=os.environ["OVERRIDE_UNREVIEWED"] == "true",
         )
     except Exception as exc:  # The gate must fail closed on malformed data and API failures too.

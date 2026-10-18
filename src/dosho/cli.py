@@ -21,7 +21,10 @@ share a tag with a release, so the two publish paths cannot collide.
 from __future__ import annotations
 
 import json
+import re
+import shlex
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +33,60 @@ import click
 from dosho import images as _images
 
 _CARGO_DIR = Path(__file__).with_name("cargo")
+
+
+@dataclass
+class PublicationSource:
+    manifest: dict[str, Any] | None = None
+    cargo: Path | None = None
+    pre_publish: tuple[str, ...] = ()
+
+
+def _source() -> PublicationSource:
+    ctx = click.get_current_context(silent=True)
+    return (ctx.find_object(PublicationSource) if ctx else None) or PublicationSource()
+
+
+def _manifest() -> dict[str, Any]:
+    candidate = _source().manifest
+    return candidate if candidate is not None else _images.manifest
+
+
+def _load_source(root: Path) -> PublicationSource:
+    """Read candidate configuration without importing candidate Python."""
+    root = root.resolve(strict=True)
+    manifest_path = (root / "src/dosho/images.yaml").resolve(strict=True)
+    cargo = (root / "src/dosho/cargo").resolve(strict=True)
+    if not manifest_path.is_relative_to(root) or not cargo.is_relative_to(root):
+        raise click.ClickException("candidate manifest/cargo escapes source root")
+    manifest = _images._load_manifest(manifest_path)
+    metadata = manifest["metadata"]
+    if metadata["registry"] != "ghcr.io/shinobi-dosho":
+        raise click.ClickException("candidate release registry must be ghcr.io/shinobi-dosho")
+    for key, entry in manifest["images"].items():
+        if "build" not in entry:
+            continue
+        name = entry.get("name", key.lower())
+        tag = f"{entry['build']['version']}-{metadata['bundle_version']}"
+        if not re.fullmatch(r"[a-z0-9]+(?:[._-][a-z0-9]+)*", name):
+            raise click.ClickException("invalid candidate image name")
+        if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}", tag):
+            raise click.ClickException("invalid candidate release tag")
+        dockerfile = (cargo / entry["build"]["dockerfile"]).resolve(strict=True)
+        if not dockerfile.is_relative_to(cargo):
+            raise click.ClickException("candidate Dockerfile escapes cargo tree")
+    for path in cargo.rglob("*"):
+        if not path.resolve(strict=True).is_relative_to(cargo):
+            raise click.ClickException("candidate context symlink escapes cargo tree")
+    return PublicationSource(manifest=manifest, cargo=cargo)
+
+
+def _registry_write(argv: list[str]) -> bool:
+    return (
+        argv[:2] == ["docker", "push"]
+        or (argv[:3] == ["docker", "buildx", "build"] and "--push" in argv)
+        or argv[:4] == ["docker", "buildx", "imagetools", "create"]
+    )
 
 
 def _image_exists(tag: str) -> bool:
@@ -128,12 +185,15 @@ def _affected_keys(manifest: dict[str, Any], changed_files: list[str]) -> set[st
 
 
 def _run(argv: list[str], **kwargs: Any) -> None:
+    hook = _source().pre_publish
+    if hook and _registry_write(argv):
+        subprocess.run(list(hook), check=True)
     click.echo(click.style("+ " + " ".join(argv), fg="cyan"))
     subprocess.run(argv, check=True, **kwargs)
 
 
 def _get_build_entry(key: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    manifest = _images.manifest
+    manifest = _manifest()
     imgs = manifest["images"]
     if key not in imgs:
         raise click.ClickException(f"no image {key!r} in the manifest (have: {', '.join(imgs)})")
@@ -152,6 +212,8 @@ def _tag(
     registry: str | None,
     dev: bool = False,
 ) -> str:
+    if _source().manifest is not None and registry not in (None, "ghcr.io/shinobi-dosho"):
+        raise click.ClickException("candidate publication registry cannot be overridden")
     registry = registry or metadata["registry"]
     name = entry.get("name", key.lower())
     if dev:
@@ -211,11 +273,11 @@ def _render_dockerfile(
     base_key = build.get("base")
     if base_key:
         fmt["base_image"] = _images._resolve_ref(
-            base_key, _images.manifest["images"][base_key], metadata
+            base_key, _manifest()["images"][base_key], metadata
         )
     for var in _OPTIONAL_TEMPLATE_VARS:
         fmt.setdefault(var, "")
-    dockerfile = _CARGO_DIR / build["dockerfile"]
+    dockerfile = (_source().cargo or _CARGO_DIR) / build["dockerfile"]
     return dockerfile.read_text().format(**fmt), dockerfile.parent
 
 
@@ -225,16 +287,33 @@ def main() -> None:
 
 
 @main.group()
-def images() -> None:
+@click.option(
+    "--source-root",
+    type=click.Path(path_type=Path, exists=True, file_okay=False),
+    help="Read candidate manifest/cargo as data; run this installed CLI's trusted code.",
+)
+@click.option(
+    "--pre-publish", default="", help="Trusted command to revalidate before every registry write."
+)
+@click.pass_context
+def images(ctx: click.Context, source_root: Path | None, pre_publish: str) -> None:
     """Build and publish dosho's container images."""
+    source = _load_source(source_root) if source_root else PublicationSource()
+    source.pre_publish = tuple(shlex.split(pre_publish))
+    ctx.obj = source
 
 
 @images.command("list")
 def images_list() -> None:
     """List every manifest image, its kind (ref/build), and resolved reference."""
-    for key, entry in _images.manifest["images"].items():
+    for key, entry in _manifest()["images"].items():
         kind = "build" if "build" in entry else "ref"
-        click.echo(f"{key:16} [{kind:5}] {getattr(_images, key)}")
+        ref = (
+            _images._resolve_ref(key, entry, _manifest()["metadata"])
+            if _source().manifest is not None
+            else getattr(_images, key)
+        )
+        click.echo(f"{key:16} [{kind:5}] {ref}")
 
 
 @images.command("build")
@@ -417,7 +496,7 @@ def _push(tag: str, force: bool) -> bool:
 @click.option("--dev", is_flag=True, help="list only KEYs that declare a `dev:` variant.")
 def images_build_keys(dev: bool) -> None:
     """Print the JSON list of `build:` image KEYs (for a CI build matrix)."""
-    manifest = _images.manifest
+    manifest = _manifest()
     keys = _build_keys(manifest)
     if dev:
         keys = [k for k in keys if "dev" in manifest["images"][k]]
@@ -451,7 +530,7 @@ def images_build_plan(changed: tuple[str, ...], missing_only: bool) -> None:
     the images a push actually invalidated (see `_affected_keys`), so CI skips
     rebuilding unrelated (e.g. heavy) images.
     """
-    manifest = _images.manifest
+    manifest = _manifest()
     images_ = manifest["images"]
     build = _build_keys(manifest)
     keys = _affected_keys(manifest, list(changed)) if changed else set(build)
@@ -484,7 +563,7 @@ def images_build_plan(changed: tuple[str, ...], missing_only: bool) -> None:
 @click.argument("key", required=False)
 def images_verify(key: str | None) -> None:
     """Check that `build:` image(s) exist in the registry (exit 1 if any are missing)."""
-    manifest = _images.manifest
+    manifest = _manifest()
     keys = [key] if key else _build_keys(manifest)
     missing = []
     for k in keys:

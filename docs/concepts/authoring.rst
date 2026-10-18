@@ -318,7 +318,9 @@ tool is editing one manifest entry.
 (``list``/``build``/``push``/``build-keys``/``build-plan``/``verify``),
 the ``dosho/cargo/`` Dockerfile tree, and the manually dispatched
 ``images.yml`` workflow. Before merge, a maintainer selects an exact reviewed
-PR head; the workflow checks approvals and successful CI/checks before building
+PR head while dispatching trusted workflow/CLI code on protected ``main``.
+The candidate supplies manifest/cargo data only. This publisher must first land
+on ``main`` before serving later PRs. It checks approvals and successful CI/checks before building
 and publishing missing tags. ``CONTRIBUTING.md`` documents invocation and the
 limited administrator override. ``images-verify.yml`` checks registry health
 each Monday.
