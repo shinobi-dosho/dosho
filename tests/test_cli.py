@@ -442,8 +442,7 @@ def test_ddfacet_dev_build_keeps_the_release_extras():
 
 
 def test_msutils_dev_build_keeps_the_release_extras_as_one_shell_word():
-    # msutils' dev image exists because `main` carries the whole `gainutils`
-    # script and subset/average's --taql/--reindex, none of which 3.0.0 has.
+    # msutils' dev image tracks `main` for work not yet released.
     # Its spec is the same PEP 508 direct-URL form as DDFacet's, so it has a
     # space in it -- and unlike DDFacet's dedicated Dockerfile the shared pip
     # template used to interpolate it bare, which pip reads as three separate
@@ -453,7 +452,7 @@ def test_msutils_dev_build_keeps_the_release_extras_as_one_shell_word():
     assert "# tag: ghcr.io/shinobi-dosho/msutils:dev" in result.output
     install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
     assert '"msutils[all] @ git+https://github.com/shinobi-dosho/msutils@main"' in install
-    assert "msutils[all]==3.0.0" not in install  # the release pin is replaced
+    assert "msutils[all]==3.1.0" not in install  # the release pin is replaced
 
 
 def test_rm_tools_builds_finufft_for_baseline_arm64():

@@ -44,7 +44,9 @@ def test_image_index_maps_a_built_ref_to_its_key():
     from dosho import images
 
     meta = idx[images.WSCLEAN]
-    assert meta["key"] == "WSCLEAN" and meta["kind"] == "build" and meta["version"] == "3.6-idg-noble"
+    assert (
+        meta["key"] == "WSCLEAN" and meta["kind"] == "build" and meta["version"] == "3.6-idg-noble"
+    )
 
 
 def test_schema_obj_resolves_cab_and_stepref():

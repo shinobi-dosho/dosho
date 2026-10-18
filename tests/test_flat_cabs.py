@@ -21,6 +21,7 @@ still a real binary and keeps its binary-cab test below.
 """
 
 import re
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -723,7 +724,8 @@ def test_spimple_binterp_output_passes_the_input_value_through(tmp_path):
     result = _dispatch(
         cab, None, image="/img.fits", output_filename=str(beam), beam_model="/beams/model"
     )
-    assert str(result.outputs.output_filename) == str(beam)
+    # Shinobi normalizes paths inside the workspace to relative paths.
+    assert Path(result.outputs.output_filename).resolve() == beam.resolve()
 
 
 def test_spimple_imconv_products_resolve_to_the_suffixes_the_tool_writes():

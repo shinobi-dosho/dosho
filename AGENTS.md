@@ -153,17 +153,18 @@ The build/maintenance infrastructure around the manifest is landed: a
 `src/dosho/cli.py`), a `src/dosho/cargo/` Dockerfile tree (a shared
 `pip/Dockerfile` template for pip-installable tools on `BASE_ASTRO`, plus a
 dedicated per-tool dir where a tool needs one -- e.g. an era-pinned
-interpreter, as for `ragavi`/`cubical`), and the `images.yml` CI workflow
-that rebuilds+pushes exactly the images a push touched (dependents of a
-changed base included) to `ghcr.io/shinobi-dosho`, modelled on cult-cargo
-and stimela-classic but with CI-automated push. Every tool is dosho-built
-except the deprecated `SIMMS_CLASSIC` (kept as a `ref:` until removal);
-bumping a tool is editing one manifest entry. Note any `images.yaml` edit
-makes every image a rebuild *candidate* in CI (shared metadata like
-`bundle_version` may have moved), but `build-plan --missing-only` filters
-candidates to tags actually absent from the registry -- so editing one
-entry's version rebuilds just that image, a `bundle_version` bump rebuilds
-everything (every tag moved), and a no-op manifest edit builds nothing.
+interpreter, as for `ragavi`/`cubical`), and the manual `images.yml` publication workflow that builds missing tags from
+an explicitly selected PR head before merge. Publication requires a human with
+repository write access, an open non-draft same-repository PR targeting main,
+a matching head branch and SHA, successful CI and all other checks, and GitHub's
+approval decision. An administrator can override incomplete approvals only;
+changes requested, failed checks and pending checks always block publication.
+The separate `images-verify.yml` checks registry health on Mondays.
+Every tool is dosho-built except deprecated `SIMMS_CLASSIC` (a `ref:` until
+removal). `build-plan --missing-only` selects absent tags, builds bases first,
+and preserves published tags: a version change builds that image, a bundle
+version change builds all moved tags, and existing tags are skipped. See
+CONTRIBUTING.md for the dispatch command.
 
 ## Repo layout
 

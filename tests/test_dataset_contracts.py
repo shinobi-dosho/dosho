@@ -29,6 +29,7 @@ from shinobi.dataset_access import (
 from shinobi.datasets import DatasetKind, dataset_declarations
 from shinobi.loaders import yaml_cab
 from shinobi.loaders.yaml_cab import CabLoadError
+from shinobi.ownership import contained_access_issues
 from shinobi.steps.schema import Cab, InputRef, Mutability, OutputRef, StepRef, mutated_path_fields
 
 from dosho import registry
@@ -78,6 +79,9 @@ CONTRACTS: dict[str, list[DatasetAccess]] = {
         DatasetAccess(field="msname", mode="write", table="HISTORY", allow_row_count_change=True),
     ],
     "wsclean": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
+    # Whole dataset like wsclean: the output, model and weight columns, the
+    # BITFLAG insertion and FLAG/FLAG_ROW saving all depend on options.
+    "cubical": [DatasetAccess(field="data_ms", mode="write", allow_schema_change=True)],
 }
 
 # Cabs that must never be skipped by the step cache (see the document).
@@ -247,11 +251,12 @@ def test_a_strict_flagging_pipeline_plans_in_order(no_closure, tmp_path):
     }
     # Nothing is wired step-to-step, so every edge below is an access hazard
     # shinobi inferred, each with the reason it gives.
-    # The sidecar output conservatively reserves its parent as a generic
-    # write too; the MS access itself remains READ above.
+    # The sidecar family reserves its exact path, not its parent directory, so
+    # backup stays a pure reader of the MS and the flagger after it is ordered
+    # by a write-after-read hazard.
     assert plan.reasons == {
         ("backup", "sim"): ("read-after-write: sim.ms, MAIN.FLAG",),
-        ("flag", "backup"): ("write-after-write: sim.ms, MAIN.FLAG",),
+        ("flag", "backup"): ("write-after-read: sim.ms, MAIN.FLAG",),
         ("restore", "flag"): ("write-after-write: sim.ms, MAIN.FLAG",),
         ("restore", "backup"): (f"read-after-write: {tmp_path / 'sim.ms.flagversions/flags.pre'}",),
     }
@@ -369,3 +374,67 @@ def test_aoflagger_orders_after_a_uvw_writer(no_closure, tmp_path):
     # AOFlagger's FLAG write rather than the read column causing contention.
     assert ("flag", "uvw") in plan.reasons
     assert plan.graph.names.index("uvw") in plan.graph.deps[plan.graph.names.index("flag")]
+
+
+def test_a_simulate_calibrate_image_chain_plans_in_order(no_closure, tmp_path):
+    """The stimela-ninja example's shape: telsim, skysim, cubical, wsclean, each
+    taking the MS from its producer's passthrough.
+
+    cubical used to take the MS as a path-only `MS`, which cannot share a recipe
+    with a strict one. As a whole-dataset writer whose `data_ms` output is the
+    same-named passthrough, it chains like the others: one write on the one MS
+    (a differently named strict output would plan as a second CREATE), each step
+    ordered behind the one before it."""
+    recipe = Recipe(name="simulate-calibrate-image", inputs_model=_MS, outputs_model=_Empty)
+    recipe.add_step(
+        "sim", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+    )
+    recipe.add_step("sky", registry.get("simms-skysim"), ms=OutputRef(step="sim", field="ms"))
+    recipe.add_step(
+        "calibrate",
+        registry.get("cubical"),
+        data_ms=OutputRef(step="sky", field="ms"),
+        out_mode="sc",
+        sol_jones=["G"],
+    )
+    recipe.add_step(
+        "image",
+        registry.get("wsclean"),
+        ms=[OutputRef(step="calibrate", field="data_ms")],
+        column="CORRECTED_DATA",
+        prefix="img",
+        size=(64, 64),
+        scale="1asec",
+    )
+    plan = plan_recipe_accesses(recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
+
+    modes = {step: [a.mode.value for a in accesses] for step, accesses in plan.accesses.items()}
+    assert modes == {
+        "sim": ["create"],
+        "sky": ["write"],
+        "calibrate": ["write"],
+        "image": ["write"],
+    }
+    # Every step resolved the one MS the recipe named. cubical names no column:
+    # whole-dataset intent, so it cannot be read as a narrower writer than it is.
+    assert {a.root for accesses in plan.accesses.values() for a in accesses} == {
+        (tmp_path / "sim.ms").resolve()
+    }
+    [calibrate] = plan.accesses["calibrate"]
+    assert calibrate.field == "data_ms"
+    assert calibrate.declaration.columns is None
+    assert calibrate.declaration.allow_schema_change
+    # The check that refused the example before anything ran: a generic
+    # (path-only) mutation of the MS, or a generic path overlapping its closure.
+    resources = {r for accesses in plan.accesses.values() for a in accesses for r in a.resources}
+    assert not contained_access_issues(
+        recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path, dataset_resources=resources
+    )
+    # A chain of writers: each is ordered directly behind the one before it, and
+    # every edge is a write-after-write hazard on the shared MS.
+    assert set(plan.reasons) == {("sky", "sim"), ("calibrate", "sky"), ("image", "calibrate")}
+    for reasons in plan.reasons.values():
+        assert all(reason.startswith("write-after-write: ") for reason in reasons)
+    names = plan.graph.names
+    for child, parent in plan.reasons:
+        assert names.index(parent) in plan.graph.deps[names.index(child)]

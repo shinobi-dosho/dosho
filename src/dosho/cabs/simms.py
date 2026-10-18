@@ -39,9 +39,12 @@ interface to anything below.
 (contracts checked against simms 3.0.2): `telsim` creates the MS, `skysim`
 writes into it. Both return the MS as a strict passthrough, so a downstream
 step can take it by `OutputRef`; it still cannot be handed to a path-only
-(`dtype: MS`) consumer in the same recipe. `create` refuses an existing
-target, so re-running a recipe with a strict `telsim` needs
-`--overwrite <step>`.
+(`dtype: MS`) consumer in the same recipe. The consumers that can follow them
+are the other strict cabs -- `wsclean` and `cubical` among them, so telsim ->
+skysim -> wsclean -> cubical -> wsclean is one recipe (cubical's MS comes back
+as its `data_ms` output); `quartical` and the rest of the calibrators are
+still path-only and cannot join it. `create` refuses an existing target, so
+re-running a recipe with a strict `telsim` needs `--overwrite <step>`.
 """
 
 from __future__ import annotations

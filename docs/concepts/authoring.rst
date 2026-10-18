@@ -152,9 +152,14 @@ reads and writes. ``msutils-flags-restore`` is the shape of a writer:
 A reader (``msutils-flags-backup``) declares ``mode: read`` and is neither
 ``mutable`` nor echoed as an output. A column chosen by a parameter is a
 template over the cab's own input, as in tricolour's ``read:
-["{data_column}"]``; ``columns`` left out means the whole dataset. A strict
-MS cannot be handed to a path-only cab in the same recipe, so only some cabs
-are strict -- ``tests/test_dataset_contracts.py`` lists them.
+["{data_column}"]``; ``columns`` left out means the whole dataset, which is
+what a cab declares when the columns it touches depend on its options
+(``wsclean``, ``cubical``). A writer's MSv2 output must have the same name as
+the input it echoes: an MSv2 output with no matching input is read as a new
+dataset to ``create``, which an existing MS refuses -- so ``cubical`` returns
+its MS as ``data_ms``, not ``ms``. A strict MS cannot be handed to a
+path-only cab in the same recipe, so only some cabs are strict --
+``tests/test_dataset_contracts.py`` lists them.
 
 ``msutils-flags-backup`` declares ``flagversions`` as a
 ``ProductFamily[DirectoryBundle]`` rooted at ``{ms}.flagversions`` beside
@@ -311,8 +316,12 @@ tool is editing one manifest entry.
 
 ``dosho`` builds these images itself -- see the ``dosho images`` CLI
 (``list``/``build``/``push``/``build-keys``/``build-plan``/``verify``),
-the ``dosho/cargo/`` Dockerfile tree, and the ``images.yml`` workflow
-that rebuilds and pushes exactly the images a push touched.
+the ``dosho/cargo/`` Dockerfile tree, and the manually dispatched
+``images.yml`` workflow. Before merge, a maintainer selects an exact reviewed
+PR head; the workflow checks approvals and successful CI/checks before building
+and publishing missing tags. ``CONTRIBUTING.md`` documents invocation and the
+limited administrator override. ``images-verify.yml`` checks registry health
+each Monday.
 
 Dev images
 ~~~~~~~~~~~~

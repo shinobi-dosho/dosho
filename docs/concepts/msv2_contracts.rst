@@ -42,11 +42,29 @@ covers reads of the selected visibility column, flags, weights, UVW and
 metadata, as well as those mode-dependent writes. The cab selects DATA by
 default and exposes the real ``-data-column`` switch as ``column``.
 
+CubiCal
+-------
+
+``cubical`` is strict for the same reason and with the same shape of
+contract, so a simulation can be calibrated in the recipe that made it
+(telsim, skysim, cubical, wsclean on one MS). It reads ``data-column`` and
+``weight-column``, writes ``out-column`` (CORRECTED_DATA by default) in every
+mode but solve-only, optionally writes ``out-model-column`` and
+``out-weight-column``, can remove and re-add columns under
+``out-reinit-column``, and by default inserts BITFLAG and BITFLAG_ROW into an
+MS that lacks them and saves FLAG, FLAG_ROW and the BITFLAG bits. Which of
+those happen depends on options a static list cannot follow, and naming any
+under ``create`` would require it after every run, so the contract is a
+whole-dataset write with schema-change permission. Its gain tables and plots
+go to ``out-dir``, not into the MS. The MS comes back as the ``data_ms``
+output, named like the input it echoes; a recipe that wired ``calibrate.ms``
+from a path-only ``cubical`` wires ``calibrate.data_ms`` now.
+
 Run the example
 ---------------
 
 Use a Python 3.11 driver with dosho's locked run dependencies. The qualified
-container boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.0.0 and WSClean
+container boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.1.0 and WSClean
 3.6/IDG, resolved through ``images.yaml``. Import tool packages inside the
 running container; cab loading never imports their schema-generation code.
 

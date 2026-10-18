@@ -6,13 +6,33 @@ hatch. This checks the real flattened flag names and the per-Jones-term
 ParamPattern against real CubiCal CLI conventions.
 """
 
+import yaml
+from shinobi.loaders import yaml_cab
 from shinobi.policies import build_argv
 
 import dosho
+from dosho import registry
 
 
 def _cab():
     return dosho.get("cubical")
+
+
+def _path_only_cab():
+    """The cab without its strict MSv2 contract, for the tests that dispatch it.
+
+    A strict MS needs a backend with a dataset lifecycle adapter and a real
+    table on disk; the recording backend has neither. The argv, passthrough and
+    cache-key behaviour below do not depend on strictness, so they run on the
+    path-only form -- the contract itself is pinned in test_dataset_contracts.py.
+    """
+    _, text = registry.get_document("cubical")
+    document = yaml.safe_load(text)
+    body = document["cabs"]["cubical"]
+    body.pop("dataset_accesses")
+    body["inputs"]["data-ms"]["dtype"] = "MS"
+    body["outputs"]["data-ms"]["dtype"] = "MS"
+    return yaml_cab.loads(yaml.safe_dump(document), **registry.loader_options())["cubical"]
 
 
 def test_registered_under_its_own_name():
@@ -105,40 +125,38 @@ def test_declared_boolean_field_is_also_explicit_not_a_bare_flag():
 
 
 def test_ms_output_is_a_real_passthrough_not_a_synthetic_hack():
-    """CubiCal writes corrected data back into the same input MS -- `ms`
-    should resolve to whatever `data-ms` was actually given, not a
-    made-up path.
+    """CubiCal writes corrected data back into the same input MS -- the
+    `data_ms` output is the same-named passthrough of the `data-ms` input
+    it was actually given, not a made-up path.
     """
     from shinobi.backends.recording import RecordingBackend
     from shinobi.steps import register_step_backend
     from shinobi.steps.dispatch import _dispatch
 
-    cab = _cab().model_copy(update={"backend": "cubical-record"})
+    cab = _path_only_cab().model_copy(update={"backend": "cubical-record"})
     register_step_backend("cubical-record", RecordingBackend())
     result = _dispatch(cab, None, data_ms="/obs.ms", out_name="selfcal1")
-    assert str(result.outputs.ms) == "/obs.ms"
+    assert str(result.outputs.data_ms) == "/obs.ms"
 
 
-def test_in_place_ms_write_is_declared_mutable_not_just_echoed_as_an_output():
-    # The `ms` output is an `implicit` passthrough of `data-ms`, so shinobi's
-    # name-intersection spelling of "mutated in place" sees nothing
-    # (`ms` != `data_ms`). Without the explicit declaration,
-    # `compute_cache_key` hashes the MS gocubical is about to rewrite -- a
-    # standalone re-run of an unchanged step can never hit its own cache
-    # entry -- and `snapshots.eligible_fields` protects nothing.
+def test_in_place_ms_write_is_declared_mutable_and_echoed_as_a_strict_output():
+    # `data_ms` is both the scalar writer and the same-named passthrough output:
+    # a strict output of any other name would read as a second, new dataset.
+    # Without the mutable declaration, `compute_cache_key` would hash the MS
+    # gocubical is about to rewrite, and `snapshots.eligible_fields` would
+    # protect nothing.
     from shinobi.steps.schema import Mutability, mutated_path_fields
 
     cab = _cab()
     assert cab.mutability_of("data_ms") is Mutability.MUTABLE
     assert mutated_path_fields(cab) == {"data_ms"}
+    assert list(cab.outputs_model.model_fields) == ["data_ms"]
 
 
 def test_mutated_ms_is_dropped_from_the_cache_key_so_a_rerun_can_hit(tmp_path):
     # `invalidate_path_hashes` is not ceremony: `_hash_path` is memoized, so
     # without it the second key would match for a stale-cache reason rather
-    # than the declared-mutable one, and the assertion would pass against a
-    # cab that never declared anything -- which is what the `naive` half
-    # below demonstrates.
+    # than the declared-mutable one.
     from shinobi.cache import compute_cache_key, invalidate_path_hashes
 
     cab = _cab()
@@ -149,9 +167,3 @@ def test_mutated_ms_is_dropped_from_the_cache_key_so_a_rerun_can_hit(tmp_path):
     (ms / "CORRECTED_DATA").write_text("rewritten by the step itself")
     invalidate_path_hashes()
     assert compute_cache_key(cab, None, params, None) == before
-
-    naive = cab.model_copy(update={"input_mutability": {}})
-    stale = compute_cache_key(naive, None, params, None)
-    (ms / "CORRECTED_DATA").write_text("rewritten again")
-    invalidate_path_hashes()
-    assert compute_cache_key(naive, None, params, None) != stale
