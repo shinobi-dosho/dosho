@@ -330,10 +330,10 @@ images:
     source: "https://github.com/laduma-dev/mowjsub"
     name: mowjsub
     build:
-      version: "2.0.1-multiarch1"
+      version: "2.1.0-multiarch1"
       platforms: [linux/amd64, linux/arm64]
       base: BASE_ASTRO
-      package: "mowjsub==2.0.1"
+      package: "mowjsub==2.1.0"
       # fitstoolz requires NumPy 2; rebuild casacore's converter against it.
       cmd: "vis-mowjsub --help"
       dockerfile: numpy2-casacore/Dockerfile
