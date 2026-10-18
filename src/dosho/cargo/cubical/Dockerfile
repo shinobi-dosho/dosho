@@ -1,19 +1,21 @@
-# cubical 1.6.4 (2023) does not support Python >=3.10: its own source does
-# `from collections import Iterator` (pickled_db.py), an alias removed in
-# 3.10 -- so the shared BASE_ASTRO (KERN-10 -> Python 3.12) is a non-starter,
-# and sed-patching upstream source in-image is the kind of snowflake dosho
-# avoids. Build on the era-correct interpreter instead: Python 3.9 on Debian
-# bookworm, the same combination the proven stimela2/cubical:1.6.4 image
-# runs. On 3.9 pip's resolver also lands a self-consistent 2023-era
-# dependency set (numba <=0.59 pins numpy <1.27), sidestepping the numpy-2
-# removals cubical predates. Users wanting a modern-Python calibrator should
-# be on QUARTICAL (CubiCal's successor, built on BASE_ASTRO) anyway.
-#
-# str.format template rendered by `dosho images build CUBICAL`.
-FROM python:{python_version}-bookworm
-
-# sharedarray (a cubical dep) builds from source -- the python:* base images
-# already carry gcc/make, no extra system packages needed.
-RUN pip install cubical=={version}
-
+# CubiCal 1.6.4 imports collections.Iterator, removed in Python 3.10.
+# Debian bullseye supplies Python 3.9 and a matching python3-casacore binary
+# on both architectures. This older base is an era pin for a legacy tool;
+# revisit it when CubiCal supports a maintained Python interpreter.
+FROM debian:bullseye-slim
+# Bullseye security packages have moved off the rolling mirror; use the
+# archived final package set so apt indexes and .deb files stay in sync.
+RUN sed -i 's@deb.debian.org/debian-security@archive.debian.org/debian-security@; s@deb.debian.org/debian@archive.debian.org/debian@; /bullseye-updates/d' /etc/apt/sources.list \
+    && printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99archive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates python3 python3-pip python3-casacore \
+    build-essential python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+ENV CC=gcc CXX=g++
+RUN python3 -m pip install --no-cache-dir --upgrade 'pip<26'
+# CubiCal predates NumPy 2; its source-built dependencies need a C compiler.
+RUN python3 -m pip install --no-cache-dir --no-compile "numpy<2" cubical=={package_version}
+# A real table operation catches a NumPy C API mismatch that import alone misses.
+RUN python3 -c 'from casacore.tables import table, maketabdesc, makescacoldesc; from tempfile import TemporaryDirectory; d=TemporaryDirectory(); p=d.name+"/smoke"; t=table(p, tabledesc=maketabdesc(makescacoldesc("x", 0.0)), nrow=1, readonly=False, ack=False); t.putcell("x", 0, 1.0); t.close(); t=table(p, ack=False); assert t.getcell("x", 0) == 1.0; t.close(); d.cleanup()'
+RUN {cmd}
 CMD {cmd}

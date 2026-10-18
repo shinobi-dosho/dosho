@@ -670,8 +670,15 @@ def test_spimple_binterp_repeated_ms_list_as_bare_tokens():
     cab = dosho.get("spimple-binterp")
     assert cab.name == "spimple-binterp"
     assert cab.command == "spimple-binterp"
+    assert cab.inputs_model.model_fields["beam_model"].is_required()
     argv = build_argv(
-        cab, {"image": "/img.fits", "output_filename": "/out", "ms": ["/a.ms", "/b.ms"]}
+        cab,
+        {
+            "image": "/img.fits",
+            "output_filename": "/out",
+            "ms": ["/a.ms", "/b.ms"],
+            "beam_model": "/beams/model",
+        },
     )
     assert argv[0] == "spimple-binterp"
     assert argv.count("--ms") == 1  # nargs='+' -> one flag occurrence
@@ -701,7 +708,10 @@ def test_spimple_output_filename_is_a_prefix_not_a_directory():
     # and the input keeps its flag: `field_meta` merges output over input, so a
     # ParamMeta on the output spec would have dropped this
     assert binterp.field_meta["output_filename"].nom_de_guerre == "output-filename"
-    argv = build_argv(binterp, {"image": "/img.fits", "output_filename": "/out/beam.fits"})
+    argv = build_argv(
+        binterp,
+        {"image": "/img.fits", "output_filename": "/out/beam.fits", "beam_model": "/beams/model"},
+    )
     assert "--output-filename" in argv and "/out/beam.fits" in argv
 
 
@@ -710,7 +720,9 @@ def test_spimple_binterp_output_passes_the_input_value_through(tmp_path):
     cab = dosho.get("spimple-binterp").model_copy(update={"backend": "spimple-record"})
     register_step_backend("spimple-record", RecordingBackend())
     beam = tmp_path / "out" / "beam.fits"
-    result = _dispatch(cab, None, image="/img.fits", output_filename=str(beam))
+    result = _dispatch(
+        cab, None, image="/img.fits", output_filename=str(beam), beam_model="/beams/model"
+    )
     assert str(result.outputs.output_filename) == str(beam)
 
 

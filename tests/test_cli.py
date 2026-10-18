@@ -31,10 +31,11 @@ def test_images_list_shows_build_and_ref_kinds():
 def test_build_dry_run_renders_dockerfile_and_tag():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0" in result.output
     # simms builds FROM the shared base-astro image (base: resolved to a full ref)
     assert "FROM ghcr.io/shinobi-dosho/base-astro:noble-kern10-d0.1.0" in result.output
     assert "--break-system-packages" in result.output and "simms==3.0.2" in result.output
+    assert "RUN simms --help" in result.output
 
 
 def test_base_image_configures_kern_ppa_without_a_base_ref():
@@ -52,7 +53,7 @@ def test_build_package_override_changes_installed_spec_but_not_tag():
     assert result.exit_code == 0, result.output
     assert "simms==3.0b2" in result.output
     # tag still from manifest version
-    assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0" in result.output
 
 
 def test_registry_override_changes_tag():
@@ -60,7 +61,7 @@ def test_registry_override_changes_tag():
         cli.main, ["images", "build", "SIMMS", "--dry-run", "--registry", "quay.io/dosho"]
     )
     assert result.exit_code == 0, result.output
-    assert "quay.io/dosho/simms:3.0.2-d0.1.0" in result.output
+    assert "quay.io/dosho/simms:3.0.2-multiarch1-d0.1.0" in result.output
 
 
 def test_build_refuses_a_ref_only_image():
@@ -109,10 +110,24 @@ def test_build_plan_changed_selects_only_the_changed_leaf_tool():
 
 def test_build_plan_changed_shared_pip_dockerfile_selects_all_pip_tools():
     plan = _plan("src/dosho/cargo/pip/Dockerfile")
-    # every pip tool (base: BASE_ASTRO, dockerfile pip/Dockerfile), no base stage
-    assert plan["bases"] == []
-    assert "SIMMS" in plan["tools"] and "QUARTICAL" in plan["tools"]
-    assert "WSCLEAN" not in plan["tools"] and "CASA6" not in plan["tools"]
+    # Every image using the shared template is selected, including new entries.
+    expected = {
+        key
+        for key, entry in _images.manifest["images"].items()
+        if entry.get("build", {}).get("dockerfile") == "pip/Dockerfile"
+    }
+    assert plan == {"bases": [], "tools": sorted(expected)}
+
+
+def test_build_plan_changed_numpy2_converter_rebuilds_its_users():
+    plan = _plan("src/dosho/cargo/numpy2-casacore/Dockerfile")
+    expected = {
+        key
+        for key, entry in _images.manifest["images"].items()
+        if entry.get("build", {}).get("dockerfile") == "numpy2-casacore/Dockerfile"
+    }
+    assert "QUARTICAL" in expected
+    assert plan == {"bases": [], "tools": sorted(expected)}
 
 
 def test_build_plan_changed_base_rebuilds_base_and_all_dependents():
@@ -211,7 +226,7 @@ def test_push_skips_already_published_tag(monkeypatch):
     calls = []
     monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
     monkeypatch.setattr(cli, "_run", lambda *a, **k: calls.append(a))
-    result = CliRunner().invoke(cli.main, ["images", "push", "SIMMS"])
+    result = CliRunner().invoke(cli.main, ["images", "push", "CASA6"])
     assert result.exit_code == 0, result.output
     assert "already published" in result.output
     assert calls == []  # no docker push
@@ -221,7 +236,7 @@ def test_push_force_overwrites(monkeypatch):
     calls = []
     monkeypatch.setattr(cli, "_image_exists", lambda tag: True)
     monkeypatch.setattr(cli, "_run", lambda argv, **k: calls.append(argv))
-    result = CliRunner().invoke(cli.main, ["images", "push", "SIMMS", "--force"])
+    result = CliRunner().invoke(cli.main, ["images", "push", "CASA6", "--force"])
     assert result.exit_code == 0, result.output
     assert any(a[:2] == ["docker", "push"] for a in calls)
 
@@ -231,7 +246,10 @@ def test_verify_ok_when_present(monkeypatch):
     monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
     result = CliRunner().invoke(cli.main, ["images", "verify"])
     assert result.exit_code == 0, result.output
-    assert "ok" in result.output and "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
+    assert (
+        "ok" in result.output
+        and "ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0" in result.output
+    )
 
 
 def test_verify_fails_when_missing(monkeypatch):
@@ -438,27 +456,32 @@ def test_msutils_dev_build_keeps_the_release_extras_as_one_shell_word():
     assert "msutils[all]==3.0.0" not in install  # the release pin is replaced
 
 
+def test_rm_tools_builds_finufft_for_baseline_arm64():
+    result = CliRunner().invoke(cli.main, ["images", "build", "RM_TOOLS", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "dpkg --print-architecture" in result.output
+    assert "-Ccmake.define.FINUFFT_ARCH_FLAGS=-march=armv8-a" in result.output
+    assert "-march=native" not in result.output
+
+
 def test_quartical_dev_build_installs_the_fix_branch_with_build_isolation():
-    # QuartiCal's dev image exists because the #435 SIGSEGV fix (a
-    # direction-axis mismatch when collapsing a chain of terms) lives only on
-    # `v0.2.8-dev`; the release entry is pinned back at 0.2.5 for want of it.
-    # Its `--no-build-isolation` is dropped here on purpose: 0.2.5/0.2.7 ship
-    # wheels so the flag has no build to act on, but a git URL is built from
-    # source and without isolation that needs hatchling in the image.
+    # The fix for a two-term, two-direction solve lives only on v0.2.8-dev.
+    # Both variants use the NumPy 2 casacore converter and retain build isolation.
     result = CliRunner().invoke(cli.main, ["images", "build", "QUARTICAL", "--dev", "--dry-run"])
     assert result.exit_code == 0, result.output
     assert "# tag: ghcr.io/shinobi-dosho/quartical:dev" in result.output
     install = next(ln for ln in result.output.splitlines() if ln.startswith("RUN pip install"))
     assert '"git+https://github.com/ratt-ru/QuartiCal@v0.2.8-dev"' in install
-    assert "quartical==0.2.5" not in install  # the held-back release pin is replaced
+    assert "quartical==0.2.5" not in install
     assert "--no-build-isolation" not in install
 
     release = CliRunner().invoke(cli.main, ["images", "build", "QUARTICAL", "--dry-run"])
     install = next(ln for ln in release.output.splitlines() if ln.startswith("RUN pip install"))
-    assert "--no-build-isolation" in install and '"quartical==0.2.5"' in install
+    assert '"quartical==0.2.5"' in install
+    assert "--no-build-isolation" not in install
 
 
-def test_pip_template_quotes_the_package_but_not_the_extra_deps():
+def test_install_quotes_the_package_but_not_the_extra_deps():
     # extra_deps is a list of specs (SHADEMS: three of them), so quoting it
     # whole would hand pip one unresolvable requirement.
     result = CliRunner().invoke(cli.main, ["images", "build", "SHADEMS", "--dry-run"])
@@ -468,7 +491,7 @@ def test_pip_template_quotes_the_package_but_not_the_extra_deps():
 
 def test_release_build_is_untouched_by_the_dev_block():
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
-    assert "ghcr.io/shinobi-dosho/simms:3.0.2-d0.1.0" in result.output
+    assert "ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0" in result.output
     assert "simms==3.0.2" in result.output
     assert "@main" not in result.output
 
@@ -487,14 +510,12 @@ def test_dev_keys_are_a_subset_of_build_keys():
     assert all("dev" in _images.manifest["images"][k] for k in dev)
 
 
-def test_dev_push_overwrites_the_mutable_tag_without_force(monkeypatch):
+def test_dev_single_platform_push_is_rejected_for_multiarch_image(monkeypatch):
     calls = []
-    monkeypatch.setattr(cli, "_image_exists", lambda tag: True)  # :dev always exists after first
     monkeypatch.setattr(cli, "_run", lambda argv, **k: calls.append(argv))
     result = CliRunner().invoke(cli.main, ["images", "push", "SIMMS", "--dev"])
-    assert result.exit_code == 0, result.output
-    assert ["docker", "push", "ghcr.io/shinobi-dosho/simms:dev"] in calls
-    assert "already published" not in result.output
+    assert result.exit_code != 0, result.output
+    assert calls == []
 
 
 def test_dev_images_never_enter_the_release_build_plan():
@@ -504,3 +525,18 @@ def test_dev_images_never_enter_the_release_build_plan():
     assert "SIMMS" in plan["tools"]  # the release image, at its release tag
     result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dry-run"])
     assert ":dev" not in result.output
+
+
+def test_all_remaining_build_images_declare_both_platforms():
+    expected = ["linux/amd64", "linux/arm64"]
+    for key, entry in _images.manifest["images"].items():
+        if "build" in entry and key != "CASA6":
+            assert entry["build"]["platforms"] == expected, key
+    assert "platforms" not in _images.manifest["images"]["CASA6"]["build"]
+    assert "ref" in _images.manifest["images"]["SIMMS_CLASSIC"]
+
+
+def test_aimfast_astlib_constraint_is_quoted():
+    result = CliRunner().invoke(cli.main, ["images", "build", "AIMFAST", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "RUN pip install --break-system-packages -U 'astLib>=0.13.2'" in result.output
