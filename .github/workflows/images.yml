@@ -109,10 +109,8 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
         run: |
-          flags="--push"
-          if [ "$IMAGE" = "DDFACET" ]; then
-            flags="$flags --sequential-platforms --prune-between-platforms"
-          fi
+          # Stage every base platform; revalidate separately before the release manifest.
+          flags="--push --sequential-platforms --prune-between-platforms"
           uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags
 
   build-tools:

@@ -362,3 +362,28 @@ def test_dispatch_from_candidate_branch_is_rejected():
             run_id=10,
             dispatch_sha="b" * 40,
         )
+
+
+@pytest.mark.parametrize("image", ["BASE_ASTRO", "DDFACET"])
+def test_all_base_platforms_are_staged_before_gated_release_manifest(image):
+    import os
+    import subprocess
+
+    import yaml
+
+    root = Path(__file__).parents[1]
+    workflow = yaml.safe_load((root / ".github/workflows/images.yml").read_text())
+    script = workflow["jobs"]["build-base"]["steps"][-1]["run"]
+    # Replace uv with an argument recorder: execute the real workflow shell without Docker.
+    result = subprocess.run(
+        ["bash", "-c", 'uv() { printf "%s\\n" "$@"; };\n' + script],
+        env={**os.environ, "IMAGE": image},
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    argv = result.stdout.splitlines()
+    assert image in argv
+    assert "--sequential-platforms" in argv
+    assert "--prune-between-platforms" in argv
+    assert argv[argv.index("--pre-publish") + 1] == "python3 scripts/image_publish_gate.py"

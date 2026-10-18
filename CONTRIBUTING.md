@@ -187,8 +187,10 @@ before every registry-writing command, including each staged platform push and
 final manifest creation. A change during an already running `buildx --push`
 command cannot stop the exact internal registry write; revalidation happens
 immediately before launching that command. `build-plan --missing-only` selects
-absent release tags, builds bases before tools and skips existing tags. Large platform builds
-retain their sequential build and prune settings. Runs are serialized without
+absent release tags, builds bases before tools and skips existing tags. All bases
+stage their platforms sequentially, so the final release manifest has a separate
+gate after the builds complete. Tools retain sequential build/prune settings
+with the single-platform CASA6 exception. Runs are serialized without
 cancelling a publisher already running. The separate `images-verify.yml`
 retains Monday registry checks; `images-dev.yml` and PyPI's `publish.yml` have
 their own release processes.
