@@ -3,8 +3,8 @@
 
 A small build driver modelled on cult-cargo's ``build-cargo``: for each
 `build:` entry it renders the entry's Dockerfile (a ``str.format`` template
-over the manifest's build vars) and shells out to ``docker build`` /
-``docker run`` (a sanity check) / ``docker push``. `ref:` entries are external
+over the manifest's build vars) and shells out to Docker. Multi-platform entries use Buildx to build and
+push one manifest list; other entries retain the single-host build/run/push path. `ref:` entries are external
 images (used verbatim) and are not built here.
 
 The resolved tag is ``{registry}/{name}:{version}-{bundle_version}`` (the same
@@ -21,7 +21,11 @@ share a tag with a release, so the two publish paths cannot collide.
 from __future__ import annotations
 
 import json
+import re
+import shlex
 import subprocess
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +34,60 @@ import click
 from dosho import images as _images
 
 _CARGO_DIR = Path(__file__).with_name("cargo")
+
+
+@dataclass
+class PublicationSource:
+    manifest: dict[str, Any] | None = None
+    cargo: Path | None = None
+    pre_publish: tuple[str, ...] = ()
+
+
+def _source() -> PublicationSource:
+    ctx = click.get_current_context(silent=True)
+    return (ctx.find_object(PublicationSource) if ctx else None) or PublicationSource()
+
+
+def _manifest() -> dict[str, Any]:
+    candidate = _source().manifest
+    return candidate if candidate is not None else _images.manifest
+
+
+def _load_source(root: Path) -> PublicationSource:
+    """Read candidate configuration without importing candidate Python."""
+    root = root.resolve(strict=True)
+    manifest_path = (root / "src/dosho/images.yaml").resolve(strict=True)
+    cargo = (root / "src/dosho/cargo").resolve(strict=True)
+    if not manifest_path.is_relative_to(root) or not cargo.is_relative_to(root):
+        raise click.ClickException("candidate manifest/cargo escapes source root")
+    manifest = _images._load_manifest(manifest_path)
+    metadata = manifest["metadata"]
+    if metadata["registry"] != "ghcr.io/shinobi-dosho":
+        raise click.ClickException("candidate release registry must be ghcr.io/shinobi-dosho")
+    for key, entry in manifest["images"].items():
+        if "build" not in entry:
+            continue
+        name = entry.get("name", key.lower())
+        tag = f"{entry['build']['version']}-{metadata['bundle_version']}"
+        if not re.fullmatch(r"[a-z0-9]+(?:[._-][a-z0-9]+)*", name):
+            raise click.ClickException("invalid candidate image name")
+        if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}", tag):
+            raise click.ClickException("invalid candidate release tag")
+        dockerfile = (cargo / entry["build"]["dockerfile"]).resolve(strict=True)
+        if not dockerfile.is_relative_to(cargo):
+            raise click.ClickException("candidate Dockerfile escapes cargo tree")
+    for path in cargo.rglob("*"):
+        if not path.resolve(strict=True).is_relative_to(cargo):
+            raise click.ClickException("candidate context symlink escapes cargo tree")
+    return PublicationSource(manifest=manifest, cargo=cargo)
+
+
+def _registry_write(argv: list[str]) -> bool:
+    return (
+        argv[:2] == ["docker", "push"]
+        or (argv[:3] == ["docker", "buildx", "build"] and "--push" in argv)
+        or argv[:4] == ["docker", "buildx", "imagetools", "create"]
+    )
 
 
 def _image_exists(tag: str) -> bool:
@@ -45,6 +103,30 @@ def _image_exists(tag: str) -> bool:
         ).returncode
         == 0
     )
+
+
+def _image_has_platforms(tag: str, platforms: list[str]) -> bool:
+    """Check an existing registry manifest's declared OS/architecture pairs."""
+    if not platforms:
+        return True
+    proc = subprocess.run(
+        ["docker", "buildx", "imagetools", "inspect", "--raw", tag],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode:
+        return False
+    try:
+        manifest = json.loads(proc.stdout)
+        present = {
+            f"{item['platform']['os']}/{item['platform']['architecture']}"
+            for item in manifest.get("manifests", [])
+            if "platform" in item
+        }
+    except (KeyError, TypeError, ValueError):
+        return False
+    return set(platforms) <= present
 
 
 def _build_keys(manifest: dict[str, Any]) -> list[str]:
@@ -104,12 +186,15 @@ def _affected_keys(manifest: dict[str, Any], changed_files: list[str]) -> set[st
 
 
 def _run(argv: list[str], **kwargs: Any) -> None:
+    hook = _source().pre_publish
+    if hook and _registry_write(argv):
+        subprocess.run(list(hook), check=True)
     click.echo(click.style("+ " + " ".join(argv), fg="cyan"))
     subprocess.run(argv, check=True, **kwargs)
 
 
 def _get_build_entry(key: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    manifest = _images.manifest
+    manifest = _manifest()
     imgs = manifest["images"]
     if key not in imgs:
         raise click.ClickException(f"no image {key!r} in the manifest (have: {', '.join(imgs)})")
@@ -128,6 +213,8 @@ def _tag(
     registry: str | None,
     dev: bool = False,
 ) -> str:
+    if _source().manifest is not None and registry not in (None, "ghcr.io/shinobi-dosho"):
+        raise click.ClickException("candidate publication registry cannot be overridden")
     registry = registry or metadata["registry"]
     name = entry.get("name", key.lower())
     if dev:
@@ -172,6 +259,22 @@ def _digest(tag: str) -> str | None:
     return proc.stdout.strip() or None if proc.returncode == 0 else None
 
 
+def _run_with_metadata(argv: list[str], tag: str, **kwargs: Any) -> str:
+    """Run a Buildx registry write and capture its exact published digest."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "metadata.json"
+        offset = 4 if argv[:4] == ["docker", "buildx", "imagetools", "create"] else 3
+        _run([*argv[:offset], "--metadata-file", str(path), *argv[offset:]], **kwargs)
+        try:
+            metadata = json.loads(path.read_text())
+            digest = metadata["containerimage.descriptor"]["digest"]
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise click.ClickException(f"Buildx did not report a digest for {tag}") from exc
+    if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+        raise click.ClickException(f"Buildx reported an invalid digest for {tag}: {digest!r}")
+    return f"{tag.rsplit(':', 1)[0]}@{digest}"
+
+
 _OPTIONAL_TEMPLATE_VARS = ("pre_install", "post_install", "extra_deps", "pip_install_flags")
 
 
@@ -187,11 +290,11 @@ def _render_dockerfile(
     base_key = build.get("base")
     if base_key:
         fmt["base_image"] = _images._resolve_ref(
-            base_key, _images.manifest["images"][base_key], metadata
+            base_key, _manifest()["images"][base_key], metadata
         )
     for var in _OPTIONAL_TEMPLATE_VARS:
         fmt.setdefault(var, "")
-    dockerfile = _CARGO_DIR / build["dockerfile"]
+    dockerfile = (_source().cargo or _CARGO_DIR) / build["dockerfile"]
     return dockerfile.read_text().format(**fmt), dockerfile.parent
 
 
@@ -201,22 +304,50 @@ def main() -> None:
 
 
 @main.group()
-def images() -> None:
+@click.option(
+    "--source-root",
+    type=click.Path(path_type=Path, exists=True, file_okay=False),
+    help="Read candidate manifest/cargo as data; run this installed CLI's trusted code.",
+)
+@click.option(
+    "--pre-publish", default="", help="Trusted command to revalidate before every registry write."
+)
+@click.pass_context
+def images(ctx: click.Context, source_root: Path | None, pre_publish: str) -> None:
     """Build and publish dosho's container images."""
+    source = _load_source(source_root) if source_root else PublicationSource()
+    source.pre_publish = tuple(shlex.split(pre_publish))
+    ctx.obj = source
 
 
 @images.command("list")
 def images_list() -> None:
     """List every manifest image, its kind (ref/build), and resolved reference."""
-    for key, entry in _images.manifest["images"].items():
+    for key, entry in _manifest()["images"].items():
         kind = "build" if "build" in entry else "ref"
-        click.echo(f"{key:16} [{kind:5}] {getattr(_images, key)}")
+        ref = (
+            _images._resolve_ref(key, entry, _manifest()["metadata"])
+            if _source().manifest is not None
+            else getattr(_images, key)
+        )
+        click.echo(f"{key:16} [{kind:5}] {ref}")
 
 
 @images.command("build")
 @click.argument("key")
 @click.option("--push", "do_push", is_flag=True, help="push the image after building.")
 @click.option("--no-cache", is_flag=True, help="build without the docker layer cache.")
+@click.option("--network", default=None, help="Docker build network mode (e.g. host).")
+@click.option(
+    "--sequential-platforms",
+    is_flag=True,
+    help="on multi-platform --push, build each platform separately before creating the manifest.",
+)
+@click.option(
+    "--prune-between-platforms",
+    is_flag=True,
+    help="with --sequential-platforms, clear Buildx cache between builds (isolated builders only).",
+)
 @click.option("--registry", default=None, help="override the manifest registry for the tag.")
 @click.option(
     "--package", default=None, help="override the pip package/spec installed (e.g. a prerelease)."
@@ -238,6 +369,9 @@ def images_build(
     key: str,
     do_push: bool,
     no_cache: bool,
+    network: str | None,
+    sequential_platforms: bool,
+    prune_between_platforms: bool,
     registry: str | None,
     package: str | None,
     force: bool,
@@ -255,9 +389,93 @@ def images_build(
         click.echo(f"# tag: {tag}\n# context: {context}\n{dockerfile}")
         return
 
+    platforms = entry["build"].get("platforms", [])
+    if prune_between_platforms and not sequential_platforms:
+        raise click.ClickException("--prune-between-platforms requires --sequential-platforms")
+    if sequential_platforms and not (do_push and platforms):
+        raise click.ClickException("--sequential-platforms requires multi-platform --push")
+    if do_push and platforms:
+        # Publish the resolved tag only after every platform's Dockerfile
+        # (including its runtime RUN check) succeeds. A local docker push
+        # would publish just the host architecture under the shared tag.
+        if not (force or dev) and _image_exists(tag):
+            if _image_has_platforms(tag, platforms):
+                click.echo(f"{tag} already published; skipping push (use --force to overwrite)")
+                return
+            raise click.ClickException(
+                f"{tag} exists without all declared platforms; bump its version "
+                "or use --force after reviewing the existing tag"
+            )
+        if sequential_platforms:
+            # Large native stacks can exceed a standard CI runner's disk when
+            # Buildx holds two unpacked platform snapshots at once. Staging
+            # tags are published first; the public tag appears only after both
+            # platform builds (and their Dockerfile RUN checks) succeed.
+            staged_tags = []
+            for index, platform in enumerate(platforms):
+                staged = f"{tag}-{platform.rsplit('/', 1)[-1]}"
+                build_argv = [
+                    "docker",
+                    "buildx",
+                    "build",
+                    "--platform",
+                    platform,
+                    "--push",
+                    "-t",
+                    staged,
+                    "-f",
+                    "-",
+                ]
+                if no_cache:
+                    build_argv.append("--no-cache")
+                if network:
+                    build_argv += ["--network", network]
+                build_argv.append(str(context))
+                _run(build_argv, input=dockerfile.encode())
+                staged_tags.append(staged)
+                if prune_between_platforms and index < len(platforms) - 1:
+                    _run(["docker", "buildx", "prune", "--all", "--force"])
+            create_argv = ["docker", "buildx", "imagetools", "create", "-t", tag, *staged_tags]
+            if dev:
+                published_digest = _run_with_metadata(create_argv, tag)
+            else:
+                _run(create_argv)
+        else:
+            build_argv = [
+                "docker",
+                "buildx",
+                "build",
+                "--platform",
+                ",".join(platforms),
+                "--push",
+                "-t",
+                tag,
+                "-f",
+                "-",
+            ]
+            if no_cache:
+                build_argv.append("--no-cache")
+            if network:
+                build_argv += ["--network", network]
+            build_argv.append(str(context))
+            if dev:
+                published_digest = _run_with_metadata(build_argv, tag, input=dockerfile.encode())
+            else:
+                _run(build_argv, input=dockerfile.encode())
+        if not _image_has_platforms(tag, platforms):
+            raise click.ClickException(f"published {tag} lacks a declared platform")
+        click.echo(click.style(f"built and pushed {tag} ({', '.join(platforms)})", fg="green"))
+        if dev:
+            click.echo(
+                click.style(f"pin this digest, not the tag: {published_digest}", fg="yellow")
+            )
+        return
+
     build_argv = ["docker", "build", "-t", tag, "-f", "-"]
     if no_cache:
         build_argv.append("--no-cache")
+    if network:
+        build_argv += ["--network", network]
     build_argv.append(str(context))
     _run(build_argv, input=dockerfile.encode())
 
@@ -286,6 +504,10 @@ def images_build(
 def images_push(key: str, registry: str | None, force: bool, dev: bool) -> None:
     """Push the already-built image for KEY (skips an already-published tag)."""
     entry, metadata = _get_build_entry(key)
+    if entry["build"].get("platforms"):
+        raise click.ClickException(
+            f"{key} declares multiple platforms; use `dosho images build {key} --push`"
+        )
     _push(_tag(key, entry, metadata, registry, dev), force or dev)
 
 
@@ -302,7 +524,7 @@ def _push(tag: str, force: bool) -> bool:
 @click.option("--dev", is_flag=True, help="list only KEYs that declare a `dev:` variant.")
 def images_build_keys(dev: bool) -> None:
     """Print the JSON list of `build:` image KEYs (for a CI build matrix)."""
-    manifest = _images.manifest
+    manifest = _manifest()
     keys = _build_keys(manifest)
     if dev:
         keys = [k for k in keys if "dev" in manifest["images"][k]]
@@ -336,14 +558,20 @@ def images_build_plan(changed: tuple[str, ...], missing_only: bool) -> None:
     the images a push actually invalidated (see `_affected_keys`), so CI skips
     rebuilding unrelated (e.g. heavy) images.
     """
-    manifest = _images.manifest
+    manifest = _manifest()
     images_ = manifest["images"]
     build = _build_keys(manifest)
     keys = _affected_keys(manifest, list(changed)) if changed else set(build)
 
     if missing_only:
         present = {
-            k for k in keys if _image_exists(_tag(k, images_[k], manifest["metadata"], None))
+            k
+            for k in keys
+            if _image_exists(_tag(k, images_[k], manifest["metadata"], None))
+            and _image_has_platforms(
+                _tag(k, images_[k], manifest["metadata"], None),
+                images_[k]["build"].get("platforms", []),
+            )
         }
         if present:
             click.echo(
@@ -363,7 +591,7 @@ def images_build_plan(changed: tuple[str, ...], missing_only: bool) -> None:
 @click.argument("key", required=False)
 def images_verify(key: str | None) -> None:
     """Check that `build:` image(s) exist in the registry (exit 1 if any are missing)."""
-    manifest = _images.manifest
+    manifest = _manifest()
     keys = [key] if key else _build_keys(manifest)
     missing = []
     for k in keys:
@@ -371,7 +599,8 @@ def images_verify(key: str | None) -> None:
         if not entry or "build" not in entry:
             raise click.ClickException(f"{k!r} is not a build: image")
         tag = _tag(k, entry, manifest["metadata"], None)
-        ok = _image_exists(tag)
+        platforms = entry["build"].get("platforms", [])
+        ok = _image_exists(tag) and _image_has_platforms(tag, platforms)
         click.echo(f"{'ok     ' if ok else 'MISSING'} {tag}")
         if not ok:
             missing.append(tag)
