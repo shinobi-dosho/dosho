@@ -27,14 +27,16 @@ RUN apt-get update && \
     apt-get install -y ${{DEB_DEPENDENCIES}} && \
     apt-get install -y ${{DEB_SETUP_DEPENDENCIES}}
 
-RUN update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-${{GNUCOMPILER}} 100 \
+# Use the host GNU triplet so the same compiler setup works on AMD64 and ARM64.
+RUN triplet="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
+    && update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-${{GNUCOMPILER}} 100 \
         --slave /usr/bin/gcc gcc /usr/bin/gcc-${{GNUCOMPILER}} \
-        --slave /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-${{GNUCOMPILER}} && \
-    update-alternatives --install /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-${{GNUCOMPILER}} 100 \
+        --slave /usr/bin/$triplet-gcc $triplet-gcc /usr/bin/gcc-${{GNUCOMPILER}} \
+    && update-alternatives --install /usr/bin/$triplet-g++ $triplet-g++ /usr/bin/g++-${{GNUCOMPILER}} 100 \
         --slave /usr/bin/g++ g++ /usr/bin/g++-${{GNUCOMPILER}} \
-        --slave /usr/bin/x86_64-linux-gnu-cpp x86_64-linux-gnu-cpp /usr/bin/g++-${{GNUCOMPILER}} && \
-    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{GNUCOMPILER}} 100 \
-        --slave /usr/bin/x86_64-linux-gnu-gfortran x86_64-linux-gnu-gfortran /usr/bin/gfortran-${{GNUCOMPILER}}
+        --slave /usr/bin/$triplet-cpp $triplet-cpp /usr/bin/g++-${{GNUCOMPILER}} \
+    && update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{GNUCOMPILER}} 100 \
+        --slave /usr/bin/$triplet-gfortran $triplet-gfortran /usr/bin/gfortran-${{GNUCOMPILER}}
 
 # All python dependencies go into venv
 WORKDIR /opt
@@ -66,7 +68,7 @@ RUN wget https://github.com/blitzpp/blitz/archive/1.0.2.tar.gz && \
     grep -rl python . | xargs sed -i "s/python/python${{PYTHONVER}}/g" && \
     autoreconf --force --install && \
     ./configure --enable-shared && \
-    make -j16 && \
+    make -j4 && \
     make install && \
     ldconfig && \
     rm -r /opt/blitz-1.0.2
@@ -83,7 +85,7 @@ RUN cd /opt && \
     mkdir -p build && \
     cd /opt/casarest-1.8.1/build && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ../ && \
-    make -j 16 && \
+    make -j 4 && \
     make install && \
     rm -r /opt/casarest-1.8.1 && \
     ldconfig
@@ -104,7 +106,7 @@ RUN wget https://github.com/ska-sa/makems/archive/v1.5.6.tar.gz && \
     cmake -DCMAKE_MODULE_PATH:PATH=/opt/makems-1.5.6/LOFAR/CMake \
           -DUSE_LOG4CPLUS=OFF -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX=/usr ../.. && \
-    make -j 16 && \
+    make -j 4 && \
     make install && \
     cd /opt/makems-1.5.6/test && \
     makems WSRT_makems.cfg && \
@@ -167,14 +169,48 @@ RUN wget https://github.com/bennahugo/LOFARBeam/archive/refs/tags/DDF_KMS_22.04.
 # isn't ABI compatible (same pin the real upstream Dockerfile carries)
 RUN echo "tensorflow==2.19.0" > /opt/constraints.txt
 ENV PIP_CONSTRAINT=/opt/constraints.txt
+# numcodecs 0.15.1 misreads the x86 host CPU flags under ARM64 emulation.
+# CFLAGS suppresses its automatic -msse2 and -mavx2 flags; the DISABLE switches
+# omit x86 shuffle sources. Install it first so DDFacet reuses this build.
+RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+      . /opt/venv/bin/activate && \
+      CFLAGS="-O2" DISABLE_NUMCODECS_SSE2=1 DISABLE_NUMCODECS_AVX2=1 \
+        python -m pip install --use-pep517 "numcodecs==0.15.1"; \
+    fi
 RUN . /opt/venv/bin/activate && python -m pip install --use-pep517 "{package}"
 
-# ensure bdsf backend still works
-RUN . /opt/venv/bin/activate && python -c "import bdsf"
+# Ubuntu's libcasa_python3 was compiled against NumPy 1.x. On ARM64,
+# python-casacore links that system library, so rebuilding the Python wheel
+# alone cannot make it usable with the final NumPy 2 runtime. Rebuild the
+# seven converter sources from the matching casacore 3.5.0 release with the
+# venv's NumPy headers, keeping the other Ubuntu casacore libraries.
+RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+      . /opt/venv/bin/activate && \
+      dpkg-query -W casacore-dev | grep -q '3.5.0-' && \
+      wget -q -O /tmp/casacore-v3.5.0.tar.gz \
+        https://github.com/casacore/casacore/archive/refs/tags/v3.5.0.tar.gz && \
+      tar -xzf /tmp/casacore-v3.5.0.tar.gz -C /tmp && \
+      ln -s /tmp/casacore-3.5.0 /tmp/casacore && \
+      cd /tmp/casacore-3.5.0/python/Converters && \
+      g++-${{GNUCOMPILER}} -std=c++11 -O2 -fPIC -shared \
+        -I"$(python -c 'import numpy; print(numpy.get_include())')" \
+        -I/usr/include/python${{PYTHONVER}} -I/tmp \
+        PycArray.cc PycArrayNP.cc PycBasicData.cc PycExcp.cc PycImport.cc \
+        PycRecord.cc PycValueHolder.cc \
+        -lcasa_casa -lboost_python312 -lpython${{PYTHONVER}} \
+        -Wl,-soname,libcasa_python3.so.7 \
+        -o /opt/venv/lib/libcasa_python3.so.7 && \
+      ldconfig && \
+      rm -rf /tmp/casacore /tmp/casacore-3.5.0 /tmp/casacore-v3.5.0.tar.gz; \
+    fi
 
 # Make venv globally available in this container
 ENV LD_LIBRARY_PATH=/opt/venv/lib:$LD_LIBRARY_PATH
 ENV PATH=/opt/venv/bin:$PATH
 ENV PYTHONPATH=/opt/venv/lib/python${{PYTHONVER}}/site-packages
 
+# Opening a table calls PycArray's NumPy C API, unlike importing casacore.
+RUN python -c 'from casacore.tables import table; t=table("/tmp/casacore-numpy-smoke", tabledesc={{}}, nrow=1, ack=False); assert t.nrows() == 1; t.close()' && \
+    rm -rf /tmp/casacore-numpy-smoke
+RUN DDF.py --help > /dev/null
 CMD {cmd}

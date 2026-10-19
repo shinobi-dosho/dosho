@@ -23,6 +23,7 @@ cabs:
         info: Path to output directory
       beam_model:
         dtype: str
+        required: true
         nom_de_guerre: beam-model
         info: 'FITS beam model to use: path up to name, e.g. /home/user/beams/meerkat_lband (pattern path_to_beam/name_corr_re/im.fits)'
       sparsify_time:

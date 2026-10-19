@@ -175,6 +175,9 @@ The MS needs DATA, MODEL_DATA, WEIGHT, four linear correlations, at least two
 channels and two timestamps, valid antenna metadata and a consistent
 POLARIZATION table. The sky model must match its phase centre. The cube
 needs a source above the test's five-sigma threshold and valid FITS WCS.
-All MS inputs are copied before native execution. To reproduce the tested
-DDFacet container, set ``DOSHO_IMAGE_DDFACET`` to
-``ghcr.io/shinobi-dosho/killms:3.3.0-d0.1.0`` before the test process starts.
+All MS inputs are copied before native execution. After publication, set
+``DOSHO_IMAGE_DDFACET`` to
+``ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-multiarch-d0.1.0`` and
+``DOSHO_IMAGE_KILLMS`` to
+``ghcr.io/shinobi-dosho/killms:3.3.0-multiarch-d0.1.0`` before the test
+process starts.

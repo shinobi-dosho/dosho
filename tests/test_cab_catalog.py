@@ -44,7 +44,9 @@ def test_image_index_maps_a_built_ref_to_its_key():
     from dosho import images
 
     meta = idx[images.WSCLEAN]
-    assert meta["key"] == "WSCLEAN" and meta["kind"] == "build" and meta["version"] == "3.6-idg"
+    assert (
+        meta["key"] == "WSCLEAN" and meta["kind"] == "build" and meta["version"] == "3.6-idg-noble"
+    )
 
 
 def test_schema_obj_resolves_cab_and_stepref():
@@ -64,8 +66,8 @@ def test_generate_writes_catalog_with_cabs_and_image_linkage(tmp_path):
 
     # a Cab, a StepRef, and their resolved images all appear
     assert "\nwsclean\n" in text and "\nlistobs\n" in text
-    assert "ghcr.io/shinobi-dosho/wsclean:3.6-idg-d0.1.0" in text
-    assert "ghcr.io/shinobi-dosho/casa6:6.7-d0.1.0" in text  # listobs' image
+    assert "ghcr.io/shinobi-dosho/wsclean:3.6-idg-noble-d0.1.0" in text
+    assert "ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0" in text  # listobs' image
     # schema tables rendered
     assert "**Inputs**" in text and ".. list-table::" in text
 
