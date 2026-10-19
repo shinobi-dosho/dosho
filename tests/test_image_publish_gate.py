@@ -387,3 +387,9 @@ def test_all_base_platforms_are_staged_before_gated_release_manifest(image):
     assert "--sequential-platforms" in argv
     assert "--prune-between-platforms" in argv
     assert argv[argv.index("--pre-publish") + 1] == "python3 scripts/image_publish_gate.py"
+
+
+def test_behind_head_with_clean_merge_is_eligible():
+    api = API()
+    api.pr["mergeable_state"] = "behind"
+    validate(api)

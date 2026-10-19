@@ -107,7 +107,7 @@ def validate(api, *, number, sha, actor, ref, run_id, dispatch_sha, override=Fal
         require(ref == "refs/heads/main", "Dispatch must use protected main")
         require(pr["mergeable"] is True, "PR mergeability is unknown or conflicted")
         require(
-            pr["mergeable_state"] in {"clean", "blocked", "unstable", "has_hooks"},
+            pr["mergeable_state"] in {"clean", "blocked", "unstable", "has_hooks", "behind"},
             "PR is not mergeable",
         )
         return pr

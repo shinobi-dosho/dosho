@@ -149,10 +149,10 @@ gh workflow run images.yml --ref main \
   -f override_unreviewed=false
 ```
 
-The Actions UI offers the same inputs. The secure publisher must first be
-merged into protected `main`; it cannot publish this implementation PR before
-that rollout. Subsequent image PRs can publish before merge by dispatching the
-trusted workflow on `main` and supplying the candidate PR's exact head SHA.
+The Actions UI offers the same inputs. The publisher must be present on
+protected `main` before dispatch. Image PRs can publish before merge by
+dispatching the trusted workflow on `main` with the candidate PR's exact
+head SHA.
 The trusted workflow, gate and CLI are pinned to that dispatch's `main` SHA.
 A separate candidate checkout supplies only the YAML manifest, Dockerfiles and
 build contexts. Candidate Python, workflows and dependency files never run on
