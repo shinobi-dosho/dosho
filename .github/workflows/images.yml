@@ -1,54 +1,47 @@
-# Build dosho's container images and push them to ghcr.io/shinobi-dosho.
-#
-# Automated "merge -> build -> push" (BioContainers-style): when a `build:`
-# image's Dockerfile or the manifest changes, the matching image(s) are rebuilt
-# and pushed with the built-in GITHUB_TOKEN (no external secret -- the repo
-# lives under the shinobi-dosho org). Published tags are immutable: the
-# `dosho images` push guard skips a tag that already exists unless forced.
-#
-# Changed-image selection: `discover` diffs the push (before..after) and builds
-# only the images that diff touched, plus dependents of any changed base
-# (`build-plan --changed`) -- so editing one tool's Dockerfile doesn't rebuild
-# the heavy CASA6 image, while editing base-astro rebuilds everything FROM it.
-# A manifest change makes every image a *candidate* (shared metadata like
-# bundle_version may have moved), but `--missing-only` then filters candidates
-# to tags actually absent from the registry: bumping one entry's version
-# rebuilds just that image, a bundle_version bump rebuilds all (every tag
-# moved), and a no-op manifest edit rebuilds nothing. A change to this
-# workflow alone builds nothing (it can't alter image contents).
-#
-# Two-stage build: shared base images (those referenced via `base:`) build and
-# push FIRST, then the tools that build FROM them (which pull the base from ghcr).
+# Human-triggered publication from the exact reviewed PR head, before merge.
 name: images
 
 on:
-  push:
-    branches: [main, caracal2-tests]
-    paths:
-      - "src/dosho/cargo/**"
-      - "src/dosho/images.yaml"
-      - ".github/workflows/images.yml"
   workflow_dispatch:
     inputs:
-      image:
-        description: "Image KEY to build (blank = all build: images)"
-        required: false
-        default: ""
-      force:
-        description: "Overwrite an already-published tag"
+      pr_number:
+        description: "Open, non-draft PR targeting main"
+        required: true
+        type: string
+      head_sha:
+        description: "Exact 40-character PR head SHA (dispatch on main)"
+        required: true
+        type: string
+      override_unreviewed:
+        description: "Admin only: allow missing approvals; checks must still pass"
         type: boolean
         default: false
-  schedule:
-    - cron: "0 6 * * 1" # Mondays 06:00 UTC -- verify images are still present
 
 permissions:
   contents: read
-  packages: write
+  actions: read
+  checks: read
+  statuses: read
+  pull-requests: read
+
+concurrency:
+  group: image-publication
+  cancel-in-progress: false
+
+env:
+  PR_NUMBER: ${{ inputs.pr_number }}
+  HEAD_SHA: ${{ inputs.head_sha }}
+  OVERRIDE_UNREVIEWED: ${{ inputs.override_unreviewed }}
+  CANDIDATE_ROOT: ../candidate
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    working-directory: trusted
 
 jobs:
-  # Split the build: images into base images (build first) and tools (build after).
   discover:
-    if: github.event_name != 'schedule'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       bases: ${{ steps.plan.outputs.bases }}
@@ -56,102 +49,114 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0 # need history to diff before..after for changed-image selection
-      - uses: astral-sh/setup-uv@v7
-      # --missing-only inspects registry tags; log in (anonymous works for
-      # public packages but is rate-limited).
-      - uses: docker/login-action@v4
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v7
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ inputs.head_sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Require approved PR head and successful checks
+        run: python3 scripts/image_publish_gate.py
+      - uses: astral-sh/setup-uv@v7
+      - uses: docker/setup-buildx-action@v3
+      # Public registry reads need no GHCR login or package write permission.
       - id: plan
-        env:
-          BEFORE: ${{ github.event.before }}
-          AFTER: ${{ github.event.after }}
         run: |
-          if [ -n "${{ github.event.inputs.image }}" ]; then
-            bases='[]'
-            tools='["${{ github.event.inputs.image }}"]'
-          else
-            args=""
-            # On an ordinary push (not a first push / force-push we can't diff),
-            # restrict the plan to the files the push actually changed.
-            if [ "${{ github.event_name }}" = "push" ] \
-               && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
-               && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-              for f in $(git diff --name-only "$BEFORE" "$AFTER"); do
-                args="$args --changed $f"
-              done
-            fi
-            plan="$(uv run dosho images build-plan --missing-only $args)"
-            bases="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["bases"]))')"
-            tools="$(echo "$plan" | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin)["tools"]))')"
-          fi
-          echo "bases=$bases" >> "$GITHUB_OUTPUT"
-          echo "tools=$tools" >> "$GITHUB_OUTPUT"
-          echo "bases: $bases | tools: $tools"
+          plan="$(uv run --locked dosho images --source-root ../candidate build-plan --missing-only)"
+          echo "$plan" | python3 -c 'import json,os,sys; p=json.load(sys.stdin); f=open(os.environ["GITHUB_OUTPUT"], "a"); f.write("bases="+json.dumps(p["bases"])+"\ntools="+json.dumps(p["tools"])+"\n")'
 
   build-base:
     needs: discover
     if: needs.discover.outputs.bases != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      statuses: read
+      pull-requests: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.discover.outputs.bases) }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.head_sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Require approved PR head and successful checks
+        run: python3 scripts/image_publish_gate.py
       - uses: astral-sh/setup-uv@v7
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: build + push base
+      - name: Build and push
+        env:
+          IMAGE: ${{ matrix.image }}
         run: |
-          flags="--push"
-          if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
-          uv run dosho images build "${{ matrix.image }}" $flags
+          # Stage every base platform; revalidate separately before the release manifest.
+          flags="--push --sequential-platforms --prune-between-platforms"
+          uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags
 
   build-tools:
     needs: [discover, build-base]
-    # run after the base(s); a skipped build-base (no bases changed) is fine.
-    # `discover.result == 'success'` is load-bearing, not belt-and-braces: on
-    # the weekly schedule `discover` is skipped, so its `tools` output is the
-    # empty string -- and `always()` overrides skip-propagation, so without this
-    # the `!= '[]'` test passes, this job starts with an empty matrix, and the
-    # whole run is marked failed even though `verify` passed.
-    if: always() && needs.discover.result == 'success' && needs.discover.outputs.tools != '[]' && needs.build-base.result != 'failure' && !cancelled()
+    if: always() && !cancelled() && needs.discover.result == 'success' && needs.build-base.result != 'failure' && needs.build-base.result != 'cancelled' && needs.discover.outputs.tools != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      statuses: read
+      pull-requests: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.discover.outputs.tools) }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.head_sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Require approved PR head and successful checks
+        run: python3 scripts/image_publish_gate.py
       - uses: astral-sh/setup-uv@v7
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: build + push tool
+      - name: Build and push
+        env:
+          IMAGE: ${{ matrix.image }}
         run: |
           flags="--push"
-          if [ "${{ github.event.inputs.force }}" = "true" ]; then flags="$flags --force"; fi
-          uv run dosho images build "${{ matrix.image }}" $flags
-
-  # Scheduled health check: every build: image's tag must still be in the registry.
-  verify:
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - run: uv run dosho images verify
+          if [ "$IMAGE" != "CASA6" ]; then
+            flags="$flags --sequential-platforms --prune-between-platforms"
+          fi
+          uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags

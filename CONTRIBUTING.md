@@ -134,8 +134,66 @@ CI builds with `-W`, so a warning is a failure.
 3. Push and open a PR against `main`. Reference any related issue
    (e.g. "Closes #12").
 4. **CI must be green.** The `test` job runs the suite and lint across Python
-   3.11 and 3.12 — that's the merge gate.
+   3.11 and 3.12, and the docs job must pass.
    `publish.yml` reuses that same workflow before it uploads.
+
+### Publishing container images before merge
+
+Image publication is a separate human action. Pushes and merges do not publish
+release images. Wait for PR reviews and checks, mark the PR ready for review,
+and dispatch the existing `images.yml` workflow **on protected `main`**:
+
+```bash
+gh workflow run images.yml --ref main \
+  -f pr_number=YOUR_PR_NUMBER -f head_sha=FULL_40_CHARACTER_HEAD_SHA \
+  -f override_unreviewed=false
+```
+
+The Actions UI offers the same inputs. The publisher must be present on
+protected `main` before dispatch. Image PRs can publish before merge by
+dispatching the trusted workflow on `main` with the candidate PR's exact
+head SHA.
+The trusted workflow, gate and CLI are pinned to that dispatch's `main` SHA.
+A separate candidate checkout supplies only the YAML manifest, Dockerfiles and
+build contexts. Candidate Python, workflows and dependency files never run on
+the credential-bearing host. A new PR commit requires a new dispatch after its
+reviews and checks pass. A rerun by a different actor is rejected; that human
+should make a fresh dispatch.
+
+A run fails before any GHCR login if the dispatcher is not a human repository
+collaborator with write access, the PR is a fork, closed, draft, conflicted,
+targets another branch, or its head moves. Dispatching from a candidate branch
+is rejected; the workflow must run on `main`. GitHub's `reviewDecision` must be
+`APPROVED`, including configured reviewer counts, code owners and stale review
+rules. A repository administrator may set `override_unreviewed=true` to allow
+`REVIEW_REQUIRED` (including partial approvals); this never overrides
+`CHANGES_REQUESTED`, unknown review state, failed checks or pending checks.
+
+The gate independently requires a successful `.github/workflows/ci.yml`
+pull-request run for this exact PR/head and successful `test (3.11)`,
+`test (3.12)` and `docs` jobs. It also checks the latest other workflow runs,
+check runs and commit status contexts for that SHA; older successes cannot hide
+new failures or pending reruns. Publisher workflow runs and their check suites
+are excluded so a failed publication can be retried. Skipped, neutral, unknown
+and API-error results fail closed.
+This explicit publication gate applies even when the branch ruleset has no
+required CI contexts. Unrelated manual or dev workflows need not be triggered.
+
+Each publishing job repeats the gate and checkout SHA checks before GHCR login.
+The trusted CLI validates candidate path containment (including symlink escapes),
+release names/tags and the fixed `ghcr.io/shinobi-dosho` namespace; deployment
+image overrides do not affect its plan or builds. The trusted gate runs again
+before every registry-writing command, including each staged platform push and
+final manifest creation. A change during an already running `buildx --push`
+command cannot stop the exact internal registry write; revalidation happens
+immediately before launching that command. `build-plan --missing-only` selects
+absent release tags, builds bases before tools and skips existing tags. All bases
+stage their platforms sequentially, so the final release manifest has a separate
+gate after the builds complete. Tools retain sequential build/prune settings
+with the single-platform CASA6 exception. Runs are serialized without
+cancelling a publisher already running. The separate `images-verify.yml`
+retains Monday registry checks; `images-dev.yml` and PyPI's `publish.yml` have
+their own release processes.
 
 ### Commit messages
 
