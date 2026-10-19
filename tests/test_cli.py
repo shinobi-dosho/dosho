@@ -2,6 +2,7 @@
 
 import json
 import re
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -508,6 +509,60 @@ def test_dev_keys_are_a_subset_of_build_keys():
     all_keys = json.loads(CliRunner().invoke(cli.main, ["images", "build-keys"]).output)
     assert dev and set(dev) <= set(all_keys)
     assert all("dev" in _images.manifest["images"][k] for k in dev)
+
+
+def test_dev_multiarch_push_reports_the_exact_buildx_index_digest(monkeypatch):
+    calls = []
+    digest = "sha256:" + "a" * 64
+
+    def run(argv, **kwargs):
+        calls.append(argv)
+        if "--metadata-file" in argv:
+            path = Path(argv[argv.index("--metadata-file") + 1])
+            path.write_text(json.dumps({"containerimage.descriptor": {"digest": digest}}))
+
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
+    monkeypatch.setattr(cli, "_run", run)
+    result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dev", "--push"])
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 1
+    assert calls[0][:5] == ["docker", "buildx", "build", "--metadata-file", calls[0][4]]
+    assert "--push" in calls[0]
+    assert f"pin this digest, not the tag: ghcr.io/shinobi-dosho/simms@{digest}" in result.output
+
+
+def test_dev_sequential_multiarch_push_reports_manifest_creation_digest(monkeypatch):
+    calls = []
+    digest = "sha256:" + "b" * 64
+
+    def run(argv, **kwargs):
+        calls.append(argv)
+        if "--metadata-file" in argv:
+            path = Path(argv[argv.index("--metadata-file") + 1])
+            path.write_text(json.dumps({"containerimage.descriptor": {"digest": digest}}))
+
+    monkeypatch.setattr(cli, "_image_has_platforms", lambda tag, platforms: True)
+    monkeypatch.setattr(cli, "_run", run)
+    result = CliRunner().invoke(
+        cli.main, ["images", "build", "DDFACET", "--dev", "--push", "--sequential-platforms"]
+    )
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 3
+    assert calls[-1][:5] == ["docker", "buildx", "imagetools", "create", "--metadata-file"]
+    assert all("--metadata-file" not in argv for argv in calls[:-1])
+    assert f"pin this digest, not the tag: ghcr.io/shinobi-dosho/ddfacet@{digest}" in result.output
+
+
+def test_dev_multiarch_push_fails_if_buildx_omits_digest(monkeypatch):
+    def run(argv, **kwargs):
+        if "--metadata-file" in argv:
+            path = Path(argv[argv.index("--metadata-file") + 1])
+            path.write_text("{}")
+
+    monkeypatch.setattr(cli, "_run", run)
+    result = CliRunner().invoke(cli.main, ["images", "build", "SIMMS", "--dev", "--push"])
+    assert result.exit_code != 0
+    assert "Buildx did not report a digest" in result.output
 
 
 def test_dev_single_platform_push_is_rejected_for_multiarch_image(monkeypatch):

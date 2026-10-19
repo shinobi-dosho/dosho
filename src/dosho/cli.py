@@ -24,6 +24,7 @@ import json
 import re
 import shlex
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -258,6 +259,22 @@ def _digest(tag: str) -> str | None:
     return proc.stdout.strip() or None if proc.returncode == 0 else None
 
 
+def _run_with_metadata(argv: list[str], tag: str, **kwargs: Any) -> str:
+    """Run a Buildx registry write and capture its exact published digest."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = Path(tmpdir) / "metadata.json"
+        offset = 4 if argv[:4] == ["docker", "buildx", "imagetools", "create"] else 3
+        _run([*argv[:offset], "--metadata-file", str(path), *argv[offset:]], **kwargs)
+        try:
+            metadata = json.loads(path.read_text())
+            digest = metadata["containerimage.descriptor"]["digest"]
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise click.ClickException(f"Buildx did not report a digest for {tag}") from exc
+    if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+        raise click.ClickException(f"Buildx reported an invalid digest for {tag}: {digest!r}")
+    return f"{tag.rsplit(':', 1)[0]}@{digest}"
+
+
 _OPTIONAL_TEMPLATE_VARS = ("pre_install", "post_install", "extra_deps", "pip_install_flags")
 
 
@@ -418,7 +435,11 @@ def images_build(
                 staged_tags.append(staged)
                 if prune_between_platforms and index < len(platforms) - 1:
                     _run(["docker", "buildx", "prune", "--all", "--force"])
-            _run(["docker", "buildx", "imagetools", "create", "-t", tag, *staged_tags])
+            create_argv = ["docker", "buildx", "imagetools", "create", "-t", tag, *staged_tags]
+            if dev:
+                published_digest = _run_with_metadata(create_argv, tag)
+            else:
+                _run(create_argv)
         else:
             build_argv = [
                 "docker",
@@ -437,10 +458,17 @@ def images_build(
             if network:
                 build_argv += ["--network", network]
             build_argv.append(str(context))
-            _run(build_argv, input=dockerfile.encode())
+            if dev:
+                published_digest = _run_with_metadata(build_argv, tag, input=dockerfile.encode())
+            else:
+                _run(build_argv, input=dockerfile.encode())
         if not _image_has_platforms(tag, platforms):
             raise click.ClickException(f"published {tag} lacks a declared platform")
         click.echo(click.style(f"built and pushed {tag} ({', '.join(platforms)})", fg="green"))
+        if dev:
+            click.echo(
+                click.style(f"pin this digest, not the tag: {published_digest}", fg="yellow")
+            )
         return
 
     build_argv = ["docker", "build", "-t", tag, "-f", "-"]
