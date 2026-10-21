@@ -1636,7 +1636,7 @@ cabs:
     # Source: DDFacet/Imager/ClassDeconvMachine.py at 2fe05ab4.
     outputs:
       dirty:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         family:
           coordinates:
             representation: str
@@ -1667,7 +1667,7 @@ cabs:
               flux_scale: intrinsic
             when: *dirty_id001
       restored:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         family:
           coordinates:
             representation: str
@@ -1711,7 +1711,7 @@ cabs:
               flux_scale: mixed
             when: *restored_id001
       model:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         family:
           coordinates:
             representation: str
@@ -1740,7 +1740,7 @@ cabs:
               flux_scale: intrinsic
             when: *model_id001
       residual:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         family:
           coordinates:
             representation: str
@@ -1814,7 +1814,7 @@ cabs:
             captures:
               cycle: int
       psf:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         family:
           coordinates:
             representation: str

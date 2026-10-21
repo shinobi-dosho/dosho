@@ -648,7 +648,7 @@ cabs:
             - path: '{prefix}-sources.txt'
               when: {predict: [false], dry_run: [false], save_source_list: [true]}
       continued_beam_model:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Existing beam-corrected model files read and updated in continuation mode.
         family:
           coordinates: {time: int, frequency: int, polarization: str, component: str}
@@ -700,7 +700,7 @@ cabs:
               axes: *beam_read_imaginary_axes
               accept_existing: true
       continued_facet_beam_model:
-        dtype: ProductFamily[File]
+        dtype: ProductFamily[FITSImage]
         info: Existing beam-corrected model files read and updated in continuation mode.
         family:
           coordinates: {time: int, frequency: int, polarization: str, component: str}
