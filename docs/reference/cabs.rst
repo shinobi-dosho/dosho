@@ -11749,8 +11749,9 @@ Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simm
 simms-skysim
 ------------
 
-Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
+Predict sky-model visibilities and optional seeded thermal noise into an MS.
 
+:Command: ``simms skysim``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0`` (``SIMMS`` 3.0.2-multiarch1, build)
 :Source: https://github.com/shinobi-dosho/simms
 
@@ -11767,159 +11768,163 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
    * - ``ms``
      - ``MSv2``
      - *required*
-     - Measurement set.
+     - \-
    * - ``ascii_sky``
      - ``Path | None``
      - ``None``
-     - Catalogue of sources. See the documentation for accepted units.
+     - \-
    * - ``fits_sky``
      - ``Path | None``
      - ``None``
-     - FITS file (or directory of Stokes cubes) containing the sky model.
+     - \-
    * - ``wsclean_sky``
      - ``Path | None``
      - ``None``
-     - WSClean component list (point and Gaussian components, Stokes I).
+     - \-
    * - ``fits_sky_interp``
-     - ``Literal['nearest', 'linear', 'cubic']``
+     - ``Literal['nearest', 'linear', 'cubic'] | None``
      - ``'linear'``
-     - Interpolation method when the MS and FITS frequency grids do not match and the cube is kept.
+     - \-
    * - ``polarisation``
-     - ``bool``
+     - ``Literal[True] | None``
      - ``True``
-     - Simulate all available Stokes parameters. If false, only Stokes I.
+     - \-
+   * - ``no_polarisation``
+     - ``bool | None``
+     - ``False``
+     - \-
    * - ``pol_basis``
-     - ``Literal['linear', 'circular']``
+     - ``Literal['linear', 'circular'] | None``
      - ``'linear'``
-     - Polarization basis for the simulation.
+     - \-
    * - ``pixel_tol``
-     - ``float``
+     - ``float | None``
      - ``1e-07``
-     - Minimum brightness for a pixel to be considered in direct Fourier transform.
+     - \-
    * - ``fits_spectrum``
-     - ``Literal['auto', 'flat', 'poly', 'cube']``
+     - ``Literal['auto', 'flat', 'poly', 'cube'] | None``
      - ``'auto'``
-     - How the FITS sky model varies with frequency.
+     - \-
    * - ``fits_spi``
      - ``list[Path] | None``
      - ``None``
-     - Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
+     - \-
    * - ``fits_ref_freq``
      - ``float | None``
      - ``None``
-     - Reference frequency (Hz) of an analytic FITS spectrum. Defaults to the MS band centre.
+     - \-
    * - ``fits_spectrum_order``
-     - ``int``
+     - ``int | None``
      - ``2``
-     - Order of the fitted log-polynomial spectrum. 1 is a plain spectral index.
+     - \-
    * - ``predict_backend``
-     - ``Literal['auto', 'dft', 'fft', 'perchan']``
+     - ``Literal['auto', 'dft', 'fft', 'perchan'] | None``
      - ``'auto'``
-     - Backend for FITS sky model prediction.
+     - \-
    * - ``fft_precision``
-     - ``Literal['single', 'double']``
+     - ``Literal['single', 'double'] | None``
      - ``'double'``
-     - Precision of the FFT calculation.
+     - \-
    * - ``do_wstacking``
-     - ``bool``
+     - ``Literal[True] | None``
      - ``True``
-     - Whether to use w-stacking for FFT-based visibility prediction.
+     - \-
+   * - ``no_do_wstacking``
+     - ``bool | None``
+     - ``False``
+     - \-
    * - ``ascii_delimiter``
      - ``str | None``
      - ``None``
-     - Delimiter used in the ascii-sky.
+     - \-
    * - ``column``
-     - ``str``
+     - ``str | None``
      - ``'DATA'``
-     - Data column for simulation.
+     - \-
    * - ``nworkers``
-     - ``int``
+     - ``int | None``
      - ``4``
-     - Number of workers (one per CPU).
+     - \-
    * - ``row_chunks``
-     - ``int``
+     - ``int | None``
      - ``10000``
-     - Maximum number of rows per chunk. Controls the row-wise task/memory granularity; the effective size is reduced when needed so every worker gets several chunks.
+     - \-
    * - ``chan_chunks``
      - ``int | None``
      - ``None``
-     - Number of channels per chunk. Defaults to all channels in one chunk.
+     - \-
    * - ``primary_beam``
      - ``Path | None``
      - ``None``
-     - Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when --beam-jones full is selected.
+     - \-
    * - ``beam_band``
-     - ``Literal['UHF', 'L']``
+     - ``Literal['UHF', 'L'] | None``
      - ``'L'``
-     - Default band for JimBeam entries that omit an explicit model/CSV.
+     - \-
    * - ``beam_pa_step``
-     - ``float``
+     - ``float | None``
      - ``1.0``
-     - Spacing (degrees) of the parallactic-angle grid the beam is sampled on.
+     - \-
    * - ``beam_grid_max_gib``
-     - ``float``
+     - ``float | None``
      - ``4.0``
-     - Hard ceiling (GiB) on the sampled beam grid held in memory for the whole run.
+     - \-
    * - ``beam_jones``
-     - ``Literal['diagonal', 'full']``
+     - ``Literal['diagonal', 'full'] | None``
      - ``'diagonal'``
-     - Primary-beam application: per-feed voltage or full 2x2 E-Jones.
+     - \-
    * - ``fits_beam_mode``
-     - ``Literal['aterm', 'average']``
+     - ``Literal['aterm', 'average'] | None``
      - ``'aterm'``
-     - Primary-beam handling for the FITS-image path: 'aterm' applies exact per-antenna a-terms in the image domain (time- and frequency-interpolated, heterogeneity-aware); 'average' multiplies the sky by a single PA-averaged power beam (legacy approximation).
+     - \-
    * - ``aterm_freq_tol``
-     - ``float``
+     - ``float | None``
      - ``0.001``
-     - Largest allowed error (in voltage-beam units, beam peak ~1) of the a-term's linear-in-frequency interpolation between knot channels. Smaller means more frequency knots; 0 or negative samples the beam at every channel.
+     - \-
    * - ``telescope_name_column``
-     - ``str``
+     - ``str | None``
      - ``'TELESCOPE_NAME'``
-     - ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
+     - \-
    * - ``beam_l_axis``
-     - ``Literal['-X', 'X']``
+     - ``Literal['-X', 'X'] | None``
      - ``'-X'``
-     - Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSLAxis.
+     - \-
    * - ``beam_m_axis``
-     - ``Literal['Y', '-Y']``
+     - ``Literal['Y', '-Y'] | None``
      - ``'Y'``
-     - Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSMAxis.
+     - \-
    * - ``field_id``
-     - ``int``
+     - ``int | None``
      - ``0``
-     - Field ID.
+     - \-
    * - ``spw_id``
-     - ``int``
+     - ``int | None``
      - ``0``
-     - Spectral Window ID.
+     - \-
    * - ``sefd``
      - ``float | None``
      - ``None``
-     - Add noise using this SEFD value.
+     - \-
    * - ``seed``
      - ``int | None``
      - ``None``
-     - Random seed for the thermal noise. Omit for a non-reproducible run. The realisation also depends on the row chunking, which --nworkers feeds into, so reproducing a previous run needs the same --seed, --row-chunks and --nworkers.
+     - \-
    * - ``ascii_species``
      - ``Literal['bdsf_gaul', 'aegean', 'wsclean'] | None``
      - ``None``
-     - Non-simms sky model type.
+     - \-
    * - ``input_column``
      - ``str | None``
      - ``None``
-     - Input column (see option --mode).
+     - \-
    * - ``mode``
-     - ``Literal['sim', 'add', 'subtract']``
+     - ``Literal['sim', 'add', 'subtract'] | None``
      - ``'sim'``
-     - Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it.
+     - \-
    * - ``source_schema``
      - ``Path | None``
      - ``None``
-     - Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects.
-   * - ``log_level``
-     - ``str``
-     - ``'INFO'``
-     - Logging verbosity.
+     - \-
 
 **Outputs**
 
@@ -11937,8 +11942,9 @@ Predict model visibilities from a sky model into an MS (simms 3.0 skysim).
 simms-telsim
 ------------
 
-Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
+Create an empty Measurement Set from a telescope layout.
 
+:Command: ``simms telsim``
 :Image: ``ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0`` (``SIMMS`` 3.0.2-multiarch1, build)
 :Source: https://github.com/shinobi-dosho/simms
 
@@ -11955,111 +11961,107 @@ Create an empty Measurement Set from a telescope layout (simms 3.0 telsim).
    * - ``ms``
      - ``MSv2``
      - *required*
-     - Observation name/id/label
+     - \-
    * - ``telescope``
      - ``str``
      - *required*
-     - Name of telescope you are simulating.
+     - \-
    * - ``subarray_list``
      - ``list[str] | None``
      - ``None``
-     - Custom list of antennas to use, e.g. M000,M005,SKA009. Must be a subarray of the given telescope.
+     - \-
    * - ``subarray_range``
      - ``list[str | int] | None``
      - ``None``
-     - Custom range of antenna indices to use, e.g. start,end,step (step optional; end is inclusive when no step is given). Must be a subarray of the given telescope.
+     - \-
    * - ``subarray_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
-     - File listing custom antennas to use (antnames key, e.g. [M000,M005,SKA009]). Must be a subarray of the given telescope.
+     - \-
    * - ``telescope_name_column``
-     - ``str``
+     - ``str | None``
      - ``'TELESCOPE_NAME'``
-     - Name of the ANTENNA-table column that holds the per-antenna telescope/type label (used by skysim to select a primary beam).
+     - \-
    * - ``direction``
-     - ``str``
+     - ``str | None``
      - ``'J2000,1h0m0s,-31d0m0s'``
-     - Direction of field centre for MS, e.g. J2000,0h24m20s,-30d12m33s.
+     - \-
    * - ``starttime``
      - ``str | None``
      - ``None``
-     - Observation start time in UTC, e.g. '2024-03-14T06:15:10'. Default is the current machine time.
+     - \-
    * - ``startha``
      - ``float | None``
      - ``None``
-     - Hour angle at start of observation. Can be used instead of date.
+     - \-
    * - ``dtime``
-     - ``float``
+     - ``float | None``
      - ``8``
-     - Integration/exposure time in seconds.
+     - \-
    * - ``ntime``
-     - ``int``
+     - ``int | None``
      - ``10``
-     - Number of time slots for MS.
+     - \-
    * - ``startfreq``
-     - ``str | float``
+     - ``str | float | None``
      - ``'1420MHz'``
-     - Centre of first frequency channel, e.g 0.55GHz. Hertz assumed if no units.
+     - \-
    * - ``dfreq``
-     - ``str | float``
+     - ``str | float | None``
      - ``'1MHz'``
-     - Channel width, e.g 2.4MHz. Hertz assumed if no units.
+     - \-
    * - ``nchan``
-     - ``int``
+     - ``int | None``
      - ``9``
-     - Number of frequency channels.
+     - \-
    * - ``correlations``
-     - ``str``
+     - ``str | None``
      - ``'XX,YY'``
-     - Feed correlations for MS, e.g. 'XX,YY'.
+     - \-
    * - ``nworkers``
-     - ``int``
+     - ``int | None``
      - ``4``
-     - Number of workers (one per CPU).
+     - \-
    * - ``rowchunks``
-     - ``int``
+     - ``int | None``
      - ``50000``
-     - Number of chunks to divide the data into; more chunks improves computation speed.
+     - \-
    * - ``column``
-     - ``str``
+     - ``str | None``
      - ``'MODEL_DATA'``
-     - The column in which to corrupt the visibilities with noise.
+     - \-
    * - ``sefd``
      - ``float | None``
      - ``None``
-     - Antenna SEFD (one value for all frequencies).
+     - \-
    * - ``tsys_over_eta``
      - ``float | None``
      - ``None``
-     - Antenna system temperature over aperture efficiency (one value for all frequencies).
+     - \-
    * - ``sensitivity_file``
-     - ``str | None``
+     - ``Path | None``
      - ``None``
-     - File with antenna spectral sensitivity info. Keys: 'freq, tsys, sefd, tsys\_over\_eta'.
+     - \-
    * - ``low_source_limit``
      - ``float | None``
      - ``None``
-     - Minimum reliable source elevation (deg); data below this is flagged.
+     - \-
    * - ``high_source_limit``
      - ``float | None``
      - ``None``
-     - Maximum reliable source elevation (deg); data above this is flagged.
+     - \-
    * - ``freq_range``
      - ``str | None``
      - ``None``
-     - A list of start frequency, end frequency, and number of channels, e.g. startfreq,endfreq,nchan.
+     - \-
    * - ``smooth``
      - ``str | None``
      - ``None``
-     - SEFD fitting option when a sensitivity file is given: 'polyn' or 'spline'.
+     - \-
    * - ``fit_order``
      - ``int | None``
      - ``None``
-     - Fitting order used when approximating the MS-frequency SEFDs.
-   * - ``log_level``
-     - ``str``
-     - ``'INFO'``
-     - Logging verbosity.
+     - \-
 
 **Outputs**
 

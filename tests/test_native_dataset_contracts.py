@@ -36,11 +36,11 @@ def native_workspace(tmp_path, monkeypatch):
     return tmp_path
 
 
-def _simulate(root):
+def _simulate(root, name="input.ms"):
     ref = dosho.get("simms-telsim")
-    scope = ref.step.model_copy(update={"backend": "docker", "cache_dir": str(root / "cache")})
+    scope = ref.model_copy(update={"backend": "docker", "cache_dir": str(root / "cache")})
     params = {
-        "ms": root / "input.ms",
+        "ms": root / name,
         "telescope": "meerkat",
         "subarray_range": ["0", "3"],
         "direction": "J2000,0h24m20s,-30d12m33s",
@@ -50,9 +50,9 @@ def _simulate(root):
         "correlations": "XX,XY,YX,YY",
         "nworkers": 1,
     }
-    result = _dispatch(scope, ref.func, **params)
+    result = _dispatch(scope, None, **params)
     assert result.success, result.stderr
-    return scope, ref.func, params
+    return scope, None, params
 
 
 def test_native_example_create_mutate_restore_read_and_image(native_workspace):
@@ -115,6 +115,38 @@ def test_native_simms_create_refuses_an_existing_ms(native_workspace):
         _dispatch(scope, func, **{**params, "ntime": 5})
 
 
+def test_native_simms_cli_seeded_noise_is_reproducible(native_workspace):
+    """Run the real CLI and contracts twice; no tool code lives on the launcher."""
+    import numpy as np
+    from casacore.tables import table
+
+    root = native_workspace
+    sky = root / "sky.txt"
+    sky.write_text("#format: name ra dec stokes_i\ncentre 0h24m20s -30d12m33s 1\n")
+    cab = dosho.get("simms-skysim").model_copy(
+        update={"backend": "docker", "cache_dir": str(root / "cache")}
+    )
+    params = {"ascii_sky": sky, "sefd": 551, "seed": 20261023, "row_chunks": 16, "nworkers": 1}
+    arrays = []
+    for name in ["first.ms", "second.ms"]:
+        _, _, creation = _simulate(root, name)
+        result = _dispatch(cab, None, ms=creation["ms"], **params)
+        assert result.success, result.stderr
+        assert result.outputs.ms == creation["ms"]
+        with table(str(creation["ms"]), ack=False) as main:
+            arrays.append(main.getcol("DATA"))
+    assert arrays[0].size > 0 and np.isfinite(arrays[0]).all()
+    assert np.any(arrays[0].imag != 0)  # thermal noise, beyond the real point source
+    np.testing.assert_array_equal(*arrays)
+
+    # A changed seed must actually execute, rather than pass through cached data.
+    params["seed"] += 1
+    result = _dispatch(cab, None, ms=root / "second.ms", **params)
+    assert result.success, result.stderr
+    with table(str(root / "second.ms"), ack=False) as main:
+        assert not np.array_equal(main.getcol("DATA"), arrays[0])
+
+
 def test_native_incomplete_skysim_contract_fails_and_restores(native_workspace):
     import numpy as np
     from casacore.tables import table
@@ -127,7 +159,7 @@ def test_native_incomplete_skysim_contract_fails_and_restores(native_workspace):
     sky = root / "sky.txt"
     sky.write_text("#format: name ra dec stokes_i\ncentre 0h24m20s -30d12m33s 1\n")
     ref = dosho.get("simms-skysim")
-    wrong = ref.step.model_copy(
+    wrong = ref.model_copy(
         update={
             "backend": "docker",
             "cache_dir": str(root / "cache"),
@@ -142,7 +174,7 @@ def test_native_incomplete_skysim_contract_fails_and_restores(native_workspace):
         }
     )
     with pytest.raises(DatasetLifecycleViolationError, match=r"PROMISED|DATA|undeclared"):
-        _dispatch(wrong, ref.func, ms=ms, ascii_sky=sky, nworkers=1)
+        _dispatch(wrong, None, ms=ms, ascii_sky=sky, nworkers=1)
     with table(str(ms), ack=False) as main:
         np.testing.assert_array_equal(main.getcol("DATA"), original)
         assert "PROMISED" not in main.colnames()

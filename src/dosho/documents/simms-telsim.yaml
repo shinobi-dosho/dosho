@@ -1,0 +1,136 @@
+# Simms 3.0.2: checked against the public CLI in images.SIMMS.
+cabs:
+  simms-telsim:
+    command: simms telsim
+    image: SIMMS
+    policies:
+      repeat_list: true
+    info: Create an empty Measurement Set from a telescope layout.
+    inputs:
+      ms:
+        dtype: MSv2
+        required: true
+        info: Observation name/id/label
+        policies:
+          positional: true
+        write_path: true
+      telescope:
+        dtype: str
+        required: true
+        info: Name of telescope you are simulating.
+        abbreviation: tel
+      subarray-list:
+        dtype: List[str]
+        info: Custom list of antennas to use, e.g. M000,M005,SKA009. Must be a subarray of the given telescope.
+        abbreviation: sublist
+      subarray-range:
+        dtype: List[Union[str, int]]
+        info: Custom range of antenna indices to use, e.g. start,end,step (step optional; end is inclusive
+          when no step is given). Must be a subarray of the given telescope.
+        abbreviation: subrange
+      subarray-file:
+        dtype: File
+        info: File listing custom antennas to use (antnames key, e.g. [M000,M005,SKA009]). Must be a subarray
+          of the given telescope.
+        abbreviation: subfile
+      telescope-name-column:
+        dtype: str
+        default: TELESCOPE_NAME
+        info: Name of the ANTENNA-table column that holds the per-antenna telescope/type label (used by
+          skysim to select a primary beam).
+        abbreviation: tnc
+      direction:
+        dtype: str
+        default: J2000,1h0m0s,-31d0m0s
+        info: Direction of field centre for MS, e.g. J2000,0h24m20s,-30d12m33s.
+        abbreviation: dir
+      starttime:
+        dtype: str
+        info: Observation start time in UTC, e.g. '2024-03-14T06:15:10'. Default is the current machine
+          time.
+        abbreviation: st
+      startha:
+        dtype: float
+        info: Hour angle at start of observation. Can be used instead of date.
+        abbreviation: sha
+      dtime:
+        dtype: float
+        default: 8
+        info: Integration/exposure time in seconds.
+        abbreviation: dt
+      ntime:
+        dtype: int
+        default: 10
+        info: Number of time slots for MS.
+        abbreviation: nt
+      startfreq:
+        dtype: Union[str, float]
+        default: 1420MHz
+        info: Centre of first frequency channel, e.g 0.55GHz. Hertz assumed if no units.
+        abbreviation: sf
+      dfreq:
+        dtype: Union[str, float]
+        default: 1MHz
+        info: Channel width, e.g 2.4MHz. Hertz assumed if no units.
+        abbreviation: df
+      nchan:
+        dtype: int
+        default: 9
+        info: Number of frequency channels.
+        abbreviation: nc
+      correlations:
+        dtype: str
+        default: XX,YY
+        info: Feed correlations for MS, e.g. 'XX,YY'.
+        abbreviation: corr
+      nworkers:
+        dtype: int
+        default: 4
+        info: Number of workers (one per CPU).
+      rowchunks:
+        dtype: int
+        default: 50000
+        info: Number of chunks to divide the data into; more chunks improves computation speed.
+        abbreviation: rc
+      column:
+        dtype: str
+        default: MODEL_DATA
+        info: The column in which to corrupt the visibilities with noise.
+        abbreviation: col
+      sefd:
+        dtype: float
+        info: Antenna SEFD (one value for all frequencies).
+      tsys-over-eta:
+        dtype: float
+        info: Antenna system temperature over aperture efficiency (one value for all frequencies).
+        abbreviation: tos
+      sensitivity-file:
+        dtype: File
+        info: 'File with antenna spectral sensitivity info. Keys: ''freq, tsys, sefd, tsys_over_eta''.'
+        abbreviation: sfile
+      low-source-limit:
+        dtype: float
+        info: Minimum reliable source elevation (deg); data below this is flagged.
+        abbreviation: lsl
+      high-source-limit:
+        dtype: float
+        info: Maximum reliable source elevation (deg); data above this is flagged.
+        abbreviation: hsl
+      freq-range:
+        dtype: str
+        info: A list of start frequency, end frequency, and number of channels, e.g. startfreq,endfreq,nchan.
+        abbreviation: fr
+      smooth:
+        dtype: str
+        info: 'SEFD fitting option when a sensitivity file is given: ''polyn'' or ''spline''.'
+      fit-order:
+        dtype: int
+        info: Fitting order used when approximating the MS-frequency SEFDs.
+        abbreviation: fo
+    outputs:
+      ms:
+        dtype: MSv2
+        info: Created Measurement Set.
+    dataset_accesses:
+    - field: ms
+      mode: create

@@ -35,6 +35,70 @@ typed ``MSv2``, including the Python reader and WSClean's list input.
    * - WSClean
      - Conservative whole-dataset read/write access, with schema-change permission.
 
+Simms CLI cabs
+--------------
+
+``dosho.get("simms-telsim")`` and ``dosho.get("simms-skysim")`` return
+declarative binary cabs running ``simms telsim`` and ``simms skysim`` inside
+the configured ``SIMMS`` image. Neither imports Simms on the launcher nor
+captures a Python adapter for a detached worker. Both retain their strict
+``MSv2`` contracts and same-named ``ms`` passthrough output.
+
+The normal recipe interface supplies all simulation controls:
+
+.. code-block:: python
+
+   recipe.add_step(
+       "create", dosho.get("simms-telsim"),
+       ms=InputRef(field="ms"), telescope="meerkat",
+       starttime="2024-03-14T06:15:10", ntime=4, nchan=8,
+   )
+   recipe.add_step(
+       "populate", dosho.get("simms-skysim"),
+       ms=OutputRef(step="create", field="ms"), ascii_sky="sky.txt",
+       column="DATA", sefd=551, seed=20261023, row_chunks=128, nworkers=1,
+   )
+
+``seed``, ``row_chunks`` and ``nworkers`` become ``--seed``, ``--row-chunks``
+and ``--nworkers``. Reproducing thermal noise requires holding all three
+fixed. The telescope creator retains its distinct upstream ``rowchunks``
+input and ``--rowchunks`` spelling. List options such as ``subarray_range``
+and ``fits_spi`` repeat their CLI flag for each value.
+
+The historical imports ``from dosho.cabs import skysim, telsim`` and
+``from dosho.cabs.simms import skysim, telsim`` resolve to these same cabs.
+Callers that inspected pystep internals must use the cab's ``inputs_model``,
+``outputs_model`` and ``image`` directly instead of ``.step``; there is no
+``.func`` wrapper to call or bundle. ``simms-primary-beam`` retains its
+Python adapter.
+
+Two boolean controls follow the CLI's paired switches: set
+``no_polarisation=True`` for Stokes I only, or ``no_do_wstacking=True`` to
+disable w-stacking. Both default to false, preserving Simms' enabled
+defaults. The old positive inputs still accept ``True``; ``False`` is
+rejected so it cannot silently leave a feature enabled. Migrate old
+``polarisation=False`` and ``do_wstacking=False`` values to the negative
+inputs. ``log_level`` was a Python-wrapper input; it is not a subcommand
+option and is no longer exposed by these cabs. Simms uses its root CLI's
+default INFO logging.
+
+The standard frozen-worker route needs no Simms code roots. Strict MSv2
+submission still requires the framework's site-issued shared-storage
+qualification and container runtime on the workers. Catalogue regression
+tests freeze both cabs and exercise worker preparation and submission with
+test storage evidence and a fake ``sbatch``; this does not qualify a physical
+Slurm cluster. The opt-in native test also creates two independent MeerKAT
+MSs in the configured container and compares their seeded DATA arrays
+exactly, then checks that a changed seed gives different data:
+
+.. code-block:: console
+
+   DOSHO_NATIVE_DATASET_CONTRACTS=1 python -m pytest -q \
+     tests/test_native_dataset_contracts.py::test_native_simms_cli_seeded_noise_is_reproducible
+
+WSClean
+-------
+
 WSClean is deliberately a writer even for dirty imaging: other modes update
 MODEL_DATA or create IMAGING_WEIGHT. Naming either under ``create`` would
 incorrectly require it after every invocation. The whole-dataset contract

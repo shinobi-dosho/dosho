@@ -1,0 +1,252 @@
+# Simms 3.0.2: checked against the public CLI in images.SIMMS.
+cabs:
+  simms-skysim:
+    command: simms skysim
+    image: SIMMS
+    policies:
+      repeat_list: true
+    info: Predict sky-model visibilities and optional seeded thermal noise into an MS.
+    inputs:
+      ms:
+        dtype: MSv2
+        required: true
+        info: Measurement set.
+        policies:
+          positional: true
+        mutable: true
+      ascii-sky:
+        dtype: File
+        info: Catalogue of sources. See the documentation for accepted units.
+        abbreviation: as
+      fits-sky:
+        dtype: File
+        info: FITS file (or directory of Stokes cubes) containing the sky model.
+        abbreviation: fs
+      wsclean-sky:
+        dtype: File
+        info: WSClean component list (point and Gaussian components, Stokes I).
+        abbreviation: ws
+      fits-sky-interp:
+        dtype: str
+        default: linear
+        info: Interpolation method when the MS and FITS frequency grids do not match and the cube is kept.
+        abbreviation: fsi
+        choices:
+        - nearest
+        - linear
+        - cubic
+      # The CLI uses paired flags rather than '--polarisation false'. Keep
+      # True valid on the old positive input; reject False instead of silently
+      # ignoring it. The negative flag below disables the upstream default.
+      polarisation:
+        dtype: bool
+        default: true
+        choices: [true]
+        info: Enable polarised simulation. To disable it, set no_polarisation=true.
+        abbreviation: pol
+      no-polarisation:
+        dtype: bool
+        default: false
+        info: Disable polarised simulation (simulate Stokes I only).
+      pol-basis:
+        dtype: str
+        default: linear
+        info: Polarization basis for the simulation.
+        choices:
+        - linear
+        - circular
+      pixel-tol:
+        dtype: float
+        default: 1.0e-07
+        info: Minimum brightness for a pixel to be considered in direct Fourier transform.
+        abbreviation: pt
+      fits-spectrum:
+        dtype: str
+        default: auto
+        info: How the FITS sky model varies with frequency.
+        abbreviation: fsp
+        choices:
+        - auto
+        - flat
+        - poly
+        - cube
+      fits-spi:
+        dtype: List[File]
+        info: Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
+      fits-ref-freq:
+        dtype: float
+        info: Reference frequency (Hz) of an analytic FITS spectrum. Defaults to the MS band centre.
+        abbreviation: frf
+      fits-spectrum-order:
+        dtype: int
+        default: 2
+        info: Order of the fitted log-polynomial spectrum. 1 is a plain spectral index.
+      predict-backend:
+        dtype: str
+        default: auto
+        info: Backend for FITS sky model prediction.
+        choices:
+        - auto
+        - dft
+        - fft
+        - perchan
+      fft-precision:
+        dtype: str
+        default: double
+        info: Precision of the FFT calculation.
+        choices:
+        - single
+        - double
+      do-wstacking:
+        dtype: bool
+        default: true
+        choices: [true]
+        info: Enable w-stacking. To disable it, set no_do_wstacking=true.
+      no-do-wstacking:
+        dtype: bool
+        default: false
+        info: Disable w-stacking for FFT visibility prediction.
+      ascii-delimiter:
+        dtype: str
+        info: Delimiter used in the ascii-sky.
+        abbreviation: ad
+      column:
+        dtype: str
+        default: DATA
+        info: Data column for simulation.
+        abbreviation: col
+      nworkers:
+        dtype: int
+        default: 4
+        info: Number of workers (one per CPU).
+      row-chunks:
+        dtype: int
+        default: 10000
+        info: Maximum number of rows per chunk. Controls the row-wise task/memory granularity; the effective
+          size is reduced when needed so every worker gets several chunks.
+        abbreviation: rcs
+      chan-chunks:
+        dtype: int
+        info: Number of channels per chunk. Defaults to all channels in one chunk.
+        abbreviation: ccs
+      primary-beam:
+        dtype: File
+        info: 'Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam
+          model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME)
+          if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when
+          --beam-jones full is selected.'
+        abbreviation: pb
+      beam-band:
+        dtype: str
+        default: L
+        info: Default band for JimBeam entries that omit an explicit model/CSV.
+        choices:
+        - UHF
+        - L
+      beam-pa-step:
+        dtype: float
+        default: 1.0
+        info: Spacing (degrees) of the parallactic-angle grid the beam is sampled on.
+      beam-grid-max-gib:
+        dtype: float
+        default: 4.0
+        info: Hard ceiling (GiB) on the sampled beam grid held in memory for the whole run.
+      beam-jones:
+        dtype: str
+        default: diagonal
+        info: 'Primary-beam application: per-feed voltage or full 2x2 E-Jones.'
+        choices:
+        - diagonal
+        - full
+      fits-beam-mode:
+        dtype: str
+        default: aterm
+        info: 'Primary-beam handling for the FITS-image path: ''aterm'' applies exact per-antenna a-terms
+          in the image domain (time- and frequency-interpolated, heterogeneity-aware); ''average'' multiplies
+          the sky by a single PA-averaged power beam (legacy approximation).'
+        abbreviation: fbm
+        choices:
+        - aterm
+        - average
+      aterm-freq-tol:
+        dtype: float
+        default: 0.001
+        info: Largest allowed error (in voltage-beam units, beam peak ~1) of the a-term's linear-in-frequency
+          interpolation between knot channels. Smaller means more frequency knots; 0 or negative samples
+          the beam at every channel.
+        abbreviation: aft
+      telescope-name-column:
+        dtype: str
+        default: TELESCOPE_NAME
+        info: ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
+        abbreviation: tnc
+      beam-l-axis:
+        dtype: str
+        default: -X
+        info: Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; ignored for YAML
+          beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSLAxis.
+        abbreviation: bla
+        choices:
+        - -X
+        - X
+      beam-m-axis:
+        dtype: str
+        default: Y
+        info: Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; ignored for YAML
+          beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSMAxis.
+        abbreviation: bma
+        choices:
+        - Y
+        - -Y
+      field-id:
+        dtype: int
+        default: 0
+        info: Field ID.
+        abbreviation: fi
+      spw-id:
+        dtype: int
+        default: 0
+        info: Spectral Window ID.
+      sefd:
+        dtype: float
+        info: Add noise using this SEFD value.
+      seed:
+        dtype: int
+        info: Random seed for the thermal noise. Omit for a non-reproducible run. The realisation also
+          depends on the row chunking, which --nworkers feeds into, so reproducing a previous run needs
+          the same --seed, --row-chunks and --nworkers.
+      ascii-species:
+        dtype: str
+        info: Non-simms sky model type.
+        abbreviation: asp
+        choices:
+        - bdsf_gaul
+        - aegean
+        - wsclean
+      input-column:
+        dtype: str
+        info: Input column (see option --mode).
+        abbreviation: ic
+      mode:
+        dtype: str
+        default: sim
+        info: 'Simulation mode: ''sim'' creates a new column, ''add'' adds to it, ''subtract'' subtracts
+          from it.'
+        choices:
+        - sim
+        - add
+        - subtract
+      source-schema:
+        dtype: File
+        info: Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects.
+    outputs:
+      ms:
+        dtype: MSv2
+        info: Populated Measurement Set.
+    dataset_accesses:
+    - field: ms
+      mode: write
+      columns:
+        create:
+        - '{column}'
+      allow_schema_change: true
