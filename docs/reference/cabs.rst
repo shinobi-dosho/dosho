@@ -3756,19 +3756,19 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - Type
      - Description
    * - ``dirty``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``restored``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``model``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``residual``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``psf``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``dico_model``
      - ``ProductFamily[Path] | None``
@@ -15408,10 +15408,10 @@ WSClean imager (https://wsclean.readthedocs.io)
      - ``ProductFamily[Path] | None``
      - \-
    * - ``continued_beam_model``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
    * - ``continued_facet_beam_model``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[FITSImage] | None``
      - \-
 
 wvrgcal

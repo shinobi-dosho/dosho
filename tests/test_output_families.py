@@ -3,8 +3,11 @@
 from pathlib import Path
 
 import pytest
+from astropy.io import fits
+from shinobi import ProductFamily, ProductMember
 from shinobi.backends.recording import RecordingBackend
-from shinobi.exceptions import ParameterError
+from shinobi.exceptions import DatasetLifecycleViolationError, ParameterError
+from shinobi.fits_products import validate_fits_outputs
 from shinobi.steps import register_step_backend
 from shinobi.steps.dispatch import _dispatch
 
@@ -27,7 +30,13 @@ class _Products(RecordingBackend):
                 elif name.startswith("logs.qc/"):
                     path = root / inputs["output_log_directory"] / name.removeprefix("logs.qc/")
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(f"produced {len(self.calls)}")
+            if cab.name == "ddfacet" and path.suffix == ".fits":
+                hdu = fits.PrimaryHDU([[float(len(self.calls))]])
+                hdu.header["CTYPE1"] = "LINEAR"
+                hdu.header["CTYPE2"] = "LINEAR"
+                hdu.writeto(path, overwrite=True)
+            else:
+                path.write_text(f"produced {len(self.calls)}")
         return result
 
 
@@ -62,6 +71,22 @@ CASES = [
         "cubelets",
     ),
 ]
+
+
+@pytest.mark.parametrize("field", ["dirty", "restored", "model", "residual", "psf"])
+def test_ddfacet_image_families_reject_non_fits_members(tmp_path, field):
+    cab = dosho.get("ddfacet")
+    path = tmp_path / "invalid.fits"
+    path.write_text("not a FITS image")
+    outputs = cab.outputs_model(
+        **{
+            field: ProductFamily(
+                resolved=True, members=(ProductMember(coordinates={}, value=path),)
+            )
+        }
+    )
+    with pytest.raises(DatasetLifecycleViolationError, match=f"FITS output '{field}'"):
+        validate_fits_outputs(cab, outputs, workspace=tmp_path)
 
 
 @pytest.mark.parametrize("name,params,files,field", CASES, ids=[case[0] for case in CASES])

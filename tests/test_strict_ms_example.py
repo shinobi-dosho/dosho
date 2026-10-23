@@ -43,7 +43,15 @@ def test_example_plans_only_strict_ms_ports(no_dataset_closure, tmp_path):
             for field, declaration in dataset_declarations(model).items():
                 if declaration.kind is DatasetKind.FITS_IMAGE:
                     assert ref.name == "image" and model is scope.outputs_model
-                    assert field.split(".")[0] in {"image", "dirty", "residual", "model", "psf"}
+                    assert field.split(".")[0] in {
+                        "image",
+                        "dirty",
+                        "residual",
+                        "model",
+                        "psf",
+                        "continued_beam_model",
+                        "continued_facet_beam_model",
+                    }
                 else:
                     assert declaration.kind is DatasetKind.MEASUREMENT_SET_V2, field
     assert (

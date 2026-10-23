@@ -174,11 +174,29 @@ def test_fits_product_annotations_render_public_types(annotation, expected):
     assert cab_catalog._type_name(annotation) == expected
 
 
-def test_wsclean_image_families_render_public_fits_contracts():
+@pytest.mark.parametrize(
+    "cab_name,names",
+    [
+        (
+            "wsclean",
+            (
+                "image",
+                "dirty",
+                "residual",
+                "model",
+                "psf",
+                "continued_beam_model",
+                "continued_facet_beam_model",
+            ),
+        ),
+        ("ddfacet", ("dirty", "restored", "model", "residual", "psf")),
+    ],
+)
+def test_image_families_render_public_fits_contracts(cab_name, names):
     from dosho import registry
 
-    cab = registry.get("wsclean")
-    for name in ("image", "dirty", "residual", "model", "psf"):
+    cab = registry.get(cab_name)
+    for name in names:
         field = cab.outputs_model.model_fields[name]
         assert (
             cab_catalog._type_name(field.annotation, tuple(field.metadata))

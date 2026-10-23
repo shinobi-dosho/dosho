@@ -501,13 +501,23 @@ def test_family_controls_refuse_explicit_null(field):
         _cab().inputs_model(**_inputs(**{field: None}))
 
 
-def test_emitted_and_reused_image_contracts_refuse_invalid_fits(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "suffix,options",
+    [
+        ("model", {}),
+        ("model-pb", {"grid_with_beam": True}),
+        ("model-fpb", {"apply_facet_beam": True}),
+    ],
+)
+def test_emitted_and_reused_image_contracts_refuse_invalid_fits(
+    tmp_path, monkeypatch, suffix, options
+):
     from shinobi.exceptions import DatasetLifecycleViolationError
 
-    model = tmp_path / "deep-model.fits"
+    model = tmp_path / f"deep-{suffix}.fits"
     model.write_bytes(b"invalid reused model")
     with pytest.raises(DatasetLifecycleViolationError, match="FITS output"):
-        _dispatch_fixture(tmp_path, monkeypatch, [], continue_=True)
+        _dispatch_fixture(tmp_path, monkeypatch, [], continue_=True, **options)
 
 
 def test_corrupt_saved_member_invalidates_cache(tmp_path, monkeypatch):
