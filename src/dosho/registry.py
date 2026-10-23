@@ -74,7 +74,7 @@ def get_document(name: str) -> tuple[str, str]:
     if "document" not in entry:
         raise KeyError(name)
     _warn_if_experimental(name)
-    return "yaml_cab", (_DOCUMENT_DIR / entry["document"]).read_text()
+    return "dosho-cab-v1", (_DOCUMENT_DIR / entry["document"]).read_text()
 
 
 def loader_options() -> dict[str, Any]:
@@ -86,7 +86,14 @@ def loader_options() -> dict[str, Any]:
     """
     from dosho import images
 
-    return {"images": {k: getattr(images, k) for k in dir(images) if k.isupper()}}
+    return {
+        "package_roots": {"dosho": Path(__file__).parent},
+        "images": {
+            k: getattr(images, k)
+            for k in dir(images)
+            if k.isupper() and isinstance(getattr(images, k), str)
+        },
+    }
 
 
 _warned_experimental: set[str] = set()
@@ -119,47 +126,23 @@ def _warn_if_experimental(name: str) -> None:
     )
 
 
-def _required_shinobi() -> str | None:
-    """The `stimela-ninja` specifier dosho's own `run` extra declares, or None.
-
-    Read back off the installed metadata rather than restated here. The
-    version dosho needs is already written down once, in `pyproject.toml`;
-    a literal in this file would be a second place to bump and would rot
-    the way `__version__` did before it was derived (see `dosho/__init__`).
-
-    None when dosho is importable but not installed as a distribution -- a
-    source tree on PYTHONPATH -- in which case the caller falls back to
-    naming no version at all rather than guessing one.
-    """
-    try:
-        requirements = metadata.requires("dosho") or ()
-    except metadata.PackageNotFoundError:  # pragma: no cover -- uninstalled tree
-        return None
-    for requirement in requirements:
-        # 'stimela-ninja>=0.1.0b6; extra == "run"' -> "stimela-ninja>=0.1.0b6"
-        if requirement.startswith("stimela-ninja"):
-            return requirement.split(";")[0].strip()
-    return None  # pragma: no cover -- the extra is declared, so unreachable
+def _required_shinobi() -> str:
+    """The lazy execution adapter API supported by this catalogue generation."""
+    return "stimela-ninja>=0.2.0b1,<0.3"
 
 
 def _build_document():
-    """`shinobi.cabs.build_document`, or an error naming what to upgrade.
+    """Lazily access the execution adapter; base catalogue access stays independent.
 
-    Every document cab is built through this one function, and it landed in
-    stimela-ninja *after* 0.1.0b5 along with the rest of the yaml_cab loader.
-    Against an older shinobi a bare import leaves the caller holding
-    `ImportError: cannot import name 'build_document' from 'shinobi.cabs'` --
-    true, but it names a private import path instead of the thing to fix, and
-    it fires once per document cab rather than once.
-
-    Nothing constrains the pairing for them: shinobi is dosho's `run` extra,
-    so `pip install stimela-ninja dosho` installs both with no resolver edge
-    between them and no version error. This message is what stands in for
-    that edge, which is why it states the requirement rather than merely
-    reporting the failure.
+    The old dosho[run] extra is retired. Install stimela-ninja, which now
+    depends on dosho[validation], to obtain runnable Cab/StepRef objects.
     """
     try:
         from shinobi.cabs import build_document
+        from shinobi.loaders.yaml_cab import CAB_ADAPTER_CONTRACT_VERSION
+
+        if CAB_ADAPTER_CONTRACT_VERSION != 1:
+            raise ImportError("unsupported Dosho cab adapter contract")
     except ModuleNotFoundError as exc:
         # Only shinobi's own absence means "not installed". A missing
         # `shinobi.cabs` is a shinobi too old to have the module at all, which
@@ -168,7 +151,7 @@ def _build_document():
             raise _too_old(exc) from exc
         raise ModuleNotFoundError(
             "dosho's document cabs are built by shinobi, which is not installed. "
-            "Install it with `pip install 'dosho[run]'`. dosho's pysteps and its cab "
+            "Install it with `pip install 'stimela-ninja>=0.2.0b1,<0.3'`. dosho's cab "
             "documents (`dosho.list_cabs`, `dosho.registry.get_document`) do not need it."
         ) from exc
     except ImportError as exc:
@@ -184,7 +167,7 @@ def _too_old(exc: ImportError) -> ImportError:
     except metadata.PackageNotFoundError:  # pragma: no cover -- editable/source
         installed = "unknown"
     return ImportError(
-        f"dosho's document cabs need shinobi's yaml_cab loader "
+        f"dosho's document cabs need the versioned Dosho validation adapter "
         f"(`shinobi.cabs.build_document`), which stimela-ninja {installed} does not "
         f"have. dosho requires {required}; upgrade with `pip install -U '{required}'`. "
         f"dosho's pysteps are unaffected."

@@ -1,84 +1,41 @@
-Installation
-============
+Installation and the v0.2 boundary
+==================================
 
-Requirements
-------------
+The base catalogue requires Python 3.11+ and a YAML parser; it can list and
+read cab documents without Pydantic or Shinobi::
 
-* Python 3.11 or newer.
-* `shinobi <https://stimela-ninja.readthedocs.io/en/latest/installation.html>`_
-  (the ``stimela-ninja`` distribution, published on PyPI) -- **only** to
-  build and run a cab. It is the ``run`` extra, not a hard dependency;
-  see below.
+    pip install dosho
 
-From PyPI
----------
+Static schema validation and argv formatting are optional::
 
-.. code-block:: console
+    pip install "dosho[validation]>=0.2.0b1,<0.3"
 
-    $ pip install dosho          # the cab definitions: names, schemas, images
-    $ pip install "dosho[run]"   # ...plus stimela-ninja, to build and run them
+To construct runnable ``Cab``/``StepRef`` objects, install Shinobi::
 
-``dosho``'s definitions are data -- YAML documents shipped inside the
-package -- so a consumer that only wants to read, diff, pin or serve them
-needs nothing but a YAML parser, and ``import dosho`` loads no shinobi
-modules at all. Turning a definition into a runnable
-:class:`~shinobi.Cab` is what needs the framework, so ``dosho.cabs.<tool>``
-and :func:`dosho.get` require the ``run`` extra and say so if it is
-missing.
+    pip install "stimela-ninja>=0.2.0b1,<0.3"
 
-Either way the install registers ``dosho`` under shinobi's ``shinobi.cabs``
-entry-point group, so ``ninja cabs list``/``ninja cabs show`` (from
-``stimela-ninja``'s ``ninja`` CLI) pick it up automatically, with no
-further configuration.
+Shinobi now requires Dosho validation. The reverse ``dosho[run]`` extra has
+been retired. ``dosho.get``, ``dosho.cabs.<name>`` and ``dosho.define_cab``
+import the execution adapter lazily; catalogue and validation APIs do not.
 
-To track unreleased cabs, install from the repository instead:
+Development pairing
+-------------------
 
-.. code-block:: console
+Dosho's lock resolves independently of Shinobi. Integration tests require an
+explicit candidate checkout or wheel of Shinobi; it is deliberately absent
+from Dosho's dependency graph::
 
-    $ pip install "dosho[run] @ git+https://github.com/shinobi-dosho/dosho.git"
+    uv sync --locked --extra validation --group dev --group docs
+    uv build --wheel
+    uv build --wheel --directory /path/to/candidate/stimela-ninja
+    uv pip install --no-deps dist/dosho-0.2.0b1-py3-none-any.whl /path/to/candidate/stimela-ninja/dist/stimela_ninja-0.2.0b1-py3-none-any.whl
 
-For development
-----------------
+Install the framework's runtime dependencies as well (or install the wheel
+pair together without ``--no-deps`` into an isolated environment). Run tests
+and docs with ``uv run --no-sync`` so a subsequent sync cannot remove the
+explicit candidate. CI takes an explicit ``ninja-ref`` for the paired checkout
+and verifies each installed version against its own source checkout plus
+package origin. Independent core CI requires no companion framework; paired
+full tests/docs run only when a compatible ``ninja-ref`` is supplied.
 
-The project uses `uv <https://docs.astral.sh/uv/>`_. The test suite builds
-real cabs, so it needs the ``run`` extra:
-
-.. code-block:: console
-
-    $ git clone https://github.com/shinobi-dosho/dosho.git
-    $ cd dosho
-    $ uv sync --extra run --group dev
-
-    $ uv run pytest
-    $ uv run ruff check .
-
-    # enable the pre-commit hook, once per clone (see Contributing)
-    $ git config core.hooksPath .githooks
-
-The development group includes Astropy for real FITS product-validation tests.
-Pure catalog reading still needs no shinobi or astronomy runtime. Applications
-using the WSClean FITS contracts install shinobi's FITS extra explicitly:
-
-.. code-block:: console
-
-    $ pip install "stimela-ninja[fits]>=0.1.0"
-
-A development checkout deliberately resolves ``stimela-ninja`` from its
-``main`` branch rather than the last PyPI release --
-``[tool.uv.sources]`` in ``pyproject.toml`` says so -- which is what lets
-a cab use a schema feature the day it lands. ``uv.lock`` pins the commit,
-so it does not follow ``main`` on its own; refresh it with ``uv lock
---upgrade-package stimela-ninja``. The redirect is a ``uv``
-project-source, invisible to anyone installing ``dosho`` from PyPI.
-
-To build the documentation locally (the build imports ``dosho`` *and*
-shinobi, so it needs the ``run`` extra too):
-
-.. code-block:: console
-
-    $ uv sync --extra run --group docs
-    $ uv run sphinx-build -b html docs docs/_build/html
-    $ open docs/_build/html/index.html
-
-See :doc:`contributing` for the pre-commit hook, the cab-catalog
-freshness gate, and what CI checks.
+See :doc:`concepts/validation` for the ownership and migration contract.

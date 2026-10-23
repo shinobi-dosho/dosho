@@ -1,17 +1,3 @@
-# The registry's map of every cab this repo provides.
-#
-# Maintained by hand. It was generated while the Python cab definitions still
-# existed and could be introspected; they are the documents now, and deriving
-# this from them would be circular -- `attr` in particular is not derivable
-# (`msutils-addcol` is imported as `addcol`).
-#
-#   <registered name>:
-#     attr:         the name `dosho.cabs` exports it as
-#     document:     its file under documents/, for a binary cab
-#     experimental: why, if it is
-#
-# A pystep has no `document`: it is a Python function and stays one.
-# tests/test_documents.py checks this against the documents and the modules.
 cabs:
   accor:
     attr: accor
@@ -89,10 +75,9 @@ cabs:
   ddfacet:
     attr: ddfacet
     document: ddfacet.yaml
-    experimental: >-
-      DDFacet FITS representations and saved cycle ordinals are declared as product families.
-      Untagged upstream parameter types and supplementary products still need wider native
-      qualification; full multi-MS and beam modes are not qualified by the tiny-fixture tests.
+    experimental: DDFacet FITS representations and saved cycle ordinals are declared as product families.
+      Untagged upstream parameter types and supplementary products still need wider native qualification;
+      full multi-MS and beam modes are not qualified by the tiny-fixture tests.
   deconvolve:
     attr: deconvolve
     module: dosho.cabs.casatasks
@@ -217,10 +202,9 @@ cabs:
   killms:
     attr: killms
     document: killms.yaml
-    experimental: >-
-      killMS outputs are inventoried solution bundles with flat native CLI flags.
-      The native batch text-list/glob MS interface has no declared batch input contract;
-      solver, compression and beam modes need wider native qualification.
+    experimental: killMS outputs are inventoried solution bundles with flat native CLI flags. The native
+      batch text-list/glob MS interface has no declared batch input contract; solver, compression and
+      beam modes need wider native qualification.
   listobs:
     attr: listobs
     module: dosho.cabs.casatasks
@@ -474,3 +458,12 @@ cabs:
     attr: wvrgcal
     module: dosho.cabs.casatasks
     symbol: wvrgcal
+  wsclean-readonly:
+    attr: wsclean_readonly
+    document: wsclean-readonly.yaml
+  ddfacet-readonly:
+    attr: ddfacet_readonly
+    document: ddfacet-readonly.yaml
+  quartical-readonly:
+    attr: quartical_readonly
+    document: quartical-readonly.yaml

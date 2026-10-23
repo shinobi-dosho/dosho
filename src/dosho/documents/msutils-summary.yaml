@@ -7,6 +7,7 @@ cabs:
       which also reads MSv4.'
     inputs:
       ms:
+        writable: false
         dtype: MS
         required: true
         info: Measurement set to summarise

@@ -46,7 +46,7 @@ if [ ${#py[@]} -gt 0 ]; then
     #
     # --force-exclude: honour ruff's own excludes even though the filenames are
     # passed explicitly.
-    if ! output=$(uv run --quiet ruff check --force-exclude -- "${py[@]}" 2>&1); then
+    if ! output=$(uv run --no-sync --quiet ruff check --force-exclude -- "${py[@]}" 2>&1); then
         printf '%s\n' "$output" >&2
         cat >&2 <<'MSG'
 
@@ -61,7 +61,7 @@ MSG
 
     # --check rather than a rewrite: a hook that silently edits files leaves
     # you committing something you never saw, and the fix is one command.
-    if ! output=$(uv run --quiet ruff format --check --force-exclude -- "${py[@]}" 2>&1); then
+    if ! output=$(uv run --no-sync --quiet ruff format --check --force-exclude -- "${py[@]}" 2>&1); then
         printf '%s\n' "$output" >&2
         cat >&2 <<'MSG'
 
@@ -81,7 +81,7 @@ fi
 # when that changed anything; the git diff additionally catches a stale copy
 # that was staged while the working tree was already fresh.
 if printf '%s\n' "$staged" | grep -qE '^(src/dosho/|docs/_ext/cab_catalog\.py$)'; then
-    catalog_out=$(uv run --quiet python docs/_ext/cab_catalog.py 2>&1)
+    catalog_out=$(uv run --no-sync --quiet python docs/_ext/cab_catalog.py 2>&1)
     catalog_status=$?
 
     if [ $catalog_status -ne 0 ] || ! git diff --quiet -- docs/reference/cabs.rst; then

@@ -218,22 +218,12 @@ def test_no_input_mutability_declared_leaves_the_cab_byte_identical():
 
 
 def test_scratch_passes_through_to_the_cab():
-    from dosho._builder import _SCRATCH_SUPPORTED
-
     cab = define_cab("t", "t", "img:1", {"cache": ("str", False, None)}, scratch=["{cache}/*"])
-    if _SCRATCH_SUPPORTED:
-        assert cab.scratch == ["{cache}/*"]
+    assert cab.scratch == ["{cache}/*"]
 
 
-def test_scratch_on_an_unsupporting_shinobi_warns_rather_than_raising(monkeypatch):
-    """Raising would fire at `import dosho.cabs` and break the package for
-    anyone on a released shinobi, to guard against a degradation that is merely
-    the behaviour they already had. Loud, not fatal.
-    """
-    import dosho._builder as builder
+def test_python_path_defaults_remain_paths():
+    from pathlib import Path
 
-    monkeypatch.setattr(builder, "_SCRATCH_SUPPORTED", False)
-    monkeypatch.setattr(builder, "_scratch_warned", False)
-    with pytest.warns(UserWarning, match="does not support"):
-        cab = define_cab("t", "t", "img:1", {"cache": ("str", False, None)}, scratch=["{cache}/*"])
-    assert cab is not None  # still built
+    cab = define_cab("tool", "tool", "image", {"input": ("File", False, Path("input.fits"))})
+    assert cab.inputs_model().input == Path("input.fits")

@@ -1,13 +1,6 @@
-# Documentation build dependencies for Read the Docs.
-# Keep in sync with the `docs` dependency group in pyproject.toml.
-#
-# stimela-ninja is *not* listed here. The build needs it -- autodoc imports
-# shinobi and the cab_catalog extension builds every cab -- but the version it
-# needs is already stated once, in dosho's own `run` extra, so
-# `.readthedocs.yaml` installs `.[run]` rather than restating a pin here that
-# would rot independently. (Local dev resolves shinobi from its `main` branch
-# instead, via `[tool.uv.sources]`; that is a uv project-source and does not
-# apply to the pip install Read the Docs does.)
+# Documentation tooling and the explicit execution adapter for catalogue rendering.
+# For unreleased pair testing, install both local candidate wheels instead.
+stimela-ninja>=0.2.0b1,<0.3
 sphinx>=7.2
 furo>=2024.1
 sphinx-copybutton>=0.5

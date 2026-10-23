@@ -17,12 +17,12 @@ expression language, and no dtype coverage gaps -- see
 
 Because a document is inert data, ``import dosho`` needs no shinobi at
 all. Reading the catalogue is a plain install; *building* a cab from a
-definition is the ``run`` extra:
+definition is the ``validation`` extra plus an explicit Shinobi installation:
 
 .. code-block:: console
 
     $ pip install dosho          # the definitions: names, schemas, images
-    $ pip install "dosho[run]"   # ...plus stimela-ninja, to build and run them
+    $ pip install "stimela-ninja>=0.2.0b1,<0.3"   # ...plus stimela-ninja, to build and run them
 
 Know the tool at write-time? Import it directly:
 
@@ -63,6 +63,8 @@ generated from the live registry at build time.
    :caption: Concepts
 
    concepts/authoring
+   concepts/validation
+   concepts/read_only_access
    concepts/msv2_contracts
 
 .. toctree::

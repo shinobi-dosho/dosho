@@ -5,8 +5,18 @@ cabs:
     info: 'msutils flags list: list an MS''s saved flag versions'
     inputs:
       ms:
+        writable: false
         dtype: MS
         required: true
         info: Measurement set to list saved flag versions for
         policies:
           positional: true
+    derived_reads:
+      flagversions:
+        member: directory
+        family:
+          root: '{ms}.flagversions'
+          coordinates: {}
+          rules:
+            - path: '.'
+              required: false

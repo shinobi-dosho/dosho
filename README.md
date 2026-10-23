@@ -23,12 +23,12 @@ Citation information can be found in [CITATION.cff](CITATION.cff).
 
 ```
 pip install dosho          # the cab definitions: names, schemas, images
-pip install dosho[run]     # ...plus stimela-ninja, to build and run them
+pip install stimela-ninja     # ...plus stimela-ninja, to build and run them
 ```
 
 The definitions are data — YAML documents under `dosho/documents/`, readable
 without the framework. `dosho.cabs.<tool>` and `dosho.get(...)` turn one into a
-`Cab`, which needs the `run` extra.
+`Cab`, which needs the `validation` extra plus an explicit Shinobi installation.
 
 ## Usage
 

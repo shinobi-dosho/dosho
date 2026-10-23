@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dosho"
-version = "0.1.0"
+version = "0.2.0b1"
 description = "A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository"
 readme = "README.md"
 license = "Apache-2.0"
@@ -18,16 +18,14 @@ authors = [
 # nothing but a YAML parser, and `import dosho` loads zero shinobi modules
 # (tests/test_import_is_shinobi_free.py).
 #
-# Turning a definition into something runnable is what needs the framework, so
-# shinobi is the `run` extra rather than a hard dependency. `dosho.cabs.<tool>`
-# and `dosho.get(...)` both require it and say so if it is missing.
+# Optional validation compiles schemas and argv without the execution framework.
 dependencies = [
     "pyyaml>=6.0",
     "click>=8.1",
 ]
 
 [project.optional-dependencies]
-run = ["stimela-ninja>=0.1.0"]
+validation = ["pydantic>=2.14"]
 
 [dependency-groups]
 dev = [
@@ -43,29 +41,6 @@ docs = [
     "sphinx-copybutton>=0.5",
     "myst-parser>=2.0",
 ]
-
-# Dev-time source for stimela-ninja: this repo tracks shinobi's main branch
-# rather than the last PyPI release, so a cab can use a schema feature the day
-# it lands instead of waiting for a release. `Scope.scratch` and
-# `ParamMeta.path_prefix` both arrived this way.
-#
-# Safe to carry, unlike the redirect removed in #42 -- verified, not assumed.
-# uv honours `tool.uv.sources` only for path/workspace dependencies, never for
-# one resolved from a registry, so it is invisible to anyone consuming dosho
-# from PyPI. stimela-ninja's own `examples = ["dosho"]` group does exactly
-# that and still locks (68 packages resolved with this in place). What #42
-# actually broke was a *path* dependency on dosho, which is not how anything
-# depends on it today.
-#
-# The one consumer that installs dosho by path is stimela-ninja's dosho-watch
-# job. There this redirect does pull shinobi from git over the checkout under
-# test -- which that job already re-asserts and verifies afterwards
-# (stimela-ninja #73), for the same reason simms caused.
-#
-# Refresh with `uv lock --upgrade-package stimela-ninja`: the lock pins a
-# commit, so it does not follow main on its own.
-[tool.uv.sources]
-stimela-ninja = { git = "https://github.com/shinobi-dosho/stimela-ninja", branch = "main" }
 
 [project.urls]
 Homepage = "https://dosho.readthedocs.io"

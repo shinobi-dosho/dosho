@@ -36,8 +36,9 @@ enter a cab definition, **in any format**:
 - **An expression or substitution language** (`=IFSET(...)`,
   `{recipe.name}-{info.suffix}`). `ParamMeta.implicit` is plain `str.format`
   against a step's own validated inputs, and deliberately nothing more.
-- **Composition semantics needing their own resolver**, e.g. cult-cargo's
-  package-scoped `_include` chains.
+- **Executable composition.** Static `_include`/`_use` composition is owned
+  by Dosho and resolves package names only through caller-supplied filesystem
+  roots; it never imports packages.
 
 Do not over-read stimela-ninja's `AGENTS.md` here: its anti-YAML rule is scoped
 to the **recipe/orchestration layer** throughout -- "Stimela 2.0's YAML-*recipe*
@@ -175,7 +176,7 @@ A tool here is one of two things, and which one is not a matter of taste
 -- see the Core rule above. A **binary cab** (a real executable, argv-built
 and shelled out to) is a YAML document under `documents/`; a **pystep** (a
 Python-package function call with no standalone binary) is a decorated
-function under `cabs/`. Today: 129 tools, 63 documents and 66 pysteps.
+function under `cabs/`. The registry index records the current tool inventory.
 
 ```
 src/dosho/
@@ -290,16 +291,18 @@ Writing one:
   same name. A `List[MSv2]` writer declares an explicit `write` and is not
   `mutable`. A reader is neither -- shinobi reads mutability or a same-name
   output as a write and refuses a read contract that contradicts it
-  (`msutils-flags-backup`). An unrelated sidecar output does not turn the
-  MS reader into a writer.
+  (for example the guarded read-only imaging variants). An unrelated
+  sidecar output alone does not turn an MS reader into a writer.
 - Every table the tool changes is declared: a standard subtable as its own
   access (aoflagger's HISTORY row), an opaque keyword-linked one through
   `allow_subtable_change` on the MAIN access (aoflagger's `QUALITY_*`).
 - Shared sidecar history can be an owned `ProductFamily[DirectoryBundle]`
   output with `accept_existing: true`, which preserves earlier versions and
-  orders writers to the same directory. `msutils-flags-backup` owns
-  `{ms}.flagversions` while reading the MS. It keeps `cache: false` so every
-  invocation creates its requested version.
+  orders writers to the same directory. Flagversions backup and delete
+  additionally reserve the associated MS with `mode: read, exclusive: true`,
+  blocking every concurrent MS access while history changes. They keep the
+  MS read-only with no mutable marker or echo and `cache: false`. Exclusivity
+  grants no scientific mutation authority or sidecar rollback promise.
 
 ## Attribution: commit trailers yes, PR trailers no
 
@@ -357,3 +360,13 @@ Set host-side `TMPDIR` and cache paths to that directory when a tool may write
 large files. Do not place large temporary data in `/tmp` or `/scratch`:
 `/tmp` shares the root filesystem with Docker and can exhaust the space needed
 for image builds. Remove disposable data when the work is finished.
+
+## Cab ownership (v0.2.0b1)
+
+Dosho owns parameter schemas/validation, argument metadata, policies, patterns
+and validated-parameter-to-argv formatting. Shinobi depends on dosho[validation]
+and owns the declared framework types, DAG/wiring, scheduling, execution,
+filesystem enforcement, dataset lifecycle/recovery and caches. Generic schema
+algorithms belong in Dosho; Shinobi adapters supply trusted dtype bindings and
+validate inert framework declarations. Dosho validation must never import
+Shinobi. Base catalogue access needs neither Pydantic nor Shinobi.

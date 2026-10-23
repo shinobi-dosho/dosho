@@ -7,6 +7,7 @@ cabs:
       repeat_list: true
     inputs:
       ms:
+        writable: false
         dtype: MS
         required: true
         info: Measurement set to compute flag statistics for

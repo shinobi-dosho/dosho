@@ -58,8 +58,19 @@ CONTRACTS: dict[str, list[DatasetAccess]] = {
         )
     ],
     "msutils-flags-backup": [
-        DatasetAccess(field="ms", mode="read", columns=DatasetColumns(read=("FLAG", "FLAG_ROW")))
+        DatasetAccess(
+            field="ms",
+            mode="read",
+            exclusive=True,
+            columns=DatasetColumns(read=("FLAG", "FLAG_ROW")),
+        )
     ],
+    "msutils-flags-delete": [
+        DatasetAccess(field="ms", mode="read", exclusive=True, columns=DatasetColumns())
+    ],
+    "wsclean-readonly": [DatasetAccess(field="ms", mode="read")],
+    "ddfacet-readonly": [DatasetAccess(field="data_ms", mode="read")],
+    "quartical-readonly": [DatasetAccess(field="input_ms_path", mode="read")],
     "msutils-flags-restore": [DatasetAccess(field="ms", mode="write", columns=FLAGS)],
     "tricolour": [
         DatasetAccess(
@@ -86,7 +97,7 @@ CONTRACTS: dict[str, list[DatasetAccess]] = {
 }
 
 # Cabs that must never be skipped by the step cache (see the document).
-UNCACHED = {"msutils-flags-backup"}
+UNCACHED = {"msutils-flags-backup", "msutils-flags-delete"}
 
 
 def _scope(cab):
@@ -166,13 +177,9 @@ def test_a_mutable_field_cannot_declare_only_read():
         _load("msutils-flags-restore", text)
 
 
-def test_backup_cannot_become_mutable_while_it_declares_a_read():
-    text = _replace(
-        _document("msutils-flags-backup"),
-        "          positional: true\n",
-        "          positional: true\n        mutable: true\n",
-    )
-    with pytest.raises(CabLoadError, match="cannot declare only read"):
+def test_backup_exclusivity_does_not_grant_write_permission():
+    text = _replace(_document("msutils-flags-backup"), "mode: read", "mode: write")
+    with pytest.raises(CabLoadError, match="exclusive"):
         _load("msutils-flags-backup", text)
 
 
@@ -290,30 +297,17 @@ def test_a_strict_flagging_pipeline_plans_in_order(no_closure, tmp_path):
     # Nothing is wired step-to-step, so every edge below is an access hazard
     # shinobi inferred, each with the reason it gives.
     # The sidecar family reserves its exact path, not its parent directory, so
-    # backup stays a pure reader of the MS and the flagger after it is ordered
-    # by a write-after-read hazard.
+    # backup also reserves the associated MS exclusively: subsequent access
+    # waits even though the tool only mutates its attached history.
     assert plan.reasons == {
-        ("backup", "sim"): ("read-after-write: sim.ms, MAIN.FLAG",),
-        ("flag", "backup"): ("write-after-read: sim.ms, MAIN.FLAG",),
+        ("backup", "sim"): ("write-after-write: sim.ms, MAIN.FLAG",),
+        ("flag", "backup"): ("write-after-write: sim.ms, MAIN.FLAG",),
         ("restore", "flag"): ("write-after-write: sim.ms, MAIN.FLAG",),
         ("restore", "backup"): (f"read-after-write: {tmp_path / 'sim.ms.flagversions/flags.pre'}",),
     }
     names = plan.graph.names
     for child, parent in plan.reasons:
         assert names.index(parent) in plan.graph.deps[names.index(child)]
-
-
-def test_backup_with_its_old_output_is_a_contradictory_reader(no_closure, tmp_path):
-    """The reason backup lost its `ms` output: a same-named output is a
-    filesystem write, which a read contract contradicts."""
-    text = _replace(
-        _document("msutils-flags-backup"),
-        "    outputs:\n",
-        "    outputs:\n      ms:\n        dtype: MSv2\n",
-    )
-    backup = _load("msutils-flags-backup", text)
-    with pytest.raises(DatasetAccessError, match="declares READ access"):
-        plan_recipe_accesses(_pipeline(backup), {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
 
 
 def test_telsim_declared_as_a_reader_is_refused(no_closure, tmp_path):

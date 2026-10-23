@@ -15,7 +15,6 @@ from __future__ import annotations
 import pathlib
 
 import pytest
-import yaml
 from shinobi.steps.schema import Cab, StepRef
 
 import dosho
@@ -53,7 +52,10 @@ def test_every_declared_input_has_a_dtype(path: pathlib.Path):
     else, and it silently defaults to `str`. A document that lost one would
     load fine and mistype the parameter.
     """
-    body = yaml.safe_load(path.read_text())["cabs"][path.stem]
+    from dosho.registry import loader_options
+    from dosho.validation.compiler import load_file
+
+    body = load_file(path, **loader_options())[path.stem].document
     for section in ("inputs", "outputs"):
         for name, spec in (body.get(section) or {}).items():
             assert spec.get("dtype"), f"{path.stem}.{section}.{name} has no dtype"

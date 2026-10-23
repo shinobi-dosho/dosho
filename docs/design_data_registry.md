@@ -1,3 +1,6 @@
+> Historical design note. Its dependency direction is superseded by the approved
+> v0.2.0b1 boundary in [validation](concepts/validation.rst).
+
 # dosho as a data registry: static cabs, optional shinobi
 
 **Status:** v3 — **implemented; kept as the record of why.** The design

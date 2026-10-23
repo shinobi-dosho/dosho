@@ -42,32 +42,16 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
 ## Development setup
 
 The project uses [uv](https://docs.astral.sh/uv/). `stimela-ninja` is
-dosho's `run` extra rather than a hard dependency, and the test suite
-builds real cabs -- so a development sync needs `--extra run`:
-
-```bash
-git clone https://github.com/shinobi-dosho/dosho.git
-cd dosho
-uv sync --extra run --group dev
-uv run pytest
-uv run ruff check .
-
-# enable the repo's pre-commit hook (once per clone)
-git config core.hooksPath .githooks
-```
-
-A development checkout resolves `stimela-ninja` from its `main` branch
-rather than the last PyPI release -- `[tool.uv.sources]` in
-`pyproject.toml` says so, and explains why that is safe to carry -- which
-is what lets a cab use a schema feature the day it lands. `uv.lock` pins
-the commit, so it does not follow `main` on its own; refresh it with
-`uv lock --upgrade-package stimela-ninja`.
+an explicit candidate installation. Dosho's independent lock has no Shinobi
+or Git-source dependency. See [installation](https://dosho.readthedocs.io/en/latest/installation.html) for the
+candidate wheel-pair procedure. After installing the pair, use `uv run --no-sync`
+for integration tests and docs so sync does not remove the explicit adapter.
 
 ### The pre-commit hook
 
 Enabling it is the only setup step that is not `uv`'s job -- git will
 not let a repository turn on an executable hook by itself, which is why
-the `git config` above is manual; skip it and you simply get no hook.
+`git config core.hooksPath .githooks` is manual; skip it and you simply get no hook.
 
 `.githooks/pre-commit` is a tracked shell script (no `pre-commit`
 framework, no separate pinned tool universe), and does two things, each
@@ -83,7 +67,7 @@ only when the commit actually touches the relevant files:
    the commit if the committed copy was stale, so you never hit the CI
    staleness error after a schema change: `git add` the regenerated file
    and commit again. To refresh it by hand at any time:
-   `uv run python docs/_ext/cab_catalog.py`.
+   `uv run --no-sync python docs/_ext/cab_catalog.py`.
 
 Any other commit skips both in milliseconds. `git commit --no-verify`
 bypasses the hook when you genuinely need to.
@@ -91,7 +75,7 @@ bypasses the hook when you genuinely need to.
 ## Testing
 
 ```bash
-uv run pytest -q
+uv run --no-sync pytest -q
 ```
 
 Every ported tool's test round-trips a representative param set through
@@ -115,11 +99,12 @@ actually dispatch/execute them.
 
 The build imports both `dosho` and shinobi -- autodoc needs the first,
 the cab-catalog extension builds every cab with the second -- so it needs
-the `run` extra too:
+the `validation` extra plus an explicit Shinobi installation too:
 
 ```bash
-uv sync --extra run --group docs
-uv run sphinx-build -b html docs docs/_build/html
+uv sync --locked --extra validation --group docs
+# Install the explicit candidate pair as described in docs/installation.rst.
+uv run --no-sync sphinx-build -b html docs docs/_build/html
 open docs/_build/html/index.html
 ```
 
@@ -129,13 +114,15 @@ CI builds with `-W`, so a warning is a failure.
 
 1. Branch off `main` and keep PRs **small and focused** — one logical change per
    PR is much easier to review.
-2. Make sure `uv run pytest -q` and `uv run ruff check .` pass locally, and that docs build if you
+2. Make sure `uv run --no-sync pytest -q` and `uv run ruff check .` pass locally, and that docs build if you
    touched public API.
 3. Push and open a PR against `main`. Reference any related issue
    (e.g. "Closes #12").
-4. **CI must be green.** The `test` job runs the suite and lint across Python
-   3.11 and 3.12, and the docs job must pass.
-   `publish.yml` reuses that same workflow before it uploads.
+4. **CI must be green.** The independent `core` job tests catalogue/validation
+   and lint without Shinobi, so Dosho can release first. Invoke CI with an
+   explicit `ninja-ref` to run the full paired suite on Python 3.11/3.12 and
+   render docs. Record that paired evidence for changes to the integration
+   contract; `publish.yml` reuses independent core CI before it uploads.
 
 ### Publishing container images before merge
 
