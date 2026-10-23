@@ -22,13 +22,28 @@ Citation information can be found in [CITATION.cff](CITATION.cff).
 ## Installing
 
 ```
-pip install dosho          # the cab definitions: names, schemas, images
-pip install stimela-ninja     # ...plus stimela-ninja, to build and run them
+# Catalogue data only
+pip install "dosho>=0.2.0b1,<0.3"
+# Standalone schemas and argv
+pip install "dosho[validation]>=0.2.0b1,<0.3"
+# Runnable cabs and recipes, pending Ninja's v0.2 beta publication
+pip install "stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main"
 ```
 
 The definitions are data — YAML documents under `dosho/documents/`, readable
 without the framework. `dosho.cabs.<tool>` and `dosho.get(...)` turn one into a
-`Cab`, which needs the `validation` extra plus an explicit Shinobi installation.
+`Cab`, which needs an explicit Shinobi installation. Shinobi depends on
+`dosho[validation]`; the retired `dosho[run]` extra is no longer needed.
+Base catalogue access needs neither Pydantic nor Shinobi, and validation
+needs Pydantic but never imports Shinobi.
+Pin a source commit for reproducibility. After Ninja's beta is published,
+`stimela-ninja>=0.2.0b1,<0.3` can be installed from PyPI instead.
+
+Since v0.2.0b1, Dosho owns schema compilation, parameter metadata, policies,
+patterns and validated argv formatting. Shinobi owns framework annotations,
+DAG wiring, execution, filesystem enforcement and dataset lifecycle. See
+[validation and migration](https://dosho.readthedocs.io/en/latest/concepts/validation.html)
+for the standalone API and compatibility boundary.
 
 ## Usage
 

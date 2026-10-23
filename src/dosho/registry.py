@@ -27,7 +27,7 @@ _cab_cache: dict[str, Any] = {}
 
 
 def _index() -> dict[str, dict[str, Any]]:
-    """registered name -> where its definition lives, from the generated index.
+    """Registered name -> where its definition lives, from the maintained index.
 
     Read from a file rather than derived from `dosho.cabs.__all__`, which
     would import every cab in the repo and, through `_builder`, shinobi
@@ -35,7 +35,7 @@ def _index() -> dict[str, dict[str, Any]]:
     `get_document`, the experimental warning -- stays usable by a consumer
     that wants dosho's definitions without the framework that runs them.
 
-    Regenerate with `python -m tools.generate_documents`.
+    Add or update entries in `cab_index.yaml` alongside tool definitions.
     """
     global _index_cache
     if _index_cache is None:
@@ -47,9 +47,9 @@ def registered_name_for_attr(attr: str) -> str | None:
     """The registered name a `dosho.cabs` attribute stands for, or None.
 
     `dosho.cabs.__getattr__` is keyed by attribute (`simms_classic`) and
-    everything else by registered name (`simms`); 31 tools differ between the
-    two. The index records both, so the mapping is written down once rather
-    than inferred in reverse from a table of exceptions.
+    everything else by registered name (`simms`); these names can differ.
+    The index records both, so the mapping is written down once rather than
+    inferred in reverse from a table of exceptions.
 
     Both kinds resolve here now that `dosho.cabs` imports nothing eagerly:
     a document-backed cab is built from its file, a pystep is fetched from the
@@ -160,7 +160,7 @@ def _build_document():
 
 
 def _too_old(exc: ImportError) -> ImportError:
-    """The error for a shinobi that predates the yaml_cab loader."""
+    """The error for a Shinobi without the versioned Dosho validation adapter."""
     required = _required_shinobi() or "a newer stimela-ninja"
     try:
         installed = metadata.version("stimela-ninja")

@@ -17,12 +17,24 @@ expression language, and no dtype coverage gaps -- see
 
 Because a document is inert data, ``import dosho`` needs no shinobi at
 all. Reading the catalogue is a plain install; *building* a cab from a
-definition is the ``validation`` extra plus an explicit Shinobi installation:
+definition into a runnable object needs Shinobi, which installs Dosho validation:
 
 .. code-block:: console
 
-    $ pip install dosho          # the definitions: names, schemas, images
-    $ pip install "stimela-ninja>=0.2.0b1,<0.3"   # ...plus stimela-ninja, to build and run them
+    $ pip install "dosho>=0.2.0b1,<0.3"             # catalogue data only
+    $ pip install "dosho[validation]>=0.2.0b1,<0.3"  # standalone schemas and argv
+    $ pip install "stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main"
+
+The last command installs the compatible source adapter while Ninja's v0.2
+beta awaits publication. Pin a source commit for reproducibility; see
+:doc:`installation` for development wheel pairing and the future PyPI floor.
+
+Since v0.2.0b1, Dosho owns parameter validation, metadata, policies, patterns
+and argv formatting. Shinobi owns framework types, DAG construction and
+execution, filesystem enforcement and dataset lifecycle. See
+:doc:`concepts/validation` for the APIs and migration notes, and
+:doc:`concepts/read_only_access` for guarded MS readers and exclusive
+flag-history reservations.
 
 Know the tool at write-time? Import it directly:
 

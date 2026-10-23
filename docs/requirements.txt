@@ -1,6 +1,7 @@
 # Documentation tooling and the explicit execution adapter for catalogue rendering.
-# For unreleased pair testing, install both local candidate wheels instead.
-stimela-ninja>=0.2.0b1,<0.3
+# The compatible Ninja adapter is on main pending its v0.2 beta publication.
+# For exact pair testing, install both local candidate wheels instead.
+stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main
 sphinx>=7.2
 furo>=2024.1
 sphinx-copybutton>=0.5

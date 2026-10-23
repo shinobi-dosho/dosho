@@ -8,7 +8,8 @@ lifecycle/recovery. Its mandatory dependency is ``dosho[validation]``; Dosho
 validation never imports Shinobi.
 
 The validation extra requires Pydantic 2.14 or newer, matching Shinobi's
-minimum for threaded generic product-family handoffs. The currently tested Python 3.11–3.14 range is unchanged. Base catalogue access still needs neither Pydantic nor Shinobi.
+minimum for threaded generic product-family handoffs. Dosho's paired CI tests
+Python 3.11 and 3.12. Base catalogue access needs neither Pydantic nor Shinobi.
 
 The public ``dosho.validation`` API exposes ``CabSpec``, ``CompiledCab``,
 ``parse_document``, ``compile_cab``, ``build_argv``, ``build_model``,
@@ -45,19 +46,35 @@ Shinobi's versioned cab cache identity separately records schema/formatter
 contract versions and argument semantics. Frozen bundle version 3 verifies
 those semantics without confusing them with dataset states or worker attempts.
 
-Release gate
-------------
+Migrating from v0.1
+-------------------
 
-Both projects target 0.2.0b1. Verify an exact local wheel pair first. Dosho's
-independent lock contains no reverse framework dependency. Ninja's final
-registry lock must wait for authorized publication of the Dosho beta; no local
-paths, invented registry hashes or publication are part of this migration.
+Install ``dosho[validation]>=0.2.0b1,<0.3`` for standalone schema compilation
+and argv formatting. For runnable cabs and recipes, install the compatible
+Shinobi source adapter as described in :doc:`../installation`; the
+``stimela-ninja>=0.2.0b1,<0.3`` registry requirement applies once its beta
+is published. Replace the retired ``dosho[run]`` extra with an explicit Shinobi
+installation. The dependency direction is Shinobi to Dosho validation;
+Dosho's independent lock contains no framework dependency.
+
+Import shared metadata and model helpers from ``dosho.validation``. Existing
+Shinobi imports remain supported: ``Policies`` is re-exported, while
+``ParamMeta``, ``ParamPattern`` and ``ParamSegment`` extend the shared types
+with framework declarations. Its model-building adapter supplies trusted
+dtype bindings for strict datasets and product families.
+``dosho.validation.build_argv`` accepts validated parameter values and formats
+argv. ``shinobi.policies.build_argv`` additionally normalizes framework inputs
+and outputs. A standalone ``CompiledCab`` is not a runnable ``shinobi.Cab``.
 
 Provider documents carry the ``dosho-cab-v1`` dialect tag. Old Shinobi releases
 reject it rather than silently substituting their earlier compiler. Lazy
 runnable-object bridges require the matching adapter capability and provide
 explicit installation guidance. Ordinary third-party ``yaml_cab`` documents
 remain supported by the new adapter.
+
+For cross-repository development, use the verified candidate wheel-pair
+procedure in :doc:`../installation` rather than adding a reverse dependency
+or a local-path source to either published package.
 
 Automatic paired CI
 -------------------

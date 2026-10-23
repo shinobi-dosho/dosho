@@ -66,26 +66,50 @@ import and inspect them directly, e.g.:
    :members:
    :imported-members:
 
-Shinobi schema types
-------------------------
+Standalone validation
+---------------------
 
-Supporting types used when defining a ``Cab``, re-exported from
-``shinobi`` for convenience -- documented in full in `shinobi's own API
-reference
-<https://stimela-ninja.readthedocs.io/en/latest/api/index.html>`_.
+These APIs require ``dosho[validation]`` and never import Shinobi. A
+``CabSpec`` is inert document data; ``CompiledCab`` contains validated
+parameter models and formatting metadata, rather than an executable step.
+See :doc:`../concepts/validation` for the boundary and a complete example.
 
-.. autoclass:: shinobi.steps.schema.ParamMeta
+.. autofunction:: dosho.validation.parse_document
+
+.. autofunction:: dosho.validation.compile_cab
+
+.. autofunction:: dosho.validation.build_model
+
+.. autofunction:: dosho.validation.dtype_to_type
+
+.. autofunction:: dosho.validation.build_argv
+
+.. autoclass:: dosho.validation.CabSpec
    :members:
-   :no-index:
 
-.. autoclass:: shinobi.steps.schema.ParamPattern
+.. autoclass:: dosho.validation.CompiledCab
    :members:
-   :no-index:
 
-.. autoclass:: shinobi.steps.schema.ParamSegment
+.. autoclass:: dosho.validation.TypeBinding
    :members:
-   :no-index:
 
-.. autoclass:: shinobi.steps.schema.Policies
+Parameter metadata and policies
+-------------------------------
+
+Dosho owns these shared schema types. Shinobi re-exports ``Policies`` and
+extends ``ParamMeta``, ``ParamPattern`` and ``ParamSegment`` with framework
+declarations. Framework-specific annotations such as ``MSv2``,
+``FITSImage`` and ``ProductFamily`` remain Shinobi-owned; callers compiling
+those dtypes must supply trusted type bindings or use Shinobi's adapter.
+
+.. autoclass:: dosho.validation.ParamMeta
    :members:
-   :no-index:
+
+.. autoclass:: dosho.validation.ParamPattern
+   :members:
+
+.. autoclass:: dosho.validation.ParamSegment
+   :members:
+
+.. autoclass:: dosho.validation.Policies
+   :members:

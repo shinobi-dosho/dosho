@@ -25,7 +25,8 @@ typed ``MSv2``, including the Python reader and WSClean's list input.
      - Create or replace the selected visibility column (DATA by default), with
        schema-change permission and a required column postcondition.
    * - Flag backup
-     - Read FLAG and FLAG_ROW; own and preserve the external flag-version history.
+     - Exclusively reserve the MS for reading FLAG and FLAG_ROW; own and preserve
+       the external flag-version history, blocking concurrent MS access.
    * - Tricolour
      - Read the selected visibility column; write FLAG, leaving FLAG_ROW unchanged.
    * - Flag restore
@@ -99,12 +100,17 @@ exactly, then checks that a changed seed gives different data:
 WSClean
 -------
 
-WSClean is deliberately a writer even for dirty imaging: other modes update
-MODEL_DATA or create IMAGING_WEIGHT. Naming either under ``create`` would
+The general ``wsclean`` cab is deliberately a writer even for dirty imaging:
+other modes update MODEL_DATA or create IMAGING_WEIGHT. Naming either under ``create`` would
 incorrectly require it after every invocation. The whole-dataset contract
 covers reads of the selected visibility column, flags, weights, UVW and
 metadata, as well as those mode-dependent writes. The cab selects DATA by
 default and exposes the real ``-data-column`` switch as ``column``.
+
+``wsclean-readonly`` instead fixes native write-enabling controls off and
+requires external reorder scratch. It declares strict READ access, with no
+MS passthrough output. See :doc:`read_only_access` for this variant and the
+guarded DDFacet/QuartiCal profiles.
 
 CubiCal
 -------
@@ -127,7 +133,10 @@ from a path-only ``cubical`` wires ``calibrate.data_ms`` now.
 Run the example
 ---------------
 
-Use a Python 3.11 driver with dosho's locked run dependencies. The qualified
+Use a Python 3.11 driver with the compatible Shinobi adapter installed through
+the :doc:`../installation` pairing procedure. For strict MS inspection and
+the image-family checks, install ``python-casacore`` and ``astropy`` (the
+framework's ``ms-contract`` and ``fits-contract`` extras). The qualified
 container boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.1.0 and WSClean
 3.6/IDG, resolved through ``images.yaml``. Import tool packages inside the
 running container; cab loading never imports their schema-generation code.
@@ -180,15 +189,18 @@ production contracts without weakening them:
      python -m pytest -q tests/test_native_dataset_contracts.py
 
 The driver needs ``python-casacore`` and ``numpy`` in addition to the locked
-run/development dependencies. The suite checks the populated visibility
-values, restored flags, emitted model FITS file and captured image. Negative
+development dependencies and explicit Shinobi adapter. The suite checks the
+populated visibility values, restored flags, emitted model FITS file and captured image. Negative
 cases refuse an existing creation target and deliberately give skysim an
 incomplete column declaration: conformance must fail and restore the original
 DATA before that invocation can count as evidence.
 
-This example qualifies ordinary local MSv2 execution. Strict scatter, nested
-recipes, Kubernetes and Slurm step backends remain unavailable under the
-current framework profile. It does not establish MSv4 adapters, the wider
+This example qualifies ordinary local MSv2 execution. Shinobi also supports
+bounded atomic read-only MSv2 scatter in flat recipes with disjoint output
+and scratch writes. Dataset WRITE/CREATE scatter, nested strict recipes,
+Kubernetes and Slurm step backends remain unavailable. Frozen whole-workflow
+offload has its separate storage and runtime qualification. This example
+does not establish MSv4 adapters, the wider
 Paper I backend/scatter evaluation, scientific calibration convergence, or
 the deferred WSClean restoration/facet interfaces.
 
@@ -210,6 +222,10 @@ not promise a particular prediction or weight column. Text-file MS lists,
 globs and DDFacet's ``//D``/``//F`` suffix syntax cannot identify the declared
 dataset closure; use explicit paths with ``selection_ddid`` and
 ``selection_field`` instead.
+
+``ddfacet-readonly`` retains those explicit dataset paths and scratch controls,
+limits the allowed imaging modes, and disables prediction and stored imaging
+weights. It declares strict READ access; see :doc:`read_only_access`.
 
 Scratch writes have concrete defaults in the working directory:
 ``.ddfacet-cache``, ``.ddfacet-wisdom`` and ``.ddfacet-montblanc.log``. These
