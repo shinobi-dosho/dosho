@@ -59,17 +59,17 @@ runnable-object bridges require the matching adapter capability and provide
 explicit installation guidance. Ordinary third-party ``yaml_cab`` documents
 remain supported by the new adapter.
 
-Temporary CI bootstrap gate
----------------------------
+Automatic paired CI
+-------------------
 
-Dosho's default core job covers validation, catalogue/image metadata, CLI,
-publication authorization and version tests without Shinobi. During the
-Dosho-first bootstrap only, full cab integration and docs require an explicit
-compatible ``ninja-ref``. Once the companion adapter lands on Ninja main,
-remove the two ``CAB_BOUNDARY_BOOTSTRAP`` job conditions and default that ref
-to main, restoring automatic full coverage on every push/PR. Completing the
-v0.2 release requires this CI restoration as well as Ninja's final registry
-lock; the temporary gate is not the intended steady-state CI policy.
+Dosho's core job covers validation, catalogue/image metadata, CLI,
+publication authorization and version tests without Shinobi. Pushes to main
+and pull requests also run the full paired cab suite on Python 3.11/3.12 and
+build docs against Shinobi main. Reusable and manually dispatched CI default
+``ninja-ref`` to ``main`` and accept an explicit branch, tag, or commit override.
+Push and pull-request checkouts fall back to ``main`` because those events
+have no workflow inputs. The publication workflow reuses the complete CI
+workflow and requires core tests, paired tests, and docs to pass before upload.
 
 Literal fields support ordinary Pydantic ``min_length`` and ``max_length``
 constraints for strings and containers. Bounds must be nonnegative integers

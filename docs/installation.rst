@@ -33,9 +33,11 @@ from Dosho's dependency graph::
 Install the framework's runtime dependencies as well (or install the wheel
 pair together without ``--no-deps`` into an isolated environment). Run tests
 and docs with ``uv run --no-sync`` so a subsequent sync cannot remove the
-explicit candidate. CI takes an explicit ``ninja-ref`` for the paired checkout
-and verifies each installed version against its own source checkout plus
-package origin. Independent core CI requires no companion framework; paired
-full tests/docs run only when a compatible ``ninja-ref`` is supplied.
+explicit candidate. CI pairs every push to main and every pull request with
+Shinobi main, verifying each installed version against its own source checkout
+plus package origin. Reusable and manually dispatched CI accept a ``ninja-ref``
+override for a specific branch, tag, or commit. Independent core CI requires no
+companion framework; the publication workflow also requires the full paired
+tests and docs to pass.
 
 See :doc:`concepts/validation` for the ownership and migration contract.
