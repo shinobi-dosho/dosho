@@ -11,13 +11,8 @@ flags, or -- for rm-tools -- flags mapped to the wrong meaning). One
 targeted test per cab: registration + a representative build_argv shape
 check against the real tool's CLI.
 
-`simms`'s 3.0 sub-commands (`simms-skysim`/`simms-telsim`/
-`simms-primary-beam`) are no longer binary cabs -- as of simms 3.0 they are
-`@shinobi.pystep` functions (`simms.apps.*`) that dosho wraps (see
-`dosho/cabs/simms.py`), so their tests check the pystep's `inputs_model`
-schema shape (Literal choices, `json_schema_extra` abbreviations) and that
-they wire into a `Recipe`, not a `build_argv` shape. `simms` (classic) is
-still a real binary and keeps its binary-cab test below.
+Simms simulation CLI cabs are covered in ``test_simms.py``. The
+primary-beam adapter remains a pystep and is checked here.
 """
 
 import re
@@ -181,54 +176,6 @@ def test_sofia2_parameter_names_are_the_ones_sofia_27_knows():
     assert "port2tigger" not in cab.inputs_model.model_fields
 
 
-def test_simms_skysim_is_a_pystep_with_choices_and_abbreviations():
-    from typing import get_args
-
-    step = dosho.get("simms-skysim")
-    assert isinstance(step, StepRef)
-    assert step.name == "simms-skysim"
-    assert step.step.image == images.SIMMS
-    fields = step.step.inputs_model.model_fields
-    assert fields["ms"].is_required()  # the MS is the one required input
-    # `choices` reach real pydantic validation as a Literal, not just info text
-    assert get_args(fields["mode"].annotation) == ("sim", "add", "subtract")
-    step.step.inputs_model(ms="/x.ms", mode="add")  # in-set value accepted
-    with pytest.raises(ValidationError):
-        step.step.inputs_model(ms="/x.ms", mode="bogus")  # out-of-set rejected
-    # `abbreviation` is carried onto json_schema_extra for `ninja run`'s short flag
-    assert fields["ascii_sky"].json_schema_extra == {"abbreviation": "as"}
-    assert "ms" in step.step.outputs_model.model_fields  # passthrough MS output
-    # simms 3.0.2's image-domain a-term beam knobs. `aterm` is upstream's default,
-    # so a stale transcription here would silently pin every FITS-image predict to
-    # the legacy PA-averaged power beam
-    assert get_args(fields["fits_beam_mode"].annotation) == ("aterm", "average")
-    assert fields["fits_beam_mode"].default == "aterm"
-    assert fields["fits_beam_mode"].json_schema_extra == {"abbreviation": "fbm"}
-    assert fields["aterm_freq_tol"].json_schema_extra == {"abbreviation": "aft"}
-
-
-def test_simms_telsim_is_a_pystep_sharing_the_skysim_image():
-    step = dosho.get("simms-telsim")
-    assert isinstance(step, StepRef)
-    assert step.name == "simms-telsim"
-    assert step.step.image == dosho.get("simms-skysim").step.image  # same simms 3.0 image
-    fields = step.step.inputs_model.model_fields
-    assert fields["ms"].is_required()
-    assert fields["telescope"].is_required()
-    assert fields["telescope"].json_schema_extra == {"abbreviation": "tel"}
-    assert fields["nchan"].json_schema_extra == {"abbreviation": "nc"}
-    assert "ms" in step.step.outputs_model.model_fields  # passthrough MS output
-    # `subarray_range` must keep simms' `list[str | int]`, str first: shinobi picks
-    # the click type from the first scalar leaf, so a plain list[int] renders as
-    # INTEGER and click rejects the documented comma form before simms sees it
-    assert step.step.inputs_model(
-        ms="/x.ms", telescope="meerkat", subarray_range=["0,64"]
-    ).subarray_range == ["0,64"]
-    assert step.step.inputs_model(
-        ms="/x.ms", telescope="meerkat", subarray_range=[0, 64]
-    ).subarray_range == [0, 64]
-
-
 def test_ragavi_gains_registered_and_passes_gain_flags():
     cab = dosho.get("ragavi-gains")
     assert cab.name == "ragavi-gains"
@@ -263,7 +210,7 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     step = dosho.get("simms-primary-beam")
     assert isinstance(step, StepRef)
     assert step.name == "simms-primary-beam"
-    assert step.step.image == dosho.get("simms-skysim").step.image  # same simms 3.0 image
+    assert step.step.image == dosho.get("simms-skysim").image  # same simms 3.0 image
     fields = step.step.inputs_model.model_fields
     # the operation selector is a required Literal choice field
     assert get_args(fields["mode"].annotation) == ("to-fits", "tag-ms", "apply", "correct")
@@ -277,7 +224,7 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     assert get_args(fields["fits_format"].annotation) == ("simms", "cattery")
     assert get_args(fields["beam_l_axis"].annotation) == ("-X", "X")
     assert get_args(fields["beam_m_axis"].annotation) == ("Y", "-Y")
-    beam_axes = dosho.get("simms-skysim").step.inputs_model.model_fields
+    beam_axes = dosho.get("simms-skysim").inputs_model.model_fields
     assert "beam_l_axis" in beam_axes and "beam_m_axis" in beam_axes
     # path-valued fields must be Path-typed, not str: only path-typed fields
     # are absolutized into the workspace and have their parents bound into the
@@ -300,25 +247,11 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     assert "ms" in step.step.outputs_model.model_fields
 
 
-def test_simms_pysteps_wire_into_a_recipe():
-    import shinobi
-    from pydantic import create_model
-
-    recipe = shinobi.Recipe(
-        name="sim", inputs_model=create_model("I"), outputs_model=create_model("O")
-    )
-    recipe.add_step("mk", dosho.get("simms-telsim"), ms="out.ms", telescope="meerkat")
-    recipe.add_step("sky", dosho.get("simms-skysim"), ms="out.ms", ascii_sky="sky.txt", mode="sim")
-    assert [s.name for s in recipe.steps] == ["mk", "sky"]
-    # the StepRef carries its pystep orchestration func into the recipe step
-    assert recipe.steps[1].func is not None
-
-
 def test_simms_classic_is_a_genuinely_different_tool_and_image():
     cab = dosho.get("simms")
     assert cab.name == "simms"
     assert cab.command == "simms"
-    assert cab.image != dosho.get("simms-skysim").step.image
+    assert cab.image != dosho.get("simms-skysim").image
     assert cab.field_meta["msname"].nom_de_guerre == "name"
     argv = build_argv(cab, {"msname": "/x.ms", "telescope": "meerkat"})
     assert argv[0] == "simms"

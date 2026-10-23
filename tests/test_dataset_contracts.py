@@ -279,14 +279,13 @@ def test_backup_with_its_old_output_is_a_contradictory_reader(no_closure, tmp_pa
 
 
 def test_telsim_declared_as_a_reader_is_refused(no_closure, tmp_path):
-    """telsim writes its MS (`write_paths=["ms"]`), so a `read` contract on it
+    """telsim writes its MS (`write_path: true`), so a `read` contract on it
     contradicts the schema and planning refuses it, rather than recording a
     creation as a read."""
     telsim = registry.get("simms-telsim")
-    as_reader = telsim.step.model_copy(
+    reader = telsim.model_copy(
         update={"dataset_accesses": [DatasetAccess(field="ms", mode="read")]}
     )
-    reader = telsim.model_copy(update={"step": as_reader})
     # After the real telsim, so the misdeclared one resolves against the
     # planned (not yet existing) MS instead of inspecting one on disk.
     ms = InputRef(field="ms")

@@ -51,8 +51,8 @@ know before adding a tool:
 ============  ==================================  ===================
 Shape         Lives in                            Today
 ============  ==================================  ===================
-``Cab``       ``dosho/documents/<name>.yaml``     61 tools
-pystep        ``dosho/cabs/<family>.py``          68 tools
+``Cab``       ``dosho/documents/<name>.yaml``     63 tools
+pystep        ``dosho/cabs/<family>.py``          66 tools
 ============  ==================================  ===================
 
 129 tools in total. The live list, with each one's resolved image and

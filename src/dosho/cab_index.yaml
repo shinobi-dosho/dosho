@@ -393,12 +393,10 @@ cabs:
     symbol: primary_beam
   simms-skysim:
     attr: skysim
-    module: dosho.cabs.simms
-    symbol: skysim
+    document: simms-skysim.yaml
   simms-telsim:
     attr: telsim
-    module: dosho.cabs.simms
-    symbol: telsim
+    document: simms-telsim.yaml
   smoothcal:
     attr: smoothcal
     module: dosho.cabs.casatasks

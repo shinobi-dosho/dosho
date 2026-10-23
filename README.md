@@ -6,8 +6,7 @@
 [shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
 Stimela 3.0). A tool is one of two shapes: a real binary is a YAML
 *document*, built into a `shinobi.Cab` on demand; a Python-package tool
-with no standalone binary (CASA tasks, simms 3.0's
-`skysim`/`telsim`/`primary-beam`) is a `@shinobi.pystep`-produced
+with no standalone binary (for example, CASA tasks) is a `@shinobi.pystep`-produced
 `StepRef`. A cab is parameter configuration and stays declarative whatever
 carries it, so there's no `dynamic_schema`-style Python-execution step at
 cab-load time, no expression language, and no dtype coverage gaps.
