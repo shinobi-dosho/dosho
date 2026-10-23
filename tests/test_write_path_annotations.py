@@ -52,7 +52,8 @@ STEMS = {
     ("wsclean", "prefix"),
     # complete paths, written directly. Marked once the field was renamed from
     # `path_prefix`, which described the shape above and not these.
-    ("ddfacet", "cache_dir"),
+    ("ddfacet", "data_cache_dir"),
+    ("ddfacet", "cache_dir_wisdom_fftw"),
     ("ddfacet", "montblanc_log_file"),
     ("killms", "image_sky_model_ddf_cache_dir"),
 }

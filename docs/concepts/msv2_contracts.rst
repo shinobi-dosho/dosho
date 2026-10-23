@@ -197,3 +197,47 @@ the deferred WSClean restoration/facet interfaces.
 
 .. literalinclude:: ../../examples/strict_ms_summary.py
    :language: python
+
+DDFacet
+-------
+
+``ddfacet`` requires an explicit list of ``MSv2`` paths, including when a
+parset is supplied, and declares a conservative whole-dataset write with
+schema-change permission. Prediction and saved imaging weights can create
+or update MAIN columns; a column is not
+required after every Dirty or Clean invocation. The contract therefore does
+not promise a particular prediction or weight column. Text-file MS lists,
+globs and DDFacet's ``//D``/``//F`` suffix syntax cannot identify the declared
+dataset closure; use explicit paths with ``selection_ddid`` and
+``selection_field`` instead.
+
+Scratch writes have concrete defaults in the working directory:
+``.ddfacet-cache``, ``.ddfacet-wisdom`` and ``.ddfacet-montblanc.log``. These
+are declared scratch destinations and are not an implicit cache next to an
+input MS or an undeclared FFTW directory under the user's home. Relative
+scratch stays inside an isolated working directory when that execution
+policy is enabled. Absolute destinations can be supplied explicitly and are
+subject to the same ownership and MS-overlap checks.
+
+Use ``data_cache_dir`` to set DDFacet's ``--Cache-Dir``. The former tool
+field ``cache_dir`` conflicted with Shinobi's execution-cache keyword; the
+new name distinguishes these two caches without changing DDFacet's CLI.
+``cache_dir_wisdom_fftw`` and ``montblanc_log_file`` keep their names. All
+three scratch fields require concrete values; ``None`` would restore an
+implicit write location the contained lifecycle cannot prove.
+
+The MS boundary and scratch declarations cover ordinary single-MS imaging.
+Multi-MS, beam and runtime product-selection workflows need separate
+qualification.
+
+The opt-in native tests copy a fixture MS and check Dirty/Clean imaging,
+saved imaging weights, Clean prediction, captured FITS products, cache reuse
+and regeneration after a missing product. Set
+``DOSHO_OUTPUT_FAMILY_TEST_MS`` to the fixture and optionally
+``DOSHO_IMAGE_DDFACET`` to a local image. The driver needs ``python-casacore``.
+For Apptainer, run:
+
+.. code-block:: console
+
+   DOSHO_OUTPUT_FAMILY_TEST_BACKEND=apptainer \
+     python -m pytest -q tests/test_native_output_families.py -k ddfacet

@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-from astropy.io import fits
 from shinobi import ProductFamily, ProductMember
 from shinobi.backends.recording import RecordingBackend
 from shinobi.exceptions import DatasetLifecycleViolationError, ParameterError
@@ -30,13 +29,7 @@ class _Products(RecordingBackend):
                 elif name.startswith("logs.qc/"):
                     path = root / inputs["output_log_directory"] / name.removeprefix("logs.qc/")
             path.parent.mkdir(parents=True, exist_ok=True)
-            if cab.name == "ddfacet" and path.suffix == ".fits":
-                hdu = fits.PrimaryHDU([[float(len(self.calls))]])
-                hdu.header["CTYPE1"] = "LINEAR"
-                hdu.header["CTYPE2"] = "LINEAR"
-                hdu.writeto(path, overwrite=True)
-            else:
-                path.write_text(f"produced {len(self.calls)}")
+            path.write_text(f"produced {len(self.calls)}")
         return result
 
 
@@ -52,17 +45,6 @@ CASES = [
         {"vis_data_ms_name": "obs.ms", "solutions_sols_dir": "sols"},
         ["sols/obs.ms/killMS.CohJones.sols.npz", "sols/obs.ms/killMS.CohJones.sols.parset"],
         "solutions",
-    ),
-    (
-        "ddfacet",
-        {"data_ms": ["obs.ms"], "output_name": "image"},
-        [
-            "image.app.restored.fits",
-            "image.cube.int.restored.fits",
-            "image.residual02.fits",
-            "image.02.DicoModel",
-        ],
-        "restored",
     ),
     (
         "sofia2",
@@ -125,11 +107,6 @@ def test_capture_cache_and_missing_member(
     repaired = _dispatch(cab, None, **params)
     assert not repaired.cached and victim.exists()
     assert len(backend.calls) == 2
-    if name == "ddfacet":
-        assert repaired.outputs.residual.select(
-            cycle=2, representation="mean", flux_scale="apparent"
-        ).is_file()
-        assert repaired.outputs.dico_model.select(cycle=2).is_file()
     if name == "sofia2":
         assert repaired.outputs.cubelets.select(source=4, product="cube", format="fits").is_file()
         assert repaired.outputs.moments.select(product="mom0", format="fits").is_file()

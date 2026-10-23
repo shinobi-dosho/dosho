@@ -100,7 +100,7 @@ def test_ddfacet_write_targets_and_column_names_stay_str():
 
     paths = path_fields(dosho.get("ddfacet").inputs_model)
     for field in (
-        "cache_dir",
+        "data_cache_dir",
         "cache_dir_wisdom_fftw",
         "montblanc_log_file",
         "output_name",
@@ -112,14 +112,13 @@ def test_ddfacet_write_targets_and_column_names_stay_str():
         assert field not in paths
 
 
-def test_ddfacet_ms_is_declared_mutable():
-    # DDF.py writes into the MS it images: --Predict-ColName,
-    # --Weight-OutColName, and by default its cache "next to the MS". No
-    # outputs model, so nothing for the name intersection to find.
+def test_ddfacet_ms_is_a_strict_list_writer():
+    # Prediction and saved weights can add/update columns. List writers use
+    # explicit DatasetAccess instead of Python-object mutability.
     from shinobi.steps.schema import Mutability, mutated_path_fields
 
     cab = dosho.get("ddfacet")
-    assert cab.mutability_of("data_ms") is Mutability.MUTABLE
+    assert cab.mutability_of("data_ms") is Mutability.IMMUTABLE
     assert mutated_path_fields(cab) == {"data_ms"}
     # a read-side path keeps its content hash -- swapping the mask really is
     # a different step
@@ -136,20 +135,43 @@ def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
     assert "--DDESolutions-SolsDir" in argv and "/sols" in argv
 
 
-def test_ddfacet_declares_the_products_a_pipeline_wires():
-    """Source-verified against DDFacet's own ClassDeconvMachine.py, which names
-    every product `"%s.<suffix>" % BaseName` for BaseName = Output-Name.
-    """
-    from shinobi.backends.recording import RecordingBackend
-    from shinobi.steps import register_step_backend
-    from shinobi.steps.dispatch import _dispatch
+def test_ddfacet_declares_the_products_a_pipeline_wires(tmp_path, monkeypatch):
+    """Capture actual files through the family declarations without faking an MS."""
+    from astropy.io import fits
+    from shinobi.fits_products import validate_fits_outputs
+    from shinobi.sandbox import ProductCapture
+    from shinobi.steps.dispatch import _prepare_inputs
 
-    register_step_backend("ddf-record", RecordingBackend())
-    cab = dosho.get("ddfacet").model_copy(update={"backend": "ddf-record"})
-    result = _dispatch(cab, None, data_ms=["/obs.ms"], output_name="img/run1")
+    monkeypatch.chdir(tmp_path)
+    cab = dosho.get("ddfacet")
+    inputs = _prepare_inputs(cab, {"data_ms": [tmp_path / "obs.ms"], "output_name": "run1"})
+    capture = ProductCapture(cab, inputs, tmp_path)
+    for suffix in (
+        "dirty.fits",
+        "psf.fits",
+        "app.restored.fits",
+        "app.model.fits",
+        "app.residual.fits",
+        "DicoModel",
+        "residual02.fits",
+        "02.DicoModel",
+    ):
+        path = tmp_path / f"run1.{suffix}"
+        if path.suffix == ".fits":
+            hdu = fits.PrimaryHDU([[1.0]])
+            hdu.header["CTYPE1"] = "LINEAR"
+            hdu.header["CTYPE2"] = "LINEAR"
+            hdu.writeto(path)
+        else:
+            path.write_text("captured product")
+    families = capture.resolve_families(True)
+    validate_fits_outputs(cab, cab.outputs_model(**families), workspace=tmp_path)
     for name in ("dirty", "psf", "restored", "model", "residual", "dico_model"):
-        family = getattr(result.outputs, name)
-        assert family.resolved and family.members == ()
+        assert families[name].resolved and families[name].members
+    assert (
+        families["residual"].select(cycle=2, representation="mean", flux_scale="apparent").is_file()
+    )
+    assert families["dico_model"].select(cycle=2).is_file()
 
 
 def test_ddfacet_harvest_covers_the_letter_code_family():
@@ -194,31 +216,34 @@ def test_ddfacet_scratch_targets_are_declared_but_never_harvested():
     products into the caller's workspace -- `Scope.scratch`, not an output.
     """
     cab = dosho.get("ddfacet")
-    assert cab.scratch == ["{cache_dir}/*", "{montblanc_log_file}"]
+    assert cab.scratch == [
+        "{data_cache_dir}/*",
+        "{cache_dir_wisdom_fftw}/*",
+        "{montblanc_log_file}",
+    ]
     # not outputs, and not harvest globs: those two would rescue them
-    for field in ("cache_dir", "montblanc_log_file"):
+    for field in ("data_cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
         assert field not in cab.outputs_model.model_fields
         assert not any(field in pattern for pattern in cab.harvest)
 
 
-def test_ddfacet_scratch_declares_nothing_when_the_cache_is_unset():
-    # Both scratch fields default to None; a pattern over a None field must not
-    # resolve to a literal "None" directory.
+def test_ddfacet_scratch_defaults_are_concrete_and_outside_home():
+    from pathlib import Path
+
+    from shinobi.steps.dispatch import _prepare_inputs
     from shinobi.steps.schema import declared_output_dirs
 
     cab = dosho.get("ddfacet")
-    dirs = [str(d) for d, _ in declared_output_dirs(cab, {"output_name": "img/run1"})]
-    assert "None" not in dirs
-    assert dirs == ["img"]
-
-
-def test_ddfacet_wisdom_dir_stays_undeclared_because_its_default_is_home_relative():
-    # `~/.fftw_wisdom` is HOME-relative, and shinobi resolves a relative
-    # declaration against the working directory -- a pattern would name a
-    # literal `~`. Noted in the experimental marker instead.
-    cab = dosho.get("ddfacet")
-    assert cab.inputs_model.model_fields["cache_dir_wisdom_fftw"].default == "~/.fftw_wisdom"
-    assert not any("wisdom" in pattern for pattern in cab.scratch)
+    inputs = _prepare_inputs(cab, {"data_ms": ["obs.ms"], "output_name": "img/run1"})
+    dirs = {str(d) for d, _ in declared_output_dirs(cab, inputs)}
+    assert {"img", ".ddfacet-cache", ".ddfacet-wisdom"} <= dirs
+    for field in ("data_cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
+        assert inputs[field] and "~" not in inputs[field]
+        assert not Path(inputs[field]).is_absolute()
+    argv = build_argv(cab, inputs)
+    assert argv[argv.index("--Cache-Dir") + 1] == ".ddfacet-cache"
+    assert argv[argv.index("--Cache-DirWisdomFFTW") + 1] == ".ddfacet-wisdom"
+    assert argv[argv.index("--Montblanc-LogFile") + 1] == ".ddfacet-montblanc.log"
 
 
 def _default_argv(**inputs):
@@ -227,15 +252,33 @@ def _default_argv(**inputs):
     handed, which is why the bare-flag defect below is invisible to every
     field-level test above.
     """
-    from shinobi.backends.recording import RecordingBackend
-    from shinobi.steps import register_step_backend
-    from shinobi.steps.dispatch import _dispatch
+    from shinobi.steps.dispatch import _prepare_inputs
 
-    recorder = RecordingBackend()
-    register_step_backend("ddf-argv", recorder)
-    cab = dosho.get("ddfacet").model_copy(update={"backend": "ddf-argv"})
-    _dispatch(cab, None, **inputs)
-    return recorder.calls[-1][1]
+    cab = dosho.get("ddfacet")
+    return build_argv(cab, _prepare_inputs(cab, inputs))
+
+
+def test_ddfacet_data_cache_override_keeps_the_native_option_name():
+    argv = _default_argv(data_ms=["obs.ms"], data_cache_dir="custom-data-cache")
+    assert argv[argv.index("--Cache-Dir") + 1] == "custom-data-cache"
+    assert "--Data-Cache-Dir" not in argv
+
+
+def test_ddfacet_scratch_defaults_cannot_be_disabled_with_none():
+    import pytest
+    from pydantic import ValidationError
+
+    for field in ("data_cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
+        with pytest.raises(ValidationError):
+            dosho.get("ddfacet").inputs_model(data_ms=["obs.ms"], **{field: None})
+
+
+def test_ddfacet_requires_explicit_ms_even_with_a_parset():
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="data_ms"):
+        dosho.get("ddfacet").inputs_model(parset="hidden-ms.parset")
 
 
 def test_ddfacet_hmp_scales_preserves_one_item_lists():
