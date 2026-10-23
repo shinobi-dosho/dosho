@@ -119,10 +119,11 @@ CI builds with `-W`, so a warning is a failure.
 3. Push and open a PR against `main`. Reference any related issue
    (e.g. "Closes #12").
 4. **CI must be green.** The independent `core` job tests catalogue/validation
-   and lint without Shinobi, so Dosho can release first. Invoke CI with an
-   explicit `ninja-ref` to run the full paired suite on Python 3.11/3.12 and
-   render docs. Record that paired evidence for changes to the integration
-   contract; `publish.yml` reuses independent core CI before it uploads.
+   and lint without Shinobi. Every push to `main` and every PR also runs the
+   full paired suite on Python 3.11/3.12 and renders docs against Shinobi
+   `main`. Reusable and manually dispatched CI accept a `ninja-ref` override
+   for a specific branch, tag, or commit. `publish.yml` reuses this complete
+   CI workflow, so core tests, paired tests, and docs must pass before upload.
 
 ### Publishing container images before merge
 

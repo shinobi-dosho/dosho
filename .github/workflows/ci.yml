@@ -8,12 +8,12 @@ on:
     inputs:
       ninja-ref:
         type: string
-        default: ""
+        default: main
   workflow_dispatch:
     inputs:
       ninja-ref:
-        description: Exact compatible Shinobi candidate ref
-        default: ""
+        description: Shinobi ref for paired validation (branch, tag, or commit)
+        default: main
         required: false
         type: string
 
@@ -35,11 +35,7 @@ jobs:
       - run: uv run --no-sync ruff check .
       - run: uv run --no-sync ruff format --check .
 
-  # CAB_BOUNDARY_BOOTSTRAP: temporary until the companion Ninja adapter lands.
-  # Release gate: remove both job conditions and default ninja-ref to main once
-  # compatible Ninja main is available, restoring automatic full PR coverage.
   test:
-    if: ${{ inputs.ninja-ref != '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -62,11 +58,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --extra validation --group dev
 
-      - name: Check out explicit Shinobi candidate
+      - name: Check out Shinobi for paired validation
         uses: actions/checkout@v7
         with:
           repository: shinobi-dosho/stimela-ninja
-          ref: ${{ inputs.ninja-ref }}
+          ref: ${{ inputs.ninja-ref || 'main' }}
           path: .work-cache/shinobi-candidate
 
       - name: Install and verify candidate wheel pair
@@ -87,7 +83,6 @@ jobs:
         run: uv run --no-sync ruff format --check .
 
   docs:
-    if: ${{ inputs.ninja-ref != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out dosho
@@ -101,11 +96,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --extra validation --group docs
 
-      - name: Check out explicit Shinobi candidate
+      - name: Check out Shinobi for paired validation
         uses: actions/checkout@v7
         with:
           repository: shinobi-dosho/stimela-ninja
-          ref: ${{ inputs.ninja-ref }}
+          ref: ${{ inputs.ninja-ref || 'main' }}
           path: .work-cache/shinobi-candidate
 
       - name: Install and verify candidate wheel pair
