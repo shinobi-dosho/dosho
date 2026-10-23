@@ -3774,6 +3774,1150 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - ``ProductFamily[Path] | None``
      - \-
 
+ddfacet-readonly
+----------------
+
+DDFacet read-only MSv2 imaging; caches, wisdom and logs must be outside the input MS.
+
+:Command: ``DDF.py``
+:Image: ``ghcr.io/shinobi-dosho/ddfacet:1.0.0.0-multiarch-d0.1.0`` (``DDFACET`` 1.0.0.0-multiarch, build)
+:Source: https://github.com/saopicc/DDFacet
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``parset``
+     - ``Literal[None] | None``
+     - ``None``
+     - \-
+   * - ``data_ms``
+     - ``list[MSv2]``
+     - *required*
+     - \-
+   * - ``data_col_name``
+     - ``str | None``
+     - ``'CORRECTED_DATA'``
+     - \-
+   * - ``data_chunk_hours``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``data_chunk_rows``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``data_sort``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``data_dask``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``predict_col_name``
+     - ``Literal['']``
+     - ``''``
+     - \-
+   * - ``predict_mask_square``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``predict_from_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``predict_init_dico_model``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``predict_overwrite``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``selection_field``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``selection_ddid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``selection_ta_ql``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_chan_start``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``selection_chan_end``
+     - ``int | None``
+     - ``-1``
+     - \-
+   * - ``selection_chan_step``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``selection_flag_ants``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_uv_range_km``
+     - ``list[float] | None``
+     - ``[0, 2000]``
+     - \-
+   * - ``selection_time_range``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_time_range_from_start_min``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_dist_max_to_core``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``selection_auto_flag_nyquist``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``output_mode``
+     - ``Literal['Clean', 'Dirty', 'PSF']``
+     - ``'Clean'``
+     - \-
+   * - ``output_clobber``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_name``
+     - ``str | None``
+     - ``'image'``
+     - \-
+   * - ``output_shift_facets_file``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``output_restoring_beam``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_also``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_cubes``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``output_images``
+     - ``str | None``
+     - ``'DdPAMRIikemz'``
+     - \-
+   * - ``output_stokes_residues``
+     - ``Literal['I', 'IQ', 'IV', 'QU', 'IQUV'] | None``
+     - ``'I'``
+     - \-
+   * - ``spi_maps_alpha_threshold``
+     - ``int | None``
+     - ``15``
+     - \-
+   * - ``image_n_pix``
+     - ``int | tuple[int, int] | None``
+     - ``5000``
+     - \-
+   * - ``image_cell``
+     - ``float | tuple[float, float] | None``
+     - ``5.0``
+     - \-
+   * - ``image_phase_center_radec``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_image_center_radec``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``image_sidelobe_search_window``
+     - ``int | None``
+     - ``200``
+     - \-
+   * - ``image_multi_field_file``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``facets_n_facets``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``facets_cat_nodes``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``facets_diam_max``
+     - ``float | None``
+     - ``180.0``
+     - \-
+   * - ``facets_diam_min``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``facets_mixing_width``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``facets_single_psf``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``facets_psf_oversize``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``facets_psf_facets``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``facets_padding``
+     - ``float | None``
+     - ``1.7``
+     - \-
+   * - ``facets_circumcision``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``facets_flux_padding_app_model``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``facets_flux_padding_scale``
+     - ``float | None``
+     - ``2.0``
+     - \-
+   * - ``facets_skip_th``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_col_name``
+     - ``str | None``
+     - ``'WEIGHT_SPECTRUM'``
+     - \-
+   * - ``weight_mode``
+     - ``Literal['Natural', 'Uniform', 'Robust', 'Briggs'] | None``
+     - ``'Briggs'``
+     - \-
+   * - ``weight_mfs``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``weight_robust``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_super_uniform``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``weight_out_col_name``
+     - ``Literal['']``
+     - ``''``
+     - \-
+   * - ``weight_enable_sigmoid_taper``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``weight_sigmoid_taper_inner_cutoff``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_sigmoid_taper_outer_cutoff``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``weight_sigmoid_taper_inner_rolloff_strength``
+     - ``float | None``
+     - ``0.5``
+     - \-
+   * - ``weight_sigmoid_taper_outer_rolloff_strength``
+     - ``float | None``
+     - ``0.5``
+     - \-
+   * - ``rime_precision``
+     - ``Literal['S', 'D'] | None``
+     - ``'S'``
+     - \-
+   * - ``rime_pol_mode``
+     - ``Literal['I', 'IQ', 'IU', 'IV', 'IQU', 'IQUV'] | None``
+     - ``'I'``
+     - \-
+   * - ``rime_full_m_tilde``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``rime_fft_machine``
+     - ``str | None``
+     - ``'FFTW'``
+     - \-
+   * - ``rime_forward_mode``
+     - ``Literal['BDA-degrid', 'Classic', 'Montblanc'] | None``
+     - ``'BDA-degrid'``
+     - \-
+   * - ``rime_backward_mode``
+     - ``Literal['BDA-grid', 'Classic'] | None``
+     - ``'BDA-grid'``
+     - \-
+   * - ``rime_decorr_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``rime_decorr_location``
+     - ``Literal['Center', 'Edge'] | None``
+     - ``'Edge'``
+     - \-
+   * - ``cf_over_s``
+     - ``int | None``
+     - ``11``
+     - \-
+   * - ``cf_support``
+     - ``int | None``
+     - ``7``
+     - \-
+   * - ``cf_nw``
+     - ``int | None``
+     - ``100``
+     - \-
+   * - ``cf_wmax``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``comp_grid_decorr``
+     - ``float | None``
+     - ``0.02``
+     - \-
+   * - ``comp_grid_fo_v``
+     - ``Literal['Full', 'Facet'] | None``
+     - ``'Facet'``
+     - \-
+   * - ``comp_degrid_decorr``
+     - ``float | None``
+     - ``0.02``
+     - \-
+   * - ``comp_degrid_fo_v``
+     - ``Literal['Full', 'Facet'] | None``
+     - ``'Facet'``
+     - \-
+   * - ``comp_sparsification``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``comp_bda_mode``
+     - ``Literal[1, 2] | None``
+     - ``1``
+     - \-
+   * - ``comp_bda_jones``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``parallel_ncpu``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``parallel_affinity``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``parallel_main_process_affinity``
+     - ``str | None``
+     - ``'disable'``
+     - \-
+   * - ``cache_reset``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``cache_jones``
+     - ``Literal['reset', 'auto'] | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_smooth_beam``
+     - ``Literal['reset', 'auto', 'force'] | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_weight``
+     - ``Literal['reset', 'auto'] | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_psf``
+     - ``Literal['off', 'reset', 'auto', 'force'] | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_dirty``
+     - ``Literal['off', 'reset', 'auto', 'forcedirty', 'forceresidual'] | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_vis_data``
+     - ``Literal['off', 'auto', 'force'] | None``
+     - ``'auto'``
+     - \-
+   * - ``cache_last_residual``
+     - ``bool | None``
+     - ``1``
+     - \-
+   * - ``data_cache_dir``
+     - ``str``
+     - ``'.ddfacet-cache'``
+     - \-
+   * - ``cache_dir_wisdom_fftw``
+     - ``str``
+     - ``'.ddfacet-wisdom'``
+     - \-
+   * - ``cache_reset_wisdom``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``cache_cf``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``cache_hmp``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``cache_remnant``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_model``
+     - ``Literal['None', 'LOFAR', 'FITS', 'GMRT', 'ATCA', 'NENUFAR', 'Everybeam'] | None``
+     - ``None``
+     - \-
+   * - ``beam_at``
+     - ``Literal['facet', 'tessel'] | None``
+     - ``'facet'``
+     - \-
+   * - ``beam_phased_array_mode``
+     - ``Literal['A', 'AE'] | None``
+     - ``'A'``
+     - \-
+   * - ``beam_force_scalar``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_n_band``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_center_norm``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_smooth``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_smooth_n_pix``
+     - ``int | None``
+     - ``11``
+     - \-
+   * - ``beam_smooth_interp_mode``
+     - ``str | None``
+     - ``'Linear'``
+     - \-
+   * - ``beam_fits_file``
+     - ``Path | None``
+     - ``'beam_$(corr)_$(reim).fits'``
+     - \-
+   * - ``beam_fits_feed``
+     - ``Literal['None', 'xy', 'XY', 'rl', 'RL'] | None``
+     - ``None``
+     - \-
+   * - ``beam_fits_feed_swap``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``beam_dt_beam_min``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``beam_fits_par_angle_inc_deg``
+     - ``float | None``
+     - ``5.0``
+     - \-
+   * - ``beam_fitsl_axis``
+     - ``str | None``
+     - ``'-X'``
+     - \-
+   * - ``beam_fitsm_axis``
+     - ``str | None``
+     - ``'Y'``
+     - \-
+   * - ``beam_fits_verbosity``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_fits_frame``
+     - ``Literal['altaz', 'altazgeo', 'equatorial', 'zenith'] | None``
+     - ``'altaz'``
+     - \-
+   * - ``beam_feed_angle``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``beam_apply_p_jones``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_flip_visibility_hands``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``beam_pointing_centre``
+     - ``str | None``
+     - ``'PhaseDir'``
+     - \-
+   * - ``beam_rotation_direction``
+     - ``str | None``
+     - ``'North2East'``
+     - \-
+   * - ``freq_band_m_hz``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``freq_degrid_band_m_hz``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``freq_n_band``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``freq_n_degrid_band``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dde_solutions_dd_sols``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dde_solutions_sols_dir``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``dde_solutions_global_norm``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dde_solutions_jones_norm_list``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``dde_solutions_jones_mode``
+     - ``Literal['Scalar', 'Diag', 'Full'] | None``
+     - ``'Full'``
+     - \-
+   * - ``dde_solutions_dd_mode_grid``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``dde_solutions_dd_mode_de_grid``
+     - ``str | None``
+     - ``'AP'``
+     - \-
+   * - ``dde_solutions_scale_amp_grid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dde_solutions_scale_amp_de_grid``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dde_solutions_calib_err``
+     - ``float | None``
+     - ``10.0``
+     - \-
+   * - ``dde_solutions_type``
+     - ``Literal['Krigging', 'Nearest'] | None``
+     - ``'Nearest'``
+     - \-
+   * - ``dde_solutions_scale``
+     - ``float | None``
+     - ``1.0``
+     - \-
+   * - ``dde_solutions_gamma``
+     - ``float | None``
+     - ``4.0``
+     - \-
+   * - ``dde_solutions_restore_sub``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``dde_solutions_re_weight_snr``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``pointing_solutions_pointing_sols_csv``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``pointing_solutions_interpolation_mode``
+     - ``Literal['LERP'] | None``
+     - ``'LERP'``
+     - \-
+   * - ``deconv_mode``
+     - ``Literal['HMP', 'Hogbom', 'SSD', 'WSCMS', 'SSD2'] | None``
+     - ``'HMP'``
+     - \-
+   * - ``deconv_max_major_iter``
+     - ``int | None``
+     - ``20``
+     - \-
+   * - ``deconv_max_minor_iter``
+     - ``int | None``
+     - ``20000``
+     - \-
+   * - ``deconv_allow_negative``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``deconv_gain``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``deconv_flux_threshold``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_cycle_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_rms_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_peak_factor``
+     - ``float | None``
+     - ``0.15``
+     - \-
+   * - ``deconv_prev_peak_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``deconv_num_rms_samples``
+     - ``int | None``
+     - ``10000``
+     - \-
+   * - ``deconv_approximate_psf``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``deconv_psf_box``
+     - ``str | None``
+     - ``'auto'``
+     - \-
+   * - ``mask_external``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``mask_auto``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``mask_auto_rms_factor``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``mask_sig_th``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``mask_flux_image_type``
+     - ``str | None``
+     - ``'ModelConv'``
+     - \-
+   * - ``mask_th_filter_rfi``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``noise_min_stats``
+     - ``list[float] | None``
+     - ``[60, 2]``
+     - \-
+   * - ``noise_brutal_hmp``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``hmp_alpha``
+     - ``list[float] | None``
+     - ``[-1.0, 1.0, 11]``
+     - \-
+   * - ``hmp_scales``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``hmp_ratios``
+     - ``list[str] | None``
+     - ``[]``
+     - \-
+   * - ``hmp_n_theta``
+     - ``int | None``
+     - ``6``
+     - \-
+   * - ``hmp_solver_mode``
+     - ``Literal['PI', 'NNLS'] | None``
+     - ``'PI'``
+     - \-
+   * - ``hmp_allow_resid_increase``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``hmp_major_stall_threshold``
+     - ``float | None``
+     - ``0.8``
+     - \-
+   * - ``hmp_taper``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``hmp_support``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``hmp_peak_weight_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``hmp_kappa``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``hmp_outer_space_th``
+     - ``float | None``
+     - ``2.0``
+     - \-
+   * - ``hmp_fraction_random_peak``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``hogbom_poly_fit_order``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``hogbom_linear_peakfinding``
+     - ``Literal['Joint', 'Separate'] | None``
+     - ``'Joint'``
+     - \-
+   * - ``wscms_num_freq_basis_funcs``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``wscms_multi_scale``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``wscms_multi_scale_bias``
+     - ``float | None``
+     - ``0.55``
+     - \-
+   * - ``wscms_scale_basis``
+     - ``str | None``
+     - ``'Gauss'``
+     - \-
+   * - ``wscms_scales``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``wscms_max_scale``
+     - ``int | None``
+     - ``250``
+     - \-
+   * - ``wscms_n_sub_minor_iter``
+     - ``int | None``
+     - ``250``
+     - \-
+   * - ``wscms_sub_minor_peak_fact``
+     - ``float | None``
+     - ``0.85``
+     - \-
+   * - ``wscms_minor_stall_threshold``
+     - ``float | None``
+     - ``1e-07``
+     - \-
+   * - ``wscms_minor_divergence_factor``
+     - ``float | None``
+     - ``1.3``
+     - \-
+   * - ``wscms_auto_mask``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``wscms_auto_mask_threshold``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``wscms_auto_mask_rms_factor``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``wscms_cache_size``
+     - ``int | None``
+     - ``3``
+     - \-
+   * - ``wscms_padding``
+     - ``float | None``
+     - ``1.2``
+     - \-
+   * - ``montblanc_tensorflow_server_target``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``montblanc_log_file``
+     - ``str``
+     - ``'.ddfacet-montblanc.log'``
+     - \-
+   * - ``montblanc_memory_budget``
+     - ``float | None``
+     - ``4.0``
+     - \-
+   * - ``montblanc_log_level``
+     - ``Literal['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] | None``
+     - ``'WARNING'``
+     - \-
+   * - ``montblanc_solver_d_type``
+     - ``Literal['single', 'double'] | None``
+     - ``'double'``
+     - \-
+   * - ``montblanc_driver_version``
+     - ``Literal['tf'] | None``
+     - ``'tf'``
+     - \-
+   * - ``ssd_clean_parallel``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ssd_clean_island_deconv_mode``
+     - ``str | None``
+     - ``'GA'``
+     - \-
+   * - ``ssd_clean_ssd_solve_pars``
+     - ``str | None``
+     - ``'[S,Alpha]'``
+     - \-
+   * - ``ssd_clean_ssd_cost_func``
+     - ``str | None``
+     - ``'[Chi2,MinFlux]'``
+     - \-
+   * - ``ssd_clean_bic_factor``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``ssd_clean_artifact_robust``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ssd_clean_conv_fft_switch``
+     - ``int | None``
+     - ``1000``
+     - \-
+   * - ``ssd_clean_n_enlarge_pars``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd_clean_n_enlarge_data``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd_clean_restore_metro_switch``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd_clean_min_max_group_distance``
+     - ``list[float] | None``
+     - ``[10, 50]``
+     - \-
+   * - ``ssd_clean_max_island_size``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd_clean_init_type``
+     - ``str | None``
+     - ``'HMP'``
+     - \-
+   * - ``ssd2_solve_pars``
+     - ``str | None``
+     - ``'[Poly]'``
+     - \-
+   * - ``ssd2_poly_freq_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd2_init_type``
+     - ``str | None``
+     - ``'[HMP,MultiSlice:Orieux]'``
+     - \-
+   * - ``ssd2_convexify_islands``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ssd2_n_last_cycles_deconv_all``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ssd3_poly_freq_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd3_solve_pars``
+     - ``str | None``
+     - ``'[Poly]'``
+     - \-
+   * - ``ssd3_init_type``
+     - ``str | None``
+     - ``'[HMP_0-50,MultiSlice:Orieux]'``
+     - \-
+   * - ``ssd3_ga_isl_size``
+     - ``str | None``
+     - ``'0-50'``
+     - \-
+   * - ``ssd3_run_simple_clean``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ssd3_propagate_prev_gen``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ssd3_alpha_scale_model``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ssd3_convexify_islands``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ssd3_unique_island``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd3_allow_facet_overlap``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd3_n_look_back_models``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``ssd3_posterior``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``ssd3_posterior_n_iter``
+     - ``int | None``
+     - ``100``
+     - \-
+   * - ``ssd3_posterior_n_points``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``ssd3_posterior_alpha``
+     - ``float | None``
+     - ``0.01``
+     - \-
+   * - ``ssd3_force_positive_model``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ssd3_n_last_cycles_deconv_all``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``multi_slice_deconv_type``
+     - ``str | None``
+     - ``'MORESANE'``
+     - \-
+   * - ``multi_slice_deconv_poly_fit_order``
+     - ``int | None``
+     - ``2``
+     - \-
+   * - ``multi_slice_deconv_force_positive_model``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``multi_slice_deconv_hyper_smooth``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``ga_clean_n_source_kin``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``ga_clean_n_max_gen``
+     - ``int | None``
+     - ``50``
+     - \-
+   * - ``ga_clean_min_size_init``
+     - ``int | None``
+     - ``10``
+     - \-
+   * - ``ga_clean_alpha_init_hmp``
+     - ``list[float] | None``
+     - ``[-4.0, 1.0, 6]``
+     - \-
+   * - ``ga_clean_scales_init_hmp``
+     - ``list[float] | None``
+     - ``[0, 1, 2, 4, 8, 16, 24, 32]``
+     - \-
+   * - ``ga_clean_gain_init_hmp``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``ga_clean_ratios_init_hmp``
+     - ``list[str] | None``
+     - ``[]``
+     - \-
+   * - ``ga_clean_n_theta_init_hmp``
+     - ``int | None``
+     - ``4``
+     - \-
+   * - ``ga_clean_max_minor_iter_init_hmp``
+     - ``int | None``
+     - ``10000``
+     - \-
+   * - ``ga_clean_allow_negative_init_hmp``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``ga_clean_rms_factor_init_hmp``
+     - ``float | None``
+     - ``3.0``
+     - \-
+   * - ``ga_clean_parallel_init``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``ga_clean_ncpu``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``moresane_n_major_iter``
+     - ``int | None``
+     - ``200``
+     - \-
+   * - ``moresane_n_minor_iter``
+     - ``int | None``
+     - ``200``
+     - \-
+   * - ``moresane_gain``
+     - ``float | None``
+     - ``0.1``
+     - \-
+   * - ``moresane_force_positive``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``moresane_sigma_cut_level``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``log_memory``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``log_boring``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``log_append``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``debug_pause_workers``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``debug_facet_phase_shift``
+     - ``list[float] | None``
+     - ``[0.0, 0.0]``
+     - \-
+   * - ``debug_print_minor_cycle_rms``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``debug_dump_clean_solutions``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``debug_dump_clean_postage_stamps``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``debug_clean_stall_threshold``
+     - ``float | None``
+     - ``0.0``
+     - \-
+   * - ``debug_memory_greedy``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``debug_app_verbose``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``debug_pdb``
+     - ``Literal['never', 'always', 'auto'] | None``
+     - ``'auto'``
+     - \-
+   * - ``misc_random_seed``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``misc_conserve_memory``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``misc_ignore_deprecation_marking``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``katdal_apply_cal``
+     - ``str | None``
+     - ``'default'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``dirty``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``restored``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``model``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``residual``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``psf``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``dico_model``
+     - ``ProductFamily[Path] | None``
+     - \-
+
 deconvolve
 ----------
 
@@ -8195,7 +9339,7 @@ msutils flags delete: delete a saved flag version from an MS
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MSv2``
      - *required*
      - \-
    * - ``name``
@@ -8212,8 +9356,8 @@ msutils flags delete: delete a saved flag version from an MS
    * - Field
      - Type
      - Description
-   * - ``ms``
-     - ``Path | None``
+   * - ``flagversions``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 msutils-flags-list
@@ -9799,11 +10943,11 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
    * - Field
      - Type
      - Description
-   * - ``ms``
-     - ``Path | None``
-     - \-
    * - ``gain_directory``
      - ``ProductFamily[DirectoryBundle] | None``
+     - \-
+   * - ``ms``
+     - ``Path | None``
      - \-
 
 quartical-backup
@@ -9954,6 +11098,243 @@ goquartical-plot: rudimentary plotter for QuartiCal gain solutions
      - Description
    * - ``output_path``
      - ``Path | None``
+     - \-
+
+quartical-readonly
+------------------
+
+QuartiCal read-only local MSv2 calibration; writes gains and declared logs only.
+
+:Command: ``goquartical``
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.5-multiarch1-d0.1.0`` (``QUARTICAL`` 0.2.5-multiarch1, build)
+:Source: https://github.com/ratt-ru/QuartiCal
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``parset``
+     - ``Literal[None] | None``
+     - ``None``
+     - \-
+   * - ``input_ms_path``
+     - ``MSv2``
+     - *required*
+     - \-
+   * - ``input_ms_data_column``
+     - ``str | None``
+     - ``'DATA'``
+     - \-
+   * - ``input_ms_sigma_column``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``input_ms_weight_column``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``input_ms_time_chunk``
+     - ``str | None``
+     - ``'0'``
+     - \-
+   * - ``input_ms_freq_chunk``
+     - ``str | None``
+     - ``'0'``
+     - \-
+   * - ``input_ms_is_bda``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``input_ms_group_by``
+     - ``list[str] | None``
+     - ``['SCAN_NUMBER', 'FIELD_ID', 'DATA_DESC_ID']``
+     - \-
+   * - ``input_ms_select_corr``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``input_ms_select_fields``
+     - ``list[int] | None``
+     - ``[]``
+     - \-
+   * - ``input_ms_select_ddids``
+     - ``list[int] | None``
+     - ``[]``
+     - \-
+   * - ``input_ms_select_uv_range``
+     - ``list[float] | None``
+     - ``[0, 0]``
+     - \-
+   * - ``input_model_recipe``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``input_model_beam``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``input_model_beam_l_axis``
+     - ``str | None``
+     - ``'X'``
+     - \-
+   * - ``input_model_beam_m_axis``
+     - ``str | None``
+     - ``'Y'``
+     - \-
+   * - ``input_model_invert_uvw``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``input_model_source_chunks``
+     - ``int | None``
+     - ``500``
+     - \-
+   * - ``input_model_apply_p_jones``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_gain_directory``
+     - ``str | None``
+     - ``'gains.qc'``
+     - \-
+   * - ``output_log_directory``
+     - ``str | None``
+     - ``'logs.qc'``
+     - \-
+   * - ``output_log_to_terminal``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``output_overwrite``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_products``
+     - ``list[str]``
+     - ``[]``
+     - \-
+   * - ``output_columns``
+     - ``list[str]``
+     - ``[]``
+     - \-
+   * - ``output_flags``
+     - ``Literal[False]``
+     - ``False``
+     - \-
+   * - ``output_apply_p_jones_inv``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_subtract_directions``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``output_net_gains``
+     - ``list[str] | None``
+     - ``None``
+     - \-
+   * - ``output_compute_baseline_corrections``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``output_apply_baseline_corrections``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``mad_flags_enable``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``mad_flags_whitening``
+     - ``str | None``
+     - ``'disabled'``
+     - \-
+   * - ``mad_flags_threshold_bl``
+     - ``float | None``
+     - ``5``
+     - \-
+   * - ``mad_flags_threshold_global``
+     - ``float | None``
+     - ``10``
+     - \-
+   * - ``mad_flags_max_deviation``
+     - ``float | None``
+     - ``0``
+     - \-
+   * - ``mad_flags_use_off_diagonals``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``solver_terms``
+     - ``list[str] | None``
+     - ``['G']``
+     - \-
+   * - ``solver_iter_recipe``
+     - ``list[int] | None``
+     - ``[25]``
+     - \-
+   * - ``solver_propagate_flags``
+     - ``bool | None``
+     - ``True``
+     - \-
+   * - ``solver_robust``
+     - ``bool | None``
+     - ``False``
+     - \-
+   * - ``solver_threads``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``solver_convergence_fraction``
+     - ``float | None``
+     - ``0.99``
+     - \-
+   * - ``solver_convergence_criteria``
+     - ``float | None``
+     - ``1e-06``
+     - \-
+   * - ``solver_reference_antenna``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``dask_threads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``dask_workers``
+     - ``int | None``
+     - ``1``
+     - \-
+   * - ``dask_address``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dask_scheduler``
+     - ``str | None``
+     - ``'threads'``
+     - \-
+   * - ``dask_scheduler_plugin``
+     - ``bool | None``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``gain_directory``
+     - ``ProductFamily[DirectoryBundle] | None``
      - \-
 
 quartical-restore
@@ -15378,6 +16759,740 @@ WSClean imager (https://wsclean.readthedocs.io)
    * - ``temp_dir``
      - ``Path | None``
      - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``image``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``dirty``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``residual``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``model``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``psf``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``source_list``
+     - ``ProductFamily[Path] | None``
+     - \-
+   * - ``continued_beam_model``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+   * - ``continued_facet_beam_model``
+     - ``ProductFamily[FITSImage] | None``
+     - \-
+
+wsclean-readonly
+----------------
+
+WSClean read-only MSv2 imaging; temporary reordered data must be outside the input MS.
+
+:Command: ``wsclean``
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-noble-d0.1.0`` (``WSCLEAN`` 3.6-idg-noble, build)
+:Source: https://gitlab.com/aroffringa/wsclean
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``list[MSv2]``
+     - *required*
+     - \-
+   * - ``prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``column``
+     - ``str | None``
+     - ``'DATA'``
+     - \-
+   * - ``model_column``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``model_storage_manager``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``deconvolution_channels``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``channel_range``
+     - ``tuple[int, int] | None``
+     - ``None``
+     - \-
+   * - ``channel_division_frequencies``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``gap_channel_division``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``pol``
+     - ``str | list[str]``
+     - ``'I'``
+     - \-
+   * - ``join_polarizations``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``link_polarizations``
+     - ``str | list[str] | None``
+     - ``None``
+     - \-
+   * - ``intervals_out``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``interval``
+     - ``tuple[int, int] | None``
+     - ``None``
+     - \-
+   * - ``even_timesteps``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``odd_timesteps``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``str | list[int] | None``
+     - ``None``
+     - \-
+   * - ``spws``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``threads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``parallel_gridding``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``parallel_reordering``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``no_work_on_master``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``channel_to_node``
+     - ``list[int] | None``
+     - ``None``
+     - \-
+   * - ``max_mpi_message_size``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``mem``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``abs_mem``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``log_time``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``quiet``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``reorder``
+     - ``Literal[True]``
+     - ``True``
+     - \-
+   * - ``no_reorder``
+     - ``Literal[False]``
+     - ``False``
+     - \-
+   * - ``reuse_reordered``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``save_reordered``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``update_model_required``
+     - ``Literal[False]``
+     - ``False``
+     - \-
+   * - ``no_update_model_required``
+     - ``Literal[True]``
+     - ``True``
+     - \-
+   * - ``no_dirty``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``save_first_residual``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``save_weights``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``save_uv``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``reuse_psf``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``reuse_dirty``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``make_psf``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``make_psf_only``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``weight``
+     - ``str | tuple[str, float] | None``
+     - ``None``
+     - \-
+   * - ``super_weight``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``mf_weighting``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_mf_weighting``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``weighting_rank_filter``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``weighting_rank_filter_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``taper_gaussian``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``taper_tukey``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``taper_inner_tukey``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``taper_edge``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``taper_edge_tukey``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``use_weights_as_taper``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``store_imaging_weights``
+     - ``Literal[False]``
+     - ``False``
+     - \-
+   * - ``size``
+     - ``tuple[int, int]``
+     - *required*
+     - \-
+   * - ``padding``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``scale``
+     - ``str | float``
+     - *required*
+     - \-
+   * - ``predict``
+     - ``Literal[False]``
+     - ``False``
+     - \-
+   * - ``continue_``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``subtract_model``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``gridder``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``use_wgridder``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``shift``
+     - ``tuple[str, str] | None``
+     - ``None``
+     - \-
+   * - ``facet_regions``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``feather_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``no_min_grid_resolution``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``min_grid_resolution``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``visibility_weighting_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``baseline_averaging``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``simulate_noise``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``simulate_baseline_noise``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``idg_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers_factor``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers_for_size``
+     - ``tuple[int, int] | None``
+     - ``None``
+     - \-
+   * - ``wstack_grid_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``wstack_kernel_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``wstack_oversampling``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``wgridder_accuracy``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``compound_tasks``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``shared_facet_reads``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``aterm_config``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``grid_with_beam``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``beam_aterm_update``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``aterm_kernel_size``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``apply_facet_solutions``
+     - ``list[Path | str] | None``
+     - ``None``
+     - \-
+   * - ``no_solution_directions_check``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``scalar_visibilities``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``diagonal_visibilities``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``apply_facet_beam``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``facet_beam_update``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``save_aterms``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``apply_primary_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``reuse_primary_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``use_differential_lofar_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``primary_beam_limit``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``mwa_path``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``save_psf_pb``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``pb_grid_size``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``dd_psf_grid``
+     - ``tuple[int, int] | None``
+     - ``None``
+     - \-
+   * - ``beam_model``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``beam_normalisation_mode``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``dry_run``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``maxuvw_m``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``minuvw_m``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``maxuv_l``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``minuv_l``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``maxw``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``niter``
+     - ``int | None``
+     - ``0``
+     - \-
+   * - ``nmiter``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``auto_threshold``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``abs_threshold``
+     - ``str | float | None``
+     - ``None``
+     - \-
+   * - ``auto_mask``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``abs_auto_mask``
+     - ``str | float | None``
+     - ``None``
+     - \-
+   * - ``local_rms``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``local_rms_strength``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``local_rms_window``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``local_rms_method``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``gain``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``mgain``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``join_channels``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``spectral_correction``
+     - ``tuple[float, str] | None``
+     - ``None``
+     - \-
+   * - ``no_fast_subminor``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``multiscale``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``multiscale_scale_bias``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``multiscale_max_scales``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``multiscale_scales``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``multiscale_shape``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``multiscale_gain``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``multiscale_convolution_padding``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``asp``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_multiscale_fast_subminor``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``python_deconvolution``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``iuwt``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``iuwt_snr_test``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_iuwt_snr_test``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``moresane_ext``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``moresane_arg``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``moresane_sl``
+     - ``list[float] | None``
+     - ``None``
+     - \-
+   * - ``save_source_list``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``clean_border``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``fits_mask``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``casa_mask``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``horizon_mask``
+     - ``str | None``
+     - ``None``
+     - \-
+   * - ``no_negative``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``negative``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``stop_negative``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``fit_spectral_pol``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``fit_spectral_log_pol``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``force_spectrum``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``squared_channel_joining``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``parallel_deconvolution``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``deconvolution_threads``
+     - ``int | None``
+     - ``None``
+     - \-
+   * - ``restore``
+     - ``tuple[Path, Path, Path] | None``
+     - ``None``
+     - \-
+   * - ``restore_list``
+     - ``tuple[Path, Path, Path] | None``
+     - ``None``
+     - \-
+   * - ``beam_size``
+     - ``str | float | None``
+     - ``None``
+     - \-
+   * - ``beam_shape``
+     - ``tuple[str | float, str | float, str | float] | None``
+     - ``None``
+     - \-
+   * - ``fit_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``no_fit_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``beam_fitting_size``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``theoretic_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``circular_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``elliptical_beam``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``local_rms_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``direct_ft_precision``
+     - ``Literal['float', 'double', 'ldouble'] | None``
+     - ``None``
+     - \-
+   * - ``temp_dir``
+     - ``Path``
+     - *required*
      - \-
 
 **Outputs**

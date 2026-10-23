@@ -51,7 +51,7 @@ def test_importing_the_image_manifest_loads_no_shinobi():
     assert _shinobi_modules_after_importing("dosho.images") == 0
 
 
-def test_define_cab_still_resolves_and_is_what_pulls_shinobi_in():
+def test_define_cab_import_is_lazy_but_construction_imports_shinobi():
     """The other half: deferring it must not break the authoring API, and it
     must actually be the thing that was costing the import.
     """
@@ -60,7 +60,7 @@ def test_define_cab_still_resolves_and_is_what_pulls_shinobi_in():
     assert callable(dosho.define_cab)
     assert "define_cab" in dir(dosho)
 
-    probe = "import dosho, sys; dosho.define_cab; print(len([m for m in sys.modules if m.startswith('shinobi')]))"
+    probe = "import dosho, sys; dosho.define_cab; assert not any(m.startswith('shinobi') for m in sys.modules); dosho.define_cab('t', 't', 'image', {}); print(len([m for m in sys.modules if m.startswith('shinobi')]))"
     out = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, check=True)
     assert int(out.stdout.strip()) > 0
 
@@ -76,7 +76,7 @@ def test_getting_a_cab_still_works():
 
 
 # --------------------------------------------------------------------------
-# shinobi is the `dosho[run]` extra, not a dependency
+# Shinobi is an explicit execution adapter, never a reverse dependency
 # --------------------------------------------------------------------------
 
 # Simulating absence rather than building a shinobi-free venv per test: the
@@ -120,7 +120,7 @@ def test_the_data_path_works_without_shinobi():
     )
     assert out.returncode == 0, out.stderr
     count, dialect, images = out.stdout.split()
-    assert int(count) > 100 and dialect == "yaml_cab" and int(images) > 20
+    assert int(count) > 100 and dialect == "dosho-cab-v1" and int(images) > 20
 
 
 def test_importing_dosho_cabs_works_without_shinobi():
@@ -134,7 +134,7 @@ def test_importing_dosho_cabs_works_without_shinobi():
 
 def test_building_a_cab_without_shinobi_says_what_to_install():
     """The failure a user actually meets. A bare ModuleNotFoundError three
-    frames deep in a loader does not tell them they wanted `dosho[run]`.
+    frames deep in a loader does not tell them they need the execution adapter.
     """
     out = _without_shinobi(
         "import dosho.cabs\n"
@@ -144,5 +144,5 @@ def test_building_a_cab_without_shinobi_says_what_to_install():
         "    print(exc)\n"
     )
     assert out.returncode == 0, out.stderr
-    assert "dosho[run]" in out.stdout
+    assert "stimela-ninja" in out.stdout
     assert "stimela-ninja" in out.stdout

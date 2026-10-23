@@ -2,7 +2,7 @@
 
 Autodoc imports the ``dosho`` package, and the ``cab_catalog`` extension
 builds every cab, so the build environment needs shinobi as well as dosho --
-i.e. dosho's ``run`` extra (``uv sync --extra run --group docs`` locally;
+i.e. dosho's ``validation`` extra plus an explicit Shinobi installation (``uv sync --extra validation --group docs`` locally;
 Read the Docs installs it via ``.readthedocs.yaml`` /
 ``docs/requirements.txt``). The package lives under ``src/``, added to
 sys.path below so an editable/uninstalled checkout also builds.

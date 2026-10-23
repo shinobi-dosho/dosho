@@ -25,7 +25,7 @@ constraints that bind a cab definition in any format.
 Because a document is inert data, ``import dosho`` needs no shinobi at
 all: a consumer that only wants the definitions -- to read, diff, pin or
 serve them -- installs ``dosho``, and only *building* a cab from one
-needs the framework that runs it (the ``dosho[run]`` extra).
+needs the framework that runs it (the ``stimela-ninja`` execution adapter).
 
 Two shapes: ``Cab`` and pystep
 --------------------------------
@@ -149,7 +149,7 @@ reads and writes. ``msutils-flags-restore`` is the shape of a writer:
         columns:
           write: [FLAG, FLAG_ROW]
 
-A reader (``msutils-flags-backup``) declares ``mode: read`` and is neither
+A reader (``wsclean-readonly``) declares ``mode: read`` and is neither
 ``mutable`` nor echoed as an output. A column chosen by a parameter is a
 template over the cab's own input, as in tricolour's ``read:
 ["{data_column}"]``; ``columns`` left out means the whole dataset, which is
@@ -165,7 +165,9 @@ path-only cab in the same recipe, so only some cabs are strict --
 ``ProductFamily[DirectoryBundle]`` rooted at ``{ms}.flagversions`` beside
 its MS. ``accept_existing: true`` preserves earlier versions and the shared
 output orders backups even when their version names differ. This unrelated
-output leaves the MS read contract intact. ``cache: false`` ensures each
+output is paired with exclusive READ ownership (``exclusive: true``) of the associated MS, blocking
+all concurrent access during history mutation. ``msutils-flags-delete`` uses
+the same ownership rule. ``cache: false`` ensures each
 invocation creates its requested version. See shinobi's
 `datasets documentation
 <https://stimela-ninja.readthedocs.io/en/latest/concepts/datasets.html>`_
@@ -425,3 +427,5 @@ WSClean declares its selected channel model files. These declarations need
 shinobi's shared derived-read support; they remain static data and never
 execute tool code to discover a schema. ``nullable: false`` on defaulted
 mode controls accepts omission and rejects an explicit null.
+
+See :doc:`read_only_access` for guarded imaging variants and the access audit.

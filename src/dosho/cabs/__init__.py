@@ -14,7 +14,7 @@ assignments.
 That laziness is also what makes shinobi optional. Building a `Cab` from its
 document, or importing a pystep, needs the schema; *naming* one does not. So
 `import dosho.cabs` costs nothing and works without shinobi installed, and
-only attribute access requires the `dosho[run]` extra.
+only attribute access requires an explicit `stimela-ninja` installation.
 
 For runtime, string-keyed lookup -- the CLI, `shinobi.cabs` entry-point
 discovery -- use `dosho.get(name)` instead. Same objects, keyed by registered
@@ -36,7 +36,7 @@ def __getattr__(name: str):
     except ImportError as exc:  # shinobi absent
         raise ImportError(
             f"dosho.cabs.{name} needs stimela-ninja, which is not installed. "
-            "dosho ships its cab definitions without it -- install `dosho[run]` "
+            "dosho ships its cab definitions without it -- install `stimela-ninja>=0.2.0b1,<0.3` "
             "to build and run them."
         ) from exc
     globals()[name] = obj
@@ -72,6 +72,7 @@ __all__ = [
     "cvel",
     "cvel2",
     "ddfacet",
+    "ddfacet_readonly",
     "deconvolve",
     "defintent",
     "delcol",
@@ -137,6 +138,7 @@ __all__ = [
     "quartical",
     "quartical_backup",
     "quartical_plotter",
+    "quartical_readonly",
     "quartical_restore",
     "ragavi_gains",
     "ragavi_vis",
@@ -176,5 +178,6 @@ __all__ = [
     "vis_mowjsub",
     "widebandpbcor",
     "wsclean",
+    "wsclean_readonly",
     "wvrgcal",
 ]

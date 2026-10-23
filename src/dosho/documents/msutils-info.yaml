@@ -5,6 +5,7 @@ cabs:
     info: 'msutils info: report MS metadata (fields, SPWs, scans, antennas, columns), for MSv2 or MSv4'
     inputs:
       ms:
+        writable: false
         dtype: MS
         required: true
         info: Measurement set (MSv2 table) or MSv4 processing set to report on

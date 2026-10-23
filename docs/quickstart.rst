@@ -37,7 +37,7 @@ tasks are Python-package calls with no standalone binary). Both are
 first-class for :meth:`Recipe.add_step <shinobi.Recipe.add_step>`; a
 pipeline author doesn't need to know or care which shape a given tool is.
 
-Both of these build a cab, so both need the ``dosho[run]`` extra (see
+Both of these build a cab, so both need the ``stimela-ninja`` execution adapter (see
 :doc:`installation`).
 
 Read a definition without shinobi

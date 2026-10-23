@@ -1,0 +1,50 @@
+_include: (dosho)documents/wsclean.yaml
+cabs:
+  wsclean-readonly:
+    _use: cabs.wsclean
+    info: WSClean read-only MSv2 imaging; temporary reordered data must be outside the input MS.
+    dataset_accesses:
+    - field: ms
+      mode: read
+    inputs:
+      ms:
+        writable: false
+      temp-dir:
+        required: true
+        nullable: false
+      reorder:
+        default: true
+        implicit: true
+        nullable: false
+        choices:
+        - true
+      no-update-model-required:
+        default: true
+        implicit: true
+        nullable: false
+        choices:
+        - true
+      no-reorder:
+        default: false
+        implicit: false
+        nullable: false
+        choices:
+        - false
+      update-model-required:
+        default: false
+        implicit: false
+        nullable: false
+        choices:
+        - false
+      predict:
+        default: false
+        implicit: false
+        nullable: false
+        choices:
+        - false
+      store-imaging-weights:
+        default: false
+        implicit: false
+        nullable: false
+        choices:
+        - false

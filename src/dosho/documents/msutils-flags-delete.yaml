@@ -5,19 +5,36 @@ cabs:
     info: 'msutils flags delete: delete a saved flag version from an MS'
     inputs:
       ms:
-        dtype: MS
+        dtype: MSv2
         required: true
         info: Measurement set to delete the flag version from
         policies:
           positional: true
-        mutable: true
+        writable: false
       name:
         dtype: str
         required: true
         info: Saved flag version to delete
         policies:
           positional: true
+        nullable: false
+        min_length: 1
+        string_pattern: ^[^.\\/][^\\/]*$
     outputs:
-      ms:
-        dtype: MS
-        info: Measurement set the version was deleted from
+      flagversions:
+        dtype: ProductFamily[DirectoryBundle]
+        info: Attached history; exclusive associated MS ownership blocks every concurrent MS access.
+        family:
+          root: '{ms}.flagversions'
+          coordinates: {}
+          rules:
+          - path: .
+            accept_existing: true
+    cache: false
+    dataset_accesses:
+    - field: ms
+      mode: read
+      columns:
+        read: []
+        write: []
+      exclusive: true

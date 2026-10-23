@@ -69,7 +69,7 @@ an existing small fixture and Docker available:
 .. code-block:: console
 
    DOSHO_WSCLEAN_TEST_MS=/absolute/path/to/tiny.ms \
-     uv run --locked --extra run pytest -q tests/test_wsclean.py -k native_36
+     uv run --locked --extra validation pytest -q tests/test_wsclean.py -k native_36
 
 Three additional native probes passed: sandboxed two-channel/two-interval
 I/Q imaging (twelve images, twelve dirty images and six PSFs); continued

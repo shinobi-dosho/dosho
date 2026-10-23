@@ -131,6 +131,16 @@ DESTINATIONS = {
 FAMILY_ROOTS = {("quartical", "output_gain_directory"), ("killms", "solutions_sols_dir")}
 SCRATCH_PATHS = {("wsclean", "temp_dir")}
 
+# Guarded variants inherit the same declared destinations, never the MS write.
+for _collection in (STEMS, DESTINATIONS, FAMILY_ROOTS, SCRATCH_PATHS):
+    _collection.update(
+        (name + "-readonly", field)
+        for name, field in tuple(_collection)
+        if name in {"wsclean", "ddfacet", "quartical"}
+    )
+SCRATCH_PATHS.add(("quartical", "output_log_directory"))
+STEMS.add(("quartical-readonly", "output_log_directory"))
+
 # Every other dual declaration, and why deleting it would be wrong. Grouped by
 # the reason, because the reasons are what a new cab has to be checked against
 # -- not the names.
@@ -161,7 +171,6 @@ NOT_DESTINATIONS = {
             ("msutils-addnoise", "ms"),
             ("msutils-copycol", "ms"),
             ("msutils-delcol", "ms"),
-            ("msutils-flags-delete", "ms"),
             ("msutils-flags-restore", "ms"),
             ("msutils-renamecol", "ms"),
             ("msutils-sumcols", "ms"),

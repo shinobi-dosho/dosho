@@ -8,7 +8,7 @@ authors:
   email: sphemakh@gmail.com
   orcid: https://orcid.org/0000-0001-9565-9622
 abstract: A shinobi's tool bag -- the native shinobi (stimela-ninja) cab repository
-version: 0.1.0
+version: 0.2.0b1
 keywords:
 - radio astronomy
 - pipelines

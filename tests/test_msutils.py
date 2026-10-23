@@ -79,18 +79,20 @@ def test_an_ms_changed_in_place_is_declared_mutable(name):
     flag version) it added is thrown away with it -- the tool succeeds and the
     pipeline sees nothing.
     """
-    assert dosho.get(name).mutability_of("ms") is Mutability.MUTABLE
+    cab = dosho.get(name)
+    if name == "msutils-flags-delete":
+        assert cab.dataset_accesses[0].exclusive and cab.dataset_accesses[0].mode.value == "read"
+    else:
+        assert cab.mutability_of("ms") is Mutability.MUTABLE
 
 
-def test_flags_backup_is_a_reader():
-    """`flags backup` reads FLAG/FLAG_ROW and writes `<ms>.flagversions/`
-    beside the MS, never the MS itself. Its strict read contract depends on
-    both of these: a mutable `ms`, or an `ms` output echoing the input, is a
-    write, and shinobi refuses a read contract that contradicts one.
-    """
+def test_flags_backup_reserves_associated_ms_exclusively():
     cab = dosho.get("msutils-flags-backup")
     assert cab.mutability_of("ms") is Mutability.IMMUTABLE
     assert "ms" not in cab.outputs_model.model_fields
+    assert cab.dataset_accesses[0].mode.value == "read"
+    assert cab.dataset_accesses[0].exclusive
+    assert not cab.dataset_accesses[0].columns.write
 
 
 def test_flags_subcommands_are_three_argv_tokens():

@@ -1,0 +1,34 @@
+_include: (dosho)documents/ddfacet.yaml
+cabs:
+  ddfacet-readonly:
+    _use: cabs.ddfacet
+    info: DDFacet read-only MSv2 imaging; caches, wisdom and logs must be outside the input MS.
+    dataset_accesses:
+    - field: data_ms
+      mode: read
+    inputs:
+      data_ms:
+        writable: false
+      parset:
+        choices:
+        - null
+        default: null
+      predict_col_name:
+        default: ''
+        implicit: ''
+        nullable: false
+        choices:
+        - ''
+      weight_out_col_name:
+        default: ''
+        implicit: ''
+        nullable: false
+        choices:
+        - ''
+      output_mode:
+        choices:
+        - Clean
+        - Dirty
+        - PSF
+        default: Clean
+        nullable: false

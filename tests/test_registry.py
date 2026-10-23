@@ -88,7 +88,7 @@ def test_stale_shinobi_names_the_version_to_upgrade_to(monkeypatch):
     assert "pysteps are unaffected" in message
 
 
-def test_absent_shinobi_says_to_install_the_run_extra(monkeypatch):
+def test_absent_shinobi_says_to_install_the_execution_adapter(monkeypatch):
     """Missing shinobi is a different fix from a stale one, and says so."""
     import builtins
 
@@ -102,15 +102,28 @@ def test_absent_shinobi_says_to_install_the_run_extra(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", refuse_shinobi)
     monkeypatch.setattr(registry, "_cab_cache", {})
 
-    with pytest.raises(ModuleNotFoundError, match=r"dosho\[run\]"):
+    with pytest.raises(ModuleNotFoundError, match=r"stimela-ninja>=0.2.0b1"):
         registry.get(_document_cab_name())
 
 
-def test_required_shinobi_comes_from_the_run_extra():
-    """The guard quotes dosho's declared requirement rather than restating it,
-    so bumping `pyproject.toml` is the only edit a shinobi bump needs.
-    """
+def test_lazy_execution_adapter_requirement():
+    """Runnable object lookup gives explicit installation guidance."""
     required = registry._required_shinobi()
     assert required is not None
     assert required.startswith("stimela-ninja")
     assert ";" not in required and "extra" not in required
+
+
+def test_old_framework_without_dosho_adapter_is_refused(monkeypatch):
+    import shinobi.loaders.yaml_cab as adapter
+
+    monkeypatch.delattr(adapter, "CAB_ADAPTER_CONTRACT_VERSION")
+    monkeypatch.setattr(registry, "_cab_cache", {})
+    with pytest.raises(ImportError, match=r"stimela-ninja>=0\.2\.0b1"):
+        registry.get(_document_cab_name())
+
+
+def test_provider_documents_negotiate_the_new_compiler_contract():
+    dialect, text = registry.get_document(_document_cab_name())
+    assert dialect == "dosho-cab-v1"
+    assert text

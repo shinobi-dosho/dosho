@@ -1,0 +1,67 @@
+_include: (dosho)documents/library/quartical.yaml
+cabs:
+  quartical-readonly:
+    _use: lib.quartical
+    info: QuartiCal read-only local MSv2 calibration; writes gains and declared logs only.
+    input_patterns:
+    - segments:
+      - regex: (?!(?:input_ms|input_model|output|mad_flags|solver|dask)\.)[A-Za-z][A-Za-z0-9_]*
+      - attrs:
+          type:
+            dtype: str
+          solve_per:
+            dtype: str
+          direction_dependent:
+            dtype: bool
+          pinned_directions:
+            dtype: List[int]
+          time_interval:
+            dtype: str
+          freq_interval:
+            dtype: str
+          load_from:
+            dtype: Directory
+            writable: false
+          interp_mode:
+            dtype: str
+          interp_method:
+            dtype: str
+          respect_scan_boundaries:
+            dtype: bool
+          initial_estimate:
+            dtype: bool
+    dataset_accesses:
+    - field: input_ms_path
+      mode: read
+    inputs:
+      input_ms.path:
+        dtype: MSv2
+        writable: false
+      parset:
+        choices:
+        - null
+        default: null
+      output.flags:
+        default: false
+        implicit: false
+        nullable: false
+        choices:
+        - false
+      output.products:
+        default: []
+        implicit: []
+        nullable: false
+        max_length: 0
+      output.columns:
+        default: []
+        implicit: []
+        nullable: false
+        max_length: 0
+      output.log_directory:
+        dtype: str
+        mutable: false
+        write_path: true
+      output.gain_directory:
+        dtype: str
+        mutable: false
+        write_path: true
