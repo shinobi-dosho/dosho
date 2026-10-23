@@ -2654,8 +2654,8 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - ``None``
      - \-
    * - ``data_ms``
-     - ``list[Path] | None``
-     - ``None``
+     - ``list[MSv2]``
+     - *required*
      - \-
    * - ``data_col_name``
      - ``str | None``
@@ -3025,13 +3025,13 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - ``bool | None``
      - ``1``
      - \-
-   * - ``cache_dir``
-     - ``str | None``
-     - ``None``
+   * - ``data_cache_dir``
+     - ``str``
+     - ``'.ddfacet-cache'``
      - \-
    * - ``cache_dir_wisdom_fftw``
-     - ``str | None``
-     - ``'~/.fftw_wisdom'``
+     - ``str``
+     - ``'.ddfacet-wisdom'``
      - \-
    * - ``cache_reset_wisdom``
      - ``bool | None``
@@ -3434,8 +3434,8 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - ``None``
      - \-
    * - ``montblanc_log_file``
-     - ``str | None``
-     - ``None``
+     - ``str``
+     - ``'.ddfacet-montblanc.log'``
      - \-
    * - ``montblanc_memory_budget``
      - ``float | None``

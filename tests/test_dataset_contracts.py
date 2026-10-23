@@ -79,6 +79,7 @@ CONTRACTS: dict[str, list[DatasetAccess]] = {
         DatasetAccess(field="msname", mode="write", table="HISTORY", allow_row_count_change=True),
     ],
     "wsclean": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
+    "ddfacet": [DatasetAccess(field="data_ms", mode="write", allow_schema_change=True)],
     # Whole dataset like wsclean: the output, model and weight columns, the
     # BITFLAG insertion and FLAG/FLAG_ROW saving all depend on options.
     "cubical": [DatasetAccess(field="data_ms", mode="write", allow_schema_change=True)],
@@ -207,6 +208,43 @@ class _MS(BaseModel):
 
 class _Empty(BaseModel):
     pass
+
+
+def test_ddfacet_after_simulation_has_a_complete_contained_contract(no_closure, tmp_path):
+    recipe = Recipe(name="strict-ddfacet", inputs_model=_MS, outputs_model=_Empty)
+    recipe.add_step(
+        "simulate", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+    )
+    recipe.add_step(
+        "image",
+        registry.get("ddfacet"),
+        data_ms=[OutputRef(step="simulate", field="ms")],
+        output_name="image",
+    )
+    inputs = {"ms": tmp_path / "sim.ms"}
+    plan = plan_recipe_accesses(recipe, inputs, workspace=tmp_path)
+    assert [access.mode.value for access in plan.accesses["image"]] == ["write"]
+    assert plan.graph.deps[plan.graph.names.index("image")] == {plan.graph.names.index("simulate")}
+    assert not contained_access_issues(
+        recipe, inputs, workspace=tmp_path, dataset_resources={inputs["ms"]}
+    )
+
+
+@pytest.mark.parametrize("field", ["data_cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"])
+def test_ddfacet_scratch_cannot_write_inside_the_ms(no_closure, tmp_path, field):
+    recipe = Recipe(name="strict-ddfacet-overlap", inputs_model=_MS, outputs_model=_Empty)
+    recipe.add_step(
+        "simulate", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+    )
+    ms = tmp_path / "sim.ms"
+    recipe.add_step(
+        "image",
+        registry.get("ddfacet"),
+        data_ms=[OutputRef(step="simulate", field="ms")],
+        output_name="image",
+        **{field: str(ms / "unowned-scratch")},
+    )
+    assert contained_access_issues(recipe, {"ms": ms}, workspace=tmp_path, dataset_resources={ms})
 
 
 @pytest.fixture

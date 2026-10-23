@@ -34,7 +34,7 @@ def test_native_product_capture_and_cache(tmp_path, monkeypatch, name, mode):
     monkeypatch.setenv("SHINOBI_OWNERSHIP_REGISTRY", str(tmp_path / "ownership.json"))
     cab = dosho.get(name).model_copy(
         update={
-            "backend": "docker",
+            "backend": os.environ.get("DOSHO_OUTPUT_FAMILY_TEST_BACKEND", "docker"),
             "cache": True,
             "cache_dir": str(tmp_path / "cache"),
             "sandbox": False,
@@ -70,10 +70,19 @@ def test_native_product_capture_and_cache(tmp_path, monkeypatch, name, mode):
         }
         field = "solutions"
     elif name == "ddfacet":
+        from casacore.tables import table
+
+        # Exercise schema creation even if the supplied fixture already has
+        # prediction or imaging-weight columns from a previous imager.
+        with table(str(ms), readonly=False, ack=False) as data:
+            for column in ("MODEL_DATA", "IMAGING_WEIGHT"):
+                if column in data.colnames():
+                    data.removecols(column)
         params = {
             "data_ms": [ms],
             "data_col_name": "DATA",
             "weight_col_name": "WEIGHT",
+            "weight_out_col_name": "IMAGING_WEIGHT",
             "output_name": "native",
             "output_mode": mode,
             "image_n_pix": 32,
@@ -86,11 +95,12 @@ def test_native_product_capture_and_cache(tmp_path, monkeypatch, name, mode):
             "deconv_max_minor_iter": 1,
             "output_images": "dDpPMmRrIi",
             "output_cubes": "dDpPMmRrIi",
-            "cache_dir": "ddfcache",
             "cache_dirty": "off",
             "cache_psf": "off",
             "output_clobber": True,
         }
+        if mode == "Clean":
+            params["predict_col_name"] = "MODEL_DATA"
         field = "dirty" if mode == "Dirty" else "restored"
     else:
         params = {
@@ -111,6 +121,19 @@ def test_native_product_capture_and_cache(tmp_path, monkeypatch, name, mode):
         field = "cubelets"
     first = _dispatch(cab, None, **params)
     assert first.returncode == 0, first.stderr
+    if name == "ddfacet":
+        import numpy as np
+        from casacore.tables import table
+
+        with table(str(ms), readonly=True, ack=False) as data:
+            columns = ["IMAGING_WEIGHT"]
+            if mode == "Clean":
+                columns.append("MODEL_DATA")
+            for column in columns:
+                assert column in data.colnames()
+                assert np.isfinite(data.getcol(column)).all()
+        assert (tmp_path / ".ddfacet-cache").is_dir()
+        assert (tmp_path / ".ddfacet-wisdom").is_dir()
     family = getattr(first.outputs, field)
     assert family.resolved and family.members
     if name in {"quartical", "killms"}:
