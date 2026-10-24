@@ -45,7 +45,7 @@ def load_file(
     package_roots: dict[str, Path] | None = None,
     images: dict[str, str] | None = None,
 ) -> dict[str, CabSpec]:
-    """Load a YAML cab definition file into `Cab` instances.
+    """Load a YAML cab definition file into inert `CabSpec` records.
 
     Args:
         path: Path to the YAML cab definition file.
@@ -54,7 +54,8 @@ def load_file(
         images: Mapping of image *key* to full reference. See `loads`.
 
     Returns:
-        A dict mapping cab name to its built `Cab` instance.
+        A dict mapping cab name to its parsed `CabSpec` record. Call
+        `compile_cab` to build parameter models and formatting metadata.
 
     Raises:
         CabLoadError: If composition cannot be resolved, including an

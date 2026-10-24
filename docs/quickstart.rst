@@ -52,7 +52,8 @@ or serve the catalogue from an environment that never runs a pipeline:
 
     from dosho.registry import get_document, list_cabs
 
-    dialect, text = get_document("wsclean")   # ("yaml_cab", "cabs:\n  wsclean:\n    ...")
+    dialect, text = get_document("wsclean")
+    assert dialect == "dosho-cab-v1"
 
 It raises ``KeyError`` for a pystep, whose definition is a Python function
 and cannot be a document.
@@ -65,14 +66,13 @@ Use it in a recipe
     from pathlib import Path
 
     from pydantic import BaseModel
-    from shinobi import Recipe
+    from shinobi import MSv2, Recipe
 
-    from dosho.cabs import wsclean
-    from dosho.cabs.casatasks import listobs
+    from dosho.cabs import wsclean_readonly
 
 
     class Inputs(BaseModel):
-        ms: Path
+        ms: MSv2
 
 
     class Outputs(BaseModel):
@@ -80,11 +80,11 @@ Use it in a recipe
 
 
     recipe = Recipe(name="image", inputs_model=Inputs, outputs_model=Outputs)
-    recipe.add_step("listobs", listobs, vis=recipe.inputs.ms, listfile=Path("obs.txt"))
     recipe.add_step(
         "image",
-        wsclean,
+        wsclean_readonly,
         ms=[recipe.inputs.ms],
+        temp_dir=Path("wsclean-tmp"),
         prefix="deep",
         size=(4096, 4096),
         scale="1.3asec",
@@ -94,6 +94,18 @@ Use it in a recipe
 .. code-block:: console
 
     $ ninja run myrecipe.py:recipe --ms data.ms --dryrun
+
+Save the Python snippet as ``myrecipe.py``. This reader leaves the input MS
+read-only and places reordered temporary data outside it. The ordinary
+``wsclean`` cab retains conservative write access. Strict MS execution also
+needs the framework's ``ms-contract`` and ``fits-contract`` extras and a
+qualified backend route (see :doc:`installation`); Apptainer
+is Shinobi's default backend. ``--dryrun`` inspects the declared plan without
+dispatching the tool. See :doc:`concepts/read_only_access` for the guarded
+controls and :doc:`concepts/msv2_contracts` for a complete strict pipeline.
+
+A path-only CASA wrapper cannot share the same strict MS in this recipe;
+all accesses to a strict dataset must use compatible declared contracts.
 
 Inspect a tool from the command line
 --------------------------------------

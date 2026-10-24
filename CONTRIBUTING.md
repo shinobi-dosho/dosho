@@ -75,19 +75,25 @@ bypasses the hook when you genuinely need to.
 ## Testing
 
 ```bash
-uv run --no-sync pytest -q
+uv run --no-sync pytest -q -o pythonpath=
 ```
 
 Every ported tool's test round-trips a representative param set through
-`shinobi.policies.build_argv` (for a `Cab`) or checks its
+`shinobi.policies.build_argv` (for a runnable `Cab`) or checks its
 `inputs_model`/`Recipe` wiring (for a pystep) against the real tool's
 known CLI/signature shape -- most tools here (`casatasks`, `casaplotms`,
 CASA in general) aren't installed in the test environment, so tests never
 actually dispatch/execute them.
 
+Standalone schema and argv behavior belongs in `dosho.validation`, whose
+tests require no Shinobi installation. Run the independent core selection
+from `.github/workflows/ci.yml` after `uv sync --locked --extra validation
+--group dev`. For integration tests, install the candidate wheel pair first;
+`-o pythonpath=` checks the installed wheels rather than importing `src/`.
+
 ## Code style
 
-- **Lint must be clean**: `uv run ruff check .` should report no errors. Ruff runs at
+- **Lint must be clean**: `uv run --no-sync ruff check .` should report no errors. Ruff runs at
   `line-length = 100` with the rule set selected in `pyproject.toml`.
 - `ruff format` is available and uses the same line width if you'd like
   autoformatting.
@@ -104,7 +110,7 @@ the `validation` extra plus an explicit Shinobi installation too:
 ```bash
 uv sync --locked --extra validation --group docs
 # Install the explicit candidate pair as described in docs/installation.rst.
-uv run --no-sync sphinx-build -b html docs docs/_build/html
+uv run --no-sync sphinx-build -b html docs docs/_build/html -W --keep-going
 open docs/_build/html/index.html
 ```
 
@@ -114,7 +120,7 @@ CI builds with `-W`, so a warning is a failure.
 
 1. Branch off `main` and keep PRs **small and focused** — one logical change per
    PR is much easier to review.
-2. Make sure `uv run --no-sync pytest -q` and `uv run ruff check .` pass locally, and that docs build if you
+2. Make sure `uv run --no-sync pytest -q -o pythonpath=` and `uv run --no-sync ruff check .` pass locally, and that docs build if you
    touched public API.
 3. Push and open a PR against `main`. Reference any related issue
    (e.g. "Closes #12").

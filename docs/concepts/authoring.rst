@@ -10,22 +10,21 @@ a new repository, not a rejection of the old one. ``dosho`` exists
 because cult-cargo's cab YAML format -- built for Stimela 2.0/scabha --
 carries assumptions shinobi deliberately doesn't carry forward:
 ``dynamic_schema`` (a Python function imported and *executed* at
-cab-load time to compute a real tool's schema), package-scoped
-``_include`` composition, and dtype coverage gaps that silently degrade
+cab-load time to compute a real tool's schema), import-based
+``_include`` resolution, and dtype coverage gaps that silently degrade
 to ``str``.
 
-Note what that objection is and isn't. It is to *executable and
-self-composing content* in a cab, not to static markup: a cab definition
-is parameter configuration -- names, dtypes, defaults, metadata,
-policies -- which is what YAML and JSON were made for. ``dosho``'s cabs
-are YAML documents, in the same scabha dialect minus the parts that are a
-programming language wearing YAML. See ``AGENTS.md``'s Core rule for the
-constraints that bind a cab definition in any format.
+A cab definition is parameter configuration -- names, dtypes, defaults,
+metadata and policies. Dosho's static scabha-compatible YAML supports
+``_include`` and ``_use`` composition through caller-supplied filesystem
+roots. Resolving a package-scoped include never imports a package or runs
+``dynamic_schema``. See :doc:`validation` and ``AGENTS.md``'s Core rule.
 
 Because a document is inert data, ``import dosho`` needs no shinobi at
 all: a consumer that only wants the definitions -- to read, diff, pin or
-serve them -- installs ``dosho``, and only *building* a cab from one
-needs the framework that runs it (the ``stimela-ninja`` execution adapter).
+serve them -- installs ``dosho``. Schema compilation and argv formatting
+need only ``dosho[validation]``; constructing runnable ``Cab`` and ``StepRef``
+objects needs the ``stimela-ninja`` execution adapter.
 
 Two shapes: ``Cab`` and pystep
 --------------------------------
@@ -48,14 +47,14 @@ load time.
 So the two shapes are stored differently, and this is the one thing to
 know before adding a tool:
 
-============  ==================================  ===================
-Shape         Lives in                            Today
-============  ==================================  ===================
-``Cab``       ``dosho/documents/<name>.yaml``     63 tools
-pystep        ``dosho/cabs/<family>.py``          66 tools
-============  ==================================  ===================
+============  ==================================
+Shape         Lives in
+============  ==================================
+``Cab``       ``dosho/documents/<name>.yaml``
+pystep        ``dosho/cabs/<family>.py``
+============  ==================================
 
-129 tools in total. The live list, with each one's resolved image and
+The live inventory, with each tool's resolved image and
 full schema, is the :doc:`cab catalog </reference/cabs>`.
 
 Both are first-class for :meth:`Recipe.add_step
@@ -168,7 +167,7 @@ output orders backups even when their version names differ. This unrelated
 output is paired with exclusive READ ownership (``exclusive: true``) of the associated MS, blocking
 all concurrent access during history mutation. ``msutils-flags-delete`` uses
 the same ownership rule. ``cache: false`` ensures each
-invocation creates its requested version. See shinobi's
+invocation executes its requested history change. See shinobi's
 `datasets documentation
 <https://stimela-ninja.readthedocs.io/en/latest/concepts/datasets.html>`_
 for the modes, the planner and the execution routes that support them.
@@ -203,7 +202,7 @@ Dynamic per-instance parameter families
 Some real tools have parameter names that depend on a caller-chosen
 value, not a fixed field set -- CubiCal's ``g1-solvable``/``g-time-int``,
 QuartiCal's ``K.time_interval``, one family per solvable-term name chosen
-per pipeline call. shinobi's :class:`~shinobi.steps.schema.ParamPattern`
+per pipeline call. Dosho's :class:`~dosho.validation.ParamPattern`
 expresses this declaratively, as an ``input_patterns`` entry: a
 hand-authored table of the real, known attrs (transcribed once from the
 tool's own docs/template), plus a regex-matched wildcard segment for the
@@ -230,11 +229,16 @@ Dynamic output paths
 
 A scalar output whose path depends on inputs uses an ``implicit`` string
 resolved by plain ``str.format`` against the step's validated inputs.
-Dimensional products use ``ProductFamily[File]`` with a static ``family``
+Dimensional FITS products use ``ProductFamily[FITSImage]`` with a static ``family``
 declaration. WSClean's ``image``, ``dirty``, ``residual`` and ``model`` families
 have ``time``, ``frequency``, ``polarization`` and ``component`` coordinates.
 Its shared ``psf`` family has only ``time`` and ``frequency``. The defaults
 are one channel, one interval, and Stokes I, matching WSClean 3.6.
+
+WSClean's and DDFacet's FITS image families validate each observed member
+against Shinobi's header-only image contract, including on cache reuse.
+The execution/inspection environment needs its ``fits-contract`` extra;
+plain-file and directory-bundle families retain their separate contracts.
 
 Every run returns a resolved collection of the products actually emitted
 or explicitly reused.
@@ -372,7 +376,7 @@ The index is maintained by hand, not generated: it was generated by
 introspecting the Python definitions that the documents replaced,
 deriving it from the documents would be circular, and ``attr`` is not
 derivable from anything -- ``msutils-addcol`` is imported as ``addcol``,
-and 48 tools differ this way.
+and other tools differ this way too.
 
 A pystep's definition sits in a module named for the *tool family*, one
 decorated function per sub-command. The decorator takes the ``image``, and
@@ -409,12 +413,13 @@ write-time or run-time.
 
 Underneath both, shinobi's provider protocol prefers the document form:
 it tries :func:`dosho.registry.get_document` first, which returns
-``(dialect, text)`` and lets *shinobi* build the ``Cab``, so nothing on
-dosho's side parses the document or imports the schema.
-:func:`dosho.registry.loader_options` supplies the one thing that
-document cannot carry on its own -- the resolved ``{KEY: ref}`` image
-map, so a deployment's ``$DOSHO_IMAGES``/``$DOSHO_IMAGE_<KEY>``
-overrides still decide the reference at load time. A pystep has no
+``("dosho-cab-v1", text)`` without parsing or importing a schema. Shinobi's
+versioned adapter delegates parameter compilation to Dosho and validates the
+framework declarations before constructing a runnable ``Cab``.
+:func:`dosho.registry.loader_options` supplies the explicit package roots
+used by static includes and the resolved ``{KEY: ref}`` image map, so a
+deployment's ``$DOSHO_IMAGES``/``$DOSHO_IMAGE_<KEY>`` overrides still decide
+the reference at load time. A pystep has no
 document, so ``get_document`` raises ``KeyError`` for one and the
 protocol falls through to ``get``.
 
