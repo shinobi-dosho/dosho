@@ -22,16 +22,16 @@ import pytest
 from pydantic import ValidationError
 from shinobi import StepRef
 from shinobi.backends.recording import RecordingBackend
+from shinobi.cabs import get as get_runtime
 from shinobi.policies import build_argv
 from shinobi.steps import register_step_backend
 from shinobi.steps.dispatch import _dispatch
 
-import dosho
 from dosho import images
 
 
 def test_aoflagger_single_dash_cli():
-    cab = dosho.get("aoflagger")
+    cab = get_runtime("aoflagger")
     assert cab.name == "aoflagger"
     argv = build_argv(cab, {"msname": "/x.ms", "verbose": True, "threads": 4})
     assert argv[0] == "aoflagger"
@@ -44,7 +44,7 @@ def test_aoflagger_single_dash_cli():
 
 
 def test_tricolour_positional_ms_and_double_dash_flags():
-    cab = dosho.get("tricolour")
+    cab = get_runtime("tricolour")
     assert cab.name == "tricolour"
     argv = build_argv(cab, {"ms": "/x.ms", "data_column": "DATA"})
     assert argv[0] == "tricolour"
@@ -53,7 +53,7 @@ def test_tricolour_positional_ms_and_double_dash_flags():
 
 
 def test_tricolour_scan_selection_matches_the_native_parser():
-    cab = dosho.get("tricolour")
+    cab = get_runtime("tricolour")
     values = cab.inputs_model(ms="/x.ms", scan_numbers="1~3", nworkers=2).model_dump()
     argv = build_argv(cab, values)
     assert argv[argv.index("--scan-numbers") : argv.index("--scan-numbers") + 2] == [
@@ -66,11 +66,11 @@ def test_tricolour_scan_selection_matches_the_native_parser():
 @pytest.mark.parametrize("params", [{"flagging_strategy": "unknown"}, {"window_backend": "disk"}])
 def test_tricolour_rejects_modes_the_native_parser_does_not_support(params):
     with pytest.raises(ValidationError):
-        dosho.get("tricolour").inputs_model(ms="/x.ms", **params)
+        get_runtime("tricolour").inputs_model(ms="/x.ms", **params)
 
 
 def test_crystalball_required_fields_and_argv():
-    cab = dosho.get("crystalball")
+    cab = get_runtime("crystalball")
     assert cab.name == "crystalball"
     fields = cab.inputs_model.model_fields
     assert fields["output_column"].is_required()
@@ -82,7 +82,7 @@ def test_crystalball_required_fields_and_argv():
 
 
 def test_owlcat_plotelev_output_field_has_real_default():
-    cab = dosho.get("owlcat_plotelev")
+    cab = get_runtime("owlcat_plotelev")
     assert cab.name == "owlcat_plotelev"
     assert cab.outputs_model.model_fields["output_name"].default == "lst-elev.png"
     argv = build_argv(cab, {"msname": "/x.ms"})
@@ -96,7 +96,7 @@ def test_owlcat_plotelev_output_name_is_a_file_input_emitted_on_the_cli():
     # `output_name` must be an *input* (File-typed, so containers bind its
     # parent dir) as well as a passthrough output -- output-only fields are
     # never emitted, and the script then writes lst-elev.png into the cwd.
-    cab = dosho.get("owlcat_plotelev")
+    cab = get_runtime("owlcat_plotelev")
     assert "output_name" in cab.inputs_model.model_fields
     argv = build_argv(cab, {"msname": "/x.ms", "output_name": "/plots/elev.png"})
     assert "--output-name" in argv
@@ -107,7 +107,7 @@ def test_owlcat_plotelev_output_name_is_a_file_input_emitted_on_the_cli():
 
 
 def test_shadems_union_dtypes_resolve_to_real_python_types():
-    cab = dosho.get("shadems")
+    cab = get_runtime("shadems")
     assert cab.name == "shadems"
     fields = cab.inputs_model.model_fields
     assert fields["field"].annotation == int | str | list[str] | list[int] | None
@@ -117,7 +117,7 @@ def test_shadems_union_dtypes_resolve_to_real_python_types():
 
 
 def test_ragavi_vis_registered_and_prefixed():
-    cab = dosho.get("ragavi-vis")
+    cab = get_runtime("ragavi-vis")
     assert cab.name == "ragavi-vis"
     assert cab.command == "ragavi-vis"
     argv = build_argv(cab, {"ms": "/x.ms"})
@@ -127,7 +127,7 @@ def test_ragavi_vis_registered_and_prefixed():
 def test_ragavi_vis_emits_htmlname_so_the_caller_controls_the_output_path():
     # htmlname is a File input (emitted on the CLI, parent dir bound) -- without
     # it ragavi-vis writes an auto-named .html into the cwd.
-    cab = dosho.get("ragavi-vis")
+    cab = get_runtime("ragavi-vis")
     assert "htmlname" in cab.inputs_model.model_fields
     argv = build_argv(
         cab, {"ms": "/x.ms", "xaxis": "chan", "yaxis": "amp", "htmlname": "/out/plots/p-amp_chan"}
@@ -137,7 +137,7 @@ def test_ragavi_vis_emits_htmlname_so_the_caller_controls_the_output_path():
 
 
 def test_sofia2_real_param_count():
-    cab = dosho.get("sofia2")
+    cab = get_runtime("sofia2")
     assert cab.name == "sofia2"
     assert len(cab.inputs_model.model_fields) == 109
 
@@ -147,7 +147,7 @@ def test_sofia2_renders_settings_not_flags():
     # setting is a bare `module.parameter=value` token. Under shinobi's
     # default `--` policies SoFiA reads the first token as the name of a
     # parameter file and dies with error code 5 before reading a voxel.
-    cab = dosho.get("sofia2")
+    cab = get_runtime("sofia2")
     argv = build_argv(cab, cab.inputs_model(input_data="/x/cube.fits").model_dump())
     assert argv[0] == "sofia"
     settings = argv[1:]
@@ -161,7 +161,7 @@ def test_sofia2_parameter_names_are_the_ones_sofia_27_knows():
     # name cult-cargo's schema carried from before the 2.6.38/2.6.54 renames
     # is not inert here, it stops the run. See the module docstring for the
     # mapping; these are the five that moved.
-    cab = dosho.get("sofia2")
+    cab = get_runtime("sofia2")
     argv = build_argv(cab, cab.inputs_model(input_data="/x/cube.fits").model_dump())
     names = {token.split("=", 1)[0] for token in argv[1:]}
     assert not {n for n in names if n.startswith("rippleFilter.")}
@@ -177,10 +177,10 @@ def test_sofia2_parameter_names_are_the_ones_sofia_27_knows():
 
 
 def test_ragavi_gains_registered_and_passes_gain_flags():
-    cab = dosho.get("ragavi-gains")
+    cab = get_runtime("ragavi-gains")
     assert cab.name == "ragavi-gains"
     assert cab.command == "ragavi-gains"
-    assert cab.image == dosho.get("ragavi-vis").image  # same ragavi image, sibling script
+    assert cab.image == get_runtime("ragavi-vis").image  # same ragavi image, sibling script
     argv = build_argv(
         cab, {"table": ["/x.G0"], "gaintype": ["G"], "htmlname": "x.G0", "plotname": "x.G0.png"}
     )
@@ -207,10 +207,10 @@ def test_ragavi_gains_registered_and_passes_gain_flags():
 def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     from typing import get_args
 
-    step = dosho.get("simms-primary-beam")
+    step = get_runtime("simms-primary-beam")
     assert isinstance(step, StepRef)
     assert step.name == "simms-primary-beam"
-    assert step.step.image == dosho.get("simms-skysim").image  # same simms 3.0 image
+    assert step.step.image == get_runtime("simms-skysim").image  # same simms 3.0 image
     fields = step.step.inputs_model.model_fields
     # the operation selector is a required Literal choice field
     assert get_args(fields["mode"].annotation) == ("to-fits", "tag-ms", "apply", "correct")
@@ -224,7 +224,7 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
     assert get_args(fields["fits_format"].annotation) == ("simms", "cattery")
     assert get_args(fields["beam_l_axis"].annotation) == ("-X", "X")
     assert get_args(fields["beam_m_axis"].annotation) == ("Y", "-Y")
-    beam_axes = dosho.get("simms-skysim").inputs_model.model_fields
+    beam_axes = get_runtime("simms-skysim").inputs_model.model_fields
     assert "beam_l_axis" in beam_axes and "beam_m_axis" in beam_axes
     # path-valued fields must be Path-typed, not str: only path-typed fields
     # are absolutized into the workspace and have their parents bound into the
@@ -248,10 +248,10 @@ def test_simms_primary_beam_is_a_pystep_with_mode_choices():
 
 
 def test_simms_classic_is_a_genuinely_different_tool_and_image():
-    cab = dosho.get("simms")
+    cab = get_runtime("simms")
     assert cab.name == "simms"
     assert cab.command == "simms"
-    assert cab.image != dosho.get("simms-skysim").image
+    assert cab.image != get_runtime("simms-skysim").image
     assert cab.field_meta["msname"].nom_de_guerre == "name"
     argv = build_argv(cab, {"msname": "/x.ms", "telescope": "meerkat"})
     assert argv[0] == "simms"
@@ -260,14 +260,14 @@ def test_simms_classic_is_a_genuinely_different_tool_and_image():
 
 
 def test_mosaic_queen_replace_policy_and_output():
-    cab = dosho.get("mosaic-queen")
+    cab = get_runtime("mosaic-queen")
     assert cab.name == "mosaic-queen"
     assert cab.policies.replace == {"_": "-"}
     assert "output" in cab.outputs_model.model_fields
 
 
 def test_msutils_summary_positional_ms_and_json_flag():
-    cab = dosho.get("msutils-summary")
+    cab = get_runtime("msutils-summary")
     assert cab.name == "msutils-summary"
     assert cab.command == "msutils summary"
     argv = build_argv(cab, {"ms": "/x.ms", "json_out": "s.json", "quiet": True})
@@ -281,7 +281,7 @@ def test_msutils_summary_positional_ms_and_json_flag():
 
 
 def test_msutils_addcol_two_positionals_in_order_and_ms_output():
-    cab = dosho.get("msutils-addcol")
+    cab = get_runtime("msutils-addcol")
     assert cab.name == "msutils-addcol"
     assert cab.command == "msutils addcol"
     argv = build_argv(cab, {"ms": "/x.ms", "colname": "CORRECTED_DATA", "init_with": 0.0})
@@ -293,14 +293,14 @@ def test_msutils_addcol_two_positionals_in_order_and_ms_output():
 
 
 def test_msutils_copycol_three_positionals():
-    cab = dosho.get("msutils-copycol")
+    cab = get_runtime("msutils-copycol")
     assert cab.name == "msutils-copycol"
     argv = build_argv(cab, {"ms": "/x.ms", "fromcol": "DATA", "tocol": "CORRECTED_DATA"})
     assert argv == ["msutils", "copycol", "/x.ms", "DATA", "CORRECTED_DATA"]
 
 
 def test_msutils_sumcols_variadic_positional_cols_as_separate_tokens():
-    cab = dosho.get("msutils-sumcols")
+    cab = get_runtime("msutils-sumcols")
     assert cab.name == "msutils-sumcols"
     assert cab.inputs_model.model_fields["cols"].is_required()
     argv = build_argv(
@@ -312,7 +312,7 @@ def test_msutils_sumcols_variadic_positional_cols_as_separate_tokens():
 
 
 def test_msutils_addnoise_defaults_and_ms_output():
-    cab = dosho.get("msutils-addnoise")
+    cab = get_runtime("msutils-addnoise")
     assert cab.name == "msutils-addnoise"
     fields = cab.inputs_model.model_fields
     assert fields["sefd"].default == 551.0
@@ -324,7 +324,7 @@ def test_msutils_addnoise_defaults_and_ms_output():
 
 
 def test_msutils_flagstats_repeated_flags_and_file_outputs():
-    cab = dosho.get("msutils-flagstats")
+    cab = get_runtime("msutils-flagstats")
     assert cab.name == "msutils-flagstats"
     # click `multiple=True` options -> flag repeated per value (repeat_list)
     assert cab.policies.repeat_list is True
@@ -338,7 +338,7 @@ def test_msutils_flagstats_repeated_flags_and_file_outputs():
 
 
 def test_breizorro_registered_and_repeated_list_flags():
-    cab = dosho.get("breizorro")
+    cab = get_runtime("breizorro")
     assert cab.name == "breizorro"
     assert cab.command == "breizorro"
     # click `multiple=True` options -> flag repeated per value (repeat_list)
@@ -358,7 +358,7 @@ def test_breizorro_registered_and_repeated_list_flags():
 
 
 def test_aimfast_registered_and_nargs_flags_emit_as_bare_tokens():
-    cab = dosho.get("aimfast")
+    cab = get_runtime("aimfast")
     assert cab.name == "aimfast"
     assert cab.command == "aimfast"
     argv = build_argv(
@@ -379,7 +379,7 @@ def test_aimfast_registered_and_nargs_flags_emit_as_bare_tokens():
 
 
 def test_eidos_required_freq_list_and_stokes_case_preserved():
-    cab = dosho.get("eidos")
+    cab = get_runtime("eidos")
     assert cab.name == "eidos"
     fields = cab.inputs_model.model_fields
     assert fields["freq"].is_required()
@@ -393,7 +393,7 @@ def test_eidos_required_freq_list_and_stokes_case_preserved():
 
 
 def test_smops_required_fields_and_hyphenated_flags():
-    cab = dosho.get("smops")
+    cab = get_runtime("smops")
     assert cab.name == "smops"
     fields = cab.inputs_model.model_fields
     assert fields["ms"].is_required()
@@ -410,7 +410,7 @@ def test_smops_required_fields_and_hyphenated_flags():
 
 
 def test_aegean_positional_image_and_repeated_beam_triple():
-    cab = dosho.get("aegean")
+    cab = get_runtime("aegean")
     assert cab.name == "aegean"
     argv = build_argv(cab, {"image": "/img.fits", "beam": [1.0, 0.5, 30.0]})
     assert argv[0] == "aegean"
@@ -420,7 +420,7 @@ def test_aegean_positional_image_and_repeated_beam_triple():
 
 
 def test_rmsynth1d_positional_and_single_dash_flags():
-    cab = dosho.get("rmsynth1d")
+    cab = get_runtime("rmsynth1d")
     assert cab.name == "rmsynth1d"
     assert cab.command == "rmsynth1d"
     argv = build_argv(cab, {"data_file": "/spec.dat", "fit_rmsf_gaussian": True, "nsamples": 20})
@@ -432,7 +432,7 @@ def test_rmsynth1d_positional_and_single_dash_flags():
 
 
 def test_rmsynth3d_three_positionals_in_order():
-    cab = dosho.get("rmsynth3d")
+    cab = get_runtime("rmsynth3d")
     assert cab.name == "rmsynth3d"
     argv = build_argv(
         cab, {"stokes_q": "/Q.fits", "stokes_u": "/U.fits", "freqs": "/freqs.dat", "verbose": True}
@@ -443,10 +443,10 @@ def test_rmsynth3d_three_positionals_in_order():
 
 
 def test_chgcentre_positionals_and_reused_wsclean_image():
-    cab = dosho.get("chgcentre")
+    cab = get_runtime("chgcentre")
     assert cab.name == "chgcentre"
     assert cab.command == "chgcentre"
-    assert cab.image == dosho.get("wsclean").image  # companion binary, same build
+    assert cab.image == get_runtime("wsclean").image  # companion binary, same build
     argv = build_argv(
         cab, {"ms": "/x.ms", "ra": "00h00m00.0s", "dec": "00d00m00.0s", "force": True}
     )
@@ -457,10 +457,10 @@ def test_chgcentre_positionals_and_reused_wsclean_image():
 
 
 def test_flagms_reuses_owlcat_image_and_positional_ms():
-    cab = dosho.get("flagms")
+    cab = get_runtime("flagms")
     assert cab.name == "flagms"
     assert cab.command == "flag-ms.py"
-    assert cab.image == dosho.get("owlcat_plotelev").image
+    assert cab.image == get_runtime("owlcat_plotelev").image
     argv = build_argv(cab, {"ms": "/x.ms", "flag": "L", "verbose": 2})
     assert argv[0] == "flag-ms.py"
     assert "--flag" in argv and "L" in argv
@@ -476,7 +476,7 @@ def test_flagms_declares_the_ms_and_export_file_it_writes():
     # rewrote. `import_` is read-only and must stay out of the mutated set.
     from shinobi.steps.schema import mutated_path_fields
 
-    cab = dosho.get("flagms")
+    cab = get_runtime("flagms")
     assert set(cab.outputs_model.model_fields) == {"ms", "export"}
     assert mutated_path_fields(cab) == {"ms", "export"}
     assert "import_" not in mutated_path_fields(cab)
@@ -488,7 +488,7 @@ def test_flagms_outputs_do_not_clobber_their_inputs_field_meta():
     # name that is also a real input silently replaces the input's. `ms`
     # would stop being positional and the argv would break. Neither output
     # carries a 4th spec element, so both metas survive intact.
-    cab = dosho.get("flagms")
+    cab = get_runtime("flagms")
     assert cab.field_meta["ms"].positional is True
     assert cab.field_meta["export"].positional is False
     argv = build_argv(cab, {"ms": "/x.ms", "flag": "+L", "export": "flags.gz"})
@@ -502,7 +502,7 @@ def test_flagms_mutated_ms_is_dropped_from_the_cache_key(tmp_path):
     # cab declaring nothing at all.
     from shinobi.cache import compute_cache_key, invalidate_path_hashes
 
-    cab = dosho.get("flagms")
+    cab = get_runtime("flagms")
     (ms := tmp_path / "obs.ms").mkdir()
     params = {"ms": str(ms), "flag": "+L"}
     before = compute_cache_key(cab, None, params, None)
@@ -535,7 +535,7 @@ def test_write_targets_are_declared_outputs_so_a_recipe_can_wire_them():
         ("rfinder", "output_dir"),
         ("quartical-backup", "zarr_dir"),
     ):
-        cab = dosho.get(name)
+        cab = get_runtime(name)
         assert field in cab.outputs_model.model_fields, name
         assert field in mutated_path_fields(cab), name
 
@@ -547,14 +547,14 @@ def test_new_outputs_do_not_clobber_their_inputs_field_meta():
     # the new output specs carries a 4th element; these argv shapes are the
     # proof, not the intent.
     assert build_argv(
-        dosho.get("tigger-convert"),
+        get_runtime("tigger-convert"),
         {"sky_model": "in.lsm.html", "output_model": "out.lsm.html", "force": True},
     ) == ["tigger-convert", "--force", "in.lsm.html", "out.lsm.html"]
     assert build_argv(
-        dosho.get("quartical-backup"),
+        get_runtime("quartical-backup"),
         {"ms_path": "/x.ms", "zarr_dir": "/bk", "column_name": "FLAG"},
     ) == ["goquartical-backup", "/x.ms", "/bk", "FLAG"]
-    assert build_argv(dosho.get("rfinder"), {"output_dir": "/out"}) == [
+    assert build_argv(get_runtime("rfinder"), {"output_dir": "/out"}) == [
         "rfinder",
         "--output_dir",
         "/out",
@@ -568,9 +568,9 @@ def test_tigger_tag_saves_in_place_by_default_so_its_model_is_mutable():
     # theirs stays immutable.
     from shinobi.steps.schema import Mutability
 
-    assert dosho.get("tigger-tag").mutability_of("sky_model") is Mutability.MUTABLE
+    assert get_runtime("tigger-tag").mutability_of("sky_model") is Mutability.MUTABLE
     for sibling in ("tigger-convert", "tigger-restore"):
-        assert dosho.get(sibling).mutability_of("sky_model") is Mutability.IMMUTABLE
+        assert get_runtime(sibling).mutability_of("sky_model") is Mutability.IMMUTABLE
 
 
 def test_quartical_backup_reads_its_ms_rather_than_writing_it():
@@ -578,11 +578,11 @@ def test_quartical_backup_reads_its_ms_rather_than_writing_it():
     # copies a column out to zarr. The MS must keep its content hash.
     from shinobi.steps.schema import Mutability
 
-    assert dosho.get("quartical-backup").mutability_of("ms_path") is Mutability.IMMUTABLE
+    assert get_runtime("quartical-backup").mutability_of("ms_path") is Mutability.IMMUTABLE
 
 
 def test_pyddi_hyphenated_flags():
-    cab = dosho.get("pyddi")
+    cab = get_runtime("pyddi")
     assert cab.name == "pyddi"
     argv = build_argv(cab, {"image": "/img.fits", "flux_thresh": 12.0})
     assert argv[0] == "pyddi"
@@ -591,7 +591,7 @@ def test_pyddi_hyphenated_flags():
 
 
 def test_rfinder_long_form_flags_diverge_from_short_mnemonics():
-    cab = dosho.get("rfinder")
+    cab = get_runtime("rfinder")
     assert cab.name == "rfinder"
     argv = build_argv(cab, {"input": "/x.ms", "telescope": "meerkat", "no_cleanup": True})
     assert argv[0] == "rfinder"
@@ -601,7 +601,7 @@ def test_rfinder_long_form_flags_diverge_from_short_mnemonics():
 
 
 def test_spimple_binterp_repeated_ms_list_as_bare_tokens():
-    cab = dosho.get("spimple-binterp")
+    cab = get_runtime("spimple-binterp")
     assert cab.name == "spimple-binterp"
     assert cab.command == "spimple-binterp"
     assert cab.inputs_model.model_fields["beam_model"].is_required()
@@ -620,9 +620,9 @@ def test_spimple_binterp_repeated_ms_list_as_bare_tokens():
 
 
 def test_spimple_imconv_shares_image_with_binterp():
-    cab = dosho.get("spimple-imconv")
+    cab = get_runtime("spimple-imconv")
     assert cab.name == "spimple-imconv"
-    assert cab.image == dosho.get("spimple-binterp").image
+    assert cab.image == get_runtime("spimple-binterp").image
     argv = build_argv(cab, {"image": "/img.fits", "output_filename": "/out", "circ_psf": True})
     assert "--circ-psf" in argv
 
@@ -635,7 +635,7 @@ def test_spimple_output_filename_is_a_prefix_not_a_directory():
     concatenate a per-product suffix. Declaring it as the directory would put
     every product one level too high.
     """
-    binterp = dosho.get("spimple-binterp")
+    binterp = get_runtime("spimple-binterp")
     # binterp: the value *is* the file -- a same-named passthrough output
     assert "output_filename" in binterp.outputs_model.model_fields
     assert binterp.field_meta["output_filename"].implicit is None
@@ -651,7 +651,7 @@ def test_spimple_output_filename_is_a_prefix_not_a_directory():
 
 def test_spimple_binterp_output_passes_the_input_value_through(tmp_path):
     # Under tmp_path: dispatch creates a declared output's parent before launch.
-    cab = dosho.get("spimple-binterp").model_copy(update={"backend": "spimple-record"})
+    cab = get_runtime("spimple-binterp").model_copy(update={"backend": "spimple-record"})
     register_step_backend("spimple-record", RecordingBackend())
     beam = tmp_path / "out" / "beam.fits"
     result = _dispatch(
@@ -664,7 +664,7 @@ def test_spimple_binterp_output_passes_the_input_value_through(tmp_path):
 def test_spimple_imconv_products_resolve_to_the_suffixes_the_tool_writes():
     # image_convolver.py: outfile + '.clean_psf.fits' / '.convolved.fits' /
     # '.power_beam.fits' / '.spatial_weight.fits', one per `products` letter.
-    cab = dosho.get("spimple-imconv").model_copy(update={"backend": "spimple-record"})
+    cab = get_runtime("spimple-imconv").model_copy(update={"backend": "spimple-record"})
     register_step_backend("spimple-record", RecordingBackend())
     result = _dispatch(cab, None, image="/img.fits", output_filename="out/img")
     assert str(result.outputs.clean_psf) == "out/img.clean_psf.fits"
@@ -676,7 +676,7 @@ def test_spimple_imconv_products_resolve_to_the_suffixes_the_tool_writes():
 
 def test_spimple_spifit_products_resolve_to_the_suffixes_the_tool_writes():
     # spi_fitter.py, letter for letter from the `products` help text.
-    cab = dosho.get("spimple-spifit").model_copy(update={"backend": "spimple-record"})
+    cab = get_runtime("spimple-spifit").model_copy(update={"backend": "spimple-record"})
     register_step_backend("spimple-record", RecordingBackend())
     result = _dispatch(cab, None, output_filename="out/spi")
     expected = {
@@ -705,7 +705,7 @@ def test_sofia2_every_moment_map_resolves_not_just_mom2(tmp_path, monkeypatch):
     # declared without a template, so they validated but never resolved.
     # Under tmp_path: dispatch creates a declared output's parent before launch.
     monkeypatch.chdir(tmp_path)  # one workspace for inputs, outputs and cwd
-    cab = dosho.get("sofia2").model_copy(update={"backend": "sofia-record"})
+    cab = get_runtime("sofia2").model_copy(update={"backend": "sofia-record"})
     register_step_backend("sofia-record", RecordingBackend())
     out = tmp_path / "out"
     result = _dispatch(
@@ -720,7 +720,7 @@ def test_sofia2_every_moment_map_resolves_not_just_mom2(tmp_path, monkeypatch):
 
 
 def test_spimple_spifit_model_and_residual_lists():
-    cab = dosho.get("spimple-spifit")
+    cab = get_runtime("spimple-spifit")
     assert cab.name == "spimple-spifit"
     argv = build_argv(
         cab,
@@ -736,7 +736,7 @@ def test_spimple_spifit_model_and_residual_lists():
 
 
 def test_tigger_convert_positionals_and_repeated_append():
-    cab = dosho.get("tigger-convert")
+    cab = get_runtime("tigger-convert")
     assert cab.name == "tigger-convert"
     assert cab.policies.repeat_list is True
     argv = build_argv(
@@ -753,9 +753,9 @@ def test_tigger_convert_positionals_and_repeated_append():
 
 
 def test_tigger_restore_shares_image_with_convert():
-    cab = dosho.get("tigger-restore")
+    cab = get_runtime("tigger-restore")
     assert cab.name == "tigger-restore"
-    assert cab.image == dosho.get("tigger-convert").image
+    assert cab.image == get_runtime("tigger-convert").image
     argv = build_argv(
         cab, {"input_image": "/img.fits", "sky_model": "/m.lsm.html", "num_sources": 10}
     )
@@ -765,7 +765,7 @@ def test_tigger_restore_shares_image_with_convert():
 
 
 def test_tigger_tag_variadic_positional_selectors():
-    cab = dosho.get("tigger-tag")
+    cab = get_runtime("tigger-tag")
     assert cab.name == "tigger-tag"
     argv = build_argv(
         cab, {"sky_model": "/m.lsm.html", "selectors": ["NAME_a", "+outlier"], "force": True}
@@ -777,17 +777,17 @@ def test_tigger_tag_variadic_positional_selectors():
 
 
 def test_quartical_backup_positionals_and_plain_argparse_policy():
-    cab = dosho.get("quartical-backup")
+    cab = get_runtime("quartical-backup")
     assert cab.name == "quartical-backup"
     assert cab.command == "goquartical-backup"
-    assert cab.image == dosho.get("quartical").image
+    assert cab.image == get_runtime("quartical").image
     argv = build_argv(cab, {"ms_path": "/x.ms", "zarr_dir": "/backups", "column_name": "FLAG"})
     assert argv[0] == "goquartical-backup"
     assert argv[-3:] == ["/x.ms", "/backups", "FLAG"]
 
 
 def test_quartical_restore_positionals_and_ms_output():
-    cab = dosho.get("quartical-restore")
+    cab = get_runtime("quartical-restore")
     assert cab.name == "quartical-restore"
     argv = build_argv(
         cab, {"zarr_path": "/backups/x.bkp.qc", "ms_path": "/x.ms", "column_name": "FLAG"}
@@ -797,7 +797,7 @@ def test_quartical_restore_positionals_and_ms_output():
 
 
 def test_quartical_plotter_positionals_and_repeated_axes_list():
-    cab = dosho.get("quartical-plotter")
+    cab = get_runtime("quartical-plotter")
     assert cab.name == "quartical-plotter"
     assert cab.command == "goquartical-plot"
     argv = build_argv(
@@ -809,7 +809,7 @@ def test_quartical_plotter_positionals_and_repeated_axes_list():
 
 
 def test_rmclean3d_positionals_and_long_only_flags_get_double_dash():
-    cab = dosho.get("rmclean3d")
+    cab = get_runtime("rmclean3d")
     assert cab.name == "rmclean3d"
     argv = build_argv(
         cab, {"fdf_dirty": "/dirty.fits", "rmsf": "/rmsf.fits", "ncores": 4, "mpi": True}
@@ -823,7 +823,7 @@ def test_rmclean3d_positionals_and_long_only_flags_get_double_dash():
 
 
 def test_vis_mowjsub_positional_ms_and_hyphenated_flags():
-    cab = dosho.get("vis-mowjsub")
+    cab = get_runtime("vis-mowjsub")
     assert cab.name == "vis-mowjsub"
     assert cab.command == "vis-mowjsub"
     assert cab.image == images.MOWJSUB
@@ -845,7 +845,7 @@ def test_vis_mowjsub_positional_ms_and_hyphenated_flags():
 
 
 def test_vis_mowjsub_defaults_match_the_tools_own_signature():
-    cab = dosho.get("vis-mowjsub")
+    cab = get_runtime("vis-mowjsub")
     fields = cab.inputs_model.model_fields
     assert fields["ms"].is_required()
     assert fields["input_column"].default == "DATA"
@@ -866,12 +866,12 @@ def test_vis_mowjsub_declares_its_in_place_write():
     later cache hit (stimela-ninja#52)."""
     from shinobi.steps.schema import mutated_path_fields
 
-    cab = dosho.get("vis-mowjsub")
+    cab = get_runtime("vis-mowjsub")
     assert "ms" in mutated_path_fields(cab)
 
 
 def test_vis_mowjsub_output_ms_is_wireable():
-    cab = dosho.get("vis-mowjsub")
+    cab = get_runtime("vis-mowjsub")
     assert "output_ms" in cab.outputs_model.model_fields
 
 
@@ -880,12 +880,12 @@ def test_vis_mowjsub_echoes_ms_so_the_in_place_mode_is_wireable():
     A mutation with no output ref behind it is a sibling of the next step
     rather than its producer, so the echo is what makes that mode usable in
     a DAG at all."""
-    cab = dosho.get("vis-mowjsub")
+    cab = get_runtime("vis-mowjsub")
     assert "ms" in cab.outputs_model.model_fields
 
 
 def test_im_mowjsub_positional_image_and_hyphenated_flags():
-    cab = dosho.get("im-mowjsub")
+    cab = get_runtime("im-mowjsub")
     assert cab.name == "im-mowjsub"
     assert cab.command == "im-mowjsub"
     assert cab.image == images.MOWJSUB
@@ -914,7 +914,7 @@ def test_im_mowjsub_sigma_clip_is_a_single_value():
     count but one mis-broadcast. The repeat policy went with it, since nothing
     in this cab is list-valued now.
     """
-    cab = dosho.get("im-mowjsub")
+    cab = get_runtime("im-mowjsub")
     # `float | None` rather than `float`: the parameter is optional, so what is
     # being pinned here is that it is not a list any more.
     assert cab.inputs_model.model_fields["sigma_clip"].annotation == float | None
@@ -932,7 +932,7 @@ def test_im_mowjsub_negates_overwrite_rather_than_carrying_it():
     """The tool's own `--overwrite` defaults on, and a False boolean emits no
     token at all -- so an `overwrite` field could never turn it off. The
     negated flag is the only shape that reaches the tool."""
-    cab = dosho.get("im-mowjsub")
+    cab = get_runtime("im-mowjsub")
     fields = cab.inputs_model.model_fields
     assert "overwrite" not in fields
     assert fields["no_overwrite"].default is False
@@ -942,7 +942,7 @@ def test_im_mowjsub_negates_overwrite_rather_than_carrying_it():
 
 
 def test_im_mowjsub_output_cubes_resolve_from_the_prefix():
-    cab = dosho.get("im-mowjsub")
+    cab = get_runtime("im-mowjsub")
     assert cab.field_meta["cont"].implicit == "{output_prefix}-cont.fits"
     assert cab.field_meta["line"].implicit == "{output_prefix}-line.fits"
     # ...which is why the prefix cannot be optional here, unlike upstream.
@@ -950,7 +950,7 @@ def test_im_mowjsub_output_cubes_resolve_from_the_prefix():
 
 
 def test_doppler_mowjsub_positional_ms_and_hyphenated_flags():
-    cab = dosho.get("doppler-mowjsub")
+    cab = get_runtime("doppler-mowjsub")
     assert cab.name == "doppler-mowjsub"
     assert cab.command == "doppler-mowjsub"
     assert cab.image == images.MOWJSUB
@@ -974,7 +974,7 @@ def test_doppler_mowjsub_requires_what_it_cannot_default():
     """It does no fitting, so nothing here has a sensible fallback: which
     column holds the subtracted data, where to put the result, and which
     frame to correct to are all the caller's to say."""
-    fields = dosho.get("doppler-mowjsub").inputs_model.model_fields
+    fields = get_runtime("doppler-mowjsub").inputs_model.model_fields
     for name in ("ms", "input_column", "output_column", "output_ms", "doppler_frame"):
         assert fields[name].is_required(), name
     # ...and the rest still carries the tool's own defaults
@@ -989,7 +989,7 @@ def test_doppler_mowjsub_never_writes_back_into_the_input():
     ever read. It is therefore not a mutator, and does not echo `ms`."""
     from shinobi.steps.schema import mutated_path_fields, write_path_fields
 
-    cab = dosho.get("doppler-mowjsub")
+    cab = get_runtime("doppler-mowjsub")
     assert "ms" not in mutated_path_fields(cab)
     assert "ms" not in cab.outputs_model.model_fields
     assert cab.outputs_model.model_fields["output_ms"]
@@ -997,6 +997,6 @@ def test_doppler_mowjsub_never_writes_back_into_the_input():
 
 
 def test_im_mowjsub_rejects_a_fit_model_the_tool_does_not_have():
-    cab = dosho.get("im-mowjsub")
+    cab = get_runtime("im-mowjsub")
     with pytest.raises(ValidationError):
         cab.inputs_model(input_image="/c.fits", output_prefix="f", fit_model="chebyshev")

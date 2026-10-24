@@ -1,7 +1,7 @@
 """Optional, framework-independent cab validation and argv formatting."""
 
 from .compiled import CabSpec, CompiledCab
-from .compiler import compile_cab, parse_document
+from .compiler import build_document, compile_cab, describe_cab, parse_document
 from .modelgen import TypeBinding, build_model, dtype_to_type, sanitize, sanitize_unique
 from .policies import build_argv
 from .schema import ParamMeta, ParamPattern, ParamSegment, Policies
@@ -17,8 +17,10 @@ __all__ = [
     "Policies",
     "TypeBinding",
     "build_argv",
+    "build_document",
     "build_model",
     "compile_cab",
+    "describe_cab",
     "dtype_to_type",
     "parse_document",
     "sanitize",

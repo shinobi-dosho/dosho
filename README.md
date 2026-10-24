@@ -5,9 +5,10 @@
 `dosho` is the native cab repository for
 [shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
 Stimela 3.0). A tool is one of two shapes: a real binary is a YAML
-*document*, built into a `shinobi.Cab` on demand; a Python-package tool
-with no standalone binary (for example, CASA tasks) is a `@shinobi.pystep`-produced
-`StepRef`. A cab is parameter configuration and stays declarative whatever
+*document*, exposed as a `CabSpec`; a Python-package tool
+with no standalone binary (for example, CASA tasks) is an ordinary annotated
+function marked with `@dosho.pystep`. Shinobi adapts either when a recipe uses
+it. A cab is parameter configuration and stays declarative whatever
 carries it, so there's no `dynamic_schema`-style Python-execution step at
 cab-load time, no expression language, and no dtype coverage gaps.
 
@@ -26,16 +27,17 @@ Citation information can be found in [CITATION.cff](CITATION.cff).
 pip install "dosho>=0.2.0b1,<0.3"
 # Standalone schemas and argv
 pip install "dosho[validation]>=0.2.0b1,<0.3"
-# Runnable cabs and recipes, pending Ninja's v0.2 beta publication
-pip install "stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main"
+# Runnable cabs and recipes from matching candidate checkouts
+pip install -e "/path/to/dosho[validation]" -e /path/to/stimela-ninja
 ```
 
 The definitions are data — YAML documents under `dosho/documents/`, readable
-without the framework. `dosho.cabs.<tool>` and `dosho.get(...)` turn one into a
-`Cab`, which needs an explicit Shinobi installation. Shinobi depends on
-`dosho[validation]`; the retired `dosho[run]` extra is no longer needed.
-Base catalogue access needs neither Pydantic nor Shinobi, and validation
-needs Pydantic but never imports Shinobi.
+without the framework. `dosho.cabs.<tool>`, `dosho.get(...)` and
+`dosho.define_cab(...)` expose definitions without importing Shinobi.
+Listing names and reading raw documents need neither Pydantic nor Shinobi;
+definition building, Python schemas and argv formatting need `dosho[validation]`.
+Shinobi depends on that extra and constructs runtime `Cab`/`StepRef` objects
+when a recipe uses a definition. The retired `dosho[run]` extra is no longer needed.
 Pin a source commit for reproducibility. After Ninja's beta is published,
 `stimela-ninja>=0.2.0b1,<0.3` can be installed from PyPI instead.
 
@@ -61,6 +63,11 @@ import dosho
 
 wsclean = dosho.get("wsclean")
 ```
+
+Both definitions can be passed directly to `Recipe.add_step`. For a runtime
+object outside a recipe, use `shinobi.cabs.get("wsclean")` or
+`shinobi.cabs.adapt_definition(wsclean)`. These APIs require matching Shinobi
+and Dosho sources for the neutral-definition boundary described here.
 
 Or, from shinobi itself (any installed `shinobi.cabs`-entry-point
 provider, `dosho` included):

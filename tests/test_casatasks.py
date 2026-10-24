@@ -18,8 +18,8 @@ from types import ModuleType
 import pytest
 from pydantic import BaseModel
 from shinobi import ExecContext, Recipe
+from shinobi.cabs import adapt_definition, get as get_runtime
 
-import dosho
 from dosho import images
 from dosho.cabs.casatasks import (
     applycal,
@@ -36,6 +36,21 @@ from dosho.cabs.casatasks import (
     polcal,
     setjy,
 )
+
+# These tests inspect the explicit runtime adapters of Dosho definitions.
+applycal = adapt_definition(applycal)
+bandpass = adapt_definition(bandpass)
+clearcal = adapt_definition(clearcal)
+fixvis = adapt_definition(fixvis)
+flagdata = adapt_definition(flagdata)
+flagmanager = adapt_definition(flagmanager)
+fluxscale = adapt_definition(fluxscale)
+gaincal = adapt_definition(gaincal)
+initweights = adapt_definition(initweights)
+listobs = adapt_definition(listobs)
+mstransform = adapt_definition(mstransform)
+polcal = adapt_definition(polcal)
+setjy = adapt_definition(setjy)
 
 
 def _all_pysteps():
@@ -63,7 +78,7 @@ def test_every_casatask_pystep_uses_the_task_image():
 
 def test_every_casatask_pystep_resolves_through_the_registry():
     for name in _all_pysteps():
-        resolved = dosho.get(name)
+        resolved = get_runtime(name)
         assert resolved.name == name
 
 
@@ -164,7 +179,9 @@ def test_a_pystep_wires_into_a_recipe_like_a_cab():
         pass
 
     recipe = Recipe(name="t", inputs_model=Inputs, outputs_model=Outputs)
-    recipe.add_step("listobs", dosho.get("listobs"), vis=recipe.inputs.ms, listfile=Path("obs.txt"))
+    recipe.add_step(
+        "listobs", get_runtime("listobs"), vis=recipe.inputs.ms, listfile=Path("obs.txt")
+    )
     assert [s.name for s in recipe.steps] == ["listobs"]
     assert recipe.steps[0].wiring == {"vis": recipe.inputs.ms}
 
@@ -178,11 +195,12 @@ def test_every_pystep_body_quiets_casa_logging_before_importing_casatasks():
     """
     import inspect
 
-    from shinobi.steps.schema import StepRef
-
+    from dosho._pystep import get_pystep_definition
     from dosho.cabs import casatasks as module
 
-    refs = [v for v in vars(module).values() if isinstance(v, StepRef)]
+    refs = [
+        adapt_definition(v) for v in vars(module).values() if get_pystep_definition(v) is not None
+    ]
     assert len(refs) >= 50  # the full audited task set, not a subset
     for ref in refs:
         src = inspect.getsource(ref.func.__wrapped__)

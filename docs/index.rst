@@ -23,11 +23,12 @@ definition into a runnable object needs Shinobi, which installs Dosho validation
 
     $ pip install "dosho>=0.2.0b1,<0.3"             # catalogue data only
     $ pip install "dosho[validation]>=0.2.0b1,<0.3"  # standalone schemas and argv
-    $ pip install "stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main"
+    $ pip install -e "/path/to/dosho[validation]" -e /path/to/stimela-ninja
 
-The last command installs the compatible source adapter while Ninja's v0.2
-beta awaits publication. Pin a source commit for reproducibility; see
-:doc:`installation` for development wheel pairing and the future PyPI floor.
+The last command installs matching candidate checkouts. The neutral-definition
+change requires both source trees until their coordinated release; installing
+Shinobi alone can select an older Dosho without the shared schema helpers.
+See :doc:`installation` for reproducible development wheel pairing.
 
 Since v0.2.0b1, Dosho owns parameter validation, metadata, policies, patterns
 and argv formatting. Shinobi owns framework types, DAG construction and

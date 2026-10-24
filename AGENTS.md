@@ -47,7 +47,8 @@ parameter table and supported data composition remain legitimate YAML.
 **A cab is a YAML document.** Every one lives under `src/dosho/documents/`,
 written in the static scabha-compatible dialect Dosho compiles (see "Repo
 layout"). The provider returns `dosho-cab-v1` documents;
-`shinobi.cabs.build_document` adapts them into runnable `Cab` objects. That was
+`dosho.validation.build_document` builds neutral `CabSpec` definitions;
+Shinobi adapts them into runnable `Cab` objects at the recipe boundary. That was
 once an open question -- cabs were authored as Python `shinobi.Cab` objects
 under `cabs/`, and this file recorded a static path as permitted but not
 settled. It is settled: the Python definitions were deleted and the documents
@@ -63,7 +64,7 @@ shinobi only ever executes
 shelled out to). A tool that's actually a Python-package function call --
 no standalone binary at all (CASA tasks are the running example:
 `casatasks.listobs`, `casaplotms.plotms`) -- is instead a
-`@shinobi.pystep`-decorated function (a `StepRef`, not a `Cab`), calling
+ordinary annotated function marked with `@dosho.pystep`, calling
 `ctx.import_func("<task>", "<package>")` *inside the running container at
 step-execution time*. That's architecturally distinct from -- and doesn't
 violate -- "never import a cab package" below: the import happens at
@@ -72,7 +73,9 @@ pystep author wrote directly, not shinobi interpreting untrusted cab data
 on the host at load time. Pysteps live under `src/dosho/cabs/` where the
 Python cab definitions used to, and both shapes are first-class for
 `Recipe.add_step` -- a pipeline author (or `dosho.get(name)`) doesn't need to
-know or care which one a given tool is. See `dosho/cabs/casatasks.py` for the
+know or care which one a given tool is. Shinobi constructs a `StepRef` when
+a recipe uses the function. The marker stores inert metadata and never
+imports Shinobi. See `dosho/cabs/casatasks.py` for the
 pattern.
 
 A pystep is a real function with a body, not a declarative pointer at a
@@ -191,10 +194,10 @@ src/dosho/
     __init__.py      # every tool by name, resolved lazily through
                       # registry.get -- `from dosho.cabs import wsclean`.
                       # Imports nothing eagerly, so it works without shinobi
-                      # installed; attribute access is what needs it.
+                      # installed; attribute access builds neutral definitions.
     <family>.py       # pysteps and compatibility re-exports (simms.py
                        # re-exports the telsim/skysim document cabs);
-                       # one @shinobi.pystep per Python sub-command
+                       # one @dosho.pystep per Python sub-command
                        # (casatasks.py's `listobs`,
                        # `mstransform`, ...; fitstoolz.py, simms.py, bdsf.py,
                        # casaplotms.py). Each calls ctx.import_func(...)
@@ -244,7 +247,7 @@ for it to be wrong.
 
 ## Before adding a cab
 
-Port from the real tool's own `--help`/docs (or, for a `@shinobi.pystep`
+Port from the real tool's own `--help`/docs (or, for a `@dosho.pystep`
 wrapper, the real Python package's own function signature), cross-checked
 against the matching cult-cargo YAML (if one exists) as a useful second
 source -- but not copied from it blindly, since cult-cargo's own schema
@@ -366,3 +369,15 @@ filesystem enforcement, dataset lifecycle/recovery and caches. Generic schema
 algorithms belong in Dosho; Shinobi adapters supply trusted dtype bindings and
 validate inert framework declarations. Dosho validation must never import
 Shinobi. Base catalogue access needs neither Pydantic nor Shinobi.
+
+
+Definition lookup and documentation never import Shinobi: `dosho.get`,
+`dosho.cabs.<name>` and `dosho.define_cab` expose `CabSpec` data or ordinary
+marked functions. Definition/schema inspection requires `dosho[validation]`;
+listing names and reading raw documents remains Pydantic-free. Descriptive
+schemas preserve exact declared dtypes without inventing runtime bindings.
+Shinobi owns adaptation through `shinobi.cabs.adapt_definition` and recipe
+entry points; runtime validation still supplies authoritative framework types
+and checks inert access/family declarations. Both projects reuse Dosho's
+Python signature-to-schema helpers. Docs and catalogue generation must pass
+in an environment with no Shinobi installation.

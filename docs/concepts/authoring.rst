@@ -34,8 +34,9 @@ Not every tool can be a :class:`~shinobi.Cab`. shinobi only ever executes
 shelled out to. A tool that's actually a Python-package function call
 with no standalone binary at all (CASA tasks are the running example:
 ``casatasks.listobs``, ``casaplotms.plotms``) is instead a
-:func:`@shinobi.pystep <shinobi.pystep>`-decorated function, producing a
-``StepRef`` rather than a ``Cab``.
+``@dosho.pystep``-marked ordinary function. The decorator records inert
+metadata and preserves the function signature and annotations. Shinobi
+constructs a ``StepRef`` when a recipe uses it.
 
 That's architecturally distinct from, and doesn't violate, "never import
 a cab package": a pystep's ``ctx.import_func("<task>", "<package>")``
@@ -119,7 +120,7 @@ rescued into your workspace -- caches, logs, wisdom files. See
 
    ``dosho`` authored its own cabs in Python until the documents replaced
    them. :func:`dosho.define_cab` is still supported and still tested --
-   it builds a ``Cab`` from a flat ``{raw_name: (dtype, required,
+   it builds a ``CabSpec`` from a flat ``{raw_name: (dtype, required,
    default)}`` dict -- so a downstream project can define cabs in Python
    without maintaining documents. It is simply not how this repository
    describes its own.
@@ -385,15 +386,17 @@ declares which of the function's own path parameters it writes to:
 .. code-block:: python
 
     # dosho/cabs/casatasks.py
-    @shinobi.pystep(image=images.CASA6, write_paths=["listfile"])
+    @dosho.pystep(image=images.CASA6, write_paths=["listfile"])
     def listobs(ctx, vis: Path, listfile: Path, ...) -> ListobsOutputs: ...
 
-    @shinobi.pystep(image=images.CASA6, write_paths=["outputvis"])
+    @dosho.pystep(image=images.CASA6, write_paths=["outputvis"])
     def mstransform(ctx, vis: Path, outputvis: Path, ...) -> MstransformOutputs: ...
 
 A pystep whose registered name isn't a valid Python identifier passes it
-explicitly -- ``@shinobi.pystep(name="fitstoolz-header", ...)`` on a
-function called ``header``.
+explicitly -- ``@dosho.pystep(name="fitstoolz-header", ...)`` on a
+function called ``header``. Importing these trusted modules does not run
+the function bodies. Dosho and Shinobi share the helpers that derive
+parameter schemas from annotations and defaults.
 
 Two lookup interfaces, one set of objects
 ---------------------------------------------
@@ -403,19 +406,20 @@ that knows the tool's name at write-time. Nothing is imported eagerly: a
 name resolves on first access, through the same ``dosho.registry.get``
 everything else takes, and repeated access returns the same object.
 
-``dosho.get(name)`` is the parallel, string-keyed lookup used by ``ninja
-cabs list``/``show`` and shinobi's ``shinobi.cabs`` entry-point
-discovery -- for a caller that only knows the tool's name at *runtime*.
+``dosho.get(name)`` is the parallel, string-keyed lookup for a caller
+that only knows the tool's name at *runtime*.
 It is keyed by registered name (``msutils-addcol``) rather than by the
 attribute (``addcol``), and resolves to the exact same objects. Picking
 one over the other is purely about whether the caller knows the name at
-write-time or run-time.
+write-time or run-time. Both return neutral definitions without importing
+Shinobi. ``Recipe.add_step`` adapts either form; ``shinobi.cabs.get`` and
+``shinobi.cabs.adapt_definition`` expose explicit runtime objects.
 
 Underneath both, shinobi's provider protocol prefers the document form:
 it tries :func:`dosho.registry.get_document` first, which returns
 ``("dosho-cab-v1", text)`` without parsing or importing a schema. Shinobi's
-versioned adapter delegates parameter compilation to Dosho and validates the
-framework declarations before constructing a runnable ``Cab``.
+adapter delegates document building and parameter compilation to Dosho,
+then validates framework declarations before constructing a runnable ``Cab``.
 :func:`dosho.registry.loader_options` supplies the explicit package roots
 used by static includes and the resolved ``{KEY: ref}`` image map, so a
 deployment's ``$DOSHO_IMAGES``/``$DOSHO_IMAGE_<KEY>`` overrides still decide

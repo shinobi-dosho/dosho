@@ -17,9 +17,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Literal
 
-import shinobi
 from pydantic import BaseModel, Field
 
+import dosho
 from dosho import images
 
 
@@ -48,7 +48,7 @@ def _opts(local_vars: dict) -> SimpleNamespace:
     )
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="simms-primary-beam",
     image=images.SIMMS,
     info="Primary-beam utilities (build/tag/apply/correct); no visibility simulation (simms 3.0).",

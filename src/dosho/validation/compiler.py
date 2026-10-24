@@ -29,6 +29,7 @@ from .modelgen import (
     deep_merge,
     length_constraints,
     merge_field_meta,
+    normalize_required_default,
     resolve_directive,
     resolve_package_root,
     resolve_use,
@@ -601,3 +602,83 @@ def _collect(
         if meta != _DEFAULT_PARAM_META:
             metas[field] = meta
     return fields, metas, mutability
+
+
+# Description uses the same field normalization as compilation, without binding
+# scientific/runtime types to misleading stand-ins.
+def describe_cab(spec: CabSpec):
+    """Describe normalized parameter data without constructing runtime types.
+
+    This validates data-level rules, not dtype bindings or execution contracts.
+    Only compilation with trusted bindings can establish runtime validity.
+    """
+    from .description import CabDescription, ParameterDescription
+
+    def fields(raw):
+        names = {}
+        values, metas, mutability = _collect(raw or {}, _seen=names)
+        descriptions = {}
+        for name, (dtype, required, default) in values.items():
+            meta = metas.get(name, ParamMeta())
+            normalized_required, normalized_default = normalize_required_default(
+                required, default, nullable=meta.nullable, error=CabLoadError
+            )
+            descriptions[name] = ParameterDescription(
+                name=name,
+                original_name=names[name],
+                dtype=dtype,
+                required=normalized_required,
+                default=normalized_default,
+                meta=meta,
+                mutability=mutability.get(name),
+            )
+        return descriptions
+
+    image = spec.document.get("image")
+    if isinstance(image, dict):
+        image = image.get("name")
+    return CabDescription(
+        name=spec.name,
+        command=spec.document.get("command"),
+        info=spec.document.get("info"),
+        image=spec.images.get(image, image),
+        inputs=fields(spec.document.get("inputs")),
+        outputs=fields(spec.document.get("outputs")),
+        input_patterns=_param_patterns(
+            spec.document.get("input_patterns"), cab=spec.name, key="input_patterns"
+        ),
+        output_patterns=_param_patterns(
+            spec.document.get("output_patterns"), cab=spec.name, key="output_patterns"
+        ),
+        framework_declarations={
+            key: spec.document[key]
+            for key in ("dataset_accesses", "fits_accesses", "derived_reads")
+            if key in spec.document
+        },
+    )
+
+
+def build_document(dialect: str, text: str, name: str | None = None, **options) -> CabSpec:
+    """Resolve a static dialect and select one neutral definition by name."""
+    if dialect in ("yaml_cab", "dosho-cab-v1"):
+        definitions = loads(text, **options)
+    elif dialect == "stimela-classic":
+        from .classic import parse_classic
+
+        # Classic JSON is self-contained. Historically this dialect ignored
+        # shared provider image/root options; preserve that loader contract.
+        definition = parse_classic(text)
+        definitions = {definition.name: definition}
+    else:
+        raise CabLoadError(
+            f"unknown cab dialect {dialect!r} (known: yaml_cab, stimela-classic, dosho-cab-v1)"
+        )
+    if name is not None:
+        if name in definitions:
+            return definitions[name]
+        raise CabLoadError(f"{dialect} document defines {sorted(definitions)!r}, not {name!r}")
+    if len(definitions) == 1:
+        return next(iter(definitions.values()))
+    raise CabLoadError(
+        f"{dialect} document defines {sorted(definitions)!r}; no name was given to choose between them"
+    )

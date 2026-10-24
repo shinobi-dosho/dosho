@@ -11,12 +11,11 @@ from pathlib import Path
 
 import pytest
 from shinobi import DatasetAccess, DatasetColumns
+from shinobi.cabs import get as get_runtime
 from shinobi.dataset_access import DatasetAccessError
 from shinobi.dataset_lifecycle import DatasetLifecycleStore
 from shinobi.exceptions import DatasetLifecycleViolationError
 from shinobi.steps.dispatch import _dispatch
-
-import dosho
 
 pytestmark = pytest.mark.skipif(
     os.environ.get("DOSHO_NATIVE_DATASET_CONTRACTS") != "1",
@@ -37,7 +36,7 @@ def native_workspace(tmp_path, monkeypatch):
 
 
 def _simulate(root, name="input.ms"):
-    ref = dosho.get("simms-telsim")
+    ref = get_runtime("simms-telsim")
     scope = ref.model_copy(update={"backend": "docker", "cache_dir": str(root / "cache")})
     params = {
         "ms": root / name,
@@ -123,7 +122,7 @@ def test_native_simms_cli_seeded_noise_is_reproducible(native_workspace):
     root = native_workspace
     sky = root / "sky.txt"
     sky.write_text("#format: name ra dec stokes_i\ncentre 0h24m20s -30d12m33s 1\n")
-    cab = dosho.get("simms-skysim").model_copy(
+    cab = get_runtime("simms-skysim").model_copy(
         update={"backend": "docker", "cache_dir": str(root / "cache")}
     )
     params = {"ascii_sky": sky, "sefd": 551, "seed": 20261023, "row_chunks": 16, "nworkers": 1}
@@ -158,7 +157,7 @@ def test_native_incomplete_skysim_contract_fails_and_restores(native_workspace):
         original = main.getcol("DATA").copy()
     sky = root / "sky.txt"
     sky.write_text("#format: name ra dec stokes_i\ncentre 0h24m20s -30d12m33s 1\n")
-    ref = dosho.get("simms-skysim")
+    ref = get_runtime("simms-skysim")
     wrong = ref.model_copy(
         update={
             "backend": "docker",

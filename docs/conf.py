@@ -1,11 +1,10 @@
 """Sphinx configuration for the dosho documentation.
 
-Autodoc imports the ``dosho`` package, and the ``cab_catalog`` extension
-builds every cab, so the build environment needs shinobi as well as dosho --
-i.e. dosho's ``validation`` extra plus an explicit Shinobi installation (``uv sync --extra validation --group docs`` locally;
-Read the Docs installs it via ``.readthedocs.yaml`` /
-``docs/requirements.txt``). The package lives under ``src/``, added to
-sys.path below so an editable/uninstalled checkout also builds.
+Autodoc imports ``dosho`` and ``cab_catalog`` inspects cab documents and
+ordinary Python functions. The docs group supplies schema inspection and
+Sphinx without Shinobi (``uv sync --group docs`` locally). Read the Docs
+installs the validation extra and ``docs/requirements.txt``. The package lives
+under ``src/``, added to sys.path below so a source checkout also builds.
 """
 
 from __future__ import annotations
@@ -54,9 +53,26 @@ exclude_patterns = [
     "design_*.md",
 ]
 
-# Treat warnings as build-relevant but don't fail the build on missing
-# autodoc targets during early scaffolding.
-nitpicky = False
+# Keep local documentation and CI strict about missing references.
+nitpicky = True
+# These are type variables, aliases or constraint metadata rather than classes
+# with linkable API entries. Preserve their annotation text without class links.
+nitpick_ignore = [
+    ("py:class", "JsonValue"),
+    ("py:class", "pydantic.types.JsonValue"),
+    ("py:class", "MetaT"),
+    ("py:class", "dosho.validation.schema.MetaT"),
+    ("py:obj", "dosho.validation.schema.MetaT"),
+    ("py:class", "annotated_types.Ge"),
+    ("py:class", "ge=0"),
+    ("py:class", "BaseModel"),
+    ("py:class", "TypeAliasForwardRef"),
+    ("py:class", "'dosho.validation.compiled.CompiledParamMeta'"),
+]
+autodoc_type_aliases = {
+    "BaseModel": "pydantic.BaseModel",
+    "CompiledParamMeta": "dosho.validation.compiled.CompiledParamMeta",
+}
 
 # -- Autodoc / autosummary ---------------------------------------------------
 

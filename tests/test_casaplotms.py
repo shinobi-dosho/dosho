@@ -8,10 +8,13 @@ from pathlib import Path
 
 from pydantic import BaseModel
 from shinobi import Recipe
+from shinobi.cabs import adapt_definition, get as get_runtime
 
-import dosho
 from dosho import images
 from dosho.cabs.casaplotms import plotms
+
+# These tests inspect the explicit runtime adapters of Dosho definitions.
+plotms = adapt_definition(plotms)
 
 
 def test_uses_the_pinned_casa6_image():
@@ -19,7 +22,7 @@ def test_uses_the_pinned_casa6_image():
 
 
 def test_resolves_through_the_registry():
-    resolved = dosho.get("plotms")
+    resolved = get_runtime("plotms")
     assert resolved.name == "plotms"
 
 
@@ -59,7 +62,7 @@ def test_minimal_elevation_track_shape_wires_into_a_recipe():
     recipe = Recipe(name="t", inputs_model=Inputs, outputs_model=Outputs)
     recipe.add_step(
         "plotelev",
-        dosho.get("plotms"),
+        get_runtime("plotms"),
         vis=recipe.inputs.ms,
         xaxis="hourangle",
         yaxis="elevation",

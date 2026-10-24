@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Literal
 
 import pytest
-from shinobi import CasaTab, FITSImage, FITSTable, MSv2, ProductFamily, ProductMember
 
 _EXT = Path(__file__).resolve().parents[1] / "docs" / "_ext" / "cab_catalog.py"
 _spec = importlib.util.spec_from_file_location("cab_catalog", _EXT)
@@ -49,11 +48,11 @@ def test_image_index_maps_a_built_ref_to_its_key():
     )
 
 
-def test_schema_obj_resolves_cab_and_stepref():
+def test_schema_obj_resolves_binary_and_function_definitions():
     from dosho import registry
 
     # a Cab exposes inputs_model directly
-    assert cab_catalog._schema_obj(registry.get("wsclean")).inputs_model is not None
+    assert cab_catalog._schema_obj(registry.get("wsclean")).inputs["ms"].dtype == "List[MSv2]"
     # a StepRef (casatask) exposes it via .step
     listobs = registry.get("listobs")
     assert cab_catalog._schema_obj(listobs).inputs_model is not None
@@ -99,78 +98,48 @@ def test_main_reports_fresh_catalog():
     assert committed.read_text() == before
 
 
-def test_strict_dataset_fields_render_as_their_shinobi_type():
-    """A strict field is a `Path` carrying a dataset declaration, so a naive
-    rendering prints `Path` and hides the contract. pydantic moves the
-    declaration onto `field.metadata` for a required field and leaves it
-    `Annotated` inside a union, so both shapes are checked.
-    """
-    from pydantic import BaseModel
-    from shinobi import MSv2
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        "MSv2",
+        "CasaTab",
+        "List[MSv2]",
+        "FITSImage",
+        "FITSTable",
+        "ProductFamily[FITSImage]",
+        "ProductMember[FITSTable]",
+    ],
+)
+def test_declared_framework_types_render_without_binding(dtype):
+    from dosho.validation import describe_cab, parse_document
 
-    class Model(BaseModel):
-        required: MSv2
-        optional: MSv2 | None = None
-        plain: Path | None = None
-
-    def rendered(name):
-        field = Model.model_fields[name]
-        return cab_catalog._type_name(field.annotation, tuple(field.metadata))
-
-    assert rendered("required") == "MSv2"
-    assert rendered("optional") == "MSv2 | None"
-    assert rendered("plain") == "Path | None"
+    description = describe_cab(
+        parse_document(
+            "x", {"command": "x", "inputs": {"data": {"dtype": dtype, "required": True}}}
+        )
+    )
+    text = "\n".join(cab_catalog._field_table(description.inputs, with_default=True))
+    assert f"``{dtype}``" in text
+    assert "*required*" in text
 
 
 def test_the_catalog_shows_a_real_cab_as_strict():
     from dosho import registry
 
-    tricolour = registry.get("tricolour")
-    rendered = {
-        side: cab_catalog._type_name(field.annotation, tuple(field.metadata))
-        for side, field in (
-            ("in", tricolour.inputs_model.model_fields["ms"]),
-            ("out", tricolour.outputs_model.model_fields["ms"]),
-        )
-    }
-    assert rendered == {"in": "MSv2", "out": "MSv2 | None"}
+    cab = cab_catalog._schema_obj(registry.get("tricolour"))
+    assert cab.inputs["ms"].dtype == cab.outputs["ms"].dtype == "MSv2"
 
 
 @pytest.mark.parametrize(
     "annotation,expected",
     [
-        (list[MSv2], "list[MSv2]"),
-        (list[MSv2] | None, "list[MSv2] | None"),
-        (dict[str, list[MSv2 | None]], "dict[str, list[MSv2 | None]]"),
-        (tuple[CasaTab, MSv2], "tuple[CasaTab, MSv2]"),
-        (tuple[MSv2, ...], "tuple[MSv2, ...]"),
+        (list[Path], "list[Path]"),
+        (list[Path] | None, "list[Path] | None"),
+        (dict[str, list[Path | None]], "dict[str, list[Path | None]]"),
         (list[Literal["ms.image.fits", "other"]], "list[Literal['ms.image.fits', 'other']]"),
     ],
 )
-def test_nested_generic_annotations_use_public_dataset_types(annotation, expected):
-    assert cab_catalog._type_name(annotation) == expected
-
-
-def test_wsclean_ms_list_renders_as_the_public_type():
-    from dosho import registry
-
-    field = registry.get("wsclean").inputs_model.model_fields["ms"]
-    assert cab_catalog._type_name(field.annotation, tuple(field.metadata)) == "list[MSv2]"
-
-
-@pytest.mark.parametrize(
-    "annotation,expected",
-    [
-        (FITSImage, "FITSImage"),
-        (FITSTable, "FITSTable"),
-        (ProductFamily[FITSImage], "ProductFamily[FITSImage]"),
-        (ProductMember[FITSTable], "ProductMember[FITSTable]"),
-        (ProductFamily[FITSImage] | None, "ProductFamily[FITSImage] | None"),
-        (list[ProductMember[FITSTable]], "list[ProductMember[FITSTable]]"),
-        (tuple[ProductFamily[FITSImage], ...], "tuple[ProductFamily[FITSImage], ...]"),
-    ],
-)
-def test_fits_product_annotations_render_public_types(annotation, expected):
+def test_python_annotations_render_stably(annotation, expected):
     assert cab_catalog._type_name(annotation) == expected
 
 
@@ -195,10 +164,42 @@ def test_fits_product_annotations_render_public_types(annotation, expected):
 def test_image_families_render_public_fits_contracts(cab_name, names):
     from dosho import registry
 
-    cab = registry.get(cab_name)
+    cab = cab_catalog._schema_obj(registry.get(cab_name))
     for name in names:
-        field = cab.outputs_model.model_fields[name]
-        assert (
-            cab_catalog._type_name(field.annotation, tuple(field.metadata))
-            == "ProductFamily[FITSImage] | None"
+        assert cab.outputs[name].dtype == "ProductFamily[FITSImage]"
+
+
+def test_descriptive_table_keeps_validation_constraints():
+    from dosho.validation import describe_cab, parse_document
+
+    fields = describe_cab(
+        parse_document(
+            "x",
+            {
+                "command": "x",
+                "inputs": {
+                    "mode": {
+                        "dtype": "str",
+                        "default": "aa",
+                        "nullable": False,
+                        "choices": ["aa", "bb"],
+                        "min_length": 2,
+                        "max_length": 3,
+                        "string_pattern": "[ab]+",
+                    }
+                },
+            },
         )
+    ).inputs
+    text = "\n".join(cab_catalog._field_table(fields, with_default=True))
+    assert "``str``" in text
+    for expected in (
+        "Choices:",
+        "'aa'",
+        "'bb'",
+        "Nullable: False",
+        "Minimum length: 2",
+        "Maximum length: 3",
+        "Pattern: [ab]+",
+    ):
+        assert expected in text

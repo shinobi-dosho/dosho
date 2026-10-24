@@ -12,6 +12,7 @@ import pytest
 import shinobi
 from pydantic import ValidationError, create_model
 from shinobi import StepRef
+from shinobi.cabs import get as get_runtime
 
 import dosho
 from dosho import images
@@ -28,7 +29,7 @@ _APPS = [
 
 @pytest.mark.parametrize("name", _APPS)
 def test_every_app_is_a_registered_pystep_on_the_fitstoolz_image(name):
-    step = dosho.get(name)
+    step = get_runtime(name)
     assert isinstance(step, StepRef)
     assert step.name == name
     assert step.step.image == images.FITSTOOLZ
@@ -38,17 +39,18 @@ def test_every_app_is_a_registered_pystep_on_the_fitstoolz_image(name):
 
 
 def test_apps_are_also_importable_directly_under_prefixed_names():
-    from dosho.cabs import fitstoolz_header, fitstoolz_slice
-
     # the module's own attribute is `slice_` (fitstoolz avoids shadowing the
     # builtin); the package re-export is prefixed, so `from dosho.cabs import
     # slice` can never shadow it either
-    assert fitstoolz_slice.name == "fitstoolz-slice"
+    from dosho._pystep import get_pystep_definition
+    from dosho.cabs import fitstoolz_header, fitstoolz_slice
+
+    assert get_pystep_definition(fitstoolz_slice).options["name"] == "fitstoolz-slice"
     assert fitstoolz_header is dosho.get("fitstoolz-header")
 
 
 def test_header_edit_add_remove_are_repeatable_and_output_is_optional():
-    step = dosho.get("fitstoolz-header")
+    step = get_runtime("fitstoolz-header")
     fields = step.step.inputs_model.model_fields
     for name in ("edit", "remove", "add"):
         assert step.step.inputs_model(fname="/x.fits", **{name: ["FOO=1", "BAR=2"]})
@@ -60,7 +62,7 @@ def test_header_edit_add_remove_are_repeatable_and_output_is_optional():
 
 
 def test_stats_returns_real_statistics_not_just_a_path():
-    step = dosho.get("fitstoolz-stats")
+    step = get_runtime("fitstoolz-stats")
     outputs = step.step.outputs_model.model_fields
     assert set(outputs) == {"min", "max", "mean", "std"}
     # a downstream step can wire to any of them
@@ -73,14 +75,14 @@ def test_stats_returns_real_statistics_not_just_a_path():
 
 
 def test_slice_axis_is_a_repeatable_ctype_start_end_spec():
-    step = dosho.get("fitstoolz-slice")
+    step = get_runtime("fitstoolz-slice")
     inputs = step.step.inputs_model(fname="/x.fits", axis=["FREQ,0,64", "STOKES,0,1"])
     assert inputs.axis == ["FREQ,0,64", "STOKES,0,1"]
     assert step.step.inputs_model.model_fields["memmap"].default is True
 
 
 def test_add_axis_requires_the_axis_it_is_adding():
-    step = dosho.get("fitstoolz-add-axis")
+    step = get_runtime("fitstoolz-add-axis")
     fields = step.step.inputs_model.model_fields
     assert fields["ctype"].is_required() and fields["index"].is_required()
     with pytest.raises(ValidationError):
@@ -91,7 +93,7 @@ def test_add_axis_requires_the_axis_it_is_adding():
 
 
 def test_remove_axis_carries_its_cli_short_flags():
-    step = dosho.get("fitstoolz-remove-axis")
+    step = get_runtime("fitstoolz-remove-axis")
     fields = step.step.inputs_model.model_fields
     assert fields["ctype"].json_schema_extra == {"abbreviation": "ct"}
     assert fields["select_index"].json_schema_extra == {"abbreviation": "si"}
@@ -99,7 +101,7 @@ def test_remove_axis_carries_its_cli_short_flags():
 
 
 def test_stack_takes_extra_files_and_names_its_own_output():
-    step = dosho.get("fitstoolz-stack")
+    step = get_runtime("fitstoolz-stack")
     fields = step.step.inputs_model.model_fields
     # unlike the other apps, the stacked output path is a required *input*
     assert fields["stacked_fits"].is_required() and fields["axis"].is_required()
@@ -129,9 +131,13 @@ def test_fitstoolz_pysteps_wire_into_a_recipe():
         name="cube", inputs_model=create_model("I"), outputs_model=create_model("O")
     )
     recipe.add_step(
-        "sub", dosho.get("fitstoolz-slice"), fname="cube.fits", axis=["FREQ,0,64"], outfile="s.fits"
+        "sub",
+        get_runtime("fitstoolz-slice"),
+        fname="cube.fits",
+        axis=["FREQ,0,64"],
+        outfile="s.fits",
     )
-    recipe.add_step("rms", dosho.get("fitstoolz-stats"), fname="s.fits", show=True)
+    recipe.add_step("rms", get_runtime("fitstoolz-stats"), fname="s.fits", show=True)
     assert [s.name for s in recipe.steps] == ["sub", "rms"]
     # the StepRef carries its pystep orchestration func into the recipe step
     assert recipe.steps[1].func is not None

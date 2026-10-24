@@ -143,149 +143,149 @@ aegean: source finding in radio astronomical images (https://github.com/PaulHanc
      - Default
      - Description
    * - ``image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Input FITS image
    * - ``config``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Path to the config file
    * - ``find``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Source finding mode [default: true, unless --save or --measure]
    * - ``hdu_index``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - HDU index (0-based) for cubes with multiple extensions
    * - ``beam``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - The beam parameters to use as "major minor pa" (all in degrees) [default: from FITS header]
    * - ``slice``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - For cube input, the array index of the image slice to process
    * - ``progress``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Show a progress bar as islands are being fit
    * - ``cores``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of CPU cores to use for calculating background/rms images
    * - ``forcerms``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Assume a single image noise of rms
    * - ``forcebkg``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Assume a single image background of bkg
    * - ``noise``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - A FITS file representing the image noise (rms); from --save or BANE
    * - ``background``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - A FITS file representing the background level; from --save or BANE
    * - ``psf``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - A FITS file representing the local PSF
    * - ``autoload``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Automatically look for background/noise/region/psf files using the input filename as a hint
    * - ``out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Destination of the Aegean catalog output
    * - ``table``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Additional table outputs, format inferred from extension
    * - ``tformats``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Show the table formats supported by this install
    * - ``blankout``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Create a blanked output image (only works if cores=1)
    * - ``colprefix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prepend each column name with "prefix\_"
    * - ``maxsummits``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - If more than maxsummits summits are detected in an island, only estimation is done, no fitting
    * - ``seedclip``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - The clipping value (in sigmas) for seeding islands
    * - ``floodclip``
-     - ``float | None``
+     - ``float``
      - ``4.0``
-     - \-
+     - The clipping value (in sigmas) for growing islands
    * - ``island``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Also calculate the island flux in addition to individual components
    * - ``nopositive``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Don't report sources with positive fluxes
    * - ``negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Report sources with negative fluxes
    * - ``region``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Restrict source finding to this MIMAS region (.mim) file
    * - ``nocov``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Don't use the covariance of the data in the fitting process
    * - ``priorized``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Enable priorized fitting level n=[1,2,3]: 1=flux, 2=flux/position, 3=flux/position/shape
    * - ``ratio``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Ratio of synthesized beam sizes (image psf / input catalog psf), for priorized fitting
    * - ``noregroup``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Do not regroup islands before priorized fitting
    * - ``input``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - For --priorized, a catalog of locations at which fluxes will be measured
    * - ``catpsf``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - A psf map corresponding to the input catalog
    * - ``regroup_eps``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Size in arcminutes used to regroup nearby components to be solved simultaneously
    * - ``save``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Save the background and noise images (sets --find to false)
    * - ``outbase``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Base name of the background/noise images when --save is set
    * - ``debug``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable debug mode
 
 **Outputs**
 
@@ -297,8 +297,8 @@ aegean: source finding in radio astronomical images (https://github.com/PaulHanc
      - Type
      - Description
    * - ``out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Destination of the Aegean catalog output
 
 aimfast
 -------
@@ -320,253 +320,253 @@ aimfast: astronomical image fidelity assessment tool (https://github.com/Athanas
      - Default
      - Description
    * - ``compare_models``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - List of tigger model (text/lsm.html) files to compare, e.g. --compare-models model1.lsm.html model2.lsm.html
    * - ``compare_images``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - List of restored image (fits) files to compare (runs a source finder first)
    * - ``compare_online``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Catalog model (html/ascii, fits) or restored image (fits) file to compare with an online catalog
    * - ``compare_residuals``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - List of noise-like (fits) files to compare, e.g. --compare-residuals residual1.fits residual2.fits
    * - ``compare_residual_subimages``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - List of noise-like (fits) files to compare (sub-image variant)
    * - ``tigger_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of the tigger model lsm.html file or any supported catalog
    * - ``restored_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of the restored image fits file
    * - ``psf_image``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of the point spread function file or psf size in arcsec
    * - ``residual_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of the residual image fits file
    * - ``mask_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of the mask image fits file
    * - ``fidelity_results``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - aimfast fidelity results file (JSON format)
    * - ``input_regions``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Region file with regions to generate stats
    * - ``config``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Config file to run source finder of choice (YAML format)
    * - ``source_finder``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Source finder to run if comparing restored images
    * - ``online_catalog_name``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix of output catalog file name
    * - ``online_catalog``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Online catalog to compare local image/model
    * - ``centre_coord``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Centre of online catalog to compare local image/model in "RA hh:mm:ss, Dec deg:min:sec"
    * - ``width``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Field of view width to query online catalog in degrees, e.g. 3.0d
    * - ``normality_test``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of model to use for normality testing (shapiro, normaltest)
    * - ``data_range``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Data range to perform normality testing
    * - ``threshold``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Get stats of channels with pixel flux above thresh in Jy/Beam; also filters online-catalog sources
    * - ``channels``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Get stats of specified channels, e.g. "10~20;100~1000"
    * - ``centre_pixels_size``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - List of subimage centre pixels and their sizes to compute stats, e.g. 500,500,20 200,10,5
    * - ``data_points``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Data points to sample the residual/noise image
    * - ``flux_plot``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Type of plot for flux comparison of the two catalogs
    * - ``units``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Units to represent the results
    * - ``decimals``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of decimal places to round off results
    * - ``only_off_axis``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Plot only cross-matched sources with distance from the phase centre less than this value
    * - ``area_factor``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Factor to multiply the beam area to get target peak area
    * - ``fov_factor``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Factor to multiply the field of view for random points (0.0-1.0)
    * - ``tolerance``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Tolerance to cross-match sources in arcsec
    * - ``all_source``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Compare all sources irrespective of shape, otherwise only point-like sources are compared
    * - ``closest``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use the closest source only when cross matching sources
    * - ``shape_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Cross-match only sources with a maj-axis equal or less than this value
    * - ``label``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Use this label instead of the FITS image path when saving data as JSON file
    * - ``x_col_data``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Catalog column name to plot on the x-axis
    * - ``y_col_data``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Catalog column name to plot on the y-axis
    * - ``x_col_err_data``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Catalog column name to plot error data on the x-axis
    * - ``y_col_err_data``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Catalog column name to plot error data on the y-axis
    * - ``x_label``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - x-axis labels for the plot
    * - ``y_label``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - y-axis labels for the plots
    * - ``plot_title``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Title label for the basic catalog plot
    * - ``flux_xlabels``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - x-axis labels for the Flux plots
    * - ``flux_ylabels``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - y-axis labels for the Flux plots
    * - ``flux_plot_titles``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Title labels for the Flux plots
    * - ``position_xlabels1``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - x-axis labels for the comparison position plots
    * - ``position_ylabels1``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - y-axis labels for the comparison position plots
    * - ``position_plot_title1``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Title labels for the comparison position plots
    * - ``position_xlabels2``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - x-axis labels for the overlay position plots
    * - ``position_ylabels2``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - y-axis labels for the overlay position plots
    * - ``position_plot_title2``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Title labels for the overlay position plots
    * - ``colorbar_major_labels_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - x-axis label size for plots
    * - ``colorbar_labels_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - x-axis label size for plots
    * - ``xlabels_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - x-axis label size for plots
    * - ``ylabels_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - y-axis label size for plots
    * - ``x_major_labels_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - x-axis major label size for plots
    * - ``y_major_labels_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - y-axis major label size for plots
    * - ``legend_font_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Label size for legends on the plots
    * - ``plot_title_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Title label size for plots
    * - ``html_prefix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix of output html files
    * - ``outfile``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of output file name (default: fidelity\_results.json)
    * - ``save_svg``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Save plots in SVG format
 
 **Outputs**
 
@@ -578,8 +578,8 @@ aimfast: astronomical image fidelity assessment tool (https://github.com/Athanas
      - Type
      - Description
    * - ``outfile``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Name of output file name (default: fidelity\_results.json)
 
 aoflagger
 ---------
@@ -603,51 +603,51 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
    * - ``msname``
      - ``MSv2``
      - *required*
-     - \-
+     - MS name(s) to be flagged
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Produce verbose output
    * - ``threads``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - overrides the number of threads specified in the strategy (default: one thread for each CPU core)
    * - ``strategy``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - specifies a possible customized strategy
    * - ``indirect_read``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - will reorder the measurement set before starting, which is normally faster but requires free disk space to reorder the data to
    * - ``memory_read``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - will read the entire measurement set in memory. This is the fastest, but requires much memory.
    * - ``auto_read_mode``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - will select either memory or direct mode based on available memory
    * - ``uvw``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - reads uvw values (some exotic strategies require these)
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - specify column to flag
    * - ``skip_flagged``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - will skip an ms if it has already been processed by AOFlagger according to its HISTORY table.
    * - ``bands``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - comma separated list of (zero-indexed) band ids to process
    * - ``fields``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Field ID(s). Comma separated string if more than one field
 
 **Outputs**
 
@@ -659,8 +659,8 @@ AOFlagger automatic RFI flagger (https://aoflagger.readthedocs.io)
      - Type
      - Description
    * - ``msname``
-     - ``MSv2 | None``
-     - \-
+     - ``MSv2``
+     - MS name(s) to be flagged
 
 apparentsens
 ------------
@@ -1360,101 +1360,101 @@ breizorro: mask creation and manipulation for radio astronomy images (https://gi
      - Default
      - Description
    * - ``restored_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Restored image file from which to build the mask
    * - ``mask_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Input mask file(s). Either restored-image or mask-image must be specified.
    * - ``threshold``
-     - ``float | None``
+     - ``float``
      - ``6.5``
-     - \-
+     - Sigma threshold for masking (default = 6.5)
    * - ``boxsize``
-     - ``int | None``
+     - ``int``
      - ``50``
-     - \-
+     - Box size over which to compute stats (default = 50)
    * - ``savenoise``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Export noise image as FITS file
    * - ``merge``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Merge one or more masks or region files
    * - ``subtract``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Subtract one or more masks or region files
    * - ``number_islands``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Number the islands detected
    * - ``remove_islands``
-     - ``list[int | str] | None``
+     - ``List[Union[int,str]]``
      - ``None``
-     - \-
+     - Remove islands from input mask (list by number or coordinates), e.g. --remove-islands 1,18,20,20h10m13s:14d15m20s
    * - ``ignore_missing_islands``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Do not throw an error if an island specified by coordinates does not exist
    * - ``extract_islands``
-     - ``list[int | str] | None``
+     - ``List[Union[int,str]]``
      - ``None``
-     - \-
+     - Extract islands from input mask (list by number or coordinates), e.g. --extract-islands 1,18,20,20h10m13s:14d15m20s
    * - ``minimum_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Remove islands with areas fewer than or equal to the specified number of pixels
    * - ``make_binary``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Replace all island numbers with 1
    * - ``invert``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Invert the mask
    * - ``dilate``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Apply dilation with a radius of R pixels
    * - ``erode``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Apply N iterations of erosion
    * - ``fill_holes``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Fill holes (closed regions) in the mask
    * - ``sum_peak``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Sum-to-peak ratio of flux islands to mask in original image
    * - ``ncpu``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of processors to use for cataloging
    * - ``beam_size``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Average beam size in arcsec if missing in the image header
    * - ``gui``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Open mask in bokeh html gui
    * - ``outfile``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - The output mask image (default based on input name)
    * - ``outcatalog``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Generate a catalog based on the region mask
    * - ``outregion``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Generate polygon regions from the mask
 
 **Outputs**
 
@@ -1466,14 +1466,14 @@ breizorro: mask creation and manipulation for radio astronomy images (https://gi
      - Type
      - Description
    * - ``outfile``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - The output mask image (default based on input name)
    * - ``outcatalog``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Generate a catalog based on the region mask
    * - ``outregion``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Generate polygon regions from the mask
 
 chgcentre
 ---------
@@ -1495,53 +1495,53 @@ chgcentre: recompute UVWs and rotate visibilities to a new phase centre (https:/
      - Default
      - Description
    * - ``geozenith``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Calculate the RA/dec of zenith for each timestep and move there (makes the set non-standard)
    * - ``flipuvwsign``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Flip the UVW sign (necessary for LOFAR, for unknown reasons)
    * - ``minw``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Calculate the direction that gives the minimum w-values for the array
    * - ``zenith``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Shift to the average zenith value
    * - ``only_uvw``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Only update the UVW values, do not apply the phase shift
    * - ``shiftback``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - After changing the phase centre, project visibilities back to the old phase centre
    * - ``force``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Force recalculation even if the destination equals the original phase direction
    * - ``datacolumn``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Only phase-rotate this column [default: DATA, MODEL\_DATA, CORRECTED\_DATA if present]
    * - ``from_ms``
-     - ``Path | None``
+     - ``MS``
      - ``None``
-     - \-
+     - Rotate to the same direction as specified in this measurement set
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to rotate (edited in place)
    * - ``ra``
      - ``str``
      - *required*
-     - \-
+     - New Right Ascension (00h00m00.0s or 00:00:00.0 format)
    * - ``dec``
      - ``str``
      - *required*
-     - \-
+     - New Declination (00d00m00.0s or 00.00.00.0 format)
 
 **Outputs**
 
@@ -1553,8 +1553,8 @@ chgcentre: recompute UVWs and rotate visibilities to a new phase centre (https:/
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set to rotate (edited in place)
 
 clearcal
 --------
@@ -1760,41 +1760,41 @@ Crystalball: predict model visibilities from a sky model (https://github.com/car
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
      - \-
    * - ``field``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - The field name or id to be predicted. If not provided, only a single field may be present in the MS.
    * - ``output_column``
      - ``str``
      - *required*
      - \-
    * - ``sky_model``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Wsclean format sky model file.
    * - ``within``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - A JS9 region file to constrain the model. Only sources within those regions will be included.
    * - ``num_sources``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Select only N brightest sources
    * - ``points_only``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Select only point-type sources
    * - ``memory_fraction``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Fraction of system RAM that can be used. Used when setting automatically the chunk size.
    * - ``num_workers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Explicitly set the number of worker threads.
 
 **Outputs**
 
@@ -1806,7 +1806,7 @@ Crystalball: predict model visibilities from a sky model (https://github.com/car
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
+     - ``MS``
      - \-
 
 cubical
@@ -1829,547 +1829,547 @@ CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
      - Default
      - Description
    * - ``parset``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Optional parset to load before applying all other parameters
    * - ``data_ms``
      - ``MSv2``
      - *required*
      - \-
    * - ``data_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_time_chunk``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_freq_chunk``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_rebin_time``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_rebin_freq``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_chunk_by``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_chunk_by_jump``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_single_chunk``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_single_tile``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``data_normalize``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sel_field``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``sel_ddid``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sel_taql``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sel_chan``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sel_diag``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``out_dir``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_name``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``out_backup``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_apply_solver_flags``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``out_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_derotate``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_model_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_weight_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_reinit_column``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``out_subtract_model``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_subtract_dirs``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_correct_dir``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_plots``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``out_casa_gaintables``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``model_list``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_ddes``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_beam_pattern``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_beam_l_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_beam_m_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_feed_rotate``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_pa_rotate``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``model_null_v``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``montblanc_device_type``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``montblanc_dtype``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``montblanc_mem_budget``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``montblanc_verbosity``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``montblanc_threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``montblanc_pa_rotate``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``weight_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``weight_fill_offdiag``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``weight_legacy_v1_2``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``flags_apply``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``flags_auto_init``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``flags_save``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``flags_save_legacy``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``flags_reinit_bitflags``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``flags_warn_thr``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``flags_see_no_evil``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_OverS``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``degridding_Support``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``degridding_Nw``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``degridding_wmax``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``degridding_Padding``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``degridding_NDegridBand``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``degridding_MaxFacetSize``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_MinNFacetPerAxis``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_NProcess``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_BeamModel``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_NBand``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``degridding_FITSFile``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_FITSFeed``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_FITSFeedSwap``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``degridding_DtBeamMin``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``degridding_FITSParAngleIncDeg``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``degridding_FITSLAxis``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_FITSMAxis``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``degridding_FITSVerbosity``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``degridding_FeedAngle``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``degridding_FlipVisibilityHands``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``postmortem_enable``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``postmortem_tf_chisq_median``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``postmortem_tf_np_median``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``postmortem_time_density``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``postmortem_chan_density``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``postmortem_ddid_density``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_enable``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_residuals``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_estimate``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_diag``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``madmax_offdiag``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``madmax_threshold``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_global_threshold``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_plot``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_plot_frac_above``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_plot_bl``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_flag_ant``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``madmax_flag_ant_thr``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_jones``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
      - \-
    * - ``sol_precision``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_delta_g``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_delta_chi``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_chi_int``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_last_rites``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``sol_stall_quorum``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_term_iters``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_flag_divergence``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_min_bl``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``sol_max_bl``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_subset``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sol_terms_iter``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``bbc_load_from``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``bbc_compute_2x2``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``bbc_apply_2x2``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``bbc_save_to``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``bbc_per_chan``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``bbc_plot``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``dist_ncpu``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dist_nworker``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dist_nthread``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dist_max_chunks``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dist_min_chunks``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dist_pin``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``dist_pin_io``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``dist_pin_main``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``dist_safe``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``log_memory``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``log_stats``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``log_stats_warn``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``log_boring``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``log_append``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``log_verbose``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``log_file_verbose``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``debug_pdb``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``debug_panic_amplitude``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``debug_stop_before_solver``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``debug_escalate_warnings``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``misc_random_seed``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
 
@@ -2383,7 +2383,7 @@ CubiCal calibration package (https://github.com/ratt-ru/CubiCal)
      - Type
      - Description
    * - ``data_ms``
-     - ``MSv2 | None``
+     - ``MSv2``
      - \-
 
 cvel
@@ -2650,1101 +2650,1101 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - Default
      - Description
    * - ``parset``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Parset file to read option defaults from, overridden by any of the flags below (DDF.py [parset file] <options>)
    * - ``data_ms``
-     - ``list[MSv2]``
+     - ``List[MSv2]``
      - *required*
-     - \-
+     - Explicit MSv2 paths. The framework plans and protects every listed dataset. Text-file lists, globs and DDFacet //D or //F suffixes are not dataset paths; use Selection-Field and Selection-DDID for selection within a declared MS.
    * - ``data_col_name``
-     - ``str | None``
+     - ``str``
      - ``'CORRECTED_DATA'``
-     - \-
+     - MS column to image (Default: CORRECTED\_DATA)
    * - ``data_chunk_hours``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Process data in chunks of <=N hours. Use 0 for no chunking. (Default: 0.0)
    * - ``data_chunk_rows``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Process data in chunks of <=N rows, for dask mode. Overrides ChunkHours. Use -1 for native dataset chunking (required in zarr mode).
    * - ``data_sort``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - if True, data will be resorted by baseline-time order internally. This usually speeds up processing. (Default: False)
    * - ``data_dask``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If True, uses dask-ms IO layer instead of casacore
    * - ``predict_col_name``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - MS column to write predict to. Can be empty to disable.
    * - ``predict_mask_square``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Use this field if you want to predict (in/out)side a square region. Syntax is (MaskOutSide,NpixInside). For example setting (0,1000) will predict the outer (1000x1000) square only
    * - ``predict_from_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - In --Image-Mode=Predict, will predict data from this image, rather than --Data-InitDicoModel
    * - ``predict_init_dico_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Resume deconvolution from given DicoModel
    * - ``predict_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Allow overwriting of predict column (Default: True)
    * - ``selection_field``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - default FIELD\_ID to read, if not specified in --Data-MS. (Default: 0)
    * - ``selection_ddid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - default DATA\_DESC\_ID to read, if not specified in --Data-MS. (Default: 0)
    * - ``selection_ta_ql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - additional TaQL selection string
    * - ``selection_chan_start``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - First channel (Default: 0)
    * - ``selection_chan_end``
-     - ``int | None``
+     - ``int``
      - ``-1``
-     - \-
+     - Last channel+1, -1 means up and including last channel. (Default: -1)
    * - ``selection_chan_step``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Channel stepping (Default: 1)
    * - ``selection_flag_ants``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - List of antennas to be flagged, e.g. 'RS,CS017LBA'
    * - ``selection_uv_range_km``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0, 2000]``
-     - \-
+     - Select baseline range (Default: [0, 2000])
    * - ``selection_time_range``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select time range (two comma separated values) containing UTC start and end times in ISO8601
    * - ``selection_time_range_from_start_min``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - In minutes before start of obs.
    * - ``selection_dist_max_to_core``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select antennas by specifying a maximum distance to core
    * - ``selection_auto_flag_nyquist``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - flag those baselines that are not properly sampled
    * - ``output_mode``
-     - ``Literal['Dirty', 'Clean', 'Predict', 'PSF'] | None``
+     - ``str``
      - ``'Clean'``
-     - \-
+     - What to do. (Default: Clean) [choices: Dirty, Clean, Predict, PSF] Choices: ['Dirty', 'Clean', 'Predict', 'PSF']
    * - ``output_clobber``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Allow overwriting of existing parset and images (can't be specified via parset!) (Default: False)
    * - ``output_name``
-     - ``str | None``
+     - ``str``
      - ``'image'``
-     - \-
+     - Base name of output images (Default: image)
    * - ``output_shift_facets_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Astrometric correction per facet, when Image-Mode=RestoreAndShift
    * - ``output_restoring_beam``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``output_also``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Save also these images (i.e. adds to the default set of --Output-Images)
    * - ``output_cubes``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Also save cube versions for these images (only MmRrIi codes recognized)
    * - ``output_images``
-     - ``str | None``
+     - ``str``
      - ``'DdPAMRIikemz'``
-     - \-
+     - Combination of letter codes indicating what images to save. Uppercase for intrinsic flux scale [D]irty, [M]odel, [C]onvolved model, [R]esiduals, restored [I]mage; Lowercase for apparent flux scale [d]irty, [m]odel, [c]onvolved model, [r]esiduals, restored [i]mage; Other images: [P]SF, [N]orm, [n]orm facets, [S] flux scale, [A]lpha (spectral index), [X] mixed-scale (intrinsic model, apparent residuals, i.e. Cyrils original output), [o] intermediate mOdels (Model\_i), [e] intermediate rEsiduals (Residual\_i), [k] intermediate masK image, [z] intermediate auto mask-related noiZe image, [g] intermediate dirty images (only if [Debugging] SaveIntermediateDirtyImages is enabled). [F] intrinsic MFS restored image [f] apparent MFS restored image Use 'all' to save all. (Default: DdPAMRIikze)
    * - ``output_stokes_residues``
-     - ``Literal['I', 'IQ', 'IV', 'QU', 'IQUV'] | None``
+     - ``str``
      - ``'I'``
-     - \-
+     - After cleaning Stokes I, output specified residues if [r] or [R] is specified in option Output-Images. Note that the imager does not perform deconvolution on any Stokes products other than I - it only outputs residues. (Default: I) [choices: I, IQ, IV, QU, IQUV] Choices: ['I', 'IQ', 'IV', 'QU', 'IQUV']
    * - ``spi_maps_alpha_threshold``
-     - ``int | None``
+     - ``int``
      - ``15``
-     - \-
+     - Multiple of the RMS in final residual which determines threshold for fitting alpha map. (Default: 15)
    * - ``image_n_pix``
-     - ``int | tuple[int, int] | None``
+     - ``Union[int, Tuple[int, int]]``
      - ``5000``
-     - \-
+     - Image size. (Default: 5000)
    * - ``image_cell``
-     - ``float | tuple[float, float] | None``
+     - ``Union[float, Tuple[float, float]]``
      - ``5.0``
-     - \-
+     - Cell size. (Default: 5.0)
    * - ``image_phase_center_radec``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Use non-default phase centre. If 'align' is used, all MSs will be rephased to the phase centre of the first MS. Otherwise, specify [HH:MM:SS,DD:MM:SS] direction. If empty, no rephasing is done. (Default: align)
    * - ``image_image_center_radec``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - The central coordinates of the field's image. While PhaseCenterRADEC rotate the visibilities, this will image on the tangential plane to the phase center but centered on ImageCenterRADEC.
    * - ``image_sidelobe_search_window``
-     - ``int | None``
+     - ``int``
      - ``200``
-     - \-
+     - Size of PSF subwindow (centred around the main lobe) to search for the highest sidelobe when fitting the PSF size. (Default: 200)
    * - ``image_multi_field_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - This is in dev. Takes a txt file as input containing the (ra, dec, FOVarcsec) coordinates of the fields
    * - ``facets_n_facets``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - Number of facets to use. (Default: 3)
    * - ``facets_cat_nodes``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - An .npy file containing the ra/dec coordnidates (in radians) of the tessel domain directions.
    * - ``facets_diam_max``
-     - ``float | None``
+     - ``float``
      - ``180.0``
-     - \-
+     - Max facet size, for tessellations. Larger facets will be broken up. (Default: 180.0)
    * - ``facets_diam_min``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Min facet size, for tessellations. Smaller facets will be merged. (Default: 0.0)
    * - ``facets_mixing_width``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Sigma of the gaussian (in pixels) being used to mix the facets on their edges (Default: 10)
    * - ``facets_single_psf``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Use a single, central PSF instead of one per facet
    * - ``facets_psf_oversize``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - For cleaning, use oversize PSF relative to size of facet. (Default: 1.0)
    * - ``facets_psf_facets``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of PSF facets to make. 0: same as NFacets (one PSF per facet) 1: one PSF for entire field. (Default: 0)
    * - ``facets_padding``
-     - ``float | None``
+     - ``float``
      - ``1.7``
-     - \-
+     - Facet padding factor. (Default: 1.7)
    * - ``facets_circumcision``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Set to non-0 to override NPixMin computation in FacetsToIm(). Debugging option, really. (Default: 0)
    * - ``facets_flux_padding_app_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - For flux-dependent facet-padding, the apparant model image (or cube)
    * - ``facets_flux_padding_scale``
-     - ``float | None``
+     - ``float``
      - ``2.0``
-     - \-
+     - The factor applied to the --Facets-Padding for the facet with the highest flux
    * - ``facets_skip_th``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Skip gridding/degridding if the mean Jones power is lower than this level (useful in mosaicing mode)
    * - ``weight_col_name``
-     - ``str | None``
+     - ``str``
      - ``'WEIGHT_SPECTRUM'``
-     - \-
+     - Read data weights from specified column. Use WEIGHT\_SPECTRUM or WEIGHT, more rarely IMAGING\_WEIGHT. (Default: WEIGHT\_SPECTRUM)
    * - ``weight_mode``
-     - ``Literal['Natural', 'Uniform', 'Robust', 'Briggs'] | None``
+     - ``str``
      - ``'Briggs'``
-     - \-
+     - Image weighting. (Default: Briggs) [choices: Natural, Uniform, Robust, Briggs] Choices: ['Natural', 'Uniform', 'Robust', 'Briggs']
    * - ``weight_mfs``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If True, MFS uniform/Briggs weighting is used (all channels binned onto one uv grid). If 0, binning is per-band. (Default: True)
    * - ``weight_robust``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Briggs robustness parameter, from -2 to 2. (Default: 0.0)
    * - ``weight_super_uniform``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Super/subuniform weighting: FoV for weighting purposes is taken as X\*Image\_Size (Default: 1.0)
    * - ``weight_out_col_name``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Save the internally computed weights into this column
    * - ``weight_enable_sigmoid_taper``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Toggles sigmoid tapering type:bool (Default: 0)
    * - ``weight_sigmoid_taper_inner_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Inner taper cutoff in uvwavelengths type:float (Default: 0.0)
    * - ``weight_sigmoid_taper_outer_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Outer taper cutoff in uvwavelengths type:float (Default: 0.0)
    * - ``weight_sigmoid_taper_inner_rolloff_strength``
-     - ``float | None``
+     - ``float``
      - ``0.5``
-     - \-
+     - Rolloff strength on inner taper if enabled. 1.0 is essentially a boxcar, 0.0 means very long rolloffs type:float (Default: 0.5)
    * - ``weight_sigmoid_taper_outer_rolloff_strength``
-     - ``float | None``
+     - ``float``
      - ``0.5``
-     - \-
+     - Rolloff strength on outer taper if enabled. 1.0 is essentially a boxcar, 0.0 means very long rolloffs type:float (Default: 0.5)
    * - ``rime_precision``
-     - ``Literal['S', 'D'] | None``
+     - ``str``
      - ``'S'``
-     - \-
+     - Single or double precision gridding. DEPRECATED? (Default: S) [choices: S, D] Choices: ['S', 'D']
    * - ``rime_pol_mode``
-     - ``Literal['I', 'IQ', 'IU', 'IV', 'IQU', 'IQUV'] | None``
+     - ``str``
      - ``'I'``
-     - \-
+     - (DIRTY ONLY) Polarization mode. (Default: I) [choices: I, IQ, IU, IV, IQU, IQUV] Choices: ['I', 'IQ', 'IU', 'IV', 'IQU', 'IQUV']
    * - ``rime_full_m_tilde``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Uee the full MTilde as described in the paper to do the image plane correction type:bool
    * - ``rime_fft_machine``
-     - ``str | None``
+     - ``str``
      - ``'FFTW'``
-     - \-
+     - (Default: FFTW)
    * - ``rime_forward_mode``
-     - ``Literal['BDA-degrid', 'Classic', 'Montblanc'] | None``
+     - ``str``
      - ``'BDA-degrid'``
-     - \-
+     - Forward predict mode. (Default: BDA-degrid) [choices: BDA-degrid, Classic, Montblanc] Choices: ['BDA-degrid', 'Classic', 'Montblanc']
    * - ``rime_backward_mode``
-     - ``Literal['BDA-grid', 'Classic'] | None``
+     - ``str``
      - ``'BDA-grid'``
-     - \-
+     - Backward mode. (Default: BDA-grid) [choices: BDA-grid, Classic] Choices: ['BDA-grid', 'Classic']
    * - ``rime_decorr_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - decorrelation mode
    * - ``rime_decorr_location``
-     - ``Literal['Center', 'Edge'] | None``
+     - ``str``
      - ``'Edge'``
-     - \-
+     - where decorrelation is estimated (Default: Edge) [choices: Center, Edge] Choices: ['Center', 'Edge']
    * - ``cf_over_s``
-     - ``int | None``
+     - ``int``
      - ``11``
-     - \-
+     - Oversampling factor. (Default: 11)
    * - ``cf_support``
-     - ``int | None``
+     - ``int``
      - ``7``
-     - \-
+     - CF support size. (Default: 7)
    * - ``cf_nw``
-     - ``int | None``
+     - ``int``
      - ``100``
-     - \-
+     - Number of w-planes. Setting this to 1 enables AIPS style faceting. (Default: 100)
    * - ``cf_wmax``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Maximum w coordinate. Visibilities with larger w will not be gridded. If 0, no maximum is imposed. (Default: 0.0)
    * - ``comp_grid_decorr``
-     - ``float | None``
+     - ``float``
      - ``0.02``
-     - \-
+     - Maximum BDA decorrelation factor (gridding) (Default: 0.02)
    * - ``comp_grid_fo_v``
-     - ``Literal['Full', 'Facet'] | None``
+     - ``str``
      - ``'Facet'``
-     - \-
+     - FoV over which decorrelation factor is computed (gridding) (Default: Facet) [choices: Full, Facet] Choices: ['Full', 'Facet']
    * - ``comp_degrid_decorr``
-     - ``float | None``
+     - ``float``
      - ``0.02``
-     - \-
+     - Maximum BDA decorrelation factor (degridding) (Default: 0.02)
    * - ``comp_degrid_fo_v``
-     - ``Literal['Full', 'Facet'] | None``
+     - ``str``
      - ``'Facet'``
-     - \-
+     - FoV over which decorrelation factor is computed (degridding) (Default: Facet) [choices: Full, Facet] Choices: ['Full', 'Facet']
    * - ``comp_sparsification``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - apply sparsification compression to initial major cycles. Sparsification refers to throwing away random visibilities. Supply a list of factors: e.g. 100,30,10 would mean only 1/100 of the data is used for the first major cycle, 1/30 for the second, 1/10 for the third, and full data for the fourth cycle onwards. This can substantially accelerate deconvolution of deep observations, since, in these regimes, very little sensitivity is required for model construction in the initial cycles. (Default: 0)
    * - ``comp_bda_mode``
-     - ``Literal[1, 2] | None``
+     - ``int``
      - ``1``
-     - \-
+     - BDA block computation mode. 1 for Cyril's old mode, 2 for Oleg's new mode. 2 is faster but see issue #319. (Default: 1) [choices: 1, 2] Choices: [1, 2]
    * - ``comp_bda_jones``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - If disabled, gridders and degridders will apply a Jones terms per visibility. If 'grid', gridder will apply them per BDA block, if 'both' so will the degridder. This is faster but possibly less accurate, if you have rapidly evolving Jones terms. (Default: 0)
    * - ``parallel_ncpu``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of CPUs to use in parallel mode. 0: use all available. 1: disable parallelism. (Default: 0)
    * - ``parallel_affinity``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - pin processes to cores. -1/1/2 determines stepping used in selecting cores. Alternatively specifies a list of length NCPU. Alternatively 'disable' to disable affinity settings Alternatively 'enable\_ht' uses stepping of 1 (equivalent to Parallel.Affinity=1), will use all vthreads - the obvious exception is if HT is disabled at BIOS level Alternatively 'disable\_ht' autodetects the NUMA layout of the chip for Debian-based systems and dont use both vthreads per core Use 1 if unsure. (Default: 1)
    * - ``parallel_main_process_affinity``
-     - ``str | None``
+     - ``str``
      - ``'disable'``
-     - \-
+     - this should be set to a core that is not used by forked processes, this option is ignored when using option 'disable or disable\_ht' for Parallel.Affinity (Default: 0)
    * - ``cache_reset``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Reset all caches (including PSF and dirty image) (Default: False)
    * - ``cache_jones``
-     - ``Literal['reset', 'auto'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Reset cached Jones [choices: reset, auto] Choices: ['reset', 'auto']
    * - ``cache_smooth_beam``
-     - ``Literal['reset', 'auto', 'force'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Reset cached smmoth beam (Default: auto) [choices: reset, auto, force] Choices: ['reset', 'auto', 'force']
    * - ``cache_weight``
-     - ``Literal['reset', 'auto'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Reset cached smmoth beam (Default: auto) [choices: reset, auto] Choices: ['reset', 'auto']
    * - ``cache_psf``
-     - ``Literal['off', 'reset', 'auto', 'force'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Cache PSF data. (Default: auto) [choices: off, reset, auto, force] Choices: ['off', 'reset', 'auto', 'force']
    * - ``cache_dirty``
-     - ``Literal['off', 'reset', 'auto', 'forcedirty', 'forceresidual'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Cache dirty image data. (Default: auto) [choices: off, reset, auto, forcedirty, forceresidual] Choices: ['off', 'reset', 'auto', 'forcedirty', 'forceresidual']
    * - ``cache_vis_data``
-     - ``Literal['off', 'auto', 'force'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Cache visibility data and flags at runtime. (Default: auto) [choices: off, auto, force] Choices: ['off', 'auto', 'force']
    * - ``cache_last_residual``
-     - ``bool | None``
+     - ``bool``
      - ``1``
-     - \-
+     - Cache last residual data (at end of last minor cycle) (Default: True)
    * - ``data_cache_dir``
      - ``str``
      - ``'.ddfacet-cache'``
-     - \-
+     - DDFacet data cache directory, separate from the MS and Shinobi's execution cache. Defaults to .ddfacet-cache in the workspace. This field is named data\_cache\_dir because cache\_dir is a Shinobi execution keyword. Nullable: False
    * - ``cache_dir_wisdom_fftw``
      - ``str``
      - ``'.ddfacet-wisdom'``
-     - \-
+     - FFTW wisdom directory. Defaults to .ddfacet-wisdom in the workspace, with declared write ownership instead of the upstream home-directory default. Nullable: False
    * - ``cache_reset_wisdom``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Reset Wisdom file (Default: False)
    * - ``cache_cf``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Cache convolution functions. With many CPUs, may be faster to recompute. (Default: True)
    * - ``cache_hmp``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Cache HMP basis functions. With many CPUs, may be faster to recompute. (Default: False)
    * - ``cache_remnant``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to True, some structures survive to the death of DDFacet, so they can be revived faster
    * - ``beam_model``
-     - ``Literal['None', 'LOFAR', 'FITS', 'GMRT', 'ATCA', 'NENUFAR', 'Everybeam'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Beam model to use. [choices: None, LOFAR, FITS, GMRT, ATCA, NENUFAR, Everybeam] Choices: ['None', 'LOFAR', 'FITS', 'GMRT', 'ATCA', 'NENUFAR', 'Everybeam']
    * - ``beam_at``
-     - ``Literal['facet', 'tessel'] | None``
+     - ``str``
      - ``'facet'``
-     - \-
+     - when DDESolutions are enabled, compute beam per facet, or per larger solution tessel (Default: facet) [choices: facet, tessel] Choices: ['facet', 'tessel']
    * - ``beam_phased_array_mode``
-     - ``Literal['A', 'AE'] | None``
+     - ``str``
      - ``'A'``
-     - \-
+     - PhasedArrayMode beam mode. [choices: A, AE] Choices: ['A', 'AE']
    * - ``beam_force_scalar``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Force Jones matrix to be scalar (used for FITS beam mode for instance)
    * - ``beam_n_band``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of channels over which same beam value is used. 0 means use every channel. (Default: 0)
    * - ``beam_center_norm``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Normalize beam so that its amplitude at the centre is 1. (Default: False)
    * - ``beam_smooth``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Compute the interpolated smooth beam (Default: False)
    * - ``beam_smooth_n_pix``
-     - ``int | None``
+     - ``int``
      - ``11``
-     - \-
+     - Number of pixels the beam is evaluated and smoothed (Default: 11)
    * - ``beam_smooth_interp_mode``
-     - ``str | None``
+     - ``str``
      - ``'Linear'``
-     - \-
+     - Linear/Log
    * - ``beam_fits_file``
-     - ``Path | None``
+     - ``File``
      - ``'beam_$(corr)_$(reim).fits'``
-     - \-
+     - Beam FITS file pattern. A beam pattern consists of eight FITS files, i.e. a real and imaginary part for each of the four Jones terms. The following substitutions are performed to form up the eight filenames: $(corr) or $(xy) is replaced by the Jones element label (e.g. 'xx' or 'rr'), $(reim) is replaced by 're' or 'im', $(realimag) is replaced by 'real' or 'imag'. Uppercase variables are replaced by uppercase values, e.g. $(REIM) by 'RE' pr 'IM'. Use 'unity' if you want to apply a unity matrix for the E term (e.g. only want to do visibility derotations). Correlation labels (XY or RL) are determined by reading the MS, but may be overridden by the FITSFeed option. (Default: beam\_$(corr)\_$(reim).fits)
    * - ``beam_fits_feed``
-     - ``Literal['None', 'xy', 'XY', 'rl', 'RL'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - If set, overrides correlation labels given by the measurement set. [choices: None, xy, XY, rl, RL] Choices: ['None', 'xy', 'XY', 'rl', 'RL']
    * - ``beam_fits_feed_swap``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - swap feed patterns (X to Y and R to L) (Default: False)
    * - ``beam_dt_beam_min``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - change in minutes on which the beam is re-evaluated (Default: 5.0)
    * - ``beam_fits_par_angle_inc_deg``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - increment in PA in degrees at which the beam is to be re-evaluated (on top of DtBeamMin) (Default: 5.0)
    * - ``beam_fitsl_axis``
-     - ``str | None``
+     - ``str``
      - ``'-X'``
-     - \-
+     - L axis of FITS file. Minus sign indicates reverse coordinate convention. (Default: -X)
    * - ``beam_fitsm_axis``
-     - ``str | None``
+     - ``str``
      - ``'Y'``
-     - \-
+     - M axis of FITS file. Minus sign indicates reverse coordinate convention. (Default: Y)
    * - ``beam_fits_verbosity``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - set to >0 to have verbose output from FITS interpolator classes. (Default: 0)
    * - ``beam_fits_frame``
-     - ``Literal['altaz', 'altazgeo', 'equatorial', 'zenith'] | None``
+     - ``str``
      - ``'altaz'``
-     - \-
+     - coordinate frame for FITS beams. Currently, alt-az, equatorial and zenith mounts are supported. (Default: altaz) [choices: altaz, altazgeo, equatorial, zenith] Choices: ['altaz', 'altazgeo', 'equatorial', 'zenith']
    * - ``beam_feed_angle``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - offset feed angle to add to parallactic angle (Default: 0.0)
    * - ``beam_apply_p_jones``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - derotate visibility data (only when FITS beam is active and also time sampled) (Default: 0)
    * - ``beam_flip_visibility_hands``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - apply anti-diagonal matrix if FITS beam is enabled effectively swapping X and Y or R and L and their respective hands (Default: 0)
    * - ``beam_pointing_centre``
-     - ``str | None``
+     - ``str``
      - ``'PhaseDir'``
      - \-
    * - ``beam_rotation_direction``
-     - ``str | None``
+     - ``str``
      - ``'North2East'``
      - \-
    * - ``freq_band_m_hz``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Gridding cube frequency step. If 0, --Freq-NBand is used instead. (Default: 0.0)
    * - ``freq_degrid_band_m_hz``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Degridding cube frequency step. If 0, --Freq-NDegridBand is used instead. (Default: 0.0)
    * - ``freq_n_band``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Number of image bands for gridding. (Default: 1)
    * - ``freq_n_degrid_band``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of image bands for degridding. 0 means degrid each channel. (Default: 0)
    * - ``dde_solutions_dd_sols``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of the DDE solution file
    * - ``dde_solutions_sols_dir``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Name of the directry of the DDE Solutions which contains <SolsDir>/<MSNames>/killMS.<SolsName>.sols.npz
    * - ``dde_solutions_global_norm``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Option to normalise the Jones matrices (options: MeanAbs, MeanAbsAnt, BLBased or SumBLBased). See code for more detail
    * - ``dde_solutions_jones_norm_list``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
-     - \-
+     - Deprecated? (Default: AP)
    * - ``dde_solutions_jones_mode``
-     - ``Literal['Scalar', 'Diag', 'Full'] | None``
+     - ``str``
      - ``'Full'``
-     - \-
+     - (Default: Full) [choices: Scalar, Diag, Full] Choices: ['Scalar', 'Diag', 'Full']
    * - ``dde_solutions_dd_mode_grid``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
-     - \-
+     - In the gridding step, apply Jones matrices Amplitude (A) or Phase (P) or Amplitude&Phase (AP) (Default: AP)
    * - ``dde_solutions_dd_mode_de_grid``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
-     - \-
+     - In the degridding step, apply Jones matrices Amplitude (A) or Phase (P) or Amplitude&Phase (AP) (Default: AP)
    * - ``dde_solutions_scale_amp_grid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Deprecated? (Default: 0)
    * - ``dde_solutions_scale_amp_de_grid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Deprecated? (Default: 0)
    * - ``dde_solutions_calib_err``
-     - ``float | None``
+     - ``float``
      - ``10.0``
-     - \-
+     - Deprecated? (Default: 10.0)
    * - ``dde_solutions_type``
-     - ``Literal['Krigging', 'Nearest'] | None``
+     - ``str``
      - ``'Nearest'``
-     - \-
+     - Deprecated? (Default: Nearest) [choices: Krigging, Nearest] Choices: ['Krigging', 'Nearest']
    * - ``dde_solutions_scale``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Deprecated? (Default: 1.0)
    * - ``dde_solutions_gamma``
-     - ``float | None``
+     - ``float``
      - ``4.0``
-     - \-
+     - Deprecated? (Default: 4.0)
    * - ``dde_solutions_restore_sub``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Deprecated? (Default: False)
    * - ``dde_solutions_re_weight_snr``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Deprecated? (Default: 0.0)
    * - ``pointing_solutions_pointing_sols_csv``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Filename of CSV containing time-variable pointing solutions. None initializes all antenna pointing offsets to 0, 0
    * - ``pointing_solutions_interpolation_mode``
-     - ``Literal['LERP'] | None``
+     - ``str``
      - ``'LERP'``
-     - \-
+     - Interpolation mode (Default: LERP) [choices: LERP] Choices: ['LERP']
    * - ``deconv_mode``
-     - ``Literal['HMP', 'Hogbom', 'SSD', 'WSCMS', 'SSD2'] | None``
+     - ``str``
      - ``'HMP'``
-     - \-
+     - Deconvolution algorithm. (Default: HMP) [choices: HMP, Hogbom, SSD, WSCMS, SSD2] Choices: ['HMP', 'Hogbom', 'SSD', 'WSCMS', 'SSD2']
    * - ``deconv_max_major_iter``
-     - ``int | None``
+     - ``int``
      - ``20``
-     - \-
+     - Max number of major cycles. (Default: 20)
    * - ``deconv_max_minor_iter``
-     - ``int | None``
+     - ``int``
      - ``20000``
-     - \-
+     - Max number of (overall) minor cycle iterations (HMP, Hogbom). (Default: 20000)
    * - ``deconv_allow_negative``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Allow negative components (HMP, Hogbom). (Default: True)
    * - ``deconv_gain``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Loop gain (HMP, Hogbom). (Default: 0.1)
    * - ``deconv_flux_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Absolute flux threshold at which deconvolution is stopped (HMP, Hogbom, SSD). (Default: 0.0)
    * - ``deconv_cycle_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Cycle factor: used to set a minor cycle stopping threshold based on PSF sidelobe level (HMP, Hogbom). Use 0 to disable, otherwise 2.5 is a reasonable value, but may lead to very shallow minor cycle. (Default: 0.0)
    * - ``deconv_rms_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Set minor cycle stopping threshold to X\*{residual RMS at start of major cycle} (HMP, Hogbom, SSD). (Default: 0.0)
    * - ``deconv_peak_factor``
-     - ``float | None``
+     - ``float``
      - ``0.15``
-     - \-
+     - Set minor cycle stopping threshold to X\*{peak residual at start of major cycle} (HMP, Hogbom, SSD). (Default: 0.15)
    * - ``deconv_prev_peak_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Set minor cycle stopping threshold to X\*{peak residual at end of previous major cycle} (HMP). (Default: 0.0)
    * - ``deconv_num_rms_samples``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - How many samples to draw for RMS computation. Use 0 to use all pixels (most precise). (Default: 10000)
    * - ``deconv_approximate_psf``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - when --Comp-Sparsification is on, use approximate (i.e. central facet) PSF for cleaning while operating above the given sparsification factor (SF). This speeds up HMP reinitialization in major cycles. A value of 1-10 is sensible. Set to 0 to always use precise per-facet PSF. (Default: 0)
    * - ``deconv_psf_box``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - determines the size of the PSF subtraction box used in CLEAN-style deconvolution (if appropriate). Use 'auto' (or 'sidelobe') for a Clark-CLEAN-style box taken out to a certain sidelobe (faster). Use 'full' to subtract the full PSF, Hogbom-style (more accurate, can also combine with --Image-PSFOversize for maximum accuracy). Use an integer number to set an explicit box radius, in pixels. (HMP) (Default: auto)
    * - ``mask_external``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - External clean mask image (FITS format).
    * - ``mask_auto``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Do automatic masking (Default: False)
    * - ``mask_auto_rms_factor``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - RMS Factor for automasking HMP
    * - ``mask_sig_th``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - set Threshold (in sigma) for automatic masking (Default: 10)
    * - ``mask_flux_image_type``
-     - ``str | None``
+     - ``str``
      - ``'ModelConv'``
-     - \-
+     - If Auto enabled, does the cut of SigTh either on the ModelConv or the Restored (Default: ModelConv)
    * - ``mask_th_filter_rfi``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Automatic filter RFI in the residual cube
    * - ``noise_min_stats``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[60, 2]``
-     - \-
+     - The parameters to compute the noise-map-based mask for step i+1 from the residual image at step i. Should be [box\_size,box\_step] (Default: [60, 2])
    * - ``noise_brutal_hmp``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If noise map is computed, this option enabled, it first computes an image plane deconvolution with a high gain value, and compute the noise-map-based mask using the brutal-restored image (Default: True)
    * - ``hmp_alpha``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[-1.0, 1.0, 11]``
-     - \-
+     - List of alphas to fit. (Default: [-1.0, 1.0, 11])
    * - ``hmp_scales``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - List of scales to use. (Default: [0])
    * - ``hmp_ratios``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``[]``
-     - \-
+     - @cyriltasse please document (Default: [''])
    * - ``hmp_n_theta``
-     - ``int | None``
+     - ``int``
      - ``6``
-     - \-
+     - Number of PA steps to use. (Default: 6)
    * - ``hmp_solver_mode``
-     - ``Literal['PI', 'NNLS'] | None``
+     - ``str``
      - ``'PI'``
-     - \-
+     - Solver mode: pseudoinverse, or non-negative least squares. (Default: PI) [choices: PI, NNLS] Choices: ['PI', 'NNLS']
    * - ``hmp_allow_resid_increase``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Allow the maximum residual to increase by at most this much relative to the lowest residual, before bailing out due to divergence. (Default: 0.1)
    * - ``hmp_major_stall_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.8``
-     - \-
+     - Major cycle stall threshold. If the residual at the beginning of a major cycle is above X\*residual at the beginning of the previous major cycle, then we consider the deconvolution stalled and bail out. (Default: 0.8)
    * - ``hmp_taper``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Weighting taper size for HMP fit. If 0, determined automatically. (Default: 0)
    * - ``hmp_support``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Basis function support size. If 0, determined automatically. (Default: 0)
    * - ``hmp_peak_weight_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - weigh the peak finding by given image
    * - ``hmp_kappa``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Regularization parameter. If stddev of per-alpha solutions exceeds the maximum solution amplitude divided by Kappa, forces a fully-regularized solution. Use 0 for no such regularization. (Default: 0.0)
    * - ``hmp_outer_space_th``
-     - ``float | None``
+     - ``float``
      - ``2.0``
-     - \-
+     - (Default: 2.0)
    * - ``hmp_fraction_random_peak``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``hogbom_poly_fit_order``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - polynomial order for frequency fitting (Default: 4)
    * - ``hogbom_linear_peakfinding``
-     - ``Literal['Joint', 'Separate'] | None``
+     - ``str``
      - ``'Joint'``
-     - \-
+     - Perform EVPA-preserving (complex-valued) polarization CLEAN (Pratley-Johnston-Hollitt) or separate Q and U cleaning. [choices: Joint, Separate] Choices: ['Joint', 'Separate']
    * - ``wscms_num_freq_basis_funcs``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - number of basis functions to use for the fit to the frequency axis (Default: 4)
    * - ``wscms_multi_scale``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - whether to use multi-scale or not (recommended to use Hogbom if not using multi-scale) (Default: True)
    * - ``wscms_multi_scale_bias``
-     - ``float | None``
+     - ``float``
      - ``0.55``
-     - \-
+     - scale bias parameter (smaller values give more weight to larger scales) (Default: 0.55)
    * - ``wscms_scale_basis``
-     - ``str | None``
+     - ``str``
      - ``'Gauss'``
-     - \-
+     - the kind of scale kernels to use (only Gauss available for now) (Default: Gauss)
    * - ``wscms_scales``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Scale sizes in pixels/FWHM eg. [0, 4, 8, 16] (if None determined automatically)
    * - ``wscms_max_scale``
-     - ``int | None``
+     - ``int``
      - ``250``
-     - \-
+     - The maximum extent of the scale functions in pixels (Default: 250)
    * - ``wscms_n_sub_minor_iter``
-     - ``int | None``
+     - ``int``
      - ``250``
-     - \-
+     - Number of iterations for the sub minor loop (Default: 250)
    * - ``wscms_sub_minor_peak_fact``
-     - ``float | None``
+     - ``float``
      - ``0.85``
-     - \-
+     - Peak factor of sub minor loop (Default: 0.85)
    * - ``wscms_minor_stall_threshold``
-     - ``float | None``
+     - ``float``
      - ``1e-07``
-     - \-
+     - if the peak in the minor cycle decreases by less than this fraction it has stalled and we go back to the major cycle (Default: 1e-07)
    * - ``wscms_minor_divergence_factor``
-     - ``float | None``
+     - ``float``
      - ``1.3``
-     - \-
+     - if the peak flux increases by more than this fraction between minor cycles then it has diverged and we go back to a major cycle (Default: 1.3)
    * - ``wscms_auto_mask``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - whether to use scale dependent auto-masking (Default: True)
    * - ``wscms_auto_mask_threshold``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Threshold at which the scale dependent mask should be fixed.
    * - ``wscms_auto_mask_rms_factor``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - Default multiple of RMS at which to start AutoMasking in case no (Default: 3)
    * - ``wscms_cache_size``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - the number of items to keep in the cache dict before spilling over to disk (Default: 3)
    * - ``wscms_padding``
-     - ``float | None``
+     - ``float``
      - ``1.2``
-     - \-
+     - padding in the minor cycle. Can often be much smaller than facet padding (Default: 1.2)
    * - ``montblanc_tensorflow_server_target``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - URL for the TensorflowServer, e.g. grpc://tensorflow.server.com:8888/
    * - ``montblanc_log_file``
      - ``str``
      - ``'.ddfacet-montblanc.log'``
-     - \-
+     - Montblanc log destination. Defaults to .ddfacet-montblanc.log in the working directory so its write location is declared before execution. Nullable: False
    * - ``montblanc_memory_budget``
-     - ``float | None``
+     - ``float``
      - ``4.0``
-     - \-
+     - Predictor memory budget in GiB (Default: 4.0)
    * - ``montblanc_log_level``
-     - ``Literal['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] | None``
+     - ``str``
      - ``'WARNING'``
-     - \-
+     - Log level to write to console, rest of the messages goes to log file (Default: WARNING) [choices: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL] Choices: ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
    * - ``montblanc_solver_d_type``
-     - ``Literal['single', 'double'] | None``
+     - ``str``
      - ``'double'``
-     - \-
+     - Data type used in solver, (Default: double) [choices: single, double] Choices: ['single', 'double']
    * - ``montblanc_driver_version``
-     - ``Literal['tf'] | None``
+     - ``str``
      - ``'tf'``
-     - \-
+     - Backend to use, (Default: tf) [choices: tf] Choices: ['tf']
    * - ``ssd_clean_parallel``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Enable parallel mode. (Default: True)
    * - ``ssd_clean_island_deconv_mode``
-     - ``str | None``
+     - ``str``
      - ``'GA'``
-     - \-
+     - Moresane, GA, Sasir, ... (Default: GA)
    * - ``ssd_clean_ssd_solve_pars``
-     - ``str | None``
+     - ``str``
      - ``'[S,Alpha]'``
-     - \-
+     - (Default: ['S', 'Alpha'])
    * - ``ssd_clean_ssd_cost_func``
-     - ``str | None``
+     - ``str``
      - ``'[Chi2,MinFlux]'``
-     - \-
+     - (Default: ['Chi2', 'MinFlux'])
    * - ``ssd_clean_bic_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - (Default: 0.0)
    * - ``ssd_clean_artifact_robust``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - (Default: False)
    * - ``ssd_clean_conv_fft_switch``
-     - ``int | None``
+     - ``int``
      - ``1000``
-     - \-
+     - (Default: 1000)
    * - ``ssd_clean_n_enlarge_pars``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - (Default: 0)
    * - ``ssd_clean_n_enlarge_data``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - (Default: 2)
    * - ``ssd_clean_restore_metro_switch``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - (Default: 0)
    * - ``ssd_clean_min_max_group_distance``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[10, 50]``
-     - \-
+     - (Default: [10, 50])
    * - ``ssd_clean_max_island_size``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - if Island size larger than this, will be split
    * - ``ssd_clean_init_type``
-     - ``str | None``
+     - ``str``
      - ``'HMP'``
-     - \-
+     - Islands can be initialised by HMP or MORESANE
    * - ``ssd2_solve_pars``
-     - ``str | None``
+     - ``str``
      - ``'[Poly]'``
-     - \-
+     - Poly: use polynomial, GSig: use gaussians (not really tested/useful - to be deprecated)
    * - ``ssd2_poly_freq_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Add Polyi to --SSDClean-SSDSolvePars.
    * - ``ssd2_init_type``
-     - ``str | None``
+     - ``str``
      - ``'[HMP,MultiSlice:Orieux]'``
-     - \-
+     - Method to initialise islands
    * - ``ssd2_convexify_islands``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Convexify island before deconvolution
    * - ``ssd2_n_last_cycles_deconv_all``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - This parameter sets how many of the last cycles will deconvolve all islands. If set to 0, SSD2 will use --Deconv-CycleFactor, --Deconv-PeakFactor, --Deconv-RMSFactor to determine threshold above which islands are reestimated. If set to 2, in the last 2 major cycle all islands are estimated. If -1: Always deconv all islands regardless of the cycle number
    * - ``ssd3_poly_freq_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Add Polyi to --SSDClean-SSDSolvePars.
    * - ``ssd3_solve_pars``
-     - ``str | None``
+     - ``str``
      - ``'[Poly]'``
      - \-
    * - ``ssd3_init_type``
-     - ``str | None``
+     - ``str``
      - ``'[HMP_0-50,MultiSlice:Orieux]'``
-     - \-
+     - Use deconv method for island initialisation. HMP\_0-50 will initialise islands only with sizes in 0-50 pixels
    * - ``ssd3_ga_isl_size``
-     - ``str | None``
+     - ``str``
      - ``'0-50'``
-     - \-
+     - Run the GA with eth GAClean parameters for islands with size in that range
    * - ``ssd3_run_simple_clean``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Run simplistic clean for the islands that have not been initialised with neither of the SSD3 InitType methods
    * - ``ssd3_propagate_prev_gen``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Propagate previous generations best individual into current cycle
    * - ``ssd3_alpha_scale_model``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Agressively scale the residual power that has not been modeled by previous cycle. Helps when PSF is really bad
    * - ``ssd3_convexify_islands``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Convexify the islands prior to deconvolution
    * - ``ssd3_unique_island``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Make a unique island with the entire image
    * - ``ssd3_allow_facet_overlap``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Allow the islands to be overlapping the facets, otherwise cut the islands when crossing a facet boundary
    * - ``ssd3_n_look_back_models``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Use previous models to constrain current model estimate. Helps when SSD3 stabilise residual goes instable (+/-)
    * - ``ssd3_posterior``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Holy grail of radio astronomy - not ready yet, maybe never
    * - ``ssd3_posterior_n_iter``
-     - ``int | None``
+     - ``int``
      - ``100``
      - \-
    * - ``ssd3_posterior_n_points``
-     - ``int | None``
+     - ``int``
      - ``50``
      - \-
    * - ``ssd3_posterior_alpha``
-     - ``float | None``
+     - ``float``
      - ``0.01``
      - \-
    * - ``ssd3_force_positive_model``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Force model to be positive
    * - ``ssd3_n_last_cycles_deconv_all``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - This parameter sets how many of the last cycles will deconvolve all islands. If set to 0, SSD3 will use --Deconv-CycleFactor, --Deconv-PeakFactor, --Deconv-RMSFactor to determine threshold above which islands are reestimated. If set to 2, in the last 2 major cycle all islands are estimated. If -1: Always deconv all islands regardless of the cycle number
    * - ``multi_slice_deconv_type``
-     - ``str | None``
+     - ``str``
      - ``'MORESANE'``
-     - \-
+     - MORESANE, Orieux, etc
    * - ``multi_slice_deconv_poly_fit_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Number of Taylor terms in the deconvolution
    * - ``multi_slice_deconv_force_positive_model``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Force the model to be positive
    * - ``multi_slice_deconv_hyper_smooth``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - When using Orieux, sets the Hyper parameter to 10\*\*ThisValue
    * - ``ga_clean_n_source_kin``
-     - ``int | None``
+     - ``int``
      - ``50``
-     - \-
+     - (Default: 50)
    * - ``ga_clean_n_max_gen``
-     - ``int | None``
+     - ``int``
      - ``50``
-     - \-
+     - (Default: 50)
    * - ``ga_clean_min_size_init``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - (Default: 10)
    * - ``ga_clean_alpha_init_hmp``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[-4.0, 1.0, 6]``
-     - \-
+     - (Default: [-4.0, 1.0, 6])
    * - ``ga_clean_scales_init_hmp``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0, 1, 2, 4, 8, 16, 24, 32]``
-     - \-
+     - (Default: [0, 1, 2, 4, 8, 16, 24, 32])
    * - ``ga_clean_gain_init_hmp``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - (Default: 0.1)
    * - ``ga_clean_ratios_init_hmp``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``[]``
-     - \-
+     - (Default: [''])
    * - ``ga_clean_n_theta_init_hmp``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - (Default: 4)
    * - ``ga_clean_max_minor_iter_init_hmp``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - (Default: 10000)
    * - ``ga_clean_allow_negative_init_hmp``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - (Default: False)
    * - ``ga_clean_rms_factor_init_hmp``
-     - ``float | None``
+     - ``float``
      - ``3.0``
-     - \-
+     - (Default: 3.0)
    * - ``ga_clean_parallel_init``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - run island init in parallel. Serial mode may reduce RAM pressure, and could be useful for debugging.
    * - ``ga_clean_ncpu``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - number of cores to use for parallel fitness calculations (in large-island mode). Default of 0 means use as many as specified by --Parallel-NCPU. If you find yourself running out of memory here, you might want to specify a small number of cores for this step. (Default: 0)
    * - ``moresane_n_major_iter``
-     - ``int | None``
+     - ``int``
      - ``200``
-     - \-
+     - Maximum number of iterations allowed in the major loop. Exit condition. (Default: 200)
    * - ``moresane_n_minor_iter``
-     - ``int | None``
+     - ``int``
      - ``200``
-     - \-
+     - Maximum number of iterations allowed in the minor loop. Serves as an exit condition when the SNR is does not reach a maximum. (Default: 200)
    * - ``moresane_gain``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Loop gain for the deconvolution. (Default: 0.1)
    * - ``moresane_force_positive``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Boolean specifier for whether or not a model must be strictly positive. (Default: True)
    * - ``moresane_sigma_cut_level``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Number of sigma at which thresholding is to be performed. (Default: 1)
    * - ``log_memory``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - log memory use (Default: False)
    * - ``log_boring``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - disable progress bars and other pretty console output (Default: False)
    * - ``log_append``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - append to log file if it exists (default truncates) (Default: False)
    * - ``debug_pause_workers``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Pauses worker processes upon launch (with SIGSTOP). Useful to attach gdb to workers. (Default: False)
    * - ``debug_facet_phase_shift``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0.0, 0.0]``
-     - \-
+     - Shift in facet coordinates in arcseconds for l and m (this phase steers the sky over the image plane). (Default: [0.0, 0.0])
    * - ``debug_print_minor_cycle_rms``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Compute and print RMS in minor cycle iterations. (Default: False)
    * - ``debug_dump_clean_solutions``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Dump intermediate minor cycle solutions to a file. Use 0 or 1, or give an explicit list of things to dump (Default: 0)
    * - ``debug_dump_clean_postage_stamps``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Also dump postage stamps when cleaning within a radius R of X,Y. Implies --Debug-DumpCleanSolutions.
    * - ``debug_clean_stall_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Throw an exception when a fitted CLEAN component is below this threshold in flux. Useful for debugging. (Default: 0.0)
    * - ``debug_memory_greedy``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Enable memory-greedy mode. Retain certain shared arrays in RAM as long as possible. (Default: True)
    * - ``debug_app_verbose``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Verbosity level for multiprocessing. (Default: 0)
    * - ``debug_pdb``
-     - ``Literal['never', 'always', 'auto'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Invoke pdb on unexpected error conditions (rather than exit). If set to 'auto', then invoke pdb only if --Log-Boring is 0. (Default: auto) [choices: never, always, auto] Choices: ['never', 'always', 'auto']
    * - ``misc_random_seed``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - seed random number generator with explicit seed, if given. Useful for reproducibility of the random-based optimizations (sparsification, etc.).
    * - ``misc_conserve_memory``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - if true, tries to minimize memory use at possible expense of runtime. (Default: 0)
    * - ``misc_ignore_deprecation_marking``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - if true, tries to run deprecated modes. Currently this means that deconvolution machines are reset and reinitialized each major cycle. (Default: False)
    * - ``katdal_apply_cal``
-     - ``str | None``
+     - ``str``
      - ``'default'``
-     - \-
+     - List of calibration solutions to apply to data as a string of comma-separated names, e.g. 'l1' or #'K,B,G'. Use 'default' for L1 + L2 and 'all' for all available products.
 
 **Outputs**
 
@@ -3756,22 +3756,22 @@ EXPERIMENTAL: DDFacet: facet-based radio-interferometric imager/deconvolver (htt
      - Type
      - Description
    * - ``dirty``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``restored``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``model``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``residual``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``psf``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``dico_model``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
 
 ddfacet-readonly
@@ -3794,1101 +3794,1101 @@ DDFacet read-only MSv2 imaging; caches, wisdom and logs must be outside the inpu
      - Default
      - Description
    * - ``parset``
-     - ``Literal[None] | None``
+     - ``File``
      - ``None``
-     - \-
+     - Parset file to read option defaults from, overridden by any of the flags below (DDF.py [parset file] <options>) Choices: [None]
    * - ``data_ms``
-     - ``list[MSv2]``
+     - ``List[MSv2]``
      - *required*
-     - \-
+     - Explicit MSv2 paths. The framework plans and protects every listed dataset. Text-file lists, globs and DDFacet //D or //F suffixes are not dataset paths; use Selection-Field and Selection-DDID for selection within a declared MS.
    * - ``data_col_name``
-     - ``str | None``
+     - ``str``
      - ``'CORRECTED_DATA'``
-     - \-
+     - MS column to image (Default: CORRECTED\_DATA)
    * - ``data_chunk_hours``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Process data in chunks of <=N hours. Use 0 for no chunking. (Default: 0.0)
    * - ``data_chunk_rows``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Process data in chunks of <=N rows, for dask mode. Overrides ChunkHours. Use -1 for native dataset chunking (required in zarr mode).
    * - ``data_sort``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - if True, data will be resorted by baseline-time order internally. This usually speeds up processing. (Default: False)
    * - ``data_dask``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If True, uses dask-ms IO layer instead of casacore
    * - ``predict_col_name``
-     - ``Literal['']``
+     - ``str``
      - ``''``
-     - \-
+     - MS column to write predict to. Can be empty to disable. Choices: [''] Nullable: False
    * - ``predict_mask_square``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Use this field if you want to predict (in/out)side a square region. Syntax is (MaskOutSide,NpixInside). For example setting (0,1000) will predict the outer (1000x1000) square only
    * - ``predict_from_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - In --Image-Mode=Predict, will predict data from this image, rather than --Data-InitDicoModel
    * - ``predict_init_dico_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Resume deconvolution from given DicoModel
    * - ``predict_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Allow overwriting of predict column (Default: True)
    * - ``selection_field``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - default FIELD\_ID to read, if not specified in --Data-MS. (Default: 0)
    * - ``selection_ddid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - default DATA\_DESC\_ID to read, if not specified in --Data-MS. (Default: 0)
    * - ``selection_ta_ql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - additional TaQL selection string
    * - ``selection_chan_start``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - First channel (Default: 0)
    * - ``selection_chan_end``
-     - ``int | None``
+     - ``int``
      - ``-1``
-     - \-
+     - Last channel+1, -1 means up and including last channel. (Default: -1)
    * - ``selection_chan_step``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Channel stepping (Default: 1)
    * - ``selection_flag_ants``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - List of antennas to be flagged, e.g. 'RS,CS017LBA'
    * - ``selection_uv_range_km``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0, 2000]``
-     - \-
+     - Select baseline range (Default: [0, 2000])
    * - ``selection_time_range``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select time range (two comma separated values) containing UTC start and end times in ISO8601
    * - ``selection_time_range_from_start_min``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - In minutes before start of obs.
    * - ``selection_dist_max_to_core``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select antennas by specifying a maximum distance to core
    * - ``selection_auto_flag_nyquist``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - flag those baselines that are not properly sampled
    * - ``output_mode``
-     - ``Literal['Clean', 'Dirty', 'PSF']``
+     - ``str``
      - ``'Clean'``
-     - \-
+     - What to do. (Default: Clean) [choices: Dirty, Clean, Predict, PSF] Choices: ['Clean', 'Dirty', 'PSF'] Nullable: False
    * - ``output_clobber``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Allow overwriting of existing parset and images (can't be specified via parset!) (Default: False)
    * - ``output_name``
-     - ``str | None``
+     - ``str``
      - ``'image'``
-     - \-
+     - Base name of output images (Default: image)
    * - ``output_shift_facets_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Astrometric correction per facet, when Image-Mode=RestoreAndShift
    * - ``output_restoring_beam``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``output_also``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Save also these images (i.e. adds to the default set of --Output-Images)
    * - ``output_cubes``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Also save cube versions for these images (only MmRrIi codes recognized)
    * - ``output_images``
-     - ``str | None``
+     - ``str``
      - ``'DdPAMRIikemz'``
-     - \-
+     - Combination of letter codes indicating what images to save. Uppercase for intrinsic flux scale [D]irty, [M]odel, [C]onvolved model, [R]esiduals, restored [I]mage; Lowercase for apparent flux scale [d]irty, [m]odel, [c]onvolved model, [r]esiduals, restored [i]mage; Other images: [P]SF, [N]orm, [n]orm facets, [S] flux scale, [A]lpha (spectral index), [X] mixed-scale (intrinsic model, apparent residuals, i.e. Cyrils original output), [o] intermediate mOdels (Model\_i), [e] intermediate rEsiduals (Residual\_i), [k] intermediate masK image, [z] intermediate auto mask-related noiZe image, [g] intermediate dirty images (only if [Debugging] SaveIntermediateDirtyImages is enabled). [F] intrinsic MFS restored image [f] apparent MFS restored image Use 'all' to save all. (Default: DdPAMRIikze)
    * - ``output_stokes_residues``
-     - ``Literal['I', 'IQ', 'IV', 'QU', 'IQUV'] | None``
+     - ``str``
      - ``'I'``
-     - \-
+     - After cleaning Stokes I, output specified residues if [r] or [R] is specified in option Output-Images. Note that the imager does not perform deconvolution on any Stokes products other than I - it only outputs residues. (Default: I) [choices: I, IQ, IV, QU, IQUV] Choices: ['I', 'IQ', 'IV', 'QU', 'IQUV']
    * - ``spi_maps_alpha_threshold``
-     - ``int | None``
+     - ``int``
      - ``15``
-     - \-
+     - Multiple of the RMS in final residual which determines threshold for fitting alpha map. (Default: 15)
    * - ``image_n_pix``
-     - ``int | tuple[int, int] | None``
+     - ``Union[int, Tuple[int, int]]``
      - ``5000``
-     - \-
+     - Image size. (Default: 5000)
    * - ``image_cell``
-     - ``float | tuple[float, float] | None``
+     - ``Union[float, Tuple[float, float]]``
      - ``5.0``
-     - \-
+     - Cell size. (Default: 5.0)
    * - ``image_phase_center_radec``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Use non-default phase centre. If 'align' is used, all MSs will be rephased to the phase centre of the first MS. Otherwise, specify [HH:MM:SS,DD:MM:SS] direction. If empty, no rephasing is done. (Default: align)
    * - ``image_image_center_radec``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - The central coordinates of the field's image. While PhaseCenterRADEC rotate the visibilities, this will image on the tangential plane to the phase center but centered on ImageCenterRADEC.
    * - ``image_sidelobe_search_window``
-     - ``int | None``
+     - ``int``
      - ``200``
-     - \-
+     - Size of PSF subwindow (centred around the main lobe) to search for the highest sidelobe when fitting the PSF size. (Default: 200)
    * - ``image_multi_field_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - This is in dev. Takes a txt file as input containing the (ra, dec, FOVarcsec) coordinates of the fields
    * - ``facets_n_facets``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - Number of facets to use. (Default: 3)
    * - ``facets_cat_nodes``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - An .npy file containing the ra/dec coordnidates (in radians) of the tessel domain directions.
    * - ``facets_diam_max``
-     - ``float | None``
+     - ``float``
      - ``180.0``
-     - \-
+     - Max facet size, for tessellations. Larger facets will be broken up. (Default: 180.0)
    * - ``facets_diam_min``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Min facet size, for tessellations. Smaller facets will be merged. (Default: 0.0)
    * - ``facets_mixing_width``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Sigma of the gaussian (in pixels) being used to mix the facets on their edges (Default: 10)
    * - ``facets_single_psf``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Use a single, central PSF instead of one per facet
    * - ``facets_psf_oversize``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - For cleaning, use oversize PSF relative to size of facet. (Default: 1.0)
    * - ``facets_psf_facets``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of PSF facets to make. 0: same as NFacets (one PSF per facet) 1: one PSF for entire field. (Default: 0)
    * - ``facets_padding``
-     - ``float | None``
+     - ``float``
      - ``1.7``
-     - \-
+     - Facet padding factor. (Default: 1.7)
    * - ``facets_circumcision``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Set to non-0 to override NPixMin computation in FacetsToIm(). Debugging option, really. (Default: 0)
    * - ``facets_flux_padding_app_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - For flux-dependent facet-padding, the apparant model image (or cube)
    * - ``facets_flux_padding_scale``
-     - ``float | None``
+     - ``float``
      - ``2.0``
-     - \-
+     - The factor applied to the --Facets-Padding for the facet with the highest flux
    * - ``facets_skip_th``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Skip gridding/degridding if the mean Jones power is lower than this level (useful in mosaicing mode)
    * - ``weight_col_name``
-     - ``str | None``
+     - ``str``
      - ``'WEIGHT_SPECTRUM'``
-     - \-
+     - Read data weights from specified column. Use WEIGHT\_SPECTRUM or WEIGHT, more rarely IMAGING\_WEIGHT. (Default: WEIGHT\_SPECTRUM)
    * - ``weight_mode``
-     - ``Literal['Natural', 'Uniform', 'Robust', 'Briggs'] | None``
+     - ``str``
      - ``'Briggs'``
-     - \-
+     - Image weighting. (Default: Briggs) [choices: Natural, Uniform, Robust, Briggs] Choices: ['Natural', 'Uniform', 'Robust', 'Briggs']
    * - ``weight_mfs``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If True, MFS uniform/Briggs weighting is used (all channels binned onto one uv grid). If 0, binning is per-band. (Default: True)
    * - ``weight_robust``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Briggs robustness parameter, from -2 to 2. (Default: 0.0)
    * - ``weight_super_uniform``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Super/subuniform weighting: FoV for weighting purposes is taken as X\*Image\_Size (Default: 1.0)
    * - ``weight_out_col_name``
-     - ``Literal['']``
+     - ``str``
      - ``''``
-     - \-
+     - Save the internally computed weights into this column Choices: [''] Nullable: False
    * - ``weight_enable_sigmoid_taper``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Toggles sigmoid tapering type:bool (Default: 0)
    * - ``weight_sigmoid_taper_inner_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Inner taper cutoff in uvwavelengths type:float (Default: 0.0)
    * - ``weight_sigmoid_taper_outer_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Outer taper cutoff in uvwavelengths type:float (Default: 0.0)
    * - ``weight_sigmoid_taper_inner_rolloff_strength``
-     - ``float | None``
+     - ``float``
      - ``0.5``
-     - \-
+     - Rolloff strength on inner taper if enabled. 1.0 is essentially a boxcar, 0.0 means very long rolloffs type:float (Default: 0.5)
    * - ``weight_sigmoid_taper_outer_rolloff_strength``
-     - ``float | None``
+     - ``float``
      - ``0.5``
-     - \-
+     - Rolloff strength on outer taper if enabled. 1.0 is essentially a boxcar, 0.0 means very long rolloffs type:float (Default: 0.5)
    * - ``rime_precision``
-     - ``Literal['S', 'D'] | None``
+     - ``str``
      - ``'S'``
-     - \-
+     - Single or double precision gridding. DEPRECATED? (Default: S) [choices: S, D] Choices: ['S', 'D']
    * - ``rime_pol_mode``
-     - ``Literal['I', 'IQ', 'IU', 'IV', 'IQU', 'IQUV'] | None``
+     - ``str``
      - ``'I'``
-     - \-
+     - (DIRTY ONLY) Polarization mode. (Default: I) [choices: I, IQ, IU, IV, IQU, IQUV] Choices: ['I', 'IQ', 'IU', 'IV', 'IQU', 'IQUV']
    * - ``rime_full_m_tilde``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Uee the full MTilde as described in the paper to do the image plane correction type:bool
    * - ``rime_fft_machine``
-     - ``str | None``
+     - ``str``
      - ``'FFTW'``
-     - \-
+     - (Default: FFTW)
    * - ``rime_forward_mode``
-     - ``Literal['BDA-degrid', 'Classic', 'Montblanc'] | None``
+     - ``str``
      - ``'BDA-degrid'``
-     - \-
+     - Forward predict mode. (Default: BDA-degrid) [choices: BDA-degrid, Classic, Montblanc] Choices: ['BDA-degrid', 'Classic', 'Montblanc']
    * - ``rime_backward_mode``
-     - ``Literal['BDA-grid', 'Classic'] | None``
+     - ``str``
      - ``'BDA-grid'``
-     - \-
+     - Backward mode. (Default: BDA-grid) [choices: BDA-grid, Classic] Choices: ['BDA-grid', 'Classic']
    * - ``rime_decorr_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - decorrelation mode
    * - ``rime_decorr_location``
-     - ``Literal['Center', 'Edge'] | None``
+     - ``str``
      - ``'Edge'``
-     - \-
+     - where decorrelation is estimated (Default: Edge) [choices: Center, Edge] Choices: ['Center', 'Edge']
    * - ``cf_over_s``
-     - ``int | None``
+     - ``int``
      - ``11``
-     - \-
+     - Oversampling factor. (Default: 11)
    * - ``cf_support``
-     - ``int | None``
+     - ``int``
      - ``7``
-     - \-
+     - CF support size. (Default: 7)
    * - ``cf_nw``
-     - ``int | None``
+     - ``int``
      - ``100``
-     - \-
+     - Number of w-planes. Setting this to 1 enables AIPS style faceting. (Default: 100)
    * - ``cf_wmax``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Maximum w coordinate. Visibilities with larger w will not be gridded. If 0, no maximum is imposed. (Default: 0.0)
    * - ``comp_grid_decorr``
-     - ``float | None``
+     - ``float``
      - ``0.02``
-     - \-
+     - Maximum BDA decorrelation factor (gridding) (Default: 0.02)
    * - ``comp_grid_fo_v``
-     - ``Literal['Full', 'Facet'] | None``
+     - ``str``
      - ``'Facet'``
-     - \-
+     - FoV over which decorrelation factor is computed (gridding) (Default: Facet) [choices: Full, Facet] Choices: ['Full', 'Facet']
    * - ``comp_degrid_decorr``
-     - ``float | None``
+     - ``float``
      - ``0.02``
-     - \-
+     - Maximum BDA decorrelation factor (degridding) (Default: 0.02)
    * - ``comp_degrid_fo_v``
-     - ``Literal['Full', 'Facet'] | None``
+     - ``str``
      - ``'Facet'``
-     - \-
+     - FoV over which decorrelation factor is computed (degridding) (Default: Facet) [choices: Full, Facet] Choices: ['Full', 'Facet']
    * - ``comp_sparsification``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - apply sparsification compression to initial major cycles. Sparsification refers to throwing away random visibilities. Supply a list of factors: e.g. 100,30,10 would mean only 1/100 of the data is used for the first major cycle, 1/30 for the second, 1/10 for the third, and full data for the fourth cycle onwards. This can substantially accelerate deconvolution of deep observations, since, in these regimes, very little sensitivity is required for model construction in the initial cycles. (Default: 0)
    * - ``comp_bda_mode``
-     - ``Literal[1, 2] | None``
+     - ``int``
      - ``1``
-     - \-
+     - BDA block computation mode. 1 for Cyril's old mode, 2 for Oleg's new mode. 2 is faster but see issue #319. (Default: 1) [choices: 1, 2] Choices: [1, 2]
    * - ``comp_bda_jones``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - If disabled, gridders and degridders will apply a Jones terms per visibility. If 'grid', gridder will apply them per BDA block, if 'both' so will the degridder. This is faster but possibly less accurate, if you have rapidly evolving Jones terms. (Default: 0)
    * - ``parallel_ncpu``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of CPUs to use in parallel mode. 0: use all available. 1: disable parallelism. (Default: 0)
    * - ``parallel_affinity``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - pin processes to cores. -1/1/2 determines stepping used in selecting cores. Alternatively specifies a list of length NCPU. Alternatively 'disable' to disable affinity settings Alternatively 'enable\_ht' uses stepping of 1 (equivalent to Parallel.Affinity=1), will use all vthreads - the obvious exception is if HT is disabled at BIOS level Alternatively 'disable\_ht' autodetects the NUMA layout of the chip for Debian-based systems and dont use both vthreads per core Use 1 if unsure. (Default: 1)
    * - ``parallel_main_process_affinity``
-     - ``str | None``
+     - ``str``
      - ``'disable'``
-     - \-
+     - this should be set to a core that is not used by forked processes, this option is ignored when using option 'disable or disable\_ht' for Parallel.Affinity (Default: 0)
    * - ``cache_reset``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Reset all caches (including PSF and dirty image) (Default: False)
    * - ``cache_jones``
-     - ``Literal['reset', 'auto'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Reset cached Jones [choices: reset, auto] Choices: ['reset', 'auto']
    * - ``cache_smooth_beam``
-     - ``Literal['reset', 'auto', 'force'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Reset cached smmoth beam (Default: auto) [choices: reset, auto, force] Choices: ['reset', 'auto', 'force']
    * - ``cache_weight``
-     - ``Literal['reset', 'auto'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Reset cached smmoth beam (Default: auto) [choices: reset, auto] Choices: ['reset', 'auto']
    * - ``cache_psf``
-     - ``Literal['off', 'reset', 'auto', 'force'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Cache PSF data. (Default: auto) [choices: off, reset, auto, force] Choices: ['off', 'reset', 'auto', 'force']
    * - ``cache_dirty``
-     - ``Literal['off', 'reset', 'auto', 'forcedirty', 'forceresidual'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Cache dirty image data. (Default: auto) [choices: off, reset, auto, forcedirty, forceresidual] Choices: ['off', 'reset', 'auto', 'forcedirty', 'forceresidual']
    * - ``cache_vis_data``
-     - ``Literal['off', 'auto', 'force'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Cache visibility data and flags at runtime. (Default: auto) [choices: off, auto, force] Choices: ['off', 'auto', 'force']
    * - ``cache_last_residual``
-     - ``bool | None``
+     - ``bool``
      - ``1``
-     - \-
+     - Cache last residual data (at end of last minor cycle) (Default: True)
    * - ``data_cache_dir``
      - ``str``
      - ``'.ddfacet-cache'``
-     - \-
+     - DDFacet data cache directory, separate from the MS and Shinobi's execution cache. Defaults to .ddfacet-cache in the workspace. This field is named data\_cache\_dir because cache\_dir is a Shinobi execution keyword. Nullable: False
    * - ``cache_dir_wisdom_fftw``
      - ``str``
      - ``'.ddfacet-wisdom'``
-     - \-
+     - FFTW wisdom directory. Defaults to .ddfacet-wisdom in the workspace, with declared write ownership instead of the upstream home-directory default. Nullable: False
    * - ``cache_reset_wisdom``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Reset Wisdom file (Default: False)
    * - ``cache_cf``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Cache convolution functions. With many CPUs, may be faster to recompute. (Default: True)
    * - ``cache_hmp``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Cache HMP basis functions. With many CPUs, may be faster to recompute. (Default: False)
    * - ``cache_remnant``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to True, some structures survive to the death of DDFacet, so they can be revived faster
    * - ``beam_model``
-     - ``Literal['None', 'LOFAR', 'FITS', 'GMRT', 'ATCA', 'NENUFAR', 'Everybeam'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Beam model to use. [choices: None, LOFAR, FITS, GMRT, ATCA, NENUFAR, Everybeam] Choices: ['None', 'LOFAR', 'FITS', 'GMRT', 'ATCA', 'NENUFAR', 'Everybeam']
    * - ``beam_at``
-     - ``Literal['facet', 'tessel'] | None``
+     - ``str``
      - ``'facet'``
-     - \-
+     - when DDESolutions are enabled, compute beam per facet, or per larger solution tessel (Default: facet) [choices: facet, tessel] Choices: ['facet', 'tessel']
    * - ``beam_phased_array_mode``
-     - ``Literal['A', 'AE'] | None``
+     - ``str``
      - ``'A'``
-     - \-
+     - PhasedArrayMode beam mode. [choices: A, AE] Choices: ['A', 'AE']
    * - ``beam_force_scalar``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Force Jones matrix to be scalar (used for FITS beam mode for instance)
    * - ``beam_n_band``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of channels over which same beam value is used. 0 means use every channel. (Default: 0)
    * - ``beam_center_norm``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Normalize beam so that its amplitude at the centre is 1. (Default: False)
    * - ``beam_smooth``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Compute the interpolated smooth beam (Default: False)
    * - ``beam_smooth_n_pix``
-     - ``int | None``
+     - ``int``
      - ``11``
-     - \-
+     - Number of pixels the beam is evaluated and smoothed (Default: 11)
    * - ``beam_smooth_interp_mode``
-     - ``str | None``
+     - ``str``
      - ``'Linear'``
-     - \-
+     - Linear/Log
    * - ``beam_fits_file``
-     - ``Path | None``
+     - ``File``
      - ``'beam_$(corr)_$(reim).fits'``
-     - \-
+     - Beam FITS file pattern. A beam pattern consists of eight FITS files, i.e. a real and imaginary part for each of the four Jones terms. The following substitutions are performed to form up the eight filenames: $(corr) or $(xy) is replaced by the Jones element label (e.g. 'xx' or 'rr'), $(reim) is replaced by 're' or 'im', $(realimag) is replaced by 'real' or 'imag'. Uppercase variables are replaced by uppercase values, e.g. $(REIM) by 'RE' pr 'IM'. Use 'unity' if you want to apply a unity matrix for the E term (e.g. only want to do visibility derotations). Correlation labels (XY or RL) are determined by reading the MS, but may be overridden by the FITSFeed option. (Default: beam\_$(corr)\_$(reim).fits)
    * - ``beam_fits_feed``
-     - ``Literal['None', 'xy', 'XY', 'rl', 'RL'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - If set, overrides correlation labels given by the measurement set. [choices: None, xy, XY, rl, RL] Choices: ['None', 'xy', 'XY', 'rl', 'RL']
    * - ``beam_fits_feed_swap``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - swap feed patterns (X to Y and R to L) (Default: False)
    * - ``beam_dt_beam_min``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - change in minutes on which the beam is re-evaluated (Default: 5.0)
    * - ``beam_fits_par_angle_inc_deg``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - increment in PA in degrees at which the beam is to be re-evaluated (on top of DtBeamMin) (Default: 5.0)
    * - ``beam_fitsl_axis``
-     - ``str | None``
+     - ``str``
      - ``'-X'``
-     - \-
+     - L axis of FITS file. Minus sign indicates reverse coordinate convention. (Default: -X)
    * - ``beam_fitsm_axis``
-     - ``str | None``
+     - ``str``
      - ``'Y'``
-     - \-
+     - M axis of FITS file. Minus sign indicates reverse coordinate convention. (Default: Y)
    * - ``beam_fits_verbosity``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - set to >0 to have verbose output from FITS interpolator classes. (Default: 0)
    * - ``beam_fits_frame``
-     - ``Literal['altaz', 'altazgeo', 'equatorial', 'zenith'] | None``
+     - ``str``
      - ``'altaz'``
-     - \-
+     - coordinate frame for FITS beams. Currently, alt-az, equatorial and zenith mounts are supported. (Default: altaz) [choices: altaz, altazgeo, equatorial, zenith] Choices: ['altaz', 'altazgeo', 'equatorial', 'zenith']
    * - ``beam_feed_angle``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - offset feed angle to add to parallactic angle (Default: 0.0)
    * - ``beam_apply_p_jones``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - derotate visibility data (only when FITS beam is active and also time sampled) (Default: 0)
    * - ``beam_flip_visibility_hands``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - apply anti-diagonal matrix if FITS beam is enabled effectively swapping X and Y or R and L and their respective hands (Default: 0)
    * - ``beam_pointing_centre``
-     - ``str | None``
+     - ``str``
      - ``'PhaseDir'``
      - \-
    * - ``beam_rotation_direction``
-     - ``str | None``
+     - ``str``
      - ``'North2East'``
      - \-
    * - ``freq_band_m_hz``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Gridding cube frequency step. If 0, --Freq-NBand is used instead. (Default: 0.0)
    * - ``freq_degrid_band_m_hz``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Degridding cube frequency step. If 0, --Freq-NDegridBand is used instead. (Default: 0.0)
    * - ``freq_n_band``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Number of image bands for gridding. (Default: 1)
    * - ``freq_n_degrid_band``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of image bands for degridding. 0 means degrid each channel. (Default: 0)
    * - ``dde_solutions_dd_sols``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of the DDE solution file
    * - ``dde_solutions_sols_dir``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Name of the directry of the DDE Solutions which contains <SolsDir>/<MSNames>/killMS.<SolsName>.sols.npz
    * - ``dde_solutions_global_norm``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Option to normalise the Jones matrices (options: MeanAbs, MeanAbsAnt, BLBased or SumBLBased). See code for more detail
    * - ``dde_solutions_jones_norm_list``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
-     - \-
+     - Deprecated? (Default: AP)
    * - ``dde_solutions_jones_mode``
-     - ``Literal['Scalar', 'Diag', 'Full'] | None``
+     - ``str``
      - ``'Full'``
-     - \-
+     - (Default: Full) [choices: Scalar, Diag, Full] Choices: ['Scalar', 'Diag', 'Full']
    * - ``dde_solutions_dd_mode_grid``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
-     - \-
+     - In the gridding step, apply Jones matrices Amplitude (A) or Phase (P) or Amplitude&Phase (AP) (Default: AP)
    * - ``dde_solutions_dd_mode_de_grid``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
-     - \-
+     - In the degridding step, apply Jones matrices Amplitude (A) or Phase (P) or Amplitude&Phase (AP) (Default: AP)
    * - ``dde_solutions_scale_amp_grid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Deprecated? (Default: 0)
    * - ``dde_solutions_scale_amp_de_grid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Deprecated? (Default: 0)
    * - ``dde_solutions_calib_err``
-     - ``float | None``
+     - ``float``
      - ``10.0``
-     - \-
+     - Deprecated? (Default: 10.0)
    * - ``dde_solutions_type``
-     - ``Literal['Krigging', 'Nearest'] | None``
+     - ``str``
      - ``'Nearest'``
-     - \-
+     - Deprecated? (Default: Nearest) [choices: Krigging, Nearest] Choices: ['Krigging', 'Nearest']
    * - ``dde_solutions_scale``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Deprecated? (Default: 1.0)
    * - ``dde_solutions_gamma``
-     - ``float | None``
+     - ``float``
      - ``4.0``
-     - \-
+     - Deprecated? (Default: 4.0)
    * - ``dde_solutions_restore_sub``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Deprecated? (Default: False)
    * - ``dde_solutions_re_weight_snr``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Deprecated? (Default: 0.0)
    * - ``pointing_solutions_pointing_sols_csv``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Filename of CSV containing time-variable pointing solutions. None initializes all antenna pointing offsets to 0, 0
    * - ``pointing_solutions_interpolation_mode``
-     - ``Literal['LERP'] | None``
+     - ``str``
      - ``'LERP'``
-     - \-
+     - Interpolation mode (Default: LERP) [choices: LERP] Choices: ['LERP']
    * - ``deconv_mode``
-     - ``Literal['HMP', 'Hogbom', 'SSD', 'WSCMS', 'SSD2'] | None``
+     - ``str``
      - ``'HMP'``
-     - \-
+     - Deconvolution algorithm. (Default: HMP) [choices: HMP, Hogbom, SSD, WSCMS, SSD2] Choices: ['HMP', 'Hogbom', 'SSD', 'WSCMS', 'SSD2']
    * - ``deconv_max_major_iter``
-     - ``int | None``
+     - ``int``
      - ``20``
-     - \-
+     - Max number of major cycles. (Default: 20)
    * - ``deconv_max_minor_iter``
-     - ``int | None``
+     - ``int``
      - ``20000``
-     - \-
+     - Max number of (overall) minor cycle iterations (HMP, Hogbom). (Default: 20000)
    * - ``deconv_allow_negative``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Allow negative components (HMP, Hogbom). (Default: True)
    * - ``deconv_gain``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Loop gain (HMP, Hogbom). (Default: 0.1)
    * - ``deconv_flux_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Absolute flux threshold at which deconvolution is stopped (HMP, Hogbom, SSD). (Default: 0.0)
    * - ``deconv_cycle_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Cycle factor: used to set a minor cycle stopping threshold based on PSF sidelobe level (HMP, Hogbom). Use 0 to disable, otherwise 2.5 is a reasonable value, but may lead to very shallow minor cycle. (Default: 0.0)
    * - ``deconv_rms_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Set minor cycle stopping threshold to X\*{residual RMS at start of major cycle} (HMP, Hogbom, SSD). (Default: 0.0)
    * - ``deconv_peak_factor``
-     - ``float | None``
+     - ``float``
      - ``0.15``
-     - \-
+     - Set minor cycle stopping threshold to X\*{peak residual at start of major cycle} (HMP, Hogbom, SSD). (Default: 0.15)
    * - ``deconv_prev_peak_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Set minor cycle stopping threshold to X\*{peak residual at end of previous major cycle} (HMP). (Default: 0.0)
    * - ``deconv_num_rms_samples``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - How many samples to draw for RMS computation. Use 0 to use all pixels (most precise). (Default: 10000)
    * - ``deconv_approximate_psf``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - when --Comp-Sparsification is on, use approximate (i.e. central facet) PSF for cleaning while operating above the given sparsification factor (SF). This speeds up HMP reinitialization in major cycles. A value of 1-10 is sensible. Set to 0 to always use precise per-facet PSF. (Default: 0)
    * - ``deconv_psf_box``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - determines the size of the PSF subtraction box used in CLEAN-style deconvolution (if appropriate). Use 'auto' (or 'sidelobe') for a Clark-CLEAN-style box taken out to a certain sidelobe (faster). Use 'full' to subtract the full PSF, Hogbom-style (more accurate, can also combine with --Image-PSFOversize for maximum accuracy). Use an integer number to set an explicit box radius, in pixels. (HMP) (Default: auto)
    * - ``mask_external``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - External clean mask image (FITS format).
    * - ``mask_auto``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Do automatic masking (Default: False)
    * - ``mask_auto_rms_factor``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - RMS Factor for automasking HMP
    * - ``mask_sig_th``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - set Threshold (in sigma) for automatic masking (Default: 10)
    * - ``mask_flux_image_type``
-     - ``str | None``
+     - ``str``
      - ``'ModelConv'``
-     - \-
+     - If Auto enabled, does the cut of SigTh either on the ModelConv or the Restored (Default: ModelConv)
    * - ``mask_th_filter_rfi``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Automatic filter RFI in the residual cube
    * - ``noise_min_stats``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[60, 2]``
-     - \-
+     - The parameters to compute the noise-map-based mask for step i+1 from the residual image at step i. Should be [box\_size,box\_step] (Default: [60, 2])
    * - ``noise_brutal_hmp``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If noise map is computed, this option enabled, it first computes an image plane deconvolution with a high gain value, and compute the noise-map-based mask using the brutal-restored image (Default: True)
    * - ``hmp_alpha``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[-1.0, 1.0, 11]``
-     - \-
+     - List of alphas to fit. (Default: [-1.0, 1.0, 11])
    * - ``hmp_scales``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - List of scales to use. (Default: [0])
    * - ``hmp_ratios``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``[]``
-     - \-
+     - @cyriltasse please document (Default: [''])
    * - ``hmp_n_theta``
-     - ``int | None``
+     - ``int``
      - ``6``
-     - \-
+     - Number of PA steps to use. (Default: 6)
    * - ``hmp_solver_mode``
-     - ``Literal['PI', 'NNLS'] | None``
+     - ``str``
      - ``'PI'``
-     - \-
+     - Solver mode: pseudoinverse, or non-negative least squares. (Default: PI) [choices: PI, NNLS] Choices: ['PI', 'NNLS']
    * - ``hmp_allow_resid_increase``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Allow the maximum residual to increase by at most this much relative to the lowest residual, before bailing out due to divergence. (Default: 0.1)
    * - ``hmp_major_stall_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.8``
-     - \-
+     - Major cycle stall threshold. If the residual at the beginning of a major cycle is above X\*residual at the beginning of the previous major cycle, then we consider the deconvolution stalled and bail out. (Default: 0.8)
    * - ``hmp_taper``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Weighting taper size for HMP fit. If 0, determined automatically. (Default: 0)
    * - ``hmp_support``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Basis function support size. If 0, determined automatically. (Default: 0)
    * - ``hmp_peak_weight_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - weigh the peak finding by given image
    * - ``hmp_kappa``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Regularization parameter. If stddev of per-alpha solutions exceeds the maximum solution amplitude divided by Kappa, forces a fully-regularized solution. Use 0 for no such regularization. (Default: 0.0)
    * - ``hmp_outer_space_th``
-     - ``float | None``
+     - ``float``
      - ``2.0``
-     - \-
+     - (Default: 2.0)
    * - ``hmp_fraction_random_peak``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``hogbom_poly_fit_order``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - polynomial order for frequency fitting (Default: 4)
    * - ``hogbom_linear_peakfinding``
-     - ``Literal['Joint', 'Separate'] | None``
+     - ``str``
      - ``'Joint'``
-     - \-
+     - Perform EVPA-preserving (complex-valued) polarization CLEAN (Pratley-Johnston-Hollitt) or separate Q and U cleaning. [choices: Joint, Separate] Choices: ['Joint', 'Separate']
    * - ``wscms_num_freq_basis_funcs``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - number of basis functions to use for the fit to the frequency axis (Default: 4)
    * - ``wscms_multi_scale``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - whether to use multi-scale or not (recommended to use Hogbom if not using multi-scale) (Default: True)
    * - ``wscms_multi_scale_bias``
-     - ``float | None``
+     - ``float``
      - ``0.55``
-     - \-
+     - scale bias parameter (smaller values give more weight to larger scales) (Default: 0.55)
    * - ``wscms_scale_basis``
-     - ``str | None``
+     - ``str``
      - ``'Gauss'``
-     - \-
+     - the kind of scale kernels to use (only Gauss available for now) (Default: Gauss)
    * - ``wscms_scales``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Scale sizes in pixels/FWHM eg. [0, 4, 8, 16] (if None determined automatically)
    * - ``wscms_max_scale``
-     - ``int | None``
+     - ``int``
      - ``250``
-     - \-
+     - The maximum extent of the scale functions in pixels (Default: 250)
    * - ``wscms_n_sub_minor_iter``
-     - ``int | None``
+     - ``int``
      - ``250``
-     - \-
+     - Number of iterations for the sub minor loop (Default: 250)
    * - ``wscms_sub_minor_peak_fact``
-     - ``float | None``
+     - ``float``
      - ``0.85``
-     - \-
+     - Peak factor of sub minor loop (Default: 0.85)
    * - ``wscms_minor_stall_threshold``
-     - ``float | None``
+     - ``float``
      - ``1e-07``
-     - \-
+     - if the peak in the minor cycle decreases by less than this fraction it has stalled and we go back to the major cycle (Default: 1e-07)
    * - ``wscms_minor_divergence_factor``
-     - ``float | None``
+     - ``float``
      - ``1.3``
-     - \-
+     - if the peak flux increases by more than this fraction between minor cycles then it has diverged and we go back to a major cycle (Default: 1.3)
    * - ``wscms_auto_mask``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - whether to use scale dependent auto-masking (Default: True)
    * - ``wscms_auto_mask_threshold``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Threshold at which the scale dependent mask should be fixed.
    * - ``wscms_auto_mask_rms_factor``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - Default multiple of RMS at which to start AutoMasking in case no (Default: 3)
    * - ``wscms_cache_size``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - the number of items to keep in the cache dict before spilling over to disk (Default: 3)
    * - ``wscms_padding``
-     - ``float | None``
+     - ``float``
      - ``1.2``
-     - \-
+     - padding in the minor cycle. Can often be much smaller than facet padding (Default: 1.2)
    * - ``montblanc_tensorflow_server_target``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - URL for the TensorflowServer, e.g. grpc://tensorflow.server.com:8888/
    * - ``montblanc_log_file``
      - ``str``
      - ``'.ddfacet-montblanc.log'``
-     - \-
+     - Montblanc log destination. Defaults to .ddfacet-montblanc.log in the working directory so its write location is declared before execution. Nullable: False
    * - ``montblanc_memory_budget``
-     - ``float | None``
+     - ``float``
      - ``4.0``
-     - \-
+     - Predictor memory budget in GiB (Default: 4.0)
    * - ``montblanc_log_level``
-     - ``Literal['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] | None``
+     - ``str``
      - ``'WARNING'``
-     - \-
+     - Log level to write to console, rest of the messages goes to log file (Default: WARNING) [choices: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL] Choices: ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
    * - ``montblanc_solver_d_type``
-     - ``Literal['single', 'double'] | None``
+     - ``str``
      - ``'double'``
-     - \-
+     - Data type used in solver, (Default: double) [choices: single, double] Choices: ['single', 'double']
    * - ``montblanc_driver_version``
-     - ``Literal['tf'] | None``
+     - ``str``
      - ``'tf'``
-     - \-
+     - Backend to use, (Default: tf) [choices: tf] Choices: ['tf']
    * - ``ssd_clean_parallel``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Enable parallel mode. (Default: True)
    * - ``ssd_clean_island_deconv_mode``
-     - ``str | None``
+     - ``str``
      - ``'GA'``
-     - \-
+     - Moresane, GA, Sasir, ... (Default: GA)
    * - ``ssd_clean_ssd_solve_pars``
-     - ``str | None``
+     - ``str``
      - ``'[S,Alpha]'``
-     - \-
+     - (Default: ['S', 'Alpha'])
    * - ``ssd_clean_ssd_cost_func``
-     - ``str | None``
+     - ``str``
      - ``'[Chi2,MinFlux]'``
-     - \-
+     - (Default: ['Chi2', 'MinFlux'])
    * - ``ssd_clean_bic_factor``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - (Default: 0.0)
    * - ``ssd_clean_artifact_robust``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - (Default: False)
    * - ``ssd_clean_conv_fft_switch``
-     - ``int | None``
+     - ``int``
      - ``1000``
-     - \-
+     - (Default: 1000)
    * - ``ssd_clean_n_enlarge_pars``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - (Default: 0)
    * - ``ssd_clean_n_enlarge_data``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - (Default: 2)
    * - ``ssd_clean_restore_metro_switch``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - (Default: 0)
    * - ``ssd_clean_min_max_group_distance``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[10, 50]``
-     - \-
+     - (Default: [10, 50])
    * - ``ssd_clean_max_island_size``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - if Island size larger than this, will be split
    * - ``ssd_clean_init_type``
-     - ``str | None``
+     - ``str``
      - ``'HMP'``
-     - \-
+     - Islands can be initialised by HMP or MORESANE
    * - ``ssd2_solve_pars``
-     - ``str | None``
+     - ``str``
      - ``'[Poly]'``
-     - \-
+     - Poly: use polynomial, GSig: use gaussians (not really tested/useful - to be deprecated)
    * - ``ssd2_poly_freq_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Add Polyi to --SSDClean-SSDSolvePars.
    * - ``ssd2_init_type``
-     - ``str | None``
+     - ``str``
      - ``'[HMP,MultiSlice:Orieux]'``
-     - \-
+     - Method to initialise islands
    * - ``ssd2_convexify_islands``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Convexify island before deconvolution
    * - ``ssd2_n_last_cycles_deconv_all``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - This parameter sets how many of the last cycles will deconvolve all islands. If set to 0, SSD2 will use --Deconv-CycleFactor, --Deconv-PeakFactor, --Deconv-RMSFactor to determine threshold above which islands are reestimated. If set to 2, in the last 2 major cycle all islands are estimated. If -1: Always deconv all islands regardless of the cycle number
    * - ``ssd3_poly_freq_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Add Polyi to --SSDClean-SSDSolvePars.
    * - ``ssd3_solve_pars``
-     - ``str | None``
+     - ``str``
      - ``'[Poly]'``
      - \-
    * - ``ssd3_init_type``
-     - ``str | None``
+     - ``str``
      - ``'[HMP_0-50,MultiSlice:Orieux]'``
-     - \-
+     - Use deconv method for island initialisation. HMP\_0-50 will initialise islands only with sizes in 0-50 pixels
    * - ``ssd3_ga_isl_size``
-     - ``str | None``
+     - ``str``
      - ``'0-50'``
-     - \-
+     - Run the GA with eth GAClean parameters for islands with size in that range
    * - ``ssd3_run_simple_clean``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Run simplistic clean for the islands that have not been initialised with neither of the SSD3 InitType methods
    * - ``ssd3_propagate_prev_gen``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Propagate previous generations best individual into current cycle
    * - ``ssd3_alpha_scale_model``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Agressively scale the residual power that has not been modeled by previous cycle. Helps when PSF is really bad
    * - ``ssd3_convexify_islands``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Convexify the islands prior to deconvolution
    * - ``ssd3_unique_island``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Make a unique island with the entire image
    * - ``ssd3_allow_facet_overlap``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Allow the islands to be overlapping the facets, otherwise cut the islands when crossing a facet boundary
    * - ``ssd3_n_look_back_models``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Use previous models to constrain current model estimate. Helps when SSD3 stabilise residual goes instable (+/-)
    * - ``ssd3_posterior``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Holy grail of radio astronomy - not ready yet, maybe never
    * - ``ssd3_posterior_n_iter``
-     - ``int | None``
+     - ``int``
      - ``100``
      - \-
    * - ``ssd3_posterior_n_points``
-     - ``int | None``
+     - ``int``
      - ``50``
      - \-
    * - ``ssd3_posterior_alpha``
-     - ``float | None``
+     - ``float``
      - ``0.01``
      - \-
    * - ``ssd3_force_positive_model``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Force model to be positive
    * - ``ssd3_n_last_cycles_deconv_all``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - This parameter sets how many of the last cycles will deconvolve all islands. If set to 0, SSD3 will use --Deconv-CycleFactor, --Deconv-PeakFactor, --Deconv-RMSFactor to determine threshold above which islands are reestimated. If set to 2, in the last 2 major cycle all islands are estimated. If -1: Always deconv all islands regardless of the cycle number
    * - ``multi_slice_deconv_type``
-     - ``str | None``
+     - ``str``
      - ``'MORESANE'``
-     - \-
+     - MORESANE, Orieux, etc
    * - ``multi_slice_deconv_poly_fit_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Number of Taylor terms in the deconvolution
    * - ``multi_slice_deconv_force_positive_model``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Force the model to be positive
    * - ``multi_slice_deconv_hyper_smooth``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - When using Orieux, sets the Hyper parameter to 10\*\*ThisValue
    * - ``ga_clean_n_source_kin``
-     - ``int | None``
+     - ``int``
      - ``50``
-     - \-
+     - (Default: 50)
    * - ``ga_clean_n_max_gen``
-     - ``int | None``
+     - ``int``
      - ``50``
-     - \-
+     - (Default: 50)
    * - ``ga_clean_min_size_init``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - (Default: 10)
    * - ``ga_clean_alpha_init_hmp``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[-4.0, 1.0, 6]``
-     - \-
+     - (Default: [-4.0, 1.0, 6])
    * - ``ga_clean_scales_init_hmp``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0, 1, 2, 4, 8, 16, 24, 32]``
-     - \-
+     - (Default: [0, 1, 2, 4, 8, 16, 24, 32])
    * - ``ga_clean_gain_init_hmp``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - (Default: 0.1)
    * - ``ga_clean_ratios_init_hmp``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``[]``
-     - \-
+     - (Default: [''])
    * - ``ga_clean_n_theta_init_hmp``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - (Default: 4)
    * - ``ga_clean_max_minor_iter_init_hmp``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - (Default: 10000)
    * - ``ga_clean_allow_negative_init_hmp``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - (Default: False)
    * - ``ga_clean_rms_factor_init_hmp``
-     - ``float | None``
+     - ``float``
      - ``3.0``
-     - \-
+     - (Default: 3.0)
    * - ``ga_clean_parallel_init``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - run island init in parallel. Serial mode may reduce RAM pressure, and could be useful for debugging.
    * - ``ga_clean_ncpu``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - number of cores to use for parallel fitness calculations (in large-island mode). Default of 0 means use as many as specified by --Parallel-NCPU. If you find yourself running out of memory here, you might want to specify a small number of cores for this step. (Default: 0)
    * - ``moresane_n_major_iter``
-     - ``int | None``
+     - ``int``
      - ``200``
-     - \-
+     - Maximum number of iterations allowed in the major loop. Exit condition. (Default: 200)
    * - ``moresane_n_minor_iter``
-     - ``int | None``
+     - ``int``
      - ``200``
-     - \-
+     - Maximum number of iterations allowed in the minor loop. Serves as an exit condition when the SNR is does not reach a maximum. (Default: 200)
    * - ``moresane_gain``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Loop gain for the deconvolution. (Default: 0.1)
    * - ``moresane_force_positive``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Boolean specifier for whether or not a model must be strictly positive. (Default: True)
    * - ``moresane_sigma_cut_level``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Number of sigma at which thresholding is to be performed. (Default: 1)
    * - ``log_memory``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - log memory use (Default: False)
    * - ``log_boring``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - disable progress bars and other pretty console output (Default: False)
    * - ``log_append``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - append to log file if it exists (default truncates) (Default: False)
    * - ``debug_pause_workers``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Pauses worker processes upon launch (with SIGSTOP). Useful to attach gdb to workers. (Default: False)
    * - ``debug_facet_phase_shift``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0.0, 0.0]``
-     - \-
+     - Shift in facet coordinates in arcseconds for l and m (this phase steers the sky over the image plane). (Default: [0.0, 0.0])
    * - ``debug_print_minor_cycle_rms``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Compute and print RMS in minor cycle iterations. (Default: False)
    * - ``debug_dump_clean_solutions``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Dump intermediate minor cycle solutions to a file. Use 0 or 1, or give an explicit list of things to dump (Default: 0)
    * - ``debug_dump_clean_postage_stamps``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Also dump postage stamps when cleaning within a radius R of X,Y. Implies --Debug-DumpCleanSolutions.
    * - ``debug_clean_stall_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Throw an exception when a fitted CLEAN component is below this threshold in flux. Useful for debugging. (Default: 0.0)
    * - ``debug_memory_greedy``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Enable memory-greedy mode. Retain certain shared arrays in RAM as long as possible. (Default: True)
    * - ``debug_app_verbose``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Verbosity level for multiprocessing. (Default: 0)
    * - ``debug_pdb``
-     - ``Literal['never', 'always', 'auto'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Invoke pdb on unexpected error conditions (rather than exit). If set to 'auto', then invoke pdb only if --Log-Boring is 0. (Default: auto) [choices: never, always, auto] Choices: ['never', 'always', 'auto']
    * - ``misc_random_seed``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - seed random number generator with explicit seed, if given. Useful for reproducibility of the random-based optimizations (sparsification, etc.).
    * - ``misc_conserve_memory``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - if true, tries to minimize memory use at possible expense of runtime. (Default: 0)
    * - ``misc_ignore_deprecation_marking``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - if true, tries to run deprecated modes. Currently this means that deconvolution machines are reset and reinitialized each major cycle. (Default: False)
    * - ``katdal_apply_cal``
-     - ``str | None``
+     - ``str``
      - ``'default'``
-     - \-
+     - List of calibration solutions to apply to data as a string of comma-separated names, e.g. 'l1' or #'K,B,G'. Use 'default' for L1 + L2 and 'all' for all available products.
 
 **Outputs**
 
@@ -4900,22 +4900,22 @@ DDFacet read-only MSv2 imaging; caches, wisdom and logs must be outside the inpu
      - Type
      - Description
    * - ``dirty``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``restored``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``model``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``residual``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``psf``
-     - ``ProductFamily[FITSImage] | None``
+     - ``ProductFamily[FITSImage]``
      - \-
    * - ``dico_model``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
 
 deconvolve
@@ -5198,53 +5198,53 @@ mowjsub: Doppler-correct an already continuum-subtracted MS onto a channel grid 
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Input MS file. Its continuum must already have been subtracted; this command does no fitting.
    * - ``input_column``
      - ``str``
      - *required*
-     - \-
+     - Column holding the continuum-subtracted data to Doppler-correct. Required: there is no standard MS column name for continuum-subtracted visibilities, so this is whatever the subtraction stage was told to write.
    * - ``output_column``
      - ``str``
      - *required*
-     - \-
+     - Column name to write the Doppler-corrected data to in the output MS. Pass DATA if the imager you feed it to expects that column.
    * - ``output_ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Name of the MS to write. Required, since the Doppler correction changes the channel count and so cannot be written back into a column of the input MS. Naming the input MS here is refused.
    * - ``spwid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spectral Window ID
    * - ``field_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Field ID
    * - ``row_chunks``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - Chunking strategy (Done along the time axis)
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of parallel worker threads (roughly one per CPU core).
    * - ``doppler_frame``
-     - ``Literal['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source']``
+     - ``str``
      - *required*
-     - \-
+     - Spectral reference frame to Doppler-correct the output to. The visibilities are resampled onto a channel grid fixed in this frame, as CASA mstransform does with regridms=True. The input channel grid must still be topocentric, i.e. as it came off the telescope. Choices: ['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source']
    * - ``doppler_chan_grid``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Output channel grid for the Doppler correction. 'auto' derives the grid that every timestamp of this observation covers. Otherwise give 'nchan,chan0,chanwidth' with frequency units, e.g. '1000,1419.5MHz,26.1kHz'; use this to place several MSs on one common grid, since 'auto' only ever sees a single MS.
    * - ``doppler_interpolation``
-     - ``Literal['nearest', 'linear'] | None``
+     - ``str``
      - ``'nearest'``
-     - \-
+     - Interpolation used when resampling onto the Doppler-corrected grid. 'nearest' is what caracal asks of CASA mstransform and leaves channel noise uncorrelated; 'linear' is smoother but correlates adjacent channels. Choices: ['nearest', 'linear']
    * - ``doppler_source_vel``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Systemic radial velocity of the source in km/s, positive for recession. Only used with --doppler-frame=source; when unset it is read from the MS SOURCE::SYSVEL column.
 
 **Outputs**
 
@@ -5256,8 +5256,8 @@ mowjsub: Doppler-correct an already continuum-subtracted MS onto a channel grid 
      - Type
      - Description
    * - ``output_ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - The Doppler-corrected MS this step wrote.
 
 eidos
 -----
@@ -5279,45 +5279,45 @@ eidos: create a primary beam model of MeerKAT (https://github.com/ratt-ru/eidos)
      - Default
      - Description
    * - ``pixels``
-     - ``int | None``
+     - ``int``
      - ``256``
-     - \-
+     - Number of pixels on one side
    * - ``diameter``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Diameter of the required beam
    * - ``scale``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Pixel scale in degrees
    * - ``freq``
-     - ``list[float]``
+     - ``List[float]``
      - *required*
-     - \-
+     - A single freq, or the start, end freqs, and channel width in MHz
    * - ``coeff``
      - ``str``
      - *required*
-     - \-
+     - Which coefficients to use: mh for MeerKAT holography, me for MeerKAT EM simulation, vh for VLA holography
    * - ``coefficients_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Coefficients file
    * - ``prefix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix of output beam file(s)
    * - ``output_eight``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Output complex voltage beams (8 files)
    * - ``thresh``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - How many Zernike coefficients to use. Must be <=20.
    * - ``stokes``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Output in Stokes (Mueller) formalism instead of the default Jones formalism: 'I','Q','U','V' for the Stokes beams, 'M' for the full Mueller matrix, or e.g. 'IQ' for the Q-to-I leakage
 
 **Outputs**
 
@@ -6439,161 +6439,161 @@ flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measureme
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to operate on
    * - ``channels``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Channel selection: N, or start:end[:step] / start~end[:step]
    * - ``timeslots``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Timeslot selection: N, or start:end / start~end
    * - ``timeslot_multiplier``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Multiplies the timeslot numbers given via --timeslots
    * - ``corrs``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Correlation selection: comma-separated list of indices
    * - ``stations``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Station (antenna) selection: comma-separated list of indices
    * - ``ifrs``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Interferometer selection (use "-I help" for syntax help)
    * - ``ddid``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - DATA\_DESC\_ID selection: single number, or comma-separated list
    * - ``field``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - FIELD\_ID selection: single number, or comma-separated list
    * - ``taql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Additional TaQL selection to restrict the subset
    * - ``above``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Select on abs(data) > X
    * - ``below``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Select on abs(data) < X
    * - ``nan``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Select on invalid data (NaN or infinite)
    * - ``fm_above``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Select on mean(abs(data)) > X over frequencies
    * - ``fm_below``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Select on mean(abs(data)) < X over frequencies
    * - ``data_column``
-     - ``str | None``
+     - ``str``
      - ``'CORRECTED_DATA'``
-     - \-
+     - Data column for --above/--below/--nan
    * - ``data_flagmask``
-     - ``str | None``
+     - ``str``
      - ``'ALL'``
-     - \-
+     - Flags to apply to the data column when e.g. computing the mean
    * - ``flagged_any``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Selects if any of the specified FLAGS are raised
    * - ``flagged_all``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Selects if all of the specified FLAGS are raised
    * - ``flag``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Raise the specified FLAGS (added to the output FLAGS)
    * - ``unflag``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Clear the specified FLAGS (removed from the output FLAGS)
    * - ``copy_flags``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Copy the selection to the specified FLAGS (replaces output FLAGS)
    * - ``copy_legacy``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Shortcut for --flagged-any +L --copy FLAGS --fill-legacy -
    * - ``fill_legacy``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Fill legacy FLAG/FLAG\_ROW columns using the specified FLAGS (use '-' to skip, '0' to clear)
    * - ``create``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - With --flag: create the named flagset if it doesn't exist
    * - ``init_bitflags``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Initialise a BITFLAG column with this many bits (8, 16 or 32)
    * - ``reinit_bitflags``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Remove (if any) and reinitialise a BITFLAG column with this many bits (8, 16 or 32)
    * - ``incr_stman``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Force the incremental storage manager for new BITFLAG columns [default: same as DATA]
    * - ``list_info``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - List MS info: flagsets, CASA flagversions if available
    * - ``stats``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Print per-flagset flagging stats
    * - ``remove``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Unflag and remove the named flagset(s) (comma-separated list)
    * - ``export``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Export all flags to this flag file (.gz for gzip-compressed); done after any flagging actions
    * - ``import_``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Import flags from this flag file; done before any flagging actions
    * - ``restore``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Restore flags from a CASA-style flagversion (see --list for names)
    * - ``save``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Save flags to a CASA-style flagversion
    * - ``force``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - With --save: force overwrite of an existing CASA-style flagversion
    * - ``verbose``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Verbosity level for messages (higher is more verbose)
    * - ``timestamps``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Add timestamps to verbosity messages
    * - ``chunk_size``
-     - ``int | None``
+     - ``int``
      - ``200000``
-     - \-
+     - Number of rows to process at once
 
 **Outputs**
 
@@ -6605,11 +6605,11 @@ flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measureme
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set to operate on
    * - ``export``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Export all flags to this flag file (.gz for gzip-compressed); done after any flagging actions
 
 fluxscale
 ---------
@@ -7166,45 +7166,45 @@ gainutils fluxscale: bootstrap a calibrator's flux density from a reference cali
      - Default
      - Description
    * - ``transfer``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Gain table/store of the calibrator whose flux is unknown. Both calibrators must have been solved the same way -- the reference against a model carrying its true flux, the transfer against an assumed one.
    * - ``reference``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Gain table/store of the calibrator with a known flux [default: TRANSFER, i.e. both fields in one table].
    * - ``transfer_field``
      - ``str``
      - *required*
-     - \-
+     - Field id or name whose flux is unknown.
    * - ``reference_field``
      - ``str``
      - *required*
-     - \-
+     - Field id or name to measure against.
    * - ``reference_flux``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Flux density (Jy) the reference was solved against. 1.0 whenever its model carried its true flux, which leaves its gains instrumental.
    * - ``output``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Write the rescaled transfer gains here. Never written in place; must not exist.
    * - ``json_out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Write the measurement to this JSON file. The number exists nowhere else once the process exits, so a pipeline should always ask for it.
    * - ``gain_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Drop gain amplitudes deviating from the median by more than this fraction. 0 disables.
    * - ``statistic``
-     - ``Literal['median', 'mean'] | None``
+     - ``str``
      - ``'median'``
-     - \-
+     - How to collapse each antenna's amplitudes over time/frequency. 'median' resists a bad scan; 'mean' is what reproduces CASA. Choices: ['median', 'mean']
    * - ``term``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Term to read from a QuartiCal store holding several.
 
 **Outputs**
 
@@ -7216,11 +7216,11 @@ gainutils fluxscale: bootstrap a calibrator's flux density from a reference cali
      - Type
      - Description
    * - ``output``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - The rescaled transfer gains
    * - ``json_out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - The measured flux density
 
 gainutils-normalise
 -------------------
@@ -7242,33 +7242,33 @@ gainutils normalise: divide a scale out of a gain table, leaving its shape behin
      - Default
      - Description
    * - ``gains``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Gain table (CASA caltable) or QuartiCal store to normalise
    * - ``output``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Write the normalised gains here. Never written in place; must not exist.
    * - ``statistic``
-     - ``Literal['median', 'mean'] | None``
+     - ``str``
      - ``'median'``
-     - \-
+     - Average to divide out. 'median' resists a bad scan; 'mean' is CASA's solnorm. Choices: ['median', 'mean']
    * - ``axis``
-     - ``Literal['all', 'time', 'freq'] | None``
+     - ``str``
      - ``'all'``
-     - \-
+     - Axes the factor is averaged over. 'freq' is bandpass normalisation (unit amplitude per spectrum, time variation kept); 'all' takes out one level. Choices: ['all', 'time', 'freq']
    * - ``scope``
-     - ``Literal['antenna', 'correlation', 'block'] | None``
+     - ``str``
      - ``'antenna'``
-     - \-
+     - How widely one factor applies. 'antenna' matches CASA and does NOT preserve relative antenna amplitudes; 'block' preserves them and removes only the overall level, which is what moving a flux scale between terms needs. Choices: ['antenna', 'correlation', 'block']
    * - ``json_out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Write the factors taken out to this JSON file. That scale has left the table; a pipeline that cannot find it later cannot put it back.
    * - ``term``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Term to read from a QuartiCal store holding several.
 
 **Outputs**
 
@@ -7280,11 +7280,11 @@ gainutils normalise: divide a scale out of a gain table, leaving its shape behin
      - Type
      - Description
    * - ``output``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - The normalised gains
    * - ``json_out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - The factors that were divided out
 
 gainutils-smooth
 ----------------
@@ -7306,37 +7306,37 @@ gainutils smooth: filter a gain table in time and/or frequency (phase and amplit
      - Default
      - Description
    * - ``gains``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Gain table (CASA caltable) or QuartiCal store to smooth
    * - ``output``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Write the smoothed gains here. Never written in place; must not exist.
    * - ``time_window``
-     - ``int | str | None``
+     - ``Union[int, str]``
      - ``None``
-     - \-
+     - Window along time: a sample count, or a physical interval ('120s', '5min'). The physical form means the same thing on differently-averaged data.
    * - ``freq_window``
-     - ``int | str | None``
+     - ``Union[int, str]``
      - ``None``
-     - \-
+     - Window along frequency: a sample count, or a physical width ('8MHz').
    * - ``kernel``
-     - ``Literal['boxcar', 'gaussian'] | None``
+     - ``str``
      - ``'boxcar'``
-     - \-
+     - Kernel shape. A gaussian's window is read as its FWHM. Choices: ['boxcar', 'gaussian']
    * - ``fill``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Unflag solutions whose window contained real data (the general form of CASA's fillgaps). Off means a flagged solution stays flagged however many neighbours it has.
    * - ``json_out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Write the report to this JSON file, including what each physical window resolved to in samples.
    * - ``term``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Term to read from a QuartiCal store holding several.
 
 **Outputs**
 
@@ -7348,11 +7348,11 @@ gainutils smooth: filter a gain table in time and/or frequency (phase and amplit
      - Type
      - Description
    * - ``output``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - The smoothed gains
    * - ``json_out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - The smoothing report
 
 gencal
 ------
@@ -7694,109 +7694,109 @@ mowjsub: image-plane continuum subtraction (https://github.com/laduma-dev/mowjsu
      - Default
      - Description
    * - ``input_image``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Input image
    * - ``output_prefix``
      - ``str``
      - *required*
-     - \-
+     - Prefix for the output cubes, which are written as '<prefix>-cont.fits' and '<prefix>-line.fits'. Required here, where the tool itself defaults it to '<input-image sans suffix>-contsub'; a declared output path has to resolve from the step's own inputs, and no template can reach the input's stem. Pass the tool's own default spelling if that is what you want.
    * - ``mask_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Mask image. Channels flagged in it are excluded from the continuum fit.
    * - ``sigma_clip``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Sigma-clipping level for the automatic mask, which is built by fitting an unmasked continuum first and clipping that residual -- so it works on a cube that still holds its continuum, unlike a mask made by running a source finder over the same cube. Only used if mask-image is not given.
    * - ``fit_model``
-     - ``Literal['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline'] | None``
+     - ``str``
      - ``'b-spline'``
-     - \-
+     - Fit function to model the continuum. The 'scipy-median-filter' model is much faster than 'median-filter', but treats band edges and masked channels differently, so the two do not give identical continuum models. WARNING: A median-filter continuum model may subsume low SNR line emission, use it with great care. Choices: ['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline']
    * - ``order``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Order of spline/polynomial or number of top coefficients to use for DCT reconstruction
    * - ``vel_width``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Width of spline segments or median filter window in km/s. Give this or chan-width, not both -- mowjsub refuses the pair rather than silently preferring one.
    * - ``chan_width``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Width of spline segments or median filter window in number of channels. The alternative to vel-width, for a caller that wants the window fixed in channels rather than converted from a velocity against the band centre. Must be at least 1. Honoured from mowjsub 2.0.1 -- before that both CLIs accepted it and neither passed it to a fitter, so it satisfied no requirement and changed no result.
    * - ``gcv_lambda``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - GCV spline penalty. Zero is equivalent to an interpolating spline, high values lead to a flatter curve. If unset the parameter will be estimated using the GCV criterion; this can be very slow. Experience suggests that values chanwidth/nchan work best.
    * - ``segments``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - ## This has been replaced by --vel-width. It will be removed in future releases ## Width of spline segments or median filter window in km/s. If given as a list, then it must have same size as --order.
    * - ``cont_fit_tol``
-     - ``float | None``
+     - ``float``
      - ``0``
-     - \-
+     - Minimum percentage of valid spectrum data points required to do a fit. Spectra below this tolerance will be set to NaN. Leaving this unset may result in poor or NaN spectra in the output cubes
    * - ``no_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Fail rather than overwrite an existing output cube. The tool's own parameter is --overwrite, which defaults on; it is declared here in its negated form because a bare flag is the only shape a boolean takes on the command line, so a False-valued --overwrite would emit nothing and silently leave overwriting enabled.
    * - ``stokes_index``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Index of stokes channel (zero-based) to use.
    * - ``rest_freq``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Cube rest frequency in MHz. Will ignore the one in the FITS header if it exists. Required for a cube whose spectral axis is a velocity and whose header carries no RESTFRQ/RESTWAV.
    * - ``hdu_index``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - FITS primary HDU index
    * - ``ra_chunks``
-     - ``int | None``
+     - ``int``
      - ``64``
-     - \-
+     - Chunking along RA-axis. If set to zero, no Chunking is perfomed.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of parallel worker threads (roughly one per CPU core). Runtime for fitting-bound models scales with this, so raise it to speed up large cubes.
    * - ``loglevel``
-     - ``Literal['info', 'debug', 'trace', 'error', 'critical'] | None``
+     - ``str``
      - ``'info'``
-     - \-
+     - Log level for the output Choices: ['info', 'debug', 'trace', 'error', 'critical']
    * - ``doppler_frame``
-     - ``Literal['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Spectral reference frame to Doppler-correct the output cubes to, applied after the continuum fit. A cube has already been integrated over time, so only a single correction factor can be applied: this is safe only when the line-of-sight velocity drifts by much less than one channel over the observation, and cannot undo smearing from a larger drift. Pass --doppler-obs-duration to have that checked. For long tracks, correct in the visibility plane instead (vis-mowjsub --doppler-frame). Leave unset to skip Doppler correction. Choices: ['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source']
    * - ``doppler_chan_grid``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Output channel grid for the Doppler correction. 'auto' derives it from this cube, dropping one guard channel at each end. Otherwise give 'nchan,chan0,chanwidth' with frequency units, e.g. '1000,1419.5MHz,26.1kHz'; use this to place several observations on one common grid for stacking.
    * - ``doppler_interpolation``
-     - ``Literal['nearest', 'linear'] | None``
+     - ``str``
      - ``'nearest'``
-     - \-
+     - Interpolation used when resampling onto the Doppler-corrected grid. 'nearest' leaves channel noise uncorrelated; 'linear' is smoother but correlates adjacent channels. Choices: ['nearest', 'linear']
    * - ``doppler_source_vel``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Systemic radial velocity of the source in km/s, positive for recession. Required with --doppler-frame=source, since a cube carries no SOURCE::SYSVEL to fall back on.
    * - ``doppler_time``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Observation epoch for the Doppler correction, as an ISO date or an MJD. Overrides the cube's MJD-OBS or DATE-OBS.
    * - ``doppler_obs_duration``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Length of the observation in hours. Only used to check how far the line-of-sight velocity drifted over the track, and to take the correction at the midpoint rather than the start. Nothing standard records this in a FITS header, so it must be given; without it the drift check is skipped.
    * - ``doppler_telescope``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Observatory name, resolved through astropy's site registry. Overrides the cube's OBSGEO-X/Y/Z or TELESCOP keywords, and is needed when the header carries neither.
    * - ``doppler_phase_centre``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Field centre used to project the observatory velocity, as 'RA,Dec' in degrees or sexagesimal. Overrides the cube's WCS reference coordinate.
 
 **Outputs**
 
@@ -7808,11 +7808,11 @@ mowjsub: image-plane continuum subtraction (https://github.com/laduma-dev/mowjsu
      - Type
      - Description
    * - ``cont``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - The continuum model cube.
    * - ``line``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - The continuum-subtracted (line) cube.
 
 impbcor
 -------
@@ -7974,383 +7974,383 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - Default
      - Description
    * - ``parset``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Parset file to read option defaults from, overridden by any of the flags below (kMS.py's own driver() reads sys.argv[1] as the parset unconditionally)
    * - ``vis_data_ms_name``
-     - ``Path``
+     - ``MS``
      - *required*
      - \-
    * - ``vis_data_t_chunk``
-     - ``float | None``
+     - ``float``
      - ``15``
      - \-
    * - ``vis_data_in_col``
-     - ``str | None``
+     - ``str``
      - ``'CORRECTED_DATA_BACKUP'``
      - \-
    * - ``vis_data_out_col``
-     - ``str | None``
+     - ``str``
      - ``'CORRECTED_DATA'``
      - \-
    * - ``vis_data_free_predict_gain_col_name``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``vis_data_free_predict_col_name``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``vis_data_parallel``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``sky_model_sky_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``sky_model_kills``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sky_model_invert``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``sky_model_decorrelation``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``sky_model_free_full_sub``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``sky_model_sky_model_col``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``beam_beam_model``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - None/LOFAR
    * - ``beam_beam_at``
-     - ``str | None``
+     - ``str``
      - ``'facet'``
-     - \-
+     - tessel/facet
    * - ``beam_lofar_beam_mode``
-     - ``str | None``
+     - ``str``
      - ``'AE'``
-     - \-
+     - A/AE
    * - ``beam_dt_beam_min``
-     - ``float | None``
+     - ``float``
      - ``5``
      - \-
    * - ``beam_center_norm``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``beam_n_chan_beam_per_ms``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``beam_fits_file``
-     - ``Path | None``
+     - ``File``
      - ``'beam_$(corr)_$(reim).fits'``
      - \-
    * - ``beam_fits_par_angle_inc_deg``
-     - ``float | None``
+     - ``float``
      - ``5``
      - \-
    * - ``beam_fitsl_axis``
-     - ``str | None``
+     - ``str``
      - ``'-X'``
-     - \-
+     - L axis of FITS file. Minus sign indicates reverse coordinate convention.
    * - ``beam_fitsm_axis``
-     - ``str | None``
+     - ``str``
      - ``'Y'``
-     - \-
+     - M axis of FITS file. Minus sign indicates reverse coordinate convention.
    * - ``beam_fits_feed``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``beam_fits_verbosity``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``beam_feed_angle``
-     - ``float | None``
+     - ``float``
      - ``0``
      - \-
    * - ``beam_apply_p_jones``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - derotate visibility data (only when FITS beam is active and also time sampled)
    * - ``beam_flip_visibility_hands``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - apply anti-diagonal matrix if FITS beam is enabled effectively swapping X and Y or R and L and their respective hands
    * - ``beam_fits_feed_swap``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``beam_fits_frame``
-     - ``str | None``
+     - ``str``
      - ``'altaz'``
-     - \-
+     - coordinate frame for FITS beams. Currently, alt-az, equatorial and zenith mounts are supported.
    * - ``image_sky_model_base_image_name``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``image_sky_model_dico_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``image_sky_model_nodes_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``image_sky_model_image_predict_parset``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``image_sky_model_over_s``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``image_sky_model_mask_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``image_sky_model_wmax``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``image_sky_model_max_facet_size``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``image_sky_model_min_facet_size``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``image_sky_model_remove_ddf_cache``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``image_sky_model_ddf_cache_dir``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``image_sky_model_filter_neg_comp``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``image_sky_model_th_solve``
-     - ``float | None``
+     - ``float``
      - ``0.0``
      - \-
    * - ``data_selection_uv_min_max``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_selection_chan_slice``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_selection_flag_ants``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``data_selection_dist_max_to_core``
-     - ``float | None``
+     - ``float``
      - ``10000.0``
      - \-
    * - ``data_selection_fill_factor``
-     - ``float | None``
+     - ``float``
      - ``1.0``
      - \-
    * - ``data_selection_field_id``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``data_selection_ddid``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``weighting_resolution``
-     - ``float | None``
+     - ``float``
      - ``0.0``
      - \-
    * - ``weighting_weight_in_col``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``weighting_weighting``
-     - ``str | None``
+     - ``str``
      - ``'Natural'``
      - \-
    * - ``weighting_robust``
-     - ``float | None``
+     - ``float``
      - ``0.0``
      - \-
    * - ``weighting_weight_uv_min_max``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``weighting_wtuv``
-     - ``float | None``
+     - ``float``
      - ``1``
      - \-
    * - ``actions_do_plot``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``actions_sub_only``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``actions_ncpu``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``actions_do_bar``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``actions_n_thread``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``actions_debug_pdb``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``actions_update_weights``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``pre_apply_pre_apply_sols``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``[]``
      - \-
    * - ``pre_apply_pre_apply_mode``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``[]``
      - \-
    * - ``solutions_ext_sols``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``solutions_clip_method``
-     - ``str | None``
+     - ``str``
      - ``'[ResidAnt]'``
      - \-
    * - ``solutions_out_sols_name``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``solutions_apply_to_dir``
-     - ``int | None``
+     - ``int``
      - ``-2``
      - \-
    * - ``solutions_merge_beam_to_applied_sol``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``solutions_apply_mode``
-     - ``str | None``
+     - ``str``
      - ``'AP'``
      - \-
    * - ``solutions_skip_existing_sols``
-     - ``Literal[0, 1]``
+     - ``int``
      - ``0``
-     - \-
+     - Integer switch (0/1). Mode 1 preserves the solutions directory during framework preparation; scalar native execution can still overwrite selected solutions. Native skipping applies only to batch/list-MS execution, unsupported by this scalar cab. Existing history at a relative sandbox root is staged from the declared dependency. Choices: [0, 1] Nullable: False
    * - ``solutions_sols_dir``
      - ``str``
      - *required*
-     - \-
+     - Required owned solutions directory outside the input MS. The MS itself, descendants and aliases into it are rejected before execution. Pattern: \\A(?!.\*(?:None\|True\|False\|[#\\s\\[\\],])).+\\Z
    * - ``compression_compression_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - auto, manual
    * - ``compression_compression_dir_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``compression_merge_stations``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``solvers_solver_type``
-     - ``str | None``
+     - ``str``
      - ``'CohJones'``
      - \-
    * - ``solvers_precision_dot``
-     - ``str | None``
+     - ``str``
      - ``'D'``
      - \-
    * - ``solvers_pol_mode``
-     - ``str | None``
+     - ``str``
      - ``'Scalar'``
      - \-
    * - ``solvers_dt``
-     - ``float | None``
+     - ``float``
      - ``30``
      - \-
    * - ``solvers_n_chan_sols``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``coh_jones_n_iter_lm``
-     - ``int | None``
+     - ``int``
      - ``7``
      - \-
    * - ``coh_jones_lambda_lm``
-     - ``float | None``
+     - ``float``
      - ``1``
      - \-
    * - ``coh_jones_lambda_tk``
-     - ``float | None``
+     - ``float``
      - ``0.0``
      - \-
    * - ``kafca_n_iter_kf``
-     - ``int | None``
+     - ``int``
      - ``6``
      - \-
    * - ``kafca_lambda_kf``
-     - ``float | None``
+     - ``float``
      - ``0.5``
      - \-
    * - ``kafca_init_lm``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``kafca_init_l_mdt``
-     - ``float | None``
+     - ``float``
      - ``5``
      - \-
    * - ``kafca_cov_p``
-     - ``float | None``
+     - ``float``
      - ``0.1``
      - \-
    * - ``kafca_cov_q``
-     - ``float | None``
+     - ``float``
      - ``0.1``
      - \-
    * - ``kafca_power_smooth``
-     - ``float | None``
+     - ``float``
      - ``1.0``
      - \-
    * - ``kafca_ev_p_step``
-     - ``int | None``
+     - ``int``
      - ``120``
      - \-
    * - ``kafca_ev_p_step_start``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``kafca_evolution_sol_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
 
@@ -8364,8 +8364,8 @@ EXPERIMENTAL: killMS: direction-dependent calibration for radio interferometric 
      - Type
      - Description
    * - ``solutions``
-     - ``ProductFamily[DirectoryBundle] | None``
-     - \-
+     - ``ProductFamily[DirectoryBundle]``
+     - Owned solutions tree; NPZ solutions and companion parsets are inventoried children.
 
 listobs
 -------
@@ -8551,77 +8551,77 @@ mosaic-queen: FITS image mosaicking (https://github.com/caracal-pipeline/mosaic-
      - Default
      - Description
    * - ``input``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Directory containing the (2D or 3D) images and beams.
    * - ``target_images``
-     - ``list[Path]``
+     - ``List[File]``
      - *required*
-     - \-
+     - Space-separated list of images to be mosaicked; 'image.fits' automatically replaced by 'pb.fits' to locate beams.
    * - ``name``
      - ``str``
      - *required*
-     - \-
+     - Prefix to be used for output files.
    * - ``num_workers``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Number of worker threads; 0 uses all available threads.
    * - ``associated_mosaics``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Also make mosaics of associated files; space-separated list. e.g masks, models or residuals
    * - ``regrid``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use montage for regridding images and beams.
    * - ``force_regrid``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Force newly-regridded files even if they exist.
    * - ``beam_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - Cutoff in the primary beam (e.g., 0.1 = 10% level).
    * - ``mosaic_cutoff``
-     - ``float | None``
+     - ``float``
      - ``0.2``
-     - \-
+     - Sensitivity cutoff in final mosaic; pixels with noise > min\_noise / cutoff are blanked.
    * - ``unity_weights``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use weight=1 instead of weight=1/noise\*\*2.
    * - ``statistic``
-     - ``str | None``
+     - ``str``
      - ``'mad'``
-     - \-
+     - Statistic to use for estimating noise in input images.
    * - ``guess_std``
-     - ``float | None``
+     - ``float``
      - ``0.02``
-     - \-
+     - Initial guess of noise level for '--statistic fit'.
    * - ``ra``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Central RA (deg) of output mosaic if not imaging full FoV.
    * - ``dec``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Central Dec (deg) of output mosaic if not imaging full FoV.
    * - ``velocity``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Central velocity/frequency of output mosaic cube.
    * - ``dra``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - RA range of output mosaic image/cube.
    * - ``ddec``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Dec range of output mosaic image/cube.
    * - ``dv``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Velocity/frequency range of output mosaic cube.
 
 **Outputs**
 
@@ -8633,8 +8633,8 @@ mosaic-queen: FITS image mosaicking (https://github.com/caracal-pipeline/mosaic-
      - Type
      - Description
    * - ``output``
-     - ``Path``
-     - \-
+     - ``Directory``
+     - Directory for all output files.
 
 mstransform
 -----------
@@ -8892,25 +8892,25 @@ msutils addcol: add a column to an MS, cloning shape/type from an existing one
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to add the column to
    * - ``colname``
      - ``str``
      - *required*
-     - \-
+     - Name of the column to add
    * - ``clone``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - Existing column to clone shape/type from.
    * - ``valuetype``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Column value type, e.g. 'complex', 'float', 'scalar'.
    * - ``init_with``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Initialise the new column with this (float) value.
 
 **Outputs**
 
@@ -8922,8 +8922,8 @@ msutils addcol: add a column to an MS, cloning shape/type from an existing one
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set to add the column to
 
 msutils-addnoise
 ----------------
@@ -8945,25 +8945,25 @@ msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to operate on
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'MODEL_DATA'``
-     - \-
+     - Column to write noisy visibilities into.
    * - ``sefd``
-     - ``float | None``
+     - ``float``
      - ``551.0``
-     - \-
+     - SEFD (Jy) used to compute per-visibility noise.
    * - ``noise``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Noise stddev; if 0, computed from --sefd.
    * - ``add_to``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Add the noise to this column's data instead of writing pure noise.
 
 **Outputs**
 
@@ -8975,8 +8975,8 @@ msutils addnoise: add Gaussian visibility noise to an MS (from an SEFD or stddev
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set to operate on
 
 msutils-average
 ---------------
@@ -8998,57 +8998,57 @@ msutils average: time- and channel-average an MS into a new one (needs msutils' 
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to average
    * - ``outms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to write
    * - ``time_bin``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Averaging interval in seconds.
    * - ``chan_bin``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Channels per output channel.
    * - ``field``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Field id/name to keep (repeatable).
    * - ``spw``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Spectral window id/name to keep (repeatable).
    * - ``scan``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
-     - \-
+     - Scan number to keep (repeatable).
    * - ``antenna``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Antenna id/name to keep (repeatable).
    * - ``corr``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Correlation name or zero-based index to keep (repeatable, in order).
    * - ``taql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Extra TaQL predicate, ANDed with the other selections.
    * - ``datacolumn``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - Visibility column to average.
    * - ``reindex``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Renumber field and SPW ids from 0 and drop the subtable rows the output no longer uses, as CASA split does.
    * - ``overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Replace the output MS if it exists.
 
 **Outputs**
 
@@ -9060,8 +9060,8 @@ msutils average: time- and channel-average an MS into a new one (needs msutils' 
      - Type
      - Description
    * - ``outms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - The averaged measurement set
 
 msutils-check
 -------------
@@ -9083,13 +9083,13 @@ msutils check: validate an MS against the MSv2 standard (exits non-zero on error
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to validate
    * - ``as_json``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Print JSON instead of the text report.
 
 **Outputs**
 
@@ -9115,25 +9115,25 @@ msutils convert: convert an MSv2 to an MSv4 processing set (needs msutils' 'conv
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set (MSv2) to convert
    * - ``outpath``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - MSv4 processing set to write
    * - ``partition``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Extra column to partition on, repeatable: FIELD\_ID, SCAN\_NUMBER, STATE\_ID or ANTENNA1. (Not \`choices:\` -- that narrows a field to a \`Literal\` of the whole value, which a repeatable option cannot be; msutils' own click.Choice rejects a wrong one.)
    * - ``no_pointing``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Skip the POINTING subtable (often large and unused).
    * - ``overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Replace the output processing set if it exists.
 
 **Outputs**
 
@@ -9145,8 +9145,8 @@ msutils convert: convert an MSv2 to an MSv4 processing set (needs msutils' 'conv
      - Type
      - Description
    * - ``outpath``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - The MSv4 processing set
 
 msutils-copycol
 ---------------
@@ -9168,17 +9168,17 @@ msutils copycol: copy one column's data to another (creating it if needed)
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to operate on
    * - ``fromcol``
      - ``str``
      - *required*
-     - \-
+     - Source column to copy from
    * - ``tocol``
      - ``str``
      - *required*
-     - \-
+     - Destination column (created if it does not exist)
 
 **Outputs**
 
@@ -9190,8 +9190,8 @@ msutils copycol: copy one column's data to another (creating it if needed)
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set to operate on
 
 msutils-delcol
 --------------
@@ -9213,17 +9213,17 @@ msutils delcol: remove columns from an MS (e.g. CORRECTED_DATA, to reclaim disk)
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to operate on
    * - ``colnames``
-     - ``list[str]``
+     - ``List[str]``
      - *required*
-     - \-
+     - Columns to remove (one or more).
    * - ``force``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Allow removing columns the MSv2 standard requires.
 
 **Outputs**
 
@@ -9235,8 +9235,8 @@ msutils delcol: remove columns from an MS (e.g. CORRECTED_DATA, to reclaim disk)
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set the columns were removed from
 
 msutils-du
 ----------
@@ -9258,13 +9258,13 @@ msutils du: report where an MS's bytes are, by storage manager and subtable
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to measure
    * - ``as_json``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Print JSON instead of the text report.
 
 **Outputs**
 
@@ -9292,19 +9292,19 @@ msutils flags backup: save an MS's current flags as a named version
    * - ``ms``
      - ``MSv2``
      - *required*
-     - \-
+     - Measurement set whose flags to save
    * - ``name``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Version name [default: a timestamp]. Give one whenever a later step has to restore it by name.
    * - ``description``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Note stored with the version.
    * - ``overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Replace a version of this name.
 
 **Outputs**
 
@@ -9316,8 +9316,8 @@ msutils flags backup: save an MS's current flags as a named version
      - Type
      - Description
    * - ``flagversions``
-     - ``ProductFamily[DirectoryBundle] | None``
-     - \-
+     - ``ProductFamily[DirectoryBundle]``
+     - Attached history; exclusive associated MS ownership blocks every concurrent MS access.
 
 msutils-flags-delete
 --------------------
@@ -9341,11 +9341,11 @@ msutils flags delete: delete a saved flag version from an MS
    * - ``ms``
      - ``MSv2``
      - *required*
-     - \-
+     - Measurement set to delete the flag version from
    * - ``name``
      - ``str``
      - *required*
-     - \-
+     - Saved flag version to delete Nullable: False Minimum length: 1 Pattern: ^[^.\\\\/][^\\\\/]\*$
 
 **Outputs**
 
@@ -9357,8 +9357,8 @@ msutils flags delete: delete a saved flag version from an MS
      - Type
      - Description
    * - ``flagversions``
-     - ``ProductFamily[DirectoryBundle] | None``
-     - \-
+     - ``ProductFamily[DirectoryBundle]``
+     - Attached history; exclusive associated MS ownership blocks every concurrent MS access.
 
 msutils-flags-list
 ------------------
@@ -9380,9 +9380,9 @@ msutils flags list: list an MS's saved flag versions
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to list saved flag versions for
 
 **Outputs**
 
@@ -9410,11 +9410,11 @@ msutils flags restore: restore an MS's flags from a saved version
    * - ``ms``
      - ``MSv2``
      - *required*
-     - \-
+     - Measurement set to restore flags into
    * - ``name``
      - ``str``
      - *required*
-     - \-
+     - Saved flag version to restore
 
 **Outputs**
 
@@ -9426,8 +9426,8 @@ msutils flags restore: restore an MS's flags from a saved version
      - Type
      - Description
    * - ``ms``
-     - ``MSv2 | None``
-     - \-
+     - ``MSv2``
+     - Measurement set with the restored flags
 
 msutils-flagstats
 -----------------
@@ -9449,37 +9449,37 @@ msutils flagstats: out-of-core flag statistics + matplotlib summary plot
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to compute flag statistics for
    * - ``plot``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output PNG plot file.
    * - ``json_out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output JSON statistics file.
    * - ``field``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Field id/name to include (repeatable).
    * - ``antenna``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Antenna id/name to include (repeatable).
    * - ``spw``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Spectral window id/name to include (repeatable).
    * - ``scan``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
-     - \-
+     - Scan number to include (repeatable).
    * - ``quiet``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Do not print the report.
 
 **Outputs**
 
@@ -9491,11 +9491,11 @@ msutils flagstats: out-of-core flag statistics + matplotlib summary plot
      - Type
      - Description
    * - ``plot``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output PNG plot file.
    * - ``json_out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output JSON statistics file.
 
 msutils-info
 ------------
@@ -9517,33 +9517,33 @@ msutils info: report MS metadata (fields, SPWs, scans, antennas, columns), for M
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set (MSv2 table) or MSv4 processing set to report on
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Also list scans, antennas and columns in full.
    * - ``level``
-     - ``Literal['meta', 'full', 'data'] | None``
+     - ``str``
      - ``'full'``
-     - \-
+     - meta: subtables only (no main-table scan); full: one pass over the index columns; data: also read UVW and FLAG. Choices: ['meta', 'full', 'data']
    * - ``json_out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Write the structured metadata to this JSON file.
    * - ``json_stdout``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Print JSON to stdout instead of the text report.
    * - ``format``
-     - ``Literal['MSv2', 'MSv4'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Force the format instead of auto-detecting. Choices: ['MSv2', 'MSv4']
    * - ``engine``
-     - ``Literal['casacore', 'zarr', 'xradio', 'xarray-ms'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - How to read the data. MSv2 defaults to casacore (TaQL); 'xarray-ms' reads an MSv2 through the MSv4 schema. Choices: ['casacore', 'zarr', 'xradio', 'xarray-ms']
 
 **Outputs**
 
@@ -9555,8 +9555,8 @@ msutils info: report MS metadata (fields, SPWs, scans, antennas, columns), for M
      - Type
      - Description
    * - ``json_out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Write the structured metadata to this JSON file.
 
 msutils-renamecol
 -----------------
@@ -9578,17 +9578,17 @@ msutils renamecol: rename a column in an MS
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to operate on
    * - ``fromcol``
      - ``str``
      - *required*
-     - \-
+     - Column to rename
    * - ``tocol``
      - ``str``
      - *required*
-     - \-
+     - New column name
 
 **Outputs**
 
@@ -9600,8 +9600,8 @@ msutils renamecol: rename a column in an MS
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set the column was renamed in
 
 msutils-subset
 --------------
@@ -9623,57 +9623,57 @@ msutils subset: write the selected rows of an MS to a new MS (optionally averagi
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to select from
    * - ``outms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to write. Field and SPW ids are preserved unless --reindex is given, rather than renumbered the way CASA split does.
    * - ``field``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Field id/name to keep (repeatable).
    * - ``spw``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Spectral window id/name to keep (repeatable).
    * - ``scan``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
-     - \-
+     - Scan number to keep (repeatable).
    * - ``antenna``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Antenna id/name to keep (repeatable).
    * - ``corr``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Correlation name or zero-based index to keep (repeatable, in order).
    * - ``taql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Extra TaQL predicate, ANDed with the other selections.
    * - ``time_bin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Also average into bins this many seconds wide (needs the 'average' extra).
    * - ``chan_bin``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Also average this many channels together (needs the 'average' extra).
    * - ``datacolumn``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - Visibility column to average. Ignored unless averaging.
    * - ``reindex``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Renumber field and SPW ids from 0 and drop the subtable rows the output no longer uses, as CASA split does.
    * - ``overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Replace the output MS if it exists.
 
 **Outputs**
 
@@ -9685,8 +9685,8 @@ msutils subset: write the selected rows of an MS to a new MS (optionally averagi
      - Type
      - Description
    * - ``outms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - The selected subset
 
 msutils-sumcols
 ---------------
@@ -9708,21 +9708,21 @@ msutils sumcols: sum (or, with --subtract, difference) MS columns into a new col
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to operate on
    * - ``cols``
-     - ``list[str]``
+     - ``List[str]``
      - *required*
-     - \-
+     - Columns to combine (two or more; exactly two with --subtract).
    * - ``out``
      - ``str``
      - *required*
-     - \-
+     - Output column.
    * - ``subtract``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Subtract the second column from the first (needs exactly 2 cols).
 
 **Outputs**
 
@@ -9734,8 +9734,8 @@ msutils sumcols: sum (or, with --subtract, difference) MS columns into a new col
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Measurement set to operate on
 
 msutils-summary
 ---------------
@@ -9757,17 +9757,17 @@ msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations).
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to summarise
    * - ``json_out``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Also write the summary to this JSON file.
    * - ``quiet``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Do not print the summary.
 
 **Outputs**
 
@@ -9779,8 +9779,8 @@ msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations).
      - Type
      - Description
    * - ``json_out``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Also write the summary to this JSON file.
 
 msutils-taql
 ------------
@@ -9804,15 +9804,15 @@ msutils taql: run a TaQL query against an MS and print the result columns
    * - ``query``
      - ``str``
      - *required*
-     - \-
+     - TaQL command to run (the CLI's COMMAND argument). Refer to the MS given by --ms as $1, e.g. 'SELECT DISTINCT FIELD\_ID FROM $1'.
    * - ``ms``
-     - ``Path | None``
+     - ``MS``
      - ``None``
-     - \-
+     - MS bound to $1 in the query.
    * - ``as_json``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Print JSON instead of the column listing.
 
 **Outputs**
 
@@ -9982,21 +9982,21 @@ Owlcat plot-elevation-tracks.py: plot target elevation over time
      - Default
      - Description
    * - ``msname``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Name of Measurement set
    * - ``list``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - lists fields found in MS, then exits
    * - ``display``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Display plot on screen
    * - ``output_name``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output filename
 
 **Outputs**
 
@@ -10008,8 +10008,8 @@ Owlcat plot-elevation-tracks.py: plot target elevation over time
      - Type
      - Description
    * - ``output_name``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output filename
 
 partition
 ---------
@@ -10658,53 +10658,53 @@ pyddi: finds directions subject to direction-dependent effects (https://github.c
      - Default
      - Description
    * - ``image``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Image of interest
    * - ``psf_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - The psf image
    * - ``catalog``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Sky model as LSM/txt, in Tigger format: "#format:name, ra\_d, dec\_d, i"
    * - ``flux_thresh``
-     - ``float | None``
+     - ``float``
      - ``10.0``
-     - \-
+     - Flux threshold. Regions in an image with flux > fth \* noise are considered.
    * - ``variance_thresh``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - Local variance threshold. Sources with variance > vth \* noise are considered.
    * - ``variance_size``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Size of the region to compute the local variance
    * - ``correlation_thresh``
-     - ``float | None``
+     - ``float``
      - ``0.5``
-     - \-
+     - Correlation threshold. Sources with correlation factor > cth are considered.
    * - ``correlation_size``
-     - ``int | None``
+     - ``int``
      - ``5``
-     - \-
+     - Size of the region to compute correlation
    * - ``group_pixels``
-     - ``int | None``
+     - ``int``
      - ``20``
-     - \-
+     - Size of the region to group the pixels, in terms of psf-size
    * - ``exclude_radius``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Radius to exclude, in arcseconds
    * - ``use_catalog``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use the catalog for identification, not only the image
    * - ``output_prefix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix for the output file containing directions (RA/Dec in degrees, peak flux)
 
 **Outputs**
 
@@ -10730,207 +10730,207 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
      - Default
      - Description
    * - ``parset``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Optional YAML config file to load before applying all other parameters (any bare \*.yaml/\*.yml argv token, per goquartical's own parser.py)
    * - ``input_ms_path``
-     - ``Path``
+     - ``URI``
      - *required*
      - \-
    * - ``input_ms_data_column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
      - \-
    * - ``input_ms_sigma_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_ms_weight_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_ms_time_chunk``
-     - ``str | None``
+     - ``str``
      - ``'0'``
      - \-
    * - ``input_ms_freq_chunk``
-     - ``str | None``
+     - ``str``
      - ``'0'``
      - \-
    * - ``input_ms_is_bda``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``input_ms_group_by``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``['SCAN_NUMBER', 'FIELD_ID', 'DATA_DESC_ID']``
      - \-
    * - ``input_ms_select_corr``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``input_ms_select_fields``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``[]``
      - \-
    * - ``input_ms_select_ddids``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``[]``
      - \-
    * - ``input_ms_select_uv_range``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0, 0]``
      - \-
    * - ``input_model_recipe``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_model_beam``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_model_beam_l_axis``
-     - ``str | None``
+     - ``str``
      - ``'X'``
      - \-
    * - ``input_model_beam_m_axis``
-     - ``str | None``
+     - ``str``
      - ``'Y'``
      - \-
    * - ``input_model_invert_uvw``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``input_model_source_chunks``
-     - ``int | None``
+     - ``int``
      - ``500``
      - \-
    * - ``input_model_apply_p_jones``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_gain_directory``
-     - ``Path | None``
+     - ``URI``
      - ``'gains.qc'``
      - \-
    * - ``output_log_directory``
-     - ``Path | None``
+     - ``Directory``
      - ``'logs.qc'``
      - \-
    * - ``output_log_to_terminal``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``output_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_products``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
      - \-
    * - ``output_columns``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
      - \-
    * - ``output_flags``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``output_apply_p_jones_inv``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_subtract_directions``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``output_net_gains``
-     - ``list[str] | None``
+     - ``List[Any]``
      - ``None``
      - \-
    * - ``output_compute_baseline_corrections``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_apply_baseline_corrections``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``mad_flags_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``mad_flags_whitening``
-     - ``str | None``
+     - ``str``
      - ``'disabled'``
      - \-
    * - ``mad_flags_threshold_bl``
-     - ``float | None``
+     - ``float``
      - ``5``
      - \-
    * - ``mad_flags_threshold_global``
-     - ``float | None``
+     - ``float``
      - ``10``
      - \-
    * - ``mad_flags_max_deviation``
-     - ``float | None``
+     - ``float``
      - ``0``
      - \-
    * - ``mad_flags_use_off_diagonals``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``solver_terms``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``['G']``
      - \-
    * - ``solver_iter_recipe``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``[25]``
      - \-
    * - ``solver_propagate_flags``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``solver_robust``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``solver_threads``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``solver_convergence_fraction``
-     - ``float | None``
+     - ``float``
      - ``0.99``
      - \-
    * - ``solver_convergence_criteria``
-     - ``float | None``
+     - ``float``
      - ``1e-06``
      - \-
    * - ``solver_reference_antenna``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``dask_threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dask_workers``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``dask_address``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``dask_scheduler``
-     - ``str | None``
+     - ``str``
      - ``'threads'``
      - \-
    * - ``dask_scheduler_plugin``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
 
@@ -10944,10 +10944,10 @@ QuartiCal calibration package (https://github.com/ratt-ru/QuartiCal)
      - Type
      - Description
    * - ``gain_directory``
-     - ``ProductFamily[DirectoryBundle] | None``
-     - \-
+     - ``ProductFamily[DirectoryBundle]``
+     - Complete local gain store, including every group, metadata file and chunk.
    * - ``ms``
-     - ``Path | None``
+     - ``MS``
      - \-
 
 quartical-backup
@@ -10970,29 +10970,29 @@ goquartical-backup: back up a measurement set column to zarr
      - Default
      - Description
    * - ``ms_path``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Path to the input measurement set (also accepts s3 URLs)
    * - ``zarr_dir``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Directory for the backup location (not the zarr name itself; also accepts s3 URLs)
    * - ``column_name``
      - ``str``
      - *required*
-     - \-
+     - Name of the column to back up
    * - ``label``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Explicit label for the backup name [default: datetime]; full name is [label]-[msname]-[column].bkp.qc
    * - ``nthread``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of threads to use
    * - ``field_id``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Field ID to back up
 
 **Outputs**
 
@@ -11004,8 +11004,8 @@ goquartical-backup: back up a measurement set column to zarr
      - Type
      - Description
    * - ``zarr_dir``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - Directory for the backup location (not the zarr name itself; also accepts s3 URLs)
 
 quartical-plotter
 -----------------
@@ -11027,65 +11027,65 @@ goquartical-plot: rudimentary plotter for QuartiCal gain solutions
      - Default
      - Description
    * - ``input_path``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Path to input gains, e.g. path/to/dir/G (also accepts s3 URLs)
    * - ``output_path``
      - ``str``
      - *required*
-     - \-
+     - Path to the desired output location
    * - ``plot_var``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of the data variable to plot
    * - ``flag_var``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of the data variable to use as flags
    * - ``xaxis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Coordinate to use for the x-axis: gain\_time, gain\_freq, param\_time, param\_freq
    * - ``transform``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Transform to apply before plotting: raw, amplitude, phase, real, imag
    * - ``iter_attrs``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Attributes (datasets) to iterate over; omitting one concatenates across it
    * - ``iter_axes``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Axes to iterate over, producing one plot per unique combination
    * - ``mean_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - If set, plot a heavier line for the mean along this axis
    * - ``colourize_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Axis to colour by
    * - ``time_range``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Time range to plot
    * - ``freq_range``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Frequency range to plot
    * - ``nworker``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of processes to use while plotting
    * - ``colourmap``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Matplotlib colourmap to use with --colourize-axis
    * - ``fig_size``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Figure size in inches: width height
 
 **Outputs**
 
@@ -11097,8 +11097,8 @@ goquartical-plot: rudimentary plotter for QuartiCal gain solutions
      - Type
      - Description
    * - ``output_path``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - Path to the desired output location
 
 quartical-readonly
 ------------------
@@ -11120,207 +11120,207 @@ QuartiCal read-only local MSv2 calibration; writes gains and declared logs only.
      - Default
      - Description
    * - ``parset``
-     - ``Literal[None] | None``
+     - ``File``
      - ``None``
-     - \-
+     - Optional YAML config file to load before applying all other parameters (any bare \*.yaml/\*.yml argv token, per goquartical's own parser.py) Choices: [None]
    * - ``input_ms_path``
      - ``MSv2``
      - *required*
      - \-
    * - ``input_ms_data_column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
      - \-
    * - ``input_ms_sigma_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_ms_weight_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_ms_time_chunk``
-     - ``str | None``
+     - ``str``
      - ``'0'``
      - \-
    * - ``input_ms_freq_chunk``
-     - ``str | None``
+     - ``str``
      - ``'0'``
      - \-
    * - ``input_ms_is_bda``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``input_ms_group_by``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``['SCAN_NUMBER', 'FIELD_ID', 'DATA_DESC_ID']``
      - \-
    * - ``input_ms_select_corr``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``input_ms_select_fields``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``[]``
      - \-
    * - ``input_ms_select_ddids``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``[]``
      - \-
    * - ``input_ms_select_uv_range``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``[0, 0]``
      - \-
    * - ``input_model_recipe``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_model_beam``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``input_model_beam_l_axis``
-     - ``str | None``
+     - ``str``
      - ``'X'``
      - \-
    * - ``input_model_beam_m_axis``
-     - ``str | None``
+     - ``str``
      - ``'Y'``
      - \-
    * - ``input_model_invert_uvw``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``input_model_source_chunks``
-     - ``int | None``
+     - ``int``
      - ``500``
      - \-
    * - ``input_model_apply_p_jones``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_gain_directory``
-     - ``str | None``
+     - ``str``
      - ``'gains.qc'``
      - \-
    * - ``output_log_directory``
-     - ``str | None``
+     - ``str``
      - ``'logs.qc'``
      - \-
    * - ``output_log_to_terminal``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``output_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_products``
-     - ``list[str]``
+     - ``List[str]``
      - ``[]``
-     - \-
+     - Nullable: False Maximum length: 0
    * - ``output_columns``
-     - ``list[str]``
+     - ``List[str]``
      - ``[]``
-     - \-
+     - Nullable: False Maximum length: 0
    * - ``output_flags``
-     - ``Literal[False]``
+     - ``bool``
      - ``False``
-     - \-
+     - Choices: [False] Nullable: False
    * - ``output_apply_p_jones_inv``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_subtract_directions``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``output_net_gains``
-     - ``list[str] | None``
+     - ``List[Any]``
      - ``None``
      - \-
    * - ``output_compute_baseline_corrections``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``output_apply_baseline_corrections``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``mad_flags_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``mad_flags_whitening``
-     - ``str | None``
+     - ``str``
      - ``'disabled'``
      - \-
    * - ``mad_flags_threshold_bl``
-     - ``float | None``
+     - ``float``
      - ``5``
      - \-
    * - ``mad_flags_threshold_global``
-     - ``float | None``
+     - ``float``
      - ``10``
      - \-
    * - ``mad_flags_max_deviation``
-     - ``float | None``
+     - ``float``
      - ``0``
      - \-
    * - ``mad_flags_use_off_diagonals``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``solver_terms``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``['G']``
      - \-
    * - ``solver_iter_recipe``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``[25]``
      - \-
    * - ``solver_propagate_flags``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``solver_robust``
-     - ``bool | None``
+     - ``bool``
      - ``False``
      - \-
    * - ``solver_threads``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``solver_convergence_fraction``
-     - ``float | None``
+     - ``float``
      - ``0.99``
      - \-
    * - ``solver_convergence_criteria``
-     - ``float | None``
+     - ``float``
      - ``1e-06``
      - \-
    * - ``solver_reference_antenna``
-     - ``int | None``
+     - ``int``
      - ``0``
      - \-
    * - ``dask_threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dask_workers``
-     - ``int | None``
+     - ``int``
      - ``1``
      - \-
    * - ``dask_address``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``dask_scheduler``
-     - ``str | None``
+     - ``str``
      - ``'threads'``
      - \-
    * - ``dask_scheduler_plugin``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
 
@@ -11334,8 +11334,8 @@ QuartiCal read-only local MSv2 calibration; writes gains and declared logs only.
      - Type
      - Description
    * - ``gain_directory``
-     - ``ProductFamily[DirectoryBundle] | None``
-     - \-
+     - ``ProductFamily[DirectoryBundle]``
+     - Complete local gain store, including every group, metadata file and chunk.
 
 quartical-restore
 -----------------
@@ -11357,21 +11357,21 @@ goquartical-restore: restore a zarr column backup into a measurement set
      - Default
      - Description
    * - ``zarr_path``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Path to the backup zarr column, e.g. path/to/dir/20211201-154457-foo.MS-FLAG.bkp.qc
    * - ``ms_path``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Path to the measurement set to restore into
    * - ``column_name``
      - ``str``
      - *required*
-     - \-
+     - Column to populate from the backup (need not match the column the backup was made from)
    * - ``nthread``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of threads to use
 
 **Outputs**
 
@@ -11383,8 +11383,8 @@ goquartical-restore: restore a zarr column backup into a measurement set
      - Type
      - Description
    * - ``ms_path``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Path to the measurement set to restore into
 
 ragavi-gains
 ------------
@@ -11406,69 +11406,69 @@ ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)
      - Default
      - Description
    * - ``table``
-     - ``list[Path]``
+     - ``List[File]``
      - *required*
-     - \-
+     - Gain table(s) to plot. Specify space separated list for multiple.
    * - ``ant``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Plot only a specific antenna, or comma-separated list of antennas. Defaults to all.
    * - ``corr``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Correlation index(ices) to plot. Defaults to all.
    * - ``cmap``
-     - ``str | None``
+     - ``str``
      - ``'coolwarm'``
-     - \-
+     - Matplotlib colour map to use for antennas. Defaults to coolwarm.
    * - ``ddid``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Spectral window to plot. Defaults to all.
    * - ``debug``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable debugging messages.
    * - ``doplot``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Y-axes to plot: amplitude & phase (ap), real and imaginary (ri), or (all). Defaults to ap.
    * - ``field``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Field ID(s) / NAME(s) to plot. Defaults to all.
    * - ``gaintype``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Type of gain table(s) to be plotted (e.g. K/G/B/F/D). Table type is auto-detected.
    * - ``logfile``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - File in which to store logs. Default is ragavi.log.
    * - ``xaxis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Choose an x-axis for the plots, otherwise an appropriate one is chosen automatically.
    * - ``t0``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Min time to plot [in seconds]. Defaults to full range.
    * - ``t1``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Max time to plot [in seconds]. Defaults to full range.
    * - ``taql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - TAQL where clause.
    * - ``htmlname``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output HTML file name (with or without .html suffix).
    * - ``plotname``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Static output file name (with suffix). '.png' or '.svg' determines the output type.
 
 **Outputs**
 
@@ -11480,11 +11480,11 @@ ragavi-gains: plots of gain tables (https://ragavi.readthedocs.io)
      - Type
      - Description
    * - ``htmlname``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output HTML file name (with or without .html suffix).
    * - ``plotname``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Static output file name (with suffix). '.png' or '.svg' determines the output type.
 
 ragavi-vis
 ----------
@@ -11506,125 +11506,125 @@ ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthed
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - MS to plot.
    * - ``xaxis``
      - ``str``
      - *required*
-     - \-
+     - X-axis to plot.
    * - ``yaxis``
      - ``str``
      - *required*
-     - \-
+     - Y-axis to plot.
    * - ``canvas_height``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Set height of the resulting image.
    * - ``canvas_width``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Set width of the resulting image.
    * - ``cbin``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Size of channel bins over which to average.
    * - ``ant``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select baselines where ANTENNA1 corresponds to the supplied antenna(s)
    * - ``chan``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Channels to select. Defaults to all.
    * - ``chunks``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Chunk sizes to be applied to the dataset. Defaults to 5,000 in the row axis.
    * - ``cmap``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Colour or colour map to use. Defaults to blues.
    * - ``colour_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select column to colourise by.
    * - ``cols``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number columns in grid if iteration is active. Defaults to 5.
    * - ``corr``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Correlation index or subset to plot. Can be specified using normal python slicing syntax. Defaults to all.
    * - ``data_column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - MS column to use for data.
    * - ``debug``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable debugging messages
    * - ``ddid``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - DATA\_DESC\_ID(s) /spw to select. Can be specified as e.g. 5, 5,6,7, 5~7 (inclusive range), 5:8 (exclusive range), 5:(from 5 to last). Defaults to all
    * - ``field``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Field ID(s) / NAME(s) to plot. Can be specified as '0', '0,2,4', '0~3' (inclusive range), '0:3' (exclusive range), '3:' (from 3 to last) or using a field name or comma separated field names. Defaults to all.
    * - ``iter_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Select column to iterate by.
    * - ``logfile``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Desired name of logfile. Default is ragavi.log
    * - ``mem_limit``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Memory limit per core. Default is 1GB.
    * - ``include_flagged``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Include flagged data in the generated plot. Default is false
    * - ``num_cores``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of CPU cores to be used by Dask. Defaults to 10 or less cores
    * - ``scan``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Scan Number to select. Defaults to all.
    * - ``taql``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - TAQL where clause
    * - ``tbin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Time in seconds over which to average.
    * - ``xmin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Minimum x value to plot
    * - ``xmax``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Maximum x value to plot
    * - ``ymin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Minimum y value to plot
    * - ``ymax``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Maximum y value to plot
    * - ``htmlname``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output HTML file name (without .html suffix)
 
 **Outputs**
 
@@ -11636,8 +11636,8 @@ ragavi-vis: interactive Bokeh-based MS visibility plots (https://ragavi.readthed
      - Type
      - Description
    * - ``htmlname``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output HTML file name (without .html suffix)
 
 rerefant
 --------
@@ -11711,109 +11711,109 @@ rfinder: visualize flagged RFI in a measurement set (https://github.com/Fil8/RFI
      - Default
      - Description
    * - ``config``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - RFInder configuration file (YAML format)
    * - ``input_dir``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Working directory (MS file assumed to be here)
    * - ``output_dir``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Output directory
    * - ``label``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Output folder is called: rfi\_polarization\_label
    * - ``input``
-     - ``Path | None``
+     - ``MS``
      - ``None``
-     - \-
+     - Input MS file
    * - ``field``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Field of the MS file to analyze
    * - ``telescope``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Telescope: meerkat, apertif, wsrt
    * - ``rfimode``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Mode to investigate RFI: use\_flags or rms\_clip
    * - ``polarization``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Stokes parameter: xx, yy, xy, yx, q (also in CAPS)
    * - ``frequency_interval``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Frequency interval where to measure noise, in GHz
    * - ``spw_av``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of channels to average
    * - ``time_step``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Time step (minutes) in which to divide the MS analysis
    * - ``sigma_clip``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Sigma clip for rms\_clip mode to find RFI
    * - ``baseline_cut``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Cut in baseline length (m) for differential RFI analysis
    * - ``no_chunks``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Disable chunking in time
    * - ``yes_chunks``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable chunking in time
    * - ``no_movies``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Disable movies (use if dataset is read as a whole)
    * - ``no_spw_av``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Disable averaging in channels
    * - ``yes_spw_av``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable averaging in channels
    * - ``no_cleanup``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Disable cleanup of intermediate products
    * - ``yes_cleanup``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable cleanup of intermediate products
    * - ``plot_details``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Plot percentage of RFI/noise, or factor of noise increase
    * - ``plot_summary``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Plot percentage of RFI per ant/scan/freq/corr
    * - ``summary_options``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Summary type(s): ant, corr, scan, freq
    * - ``freq_bin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Number of frequencies to bin into a single channel
    * - ``ncpu``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of CPUs to use when generating summary stats
 
 **Outputs**
 
@@ -11825,8 +11825,8 @@ rfinder: visualize flagged RFI in a measurement set (https://github.com/Fil8/RFI
      - Type
      - Description
    * - ``output_dir``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - Output directory
 
 rmclean3d
 ---------
@@ -11848,53 +11848,53 @@ RM-Tools rmclean3d: RM-CLEAN on a cube of Faraday dispersion functions
      - Default
      - Description
    * - ``fdf_dirty``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - FITS cube containing the dirty FDF (any FDF output cube from rmsynth3d)
    * - ``rmsf``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - FITS cube containing the RMSF and FWHM image (any RMSF output cube from rmsynth3d, not \_FWHM.fits)
    * - ``cutoff``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Initial CLEAN cutoff in flux units
    * - ``window``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Threshold for (deeper) windowed clean [not used if not set]
    * - ``max_iter``
-     - ``int | None``
+     - ``int``
      - ``1000``
-     - \-
+     - Maximum number of CLEAN iterations per pixel
    * - ``gain``
-     - ``float | None``
+     - ``float``
      - ``0.1``
-     - \-
+     - CLEAN loop gain
    * - ``prefix_out``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix to prepend to output files [None]
    * - ``fits_extensions``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Store different Stokes as FITS extensions [default: separate files]
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Verbose output
    * - ``ncores``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of processes (uses multiprocessing)
    * - ``chunk``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Chunk size (uses multiprocessing -- not available in MPI)
    * - ``mpi``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Run with MPI
 
 **Outputs**
 
@@ -11920,69 +11920,69 @@ RM-Tools rmsynth1d: RM-synthesis on Stokes I/Q/U spectra (1D, ASCII)
      - Default
      - Description
    * - ``data_file``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - ASCII file containing Stokes spectra & errors: [freq\_Hz, I, Q, U, I\_err, Q\_err, U\_err] or [freq\_Hz, Q, U, Q\_err, U\_err]
    * - ``fit_rmsf_gaussian``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Fit a Gaussian to the RMSF
    * - ``max_faraday_depth``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Absolute max Faraday depth sampled [Auto if not set]
    * - ``dphi_radm2``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Width of Faraday depth channel [Auto if not set] (overrides nsamples)
    * - ``nsamples``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Number of samples across the RMSF lobe
    * - ``weight_type``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Weighting: inverse 'variance' [default] or 'uniform' (all 1s)
    * - ``fit_function``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Stokes I fitting function: 'linear' or 'log' [default] polynomials
    * - ``poly_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Polynomial order to fit to the I spectrum: 0-5, or negative for dynamic order selection
    * - ``ignore_stokes_i``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Ignore the Stokes I spectrum
    * - ``use_64bit``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use 64-bit floating point precision [default: 32-bit]
    * - ``show_plots``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Show the plots
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Verbose output
    * - ``save_outputs``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Save the arrays and plots
    * - ``debug``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Turn on debugging messages & plots
    * - ``units``
-     - ``str | None``
+     - ``str``
      - ``'Jy/beam'``
-     - \-
+     - Intensity units of the data
    * - ``super_resolution``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Optimise the resolution of the RMSF (Rudnick & Cotton)
 
 **Outputs**
 
@@ -12008,65 +12008,65 @@ RM-Tools rmsynth3d: RM-synthesis on Stokes Q/U cubes (3D)
      - Default
      - Description
    * - ``stokes_q``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - FITS cube containing Stokes Q data
    * - ``stokes_u``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - FITS cube containing Stokes U data
    * - ``freqs``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - ASCII file containing the frequency vector (Hz)
    * - ``stokes_i_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - FITS cube containing a Stokes I model [None]
    * - ``noise_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Text file containing channel noise values [None]
    * - ``weight_type``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Weighting: 'uniform' [default] (all 1s) or 'variance'
    * - ``fit_rmsf_gaussian``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Fit a Gaussian to the RMSF
    * - ``max_faraday_depth``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Absolute max Faraday depth sampled (overrides nsamples) [Auto if not set]
    * - ``dphi_radm2``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Width of Faraday depth channel [Auto if not set]
    * - ``prefix_out``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix to prepend to output files [None]
    * - ``nsamples``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of samples across the FWHM RMSF
    * - ``fits_extensions``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Store different Stokes as FITS extensions [default: separate files]
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Verbose output
    * - ``skip_rmsf``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Skip calculation of the RMSF
    * - ``super_resolution``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Optimise the resolution of the RMSF (Rudnick & Cotton)
 
 **Outputs**
 
@@ -12646,197 +12646,197 @@ ShadeMS: rendering MS data via datashader (https://github.com/ratt-ru/shadeMS)
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Measurement set to plot
    * - ``xaxis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Xaxis to plot. Can be any MS column name, also: CHAN, FREQ, CORR, ROW, WAVEL, U, V, W, UV, and, for complex columns, keywords such as: 'amp', 'phase', 'real', 'imag'. You can also specify correlations, e.g. 'DATA:phase:XX'. The order of specifiers does not matter.
    * - ``yaxis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Y axis to plot. Must be given the same number of times as --xaxis.
    * - ``aaxis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Intensity axis. If none, plot intensity (a.k.a. alpha channel) is proportional to density of points.Otherwise, a reduction function (--ared) is applied to the given values, and the result is used to determine intensity.
    * - ``ared``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Alpha axis reduction function.
    * - ``colour_by``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Colour axis. All columns and variations listed under --xaxis are available for colouring by.
    * - ``col``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Name of visibility column. Default is DATA. Two-column arithmetic is recognized.
    * - ``noflags``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Ignore flags. Default is to honour
    * - ``noconj``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Do not show conjugate points in u,v plots. Default is true.
    * - ``xmin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Minimum x-axis value. Default is data min.
    * - ``xmax``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Maximum x-axis value to plot. Default is data max.
    * - ``ymin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Minimum y-axis value. Default is data min.
    * - ``ymax``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Maximum y-axis value to plot. Default is data max.
    * - ``cmin``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Minimum colouring value. Default is data-min.
    * - ``cmax``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Maximum colouring value. Default is data-max.
    * - ``cnum``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of colours to use.
    * - ``iter_field``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Separate plots per field. Default is combine all.
    * - ``iter_antenna``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Separate plots per antenna. Default is combine all.
    * - ``iter_spw``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Separate plots per spw. Default is combine all.
    * - ``iter_scan``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Separate plots per scan. Default is combine all.
    * - ``iter_corr``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Separate plots per correlation / Stokes. Default is combine all.
    * - ``ant``
-     - ``str | list[str] | None``
+     - ``Union[str, List[str]]``
      - ``None``
-     - \-
+     - Antennas to plot (comma-separated list of names). Default is all.
    * - ``ant_num``
-     - ``str | list[int] | None``
+     - ``Union[str, List[int]]``
      - ``None``
-     - \-
+     - Antennas to plot (comma-separated list of numbers, or a [start]:[stop][:step] slice, overrides --ant).
    * - ``baseline``
-     - ``str | list[str] | None``
+     - ``Union[str, List[str]]``
      - ``None``
-     - \-
+     - Baselines to plot, as 'ant1-ant2' (comma-separated list). Default is all.
    * - ``spw``
-     - ``int | list[int] | None``
+     - ``Union[int, List[int]]``
      - ``None``
-     - \-
+     - Spectral windows (DDIDs) to plot (comma-separated list) Default is all.
    * - ``field``
-     - ``int | str | list[str] | list[int] | None``
+     - ``Union[int, str, List[str], List[int]]``
      - ``None``
-     - \-
+     - Field ID(s) to plot (comma-separated list). Default is all.
    * - ``scan``
-     - ``int | list[int] | None``
+     - ``Union[int, List[int]]``
      - ``None``
-     - \-
+     - Scans to plot (comma-separated list). Default is all.
    * - ``corr``
-     - ``str | list[str] | None``
+     - ``Union[str, List[str]]``
      - ``None``
-     - \-
+     - Correlations or Stokes to plot, use indices or labels (comma-separated list). Default is all.
    * - ``chan``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Channel slice, as [start]:[stop][:step]. Default is to plot all.
    * - ``xcanvas``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Canvas x-size in pixels.
    * - ``ycanvas``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Canvas y-size in pixels.
    * - ``norm``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Pixel scale normalization. Default is 'log' when colouring, and 'eq\_hist' when not.
    * - ``cmap``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Colorcet map used without --colour-by.
    * - ``bmap``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Colorcet map used when colouring by a continuous axis.
    * - ``dmap``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Colorcet map used when colouring by a discrete axis.
    * - ``spread_pix``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Dynamically spread rendered pixels to this size.
    * - ``spread_thr``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Threshold parameter for spreading (0 to 1).
    * - ``bgcol``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - RGB hex code for background colour. Default FFFFFF (white).
    * - ``fontsize``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Font size for all text elements.
    * - ``suffix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Suffix to be included in filenames.
    * - ``png``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Output PNG name. Default is plot-{ms}{\_field}{\_Spw}{\_Scan}{\_Ant}-{label}{\_alphalabel}{\_colorlabel}{\_suffix}.png
    * - ``title``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Template for plot titles. Default title includes ms name, field, spw, scan, antenna, plot title, alpha title and colour title.
    * - ``xlabel``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Template for X axis labels. Default is x-axis name and unit
    * - ``ylabel``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Template for Y axis labels. Default is y-axis name and unit
    * - ``debug``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable debugging output.
    * - ``row_chunk_size``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Row chunk size for dask-ms. Larger chunks may or may not be faster, but will certainly use more RAM.
    * - ``num_parallel``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Run up to N renderers in parallel. Default is serial. Use -j0 to auto-set this to half the available cores.
    * - ``profile``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable dask profiling output.
 
 **Outputs**
 
@@ -12848,8 +12848,8 @@ ShadeMS: rendering MS data via datashader (https://github.com/ratt-ru/shadeMS)
      - Type
      - Description
    * - ``dir``
-     - ``Path | None``
-     - \-
+     - ``Directory``
+     - Send all plots to this output directory
 
 simms
 -----
@@ -12871,101 +12871,101 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
      - Default
      - Description
    * - ``msname``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Name of MS file to be created
    * - ``telescope``
      - ``str``
      - *required*
-     - \-
+     - Name of telescope that being simulated
    * - ``antenna_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - File that contains antenna coordinates
    * - ``type``
-     - ``str | None``
+     - ``str``
      - ``'casa'``
-     - \-
+     - Type of antenna file
    * - ``coord_sys``
-     - ``str | None``
+     - ``str``
      - ``'itrf'``
-     - \-
+     - Coordinate system of antenna coordinates in 'antenna-file'. Only needed if 'type' is 'ascii'; CASA tables are assumed to be in ITRF coords
    * - ``lon_lat_elv``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Reference position of telescope. Comma seperated longitude,lattitude and elevation 'deg,deg,m'. Elevation is not crucial, lon,lat should be enough. If not specified, we'll try to get this info from the CASA database (assuming that your telescope is known to CASA)
    * - ``noup``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Enable this to indicate that your ENU file does not have an 'up' dimension
    * - ``direction``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``'J2000,0deg,-30deg'``
-     - \-
+     - Pointing direction. Example J2000,0h0m0s,-30d0m0d. Option --direction may be specified multiple times for multiple pointings. Provide a list of directions for multiple pointings; each pointing will have a unique field ID
    * - ``synthesis``
-     - ``float | None``
+     - ``float``
      - ``4``
-     - \-
+     - Synthesis time in hours
    * - ``scan_length``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Duration of a single scan in hours. Default is the entire observation (synthesis)
    * - ``dtime``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Integration time in seconds
    * - ``freq0``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``'1.4GHz'``
-     - \-
+     - Start frequency. This is the middle of the first channel. Specify as val[unit]. E.g 700MHz, no unit => Hz. Use a comma seperated list for multiple start frequencies (for multiple subbands)
    * - ``dfreq``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``'2MHz'``
-     - \-
+     - Channel width. Specify as val[unit]. E.g 700MHz, no unit => Hz. Use a comma separated list of channel widths (for multiple subbands)
    * - ``nband``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Number of subbands
    * - ``nchan``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``1``
-     - \-
+     - Number of channels. Can be used in tandem with 'freq0, dfreq, nband' to customise the partitioning of the subbands
    * - ``init_ha``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Initial hour angle. 'scan-length/2' is the default
    * - ``pol``
-     - ``str | None``
+     - ``str``
      - ``'XX XY YX YY'``
-     - \-
+     - polarization
    * - ``feed``
-     - ``str | None``
+     - ``str``
      - ``'perfect X Y'``
-     - \-
+     - Feed type
    * - ``scan_lag``
-     - ``float | None``
+     - ``float``
      - ``0``
-     - \-
+     - Lag time between scans in hours
    * - ``set_limits``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Set telescope limits. Elevation and shadow limits. Works in tandem with 'shadow-limit, elevation-limit'
    * - ``elevation_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Dish elevation limit. Will only be taken into account if 'set-limits' is enabled.
    * - ``shadow_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Shadow limit. Will only be taken into account if 'set-limits' is enabled.
    * - ``auto_correlations``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Don't flag autocorrelations
    * - ``date``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Date of observation. Example UTC,2014/05/26 or UTC,2014/05/26/12:12:12: default is today (format EPOCH,yyyy/mm/dd/[h:m:s])
 
 **Outputs**
 
@@ -12977,8 +12977,8 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
      - Type
      - Description
    * - ``msname``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Name of MS file to be created
 
 simms-primary-beam
 ------------------
@@ -13149,163 +13149,163 @@ Predict sky-model visibilities and optional seeded thermal noise into an MS.
    * - ``ms``
      - ``MSv2``
      - *required*
-     - \-
+     - Measurement set.
    * - ``ascii_sky``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Catalogue of sources. See the documentation for accepted units.
    * - ``fits_sky``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - FITS file (or directory of Stokes cubes) containing the sky model.
    * - ``wsclean_sky``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - WSClean component list (point and Gaussian components, Stokes I).
    * - ``fits_sky_interp``
-     - ``Literal['nearest', 'linear', 'cubic'] | None``
+     - ``str``
      - ``'linear'``
-     - \-
+     - Interpolation method when the MS and FITS frequency grids do not match and the cube is kept. Choices: ['nearest', 'linear', 'cubic']
    * - ``polarisation``
-     - ``Literal[True] | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Enable polarised simulation. To disable it, set no\_polarisation=true. Choices: [True]
    * - ``no_polarisation``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Disable polarised simulation (simulate Stokes I only).
    * - ``pol_basis``
-     - ``Literal['linear', 'circular'] | None``
+     - ``str``
      - ``'linear'``
-     - \-
+     - Polarization basis for the simulation. Choices: ['linear', 'circular']
    * - ``pixel_tol``
-     - ``float | None``
+     - ``float``
      - ``1e-07``
-     - \-
+     - Minimum brightness for a pixel to be considered in direct Fourier transform.
    * - ``fits_spectrum``
-     - ``Literal['auto', 'flat', 'poly', 'cube'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - How the FITS sky model varies with frequency. Choices: ['auto', 'flat', 'poly', 'cube']
    * - ``fits_spi``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
    * - ``fits_ref_freq``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Reference frequency (Hz) of an analytic FITS spectrum. Defaults to the MS band centre.
    * - ``fits_spectrum_order``
-     - ``int | None``
+     - ``int``
      - ``2``
-     - \-
+     - Order of the fitted log-polynomial spectrum. 1 is a plain spectral index.
    * - ``predict_backend``
-     - ``Literal['auto', 'dft', 'fft', 'perchan'] | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Backend for FITS sky model prediction. Choices: ['auto', 'dft', 'fft', 'perchan']
    * - ``fft_precision``
-     - ``Literal['single', 'double'] | None``
+     - ``str``
      - ``'double'``
-     - \-
+     - Precision of the FFT calculation. Choices: ['single', 'double']
    * - ``do_wstacking``
-     - ``Literal[True] | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Enable w-stacking. To disable it, set no\_do\_wstacking=true. Choices: [True]
    * - ``no_do_wstacking``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Disable w-stacking for FFT visibility prediction.
    * - ``ascii_delimiter``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Delimiter used in the ascii-sky.
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - Data column for simulation.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of workers (one per CPU).
    * - ``row_chunks``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - Maximum number of rows per chunk. Controls the row-wise task/memory granularity; the effective size is reduced when needed so every worker gets several chunks.
    * - ``chan_chunks``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of channels per chunk. Defaults to all channels in one chunk.
    * - ``primary_beam``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when --beam-jones full is selected.
    * - ``beam_band``
-     - ``Literal['UHF', 'L'] | None``
+     - ``str``
      - ``'L'``
-     - \-
+     - Default band for JimBeam entries that omit an explicit model/CSV. Choices: ['UHF', 'L']
    * - ``beam_pa_step``
-     - ``float | None``
+     - ``float``
      - ``1.0``
-     - \-
+     - Spacing (degrees) of the parallactic-angle grid the beam is sampled on.
    * - ``beam_grid_max_gib``
-     - ``float | None``
+     - ``float``
      - ``4.0``
-     - \-
+     - Hard ceiling (GiB) on the sampled beam grid held in memory for the whole run.
    * - ``beam_jones``
-     - ``Literal['diagonal', 'full'] | None``
+     - ``str``
      - ``'diagonal'``
-     - \-
+     - Primary-beam application: per-feed voltage or full 2x2 E-Jones. Choices: ['diagonal', 'full']
    * - ``fits_beam_mode``
-     - ``Literal['aterm', 'average'] | None``
+     - ``str``
      - ``'aterm'``
-     - \-
+     - Primary-beam handling for the FITS-image path: 'aterm' applies exact per-antenna a-terms in the image domain (time- and frequency-interpolated, heterogeneity-aware); 'average' multiplies the sky by a single PA-averaged power beam (legacy approximation). Choices: ['aterm', 'average']
    * - ``aterm_freq_tol``
-     - ``float | None``
+     - ``float``
      - ``0.001``
-     - \-
+     - Largest allowed error (in voltage-beam units, beam peak ~1) of the a-term's linear-in-frequency interpolation between knot channels. Smaller means more frequency knots; 0 or negative samples the beam at every channel.
    * - ``telescope_name_column``
-     - ``str | None``
+     - ``str``
      - ``'TELESCOPE_NAME'``
-     - \-
+     - ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
    * - ``beam_l_axis``
-     - ``Literal['-X', 'X'] | None``
+     - ``str``
      - ``'-X'``
-     - \-
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSLAxis. Choices: ['-X', 'X']
    * - ``beam_m_axis``
-     - ``Literal['Y', '-Y'] | None``
+     - ``str``
      - ``'Y'``
-     - \-
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSMAxis. Choices: ['Y', '-Y']
    * - ``field_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Field ID.
    * - ``spw_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spectral Window ID.
    * - ``sefd``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Add noise using this SEFD value.
    * - ``seed``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Random seed for the thermal noise. Omit for a non-reproducible run. The realisation also depends on the row chunking, which --nworkers feeds into, so reproducing a previous run needs the same --seed, --row-chunks and --nworkers.
    * - ``ascii_species``
-     - ``Literal['bdsf_gaul', 'aegean', 'wsclean'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Non-simms sky model type. Choices: ['bdsf\_gaul', 'aegean', 'wsclean']
    * - ``input_column``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Input column (see option --mode).
    * - ``mode``
-     - ``Literal['sim', 'add', 'subtract'] | None``
+     - ``str``
      - ``'sim'``
-     - \-
+     - Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it. Choices: ['sim', 'add', 'subtract']
    * - ``source_schema``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects.
 
 **Outputs**
 
@@ -13317,8 +13317,8 @@ Predict sky-model visibilities and optional seeded thermal noise into an MS.
      - Type
      - Description
    * - ``ms``
-     - ``MSv2 | None``
-     - \-
+     - ``MSv2``
+     - Populated Measurement Set.
 
 simms-telsim
 ------------
@@ -13342,107 +13342,107 @@ Create an empty Measurement Set from a telescope layout.
    * - ``ms``
      - ``MSv2``
      - *required*
-     - \-
+     - Observation name/id/label
    * - ``telescope``
      - ``str``
      - *required*
-     - \-
+     - Name of telescope you are simulating.
    * - ``subarray_list``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Custom list of antennas to use, e.g. M000,M005,SKA009. Must be a subarray of the given telescope.
    * - ``subarray_range``
-     - ``list[str | int] | None``
+     - ``List[Union[str, int]]``
      - ``None``
-     - \-
+     - Custom range of antenna indices to use, e.g. start,end,step (step optional; end is inclusive when no step is given). Must be a subarray of the given telescope.
    * - ``subarray_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - File listing custom antennas to use (antnames key, e.g. [M000,M005,SKA009]). Must be a subarray of the given telescope.
    * - ``telescope_name_column``
-     - ``str | None``
+     - ``str``
      - ``'TELESCOPE_NAME'``
-     - \-
+     - Name of the ANTENNA-table column that holds the per-antenna telescope/type label (used by skysim to select a primary beam).
    * - ``direction``
-     - ``str | None``
+     - ``str``
      - ``'J2000,1h0m0s,-31d0m0s'``
-     - \-
+     - Direction of field centre for MS, e.g. J2000,0h24m20s,-30d12m33s.
    * - ``starttime``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Observation start time in UTC, e.g. '2024-03-14T06:15:10'. Default is the current machine time.
    * - ``startha``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Hour angle at start of observation. Can be used instead of date.
    * - ``dtime``
-     - ``float | None``
+     - ``float``
      - ``8``
-     - \-
+     - Integration/exposure time in seconds.
    * - ``ntime``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Number of time slots for MS.
    * - ``startfreq``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``'1420MHz'``
-     - \-
+     - Centre of first frequency channel, e.g 0.55GHz. Hertz assumed if no units.
    * - ``dfreq``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``'1MHz'``
-     - \-
+     - Channel width, e.g 2.4MHz. Hertz assumed if no units.
    * - ``nchan``
-     - ``int | None``
+     - ``int``
      - ``9``
-     - \-
+     - Number of frequency channels.
    * - ``correlations``
-     - ``str | None``
+     - ``str``
      - ``'XX,YY'``
-     - \-
+     - Feed correlations for MS, e.g. 'XX,YY'.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of workers (one per CPU).
    * - ``rowchunks``
-     - ``int | None``
+     - ``int``
      - ``50000``
-     - \-
+     - Number of chunks to divide the data into; more chunks improves computation speed.
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'MODEL_DATA'``
-     - \-
+     - The column in which to corrupt the visibilities with noise.
    * - ``sefd``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Antenna SEFD (one value for all frequencies).
    * - ``tsys_over_eta``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Antenna system temperature over aperture efficiency (one value for all frequencies).
    * - ``sensitivity_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - File with antenna spectral sensitivity info. Keys: 'freq, tsys, sefd, tsys\_over\_eta'.
    * - ``low_source_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Minimum reliable source elevation (deg); data below this is flagged.
    * - ``high_source_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Maximum reliable source elevation (deg); data above this is flagged.
    * - ``freq_range``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - A list of start frequency, end frequency, and number of channels, e.g. startfreq,endfreq,nchan.
    * - ``smooth``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - SEFD fitting option when a sensitivity file is given: 'polyn' or 'spline'.
    * - ``fit_order``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Fitting order used when approximating the MS-frequency SEFDs.
 
 **Outputs**
 
@@ -13454,8 +13454,8 @@ Create an empty Measurement Set from a telescope layout.
      - Type
      - Description
    * - ``ms``
-     - ``MSv2 | None``
-     - \-
+     - ``MSv2``
+     - Created Measurement Set.
 
 smoothcal
 ---------
@@ -13537,37 +13537,37 @@ smops: Smooth Operator, frequency axis upsampling for WSClean-derived model imag
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Input MS. Used for getting reference frequency
    * - ``input_prefix``
      - ``str``
      - *required*
-     - \-
+     - The input image prefix, same as the one used for wsclean
    * - ``channels_out``
      - ``int``
      - *required*
-     - \-
+     - Number of channels to generate out
    * - ``polynomial_order``
      - ``int``
      - *required*
-     - \-
+     - Order of the spectral polynomial
    * - ``max_mem``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Approximate memory cap in GB. Default is 10% of available memory.
    * - ``num_threads``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of threads to use while writing out output images
    * - ``output_prefix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - What to prefix the new interpolated model name with
    * - ``stokes``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Which stokes model to extrapolate, e.g. 'IQUV'. Required when there are multiple Stokes images in a directory. Default I.
 
 **Outputs**
 
@@ -13593,441 +13593,441 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - Default
      - Description
    * - ``pipeline_pedantic``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, the pipeline will terminate with an error message if an unknown parameter name is encountered in the input parameter file. If set to false, unknown parameters will instead be ignored.
    * - ``pipeline_threads``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Sets the maximum number of parallel threads that multi-threaded algorithms within SoFiA are allowed to use. If set to 0 (default value), then the OMP\_NUM\_THREADS environment variable is used to control the number of threads. If the value equals (or exceeds) the number of available threads, then all CPU cores will be utilised, which minimises the runtime of the pipeline at the cost of maximal CPU load.
    * - ``pipeline_verbose``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Determines the level of output messages produced by the pipeline. Additional warning messages can be enabled by setting the value to true.
    * - ``input_data``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of the input data cube on which to run the source finder. The absolute path to the data file must be provided. If only the file name is specified, the pipeline will assume the file to be located in the current working directory. Currently, only the FITS format is supported.
    * - ``input_gain``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of an optional data cube containing the gain across the image. If specified, the input data cube will be divided by the gain cube prior to source parameterisation to ensure that the correct flux values are extracted. The gain cube must have the same dimensions as the input data cube. The absolute path to the gain file must be provided. If only the file name is specified, the pipeline will assume the file to be located in the current working directory. Currently, only the FITS format is supported.
    * - ``input_invert``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, invert the data cube prior to processing. This is useful when searching for negative rather than positive signals such as absorption lines. Note that all flux-related parameters and maps will be inverted, too, in this case and hence be positive rather than negative.
    * - ``input_mask``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - File name of an input mask cube. Any additional pixels detected by the source finder will be added to the input mask. This can be useful if the results from two different source finding runs should be combined into a single mask. The mask cube must have the same dimensions as the input data cube. The absolute path to the mask file must be provided. If only the file name is specified, the pipeline will assume the file to be located in the current working directory. Currently, only the FITS format is supported.
    * - ``input_noise``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of an optional data cube containing the noise levels across the image. If specified, the input data cube will be divided by the noise cube prior to source finding to ensure that a constant source finding threshold can be applied. The noise cube must have the same dimensions as the input data cube. The absolute path to the noise file must be provided. If only the file name is specified, the pipeline will assume the file to be located in the current working directory. Currently, only the FITS format is supported. Note that either a noise cube or a weights cube can be applied, but not both
    * - ``input_region``
-     - ``list[int] | None``
+     - ``list:int``
      - ``None``
-     - \-
+     - Region of the input data cube to be searched. Only the specified region will be loaded into memory and processed. A region must contain six comma-separated integer values of the following format: x\_min, x\_max, y\_min, y\_max, z\_min, z\_max (all in units of pixels and 0-based). If no region is specified, then the entire data cube will be loaded.
    * - ``input_weights``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Name of an optional data cube containing the weights across the image. If specified, the input data cube will be multiplied by the square root of the weights cube prior to source finding to ensure that a constant source finding threshold can be applied. The weights cube must have the same dimensions as the input data cube. The absolute path to the weights file must be provided. If only the file name is specified, the pipeline will assume the file to be located in the current working directory. Currently, only the FITS format is supported. Note that either a noise cube or a weights cube can be applied, but not both.
    * - ``contsub_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If enabled, SoFiA will try to subtract any residual continuum emission from the data cube prior to source finding by fitting and subtracting a polynomial of order 0 (offset) or 1 (offset + slope). The order of the polynomial is defined by contsub.order.
    * - ``contsub_order``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Order of the polynomial to be used in continuum subtraction if contsub.enable is set to true. Can either be 0 for a simple offset or 1 for an offset + slope. Higher orders are not currently supported.
    * - ``contsub_padding``
-     - ``int | None``
+     - ``int``
      - ``3``
-     - \-
+     - The amount of additional padding (in channels) applied to either side of channels excluded from the fit.
    * - ``contsub_shift``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - The number of channels by which the spectrum will be shifted (symmetrically in both directions) before self-subtraction.
    * - ``contsub_threshold``
-     - ``float | None``
+     - ``float``
      - ``2.0``
-     - \-
+     - Relative clipping threshold. All channels with a flux density > contsub.threshold times the noise will be clipped and excluded from the polynomial fit.
    * - ``flag_auto``
-     - ``str | None``
+     - ``str``
      - ``'false'``
-     - \-
+     - If set to true, SoFiA will attempt to automatically flag spectral channels and spatial pixels affected by interference or artefacts based on their RMS noise level. If set to channels, only spectral channels will be flagged. If set to pixels, only spatial pixels will be flagged. If set to false, auto-flagging will be disabled. Please see the user manual for details.
    * - ``flag_catalog``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Path to a catalogue file containing two columns that specify the longitude and latitude coordinates of sky positions to be flagged in the native coordinate system and units of the input data cube. The two columns can be separated by spaces, tabulators or commas. Also see flag.radius.
    * - ``flag_log``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, write a list of the channels and pixels flagged by the auto-flagger to a log file. Note that if no channels or pixels were found to be in need of flagging, then the log file will not be written irrespective of the value of flag.log.
    * - ``flag_radius``
-     - ``int | None``
+     - ``int``
      - ``5``
-     - \-
+     - Radius around the sky positions listed in the catalogue provided by flag.catalog that should be flagged. If 0, then only the nearest pixel to the position will be flagged. Otherwise, pixels within the specified radius around the nearest pixel will be flagged.
    * - ``flag_region``
-     - ``list[int] | None``
+     - ``list:int``
      - ``None``
-     - \-
+     - Region(s) to be flagged in the input data cube prior to processing. The flagging region must contain a multiple of six comma-separated integer values of the following format: x\_min, x\_max, y\_min, y\_max, z\_min, z\_max, ... (all in units of pixels and 0-based). Pixels within those regions will be set to blank in the input cube. If unset, no flagging will occur.
    * - ``flag_threshold``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - Relative threshold in multiples of the standard deviation to be applied by the automatic flagging algorithm. Only relevant if flag.auto is enabled. Please see the documentation for details
    * - ``background_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then the background subtraction filter will be applied to the data cube prior to source finding. The filter works by measuring and subtracting either the mean or median across a running window. This can be useful if a background offset or large-scale spatial/spectral ripple is present in the data.
    * - ``background_gridXY``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spatial grid separation in pixels for the running window used by the background subtraction filter. The value must be an odd integer value and specifies the spatial step by which the window is moved. Alternatively, it can be set to 0, in which case it will default to half the spatial window size (see background.windowXY).
    * - ``background_gridZ``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spectral grid separation in channels for the running window used by the background subtraction filter. The value must be an odd integer value and specifies the spectral step by which the window is moved. Alternatively, it can be set to 0, in which case it will default to half the spectral window size (see background.windowZ).
    * - ``background_interpolate``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then the mean or median values measured across the running window by the background subtraction filter will be linearly interpolated in between the grid points. If set to false, the mean or median will be subtracted from the entire grid cell without interpolation.
    * - ``background_statistic``
-     - ``str | None``
+     - ``str``
      - ``'median'``
-     - \-
+     - Controls whether the mean or median should be measured and subtracted in the running window of the background subtraction filter. The median is strongly recommended, as it is more robust against real signal and artefacts.
    * - ``background_windowXY``
-     - ``int | None``
+     - ``int``
      - ``31``
-     - \-
+     - Spatial size in pixels of the running window used by the background subtraction filter. The size must be an odd integer number.
    * - ``background_windowZ``
-     - ``int | None``
+     - ``int``
      - ``15``
-     - \-
+     - Spectral size in channels of the running window used by the background subtraction filter. The size must be an odd integer number.
    * - ``scaleNoise_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, noise scaling will be enabled. The purpose of the noise scaling modules is to measure the noise level in the input cube and then divide the input cube by the noise. This can be used to correct for spatial or spectral noise variations across the input cube prior to running the source finder.
    * - ``scaleNoise_fluxRange``
-     - ``str | None``
+     - ``str``
      - ``'negative'``
-     - \-
+     - Flux range to be used in the noise measurement. If set to negative or positive, only pixels with negative or positive flux will be used, respectively. This can be useful to prevent real emission or artefacts from affecting the noise measurement. If set to full, all pixels will be used in the noise measurement irrespective of their flux.
    * - ``scaleNoise_gridXY``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Size of the spatial grid across which noise measurement window will be moved across the data cube. It must be an odd integer value. If set to 0 instead, the spatial grid size will default to half the spatial window size.
    * - ``scaleNoise_gridZ``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Size of the spatial grid across which noise measurement window will be moved across the data cube. It must be an odd integer value. If set to 0 instead, the spatial grid size will default to half the spatial window size.
    * - ``scaleNoise_interpolate``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, linear interpolation will be used to interpolate the measured local noise values in between grid points. If set to false, the entire grid cell will instead be filled with the measured noise value.
    * - ``scaleNoise_mode``
-     - ``str | None``
+     - ``str``
      - ``'spectral'``
-     - \-
+     - Noise scaling mode. If set to spectral, the noise level will be determined for each spectral channel by measuring the noise within each image plane. This is useful for data cubes where the noise varies with frequency. If set to local, the noise level will be measured locally in window running across the entire cube in all three dimensions. This is useful for data cubes with more complex noise variations, such as interferometric images with primary-beam correction applied.
    * - ``scaleNoise_scfind``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If true and global or local noise scaling is enabled, then noise scaling will additionally be applied after each smoothing operation in the S+C finder. This might be useful in certain situations where large-scale artefacts are present in interferometric data. However, this feature should be used with great caution, as it has the potential to do more harm than good.
    * - ``scaleNoise_statistic``
-     - ``str | None``
+     - ``str``
      - ``'mad'``
-     - \-
+     - Statistic to be used in the noise measurement process. Possible values are std, mad and gauss for standard deviation, median absolute deviation and Gaussian fitting to the flux histogram, respectively. Standard deviation is by far the fastest algorithm, but it is also the least robust one with respect to emission and artefacts in the data. Median absolute deviation and Gaussian fitting are far more robust in the presence of strong, extended emission or artefacts, but will usually take longer.
    * - ``scaleNoise_windowXY``
-     - ``int | None``
+     - ``int``
      - ``25``
-     - \-
+     - Spatial size of the window used in determining the local noise level. It must be an odd integer value. If set to 0, the pipeline will use the default value instead.
    * - ``scaleNoise_windowZ``
-     - ``int | None``
+     - ``int``
      - ``15``
-     - \-
+     - Spectral size of the window used in determining the local noise level. It must be an odd integer value. If set to 0, the pipeline will use the default value instead.
    * - ``scfind_enable``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, the Smooth + Clip (S+C) finder will be enabled. The S+C finder operates by iteratively smoothing the data cube with a user-defined set of smoothing kernels, measuring the noise level on each smoothing scale, and adding all pixels with an absolute flux above a user-defined relative threshold to the source detection mask.
    * - ``scfind_fluxRange``
-     - ``str | None``
+     - ``str``
      - ``'negative'``
-     - \-
+     - Flux range to be used in the noise measurement. If set to negative or positive, only pixels with negative or positive flux will be used, respectively. This can be useful to prevent real emission or artefacts from affecting the noise measurement. If set to full, all pixels will be used in the noise measurement irrespective of their flux.
    * - ``scfind_kernelsXY``
-     - ``list[float] | None``
+     - ``list:float``
      - ``[0, 3, 6]``
-     - \-
+     - Comma-separated list of spatial Gaussian kernel sizes to apply. The individual kernel sizes must be floating-point values and denote the full width at half maximum (FWHM) of the Gaussian used to smooth the data in the spatial domain. A value of 0 means that no spatial smoothing will be applied.
    * - ``scfind_kernelsZ``
-     - ``list[int] | None``
+     - ``list:int``
      - ``[0, 3, 7, 15]``
-     - \-
+     - Comma-separated list of spectral Boxcar kernel sizes to apply. The individual kernel sizes must be odd integer values of 3 or greater and denote the full width of the Boxcar filter used to smooth the data in the spectral domain. A value of 0 means that no spectral smoothing will be applied.
    * - ``scfind_replacement``
-     - ``float | None``
+     - ``float``
      - ``2.0``
-     - \-
+     - Before smoothing the data cube during an S+C iteration, every pixel in the data cube that was already detected in a previous iteration will be replaced by this value multiplied by the original noise level in the non-smoothed data cube, while keeping the original sign of the data value. This feature can be disabled altogether by specifying a value of < 0.
    * - ``scfind_statistic``
-     - ``str | None``
+     - ``str``
      - ``'mad'``
-     - \-
+     - Statistic to be used in the noise measurement process. Possible values are std, mad and gauss for standard deviation, median absolute deviation and Gaussian fitting to the flux histogram, respectively. Standard deviation is by far the fastest algorithm, but it is also the least robust one with respect to emission and artefacts in the data. Median absolute deviation and Gaussian fitting are far more robust in the presence of strong, extended emission or artefacts, but will usually take longer.
    * - ``scfind_threshold``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - Flux threshold to be used by the S+C finder relative to the measured noise level in each smoothing iteration. In practice, values in the range of about 3 to 5 have proven to be useful in most situations, with lower values in that range requiring use of the reliability filter to reduce the number of false detections.
    * - ``threshold_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, the threshold finder will be enabled. The threshold finder is a very basic source finder that simply applies a fixed threshold (either absolute or relative to the noise) to the original data cube. It can be useful if a simple flux threshold is to be applied to a pre-processed or filtered data cube
    * - ``threshold_fluxRange``
-     - ``str | None``
+     - ``str``
      - ``'negative'``
-     - \-
+     - Flux range to be used in the noise measurement. If set to negative or positive, only pixels with negative or positive flux will be used, respectively. This can be useful to prevent real emission or artefacts from affecting the noise measurement. If set to full, all pixels will be used in the noise measurement irrespective of their flux.
    * - ``threshold_mode``
-     - ``str | None``
+     - ``str``
      - ``'relative'``
-     - \-
+     - If set to absolute, the flux threshold of the threshold finder will be interpreted as an absolute flux threshold in the native flux unit of the data cube. If set to relative, the threshold will be interpreted in units of the noise level across the data cube.
    * - ``threshold_statistic``
-     - ``str | None``
+     - ``str``
      - ``'mad'``
-     - \-
+     - Statistic to be used in the noise measurement process if threshold.mode is set to relative. Possible values are std, mad and gauss for standard deviation, median absolute deviation and Gaussian fitting to the flux histogram, respectively. Standard deviation is by far the fastest algorithm, but it is also the least robust one with respect to emission and artefacts in the data. Median absolute deviation and Gaussian fitting are far more robust in the presence of strong, extended emission or artefacts, but will usually take longer.
    * - ``threshold_threshold``
-     - ``float | None``
+     - ``float``
      - ``5.0``
-     - \-
+     - Flux threshold to be applied by the threshold finder. Depending on the threshold.mode parameter, this can either be absolute (in native flux units of the data cube) or relative to the noise level of the cube.
    * - ``linker_enable``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If true, then the linker will be run to merge the pixels detected by the source finder into coherent detections that can then be parameterised and catalogued. If false, the pipeline will be terminated after source finding, and no catalogue or source products will be created. Disabling the linker can be useful if only the raw mask from the source finder is needed.
    * - ``linker_maxFill``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Maximum allowed filling factor of a source within its rectangular bounding box, defined as the number of spatial and spectral pixels that make up the source divided by the number of pixels in the bounding box. The default value of 0.0 disables maximum filling factor filtering.
    * - ``linker_maxPixels``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Maximum allowed number of spatial and spectral pixels that a source must not exceed. The default value of 0 disables maximum size filtering.
    * - ``linker_maxSizeXY``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Maximum size of sources in the spatial dimension in pixels. Sources that exceed this limit will be discarded by the linker. If the value is set to 0, maximum size filtering will be disabled.
    * - ``linker_maxSizeZ``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Maximum size of sources in the spectral dimension in pixels. Sources that exceed this limit will be discarded by the linker. If the value is set to 0, maximum size filtering will be disabled.
    * - ``linker_minFill``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Minimum allowed filling factor of a source within its rectangular bounding box, defined as the number of spatial and spectral pixels that make up the source divided by the number of pixels in the bounding box. The default value of 0.0 disables minimum filling factor filtering.
    * - ``linker_minPixels``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Minimum allowed number of spatial and spectral pixels that a source must have. The default value of 0 disables minimum size filtering.
    * - ``linker_minSizeXY``
-     - ``int | None``
+     - ``int``
      - ``5``
-     - \-
+     - Minimum size of sources in the spatial dimension in pixels. Sources that fall below this limit will be discarded by the linker.
    * - ``linker_minSizeZ``
-     - ``int | None``
+     - ``int``
      - ``5``
-     - \-
+     - Minimum size of sources in the spectral dimension in pixels. Sources that fall below this limit will be discarded by the linker.
    * - ``linker_positivity``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then the linker will only merge positive pixels and discard all negative pixels by removing them from the mask. This option should be used with extreme caution and will render the reliability filter useless. It can be useful, though, if there are significant negative artefacts such as residual sidelobes in the data.
    * - ``linker_radiusXY``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Maximum merging length in the spatial dimension. Pixels with a separation of up to this value will be merged into the same source.
    * - ``linker_radiusZ``
-     - ``int | None``
+     - ``int``
      - ``1``
-     - \-
+     - Maximum merging length in the spectral dimension. Pixels with a separation of up to this value will be merged into the same source.
    * - ``reliability_autoKernel``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, SoFiA will try to automatically determine the optimal reliability kernel scale factor by iteratively increasing the kernel size until the absolute value of the median of the Skellam distribution decreases below reliability.tolerance. If the algorithm fails to converge after reliability.iterations steps, then the default value of reliability.scaleKernel will be used instead.
    * - ``reliability_catalog``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Path to a file containing positions on the sky to be excluded from the reliability analysis. The file must contain two columns separated by a space, tabulator or comma that specify the longitude and latitude of the position to be excluded in the native WCS coordinates and units of the input FITS file. Negative detections that contain any of those positions within their bounding box will be excluded from the reliability analysis, although they will still show up in the reliability plot.
    * - ``reliability_debug``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true and the reliability module is enabled, then two catalogue files containing relevant reliability parameters of negative and positive detections are created for debugging purposes. The catalogues will be written in VOTable format.
    * - ``reliability_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, reliability calculation and filtering will be enabled. This will determine the reliability of each detection with positive total flux by comparing the density of positive and negative detections in a three-dimensional parameter space. Sources below the specified reliability threshold will then be discarded. Note that this will require a sufficient number of negative detections, which can usually be achieved by setting the source finding threshold to somewhere around 3 to 4 times the noise level.
    * - ``reliability_iterations``
-     - ``int | None``
+     - ``int``
      - ``30``
-     - \-
+     - Maximum number of iterations for the reliability kernel auto-scaling algorithm to converge. If convergence is not achieved, then reliability.scaleKernel will instead be applied.
    * - ``reliability_parameters``
-     - ``list[str] | None``
+     - ``list:str``
      - ``['peak', 'sum', 'mean']``
-     - \-
+     - Parameter space to be used in deriving the reliability of detections. This must be a list of parameters the number of which defines the dimensionality of the parameter space. Possible values are peak for the peak flux density, sum for the summed flux density, mean for mean flux density, chan for the number of spectral channels, pix for the total number of spatial and spectral pixels, fill for the filling factor, std for the standard deviation, skew for the skewness and kurt for the kurtosis across the source mask. Flux densities will be divided by the global RMS noise level. peak, sum, mean, pix and fill will be logarithmic, all other parameters linear.
    * - ``reliability_plot``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, diagnostic plots (in EPS format) will be created to allow the quality of the reliability estimation to be assessed. It is advisable to generate and inspect these plots to ensure that the outcome of the reliability filtering procedure is satisfactory.
    * - ``reliability_scaleKernel``
-     - ``float | None``
+     - ``float``
      - ``0.4``
-     - \-
+     - When estimating the density of positive and negative detections in parameter space, the size of the Gaussian kernel used in this process is determined from the covariance of the distribution of negative detections in parameter space. This parameter setting can be used to scale that kernel by a constant factor.
    * - ``reliability_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.9``
-     - \-
+     - Reliability threshold in the range of 0 to 1. Sources with a reliability below this threshold will be discarded.
    * - ``reliability_tolerance``
-     - ``float | None``
+     - ``float``
      - ``0.05``
-     - \-
+     - Convergence tolerance for the reliability kernel auto-scaling algorithm. Convergence is achieved when the absolute value of the median of the Skellam distribution drops below this tolerance.
    * - ``filter_discardNegative``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to false, then SoFiA will not remove detections with negative flux. Note that reliability filtering must be disabled for negative sources to be retained. Also note that negative sources will not appear in moment 1 and 2 maps. This setting should only ever be disabled for testing or debugging purposes, but never in production mode.
    * - ``filter_minPixels``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Minimum total number of spatial and spectral pixels within the source mask for detections to be considered reliable. Detections with fewer pixels will be removed from the catalogue.
    * - ``filter_minSNR``
-     - ``float | None``
+     - ``float``
      - ``3.0``
-     - \-
+     - Lower signal-to-noise limit for reliable sources. Detections that fall below this threshold will be deemed unreliable and removed from the catalogue. The value denotes the integrated signal-to-noise ratio, SNR = \|F\_sum\| / [RMS \* sqrt(N \* Omega)], of the source, where Omega is the solid angle (in pixels) of the point spread function of the data, N is the number of spatial and spectral pixels of the source, F\_sum is the summed flux density and RMS is the local RMS noise level (assumed to be constant). Note that the spectral resolution is assumed to be equal to the channel width.
    * - ``dilation_enable``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Set to true to enable source mask dilation whereby the mask of each source will be grown outwards until the resulting increase in integrated flux drops below a given threshold or the maximum number of iterations is reached.
    * - ``dilation_iterationsXY``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Sets the maximum number of spatial iterations for the mask dilation algorithm. Once this number of iterations has been reached, mask dilation in the spatial plane will stop even if the flux increase still exceeds the threshold set by dilation.threshold.
    * - ``dilation_iterationsZ``
-     - ``int | None``
+     - ``int``
      - ``5``
-     - \-
+     - Sets the maximum number of spectral iterations for the mask dilation algorithm. Once this number of iterations has been reached, mask dilation in the spectral axis will stop even if the flux increase still exceeds the threshold set by dilation.threshold.
    * - ``dilation_threshold``
-     - ``float | None``
+     - ``float``
      - ``0.001``
-     - \-
+     - If a positive value is provided, mask dilation will end when the increment in the integrated flux during a single iteration drops below this value times the total integrated flux (from the previous iteration), or when the maximum number of iterations has been reached. Specifying a negative threshold will disable flux checking altogether and always carry out the maximum number of iterations.
    * - ``parameter_enable``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, the parametrisation module will be enabled to measure the basic parameters of each detected source.
    * - ``parameter_offset``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to false and a region of the data cube is read in using the input.region parameter, then the position parameters x, y, z, x\_min, x\_max, y\_min, y\_max, z\_min and z\_max in the source catalogue will be specified relative to the region. If set to true, the position parameters will instead be relative to the full cube. Note that the auto-flagging log file will also adhere to this setting.
    * - ``parameter_physical``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, SoFiA will attempt to convert relevant parameters to physical units. This involves conversion of channel widths to frequency/velocity units and division of flux-based parameters by the solid angle of the beam. For this to work, the relevant header parameters, including CTYPE3, CDELT3, BMAJ and BMIN, must have been correctly set. It is further assumed that the beam does not vary with frequency or position.
    * - ``parameter_prefix``
-     - ``str | None``
+     - ``str``
      - ``'SoFiA'``
-     - \-
+     - Prefix to be used in source names. The default prefix is SoFiA, and the resulting default source name is SoFiA Jhhmmss.ss-ddmmss.s for J2000 equatorial coordinates (and likewise for other coordinate types).
    * - ``parameter_wcs``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, SoFiA will attempt to convert the source centroid position (x, y, z) to world coordinates using the WCS information stored in the header. In addition, spectra and moment map units will be converted from channels to WCS units as well.
    * - ``output_directory``
-     - ``str | None``
+     - ``str``
      - ``'.'``
-     - \-
+     - Full path to the directory to which all output files will be written. Defaults to '.' here (real SoFiA would fall back to the input data cube's own directory) so this cab's output paths stay predictable.
    * - ``output_filename``
-     - ``str | None``
+     - ``str``
      - ``'sofia'``
-     - \-
+     - File name that will be used as the template for all output files. For example, if output.filename = my\_data, then the output files will be named my\_data\_cat.xml, my\_data\_mom0.fits, etc. Defaults to 'sofia' here (real SoFiA would fall back to the input data cube's own name) so this cab's output paths stay predictable.
    * - ``output_marginCubeletsXY``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Spatial padding (in pixels) around detections to be added when creating cubelets and moment maps of individual sources. The same margin will be applied to both spatial axes of the cube. A value of 0 will create tight cutouts without any extra padding, thus minimising file sizes. The default is 10 pixels.
    * - ``output_marginCubeletsZ``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Spectral padding (in channels) around detections to be added when creating cubelets, moment maps and spectra of individual sources. A value of 0 will create tight cutouts without any extra padding, thus minimising file sizes. The default is 10 channels.
    * - ``output_overwrite``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If true, existing output files will be overwritten without warning. If false, SoFiA will refuse to run if any of the output files and directories to be created already exists.
    * - ``output_thresholdMom12``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - If output.cubelets is enabled, then the moment 1 and 2 maps for each individual detection will be created using only those spectral channels where the flux density exceeds this value times the local RMS noise level. E.g., setting output.thresholdMom12 to a value of 3.0 would set a 3-sigma flux density threshold for moments 1 and 2. Note that this setting has no effect on moment 0 maps or global moment 1 and 2 maps.
    * - ``output_writeCatASCII``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, an output source catalogue will be produced in human-readable ASCII format. The catalogue file will have the suffix \_cat.txt.
    * - ``output_writeCatSQL``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, an output source catalogue will be produced in SQL format. The catalogue file will have the suffix \_cat.sql. The SQL catalogue can be imported into any SQL-compatible database. A new data table containing the source parameters, named SoFiA-Catalogue by default, will be generated.
    * - ``output_writeCatXML``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - If set to true, an output source catalogue will be produced in VO-compatible XML format. The catalogue file will have the suffix \_cat.xml.
    * - ``output_writeCubelets``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then individual source products for each detected source will be created, including sub-cubes, masks, moment maps and integrated spectra. The source products will be written to a sub-directory with the suffix \_cubelets. Each source product will be labelled with the source ID number for identification.
    * - ``output_writeFiltered``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true and any input filtering algorithm is enabled, then a data cube containing the filtered data will be written in FITS format. The filtered cube will have the suffix \_filtered.fits.
    * - ``output_writeMask``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then a data cube containing the final source mask produced by the source finder will be written in FITS format. The pixel values in the source mask will correspond to the respective source ID numbers in the catalogue. The mask cube will have the suffix \_mask.fits.
    * - ``output_writeMask2d``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then an image containing a two-dimensional projection of the 3D mask cube will be written in FITS format. The 2D mask image will have the suffix \_mask-2d.fits. Note that some sources may be hidden behind others in this 2D projection.
    * - ``output_writeMoments``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then images of the spectral moments 0, 1 and 2 and the number of channels in each pixel of the moment 0 map will be written in FITS format. The maps will have the suffix \_mom0.fits, \_mom1.fits, \_mom2.fits and \_chan.fits. Note that moments 1 and 2 and the number of channels will not be produced if the input data cube is only two-dimensional.
    * - ``output_writeNoise``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true and local noise scaling is enabled, then a data cube containing the measured local noise values will be written in FITS format. The noise cube will have the suffix \_noise.fits. If spectral noise scaling is enabled, then the measured noise in each channel (in native data cube flux units) will be written to a plain text file with the suffix \_noise.txt.
    * - ``output_writeRawMask``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - If set to true, then a data cube containing the raw, binary source mask produced by the source finder prior to linking will be written in FITS format. The raw mask cube will have the suffix \_mask-raw.fits.
    * - ``input_primaryBeam``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Optional primary-beam cube used in source parameterisation.
    * - ``flag_cube``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Optional integer flag cube applied before source finding.
    * - ``output_dataFormat``
-     - ``str | None``
+     - ``str``
      - ``'fits'``
-     - \-
+     - Image/cube format; hdf5 falls back to fits when unsupported by the build.
    * - ``output_writeLogFile``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Write pipeline messages to the output log file.
    * - ``output_writePV``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Write source major/minor-axis PV diagrams when cubelets are enabled.
    * - ``output_writeKarma``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Write catalogue labels in Karma annotation format.
    * - ``output_marginAperSpec``
-     - ``int | None``
+     - ``int``
      - ``-1``
-     - \-
+     - Aperture-spectrum margin in channels; -1 uses the entire spectral axis.
    * - ``output_showPreviewImage``
-     - ``bool | None``
+     - ``bool``
      - ``False``
-     - \-
+     - Show an image preview in the terminal.
    * - ``output_writeDiagnosticPlot``
-     - ``bool | None``
+     - ``bool``
      - ``True``
-     - \-
+     - Write the source-finding diagnostic plot.
 
 **Outputs**
 
@@ -14039,25 +14039,25 @@ SoFiA-2: Source Finding Application for spectral-line data (https://gitlab.com/S
      - Type
      - Description
    * - ``catalogue``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
    * - ``filtered``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
    * - ``mask``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
    * - ``moments``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
    * - ``noise``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
    * - ``cubelets``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
    * - ``diagnostics``
-     - ``ProductFamily[Path] | None``
+     - ``ProductFamily[File]``
      - \-
 
 spimple-binterp
@@ -14080,37 +14080,37 @@ spimple-binterp: beam interpolation tool (https://github.com/ratt-ru/spimple)
      - Default
      - Description
    * - ``image``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - A FITS image providing the coordinates to interpolate to
    * - ``ms``
-     - ``list[Path] | None``
+     - ``List[MS]``
      - ``None``
-     - \-
+     - Measurement set(s) used to make the image (for parallactic angles, primary beam correction)
    * - ``field``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Field ID
    * - ``output_filename``
      - ``str``
      - *required*
-     - \-
+     - Path to output directory
    * - ``beam_model``
      - ``str``
      - *required*
-     - \-
+     - FITS beam model to use: path up to name, e.g. /home/user/beams/meerkat\_lband (pattern path\_to\_beam/name\_corr\_re/im.fits)
    * - ``sparsify_time``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Used to select a subset of time
    * - ``nthreads``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of threads to use [0: all threads]
    * - ``corr_type``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Correlation type: linear or circular
 
 **Outputs**
 
@@ -14122,8 +14122,8 @@ spimple-binterp: beam interpolation tool (https://github.com/ratt-ru/spimple)
      - Type
      - Description
    * - ``output_filename``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Path to output directory
 
 spimple-imconv
 --------------
@@ -14145,53 +14145,53 @@ spimple-imconv: convolve images to a common resolution (https://github.com/ratt-
      - Default
      - Description
    * - ``image``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Input image
    * - ``output_filename``
      - ``str``
      - *required*
-     - \-
+     - Path to output directory
    * - ``products``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Outputs to write: c=restoring beam, i=convolved image, b=average power beam, w=beam\*\*2 weight image [default: convolved image only]
    * - ``psf_pars``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Restoring beam FWHM as emaj emin pa [default: from the FITS header]
    * - ``nthreads``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of threads to use [0: all threads]
    * - ``circ_psf``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Convolve with a circularised beam instead of elliptical
    * - ``dilate``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Dilate the psf-pars in the FITS header by this amount (sometimes needed for stability)
    * - ``beam_model``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - FITS beam model to use (see power\_beam\_maker)
    * - ``band``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Band to use with JimBeam: L, UHF or S
    * - ``pb_min``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Set image to zero where pb falls below this value
    * - ``padding_frac``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Padding fraction for FFTs (half on either side)
    * - ``out_dtype``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Data type of output [default: single precision]
 
 **Outputs**
 
@@ -14203,16 +14203,16 @@ spimple-imconv: convolve images to a common resolution (https://github.com/ratt-
      - Type
      - Description
    * - ``clean_psf``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``convolved``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``power_beam``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``spatial_weight``
-     - ``Path | None``
+     - ``File``
      - \-
 
 spimple-spifit
@@ -14235,101 +14235,101 @@ spimple-spifit: simple spectral index fitting tool (https://github.com/ratt-ru/s
      - Default
      - Description
    * - ``model``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Model image(s)
    * - ``residual``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Residual image(s)
    * - ``output_filename``
      - ``str``
      - *required*
-     - \-
+     - Path to output directory + prefix
    * - ``psf_pars``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Restoring beam FWHM as emaj emin pa [default: from the residual's FITS header]
    * - ``circ_psf``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Convolve with a circularised beam instead of elliptical
    * - ``threshold``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Multiple of the residual rms to threshold on; only components above are fit
    * - ``maxDR``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Max dynamic range used to determine the threshold if no residual is passed in
    * - ``nthreads``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Number of threads to use [0: all threads]
    * - ``pb_min``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Set image to zero where pb falls below this value
    * - ``products``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Outputs to write: a=alpha, e=alpha error, i=I0, k=I0 error, I=reconstructed cube, c=restoring beam, m=convolved model, r=convolved residual, b=average power beam, d=data-model difference [default: all]
    * - ``padding_frac``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Padding fraction for FFTs
    * - ``dont_convolve``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Bypass the convolution by the clean beam
    * - ``channel_weights``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Per-channel weights for the frequency-axis fit (only if no residual is passed in)
    * - ``channel_freqs``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
-     - \-
+     - Per-channel freqs for the frequency-axis fit [default: from the FITS header]
    * - ``ref_freq``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Reference frequency where the I0 map is sought
    * - ``out_dtype``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Data type of output [default: single precision]
    * - ``add_convolved_residuals``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Add in the convolved residuals before fitting components
    * - ``ms``
-     - ``list[Path] | None``
+     - ``List[MS]``
      - ``None``
-     - \-
+     - Measurement set(s) used to make the image (for parallactic angles, primary beam correction)
    * - ``field``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Field ID
    * - ``beam_model``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - FITS beam model to use: path up to name (pattern path\_to\_beam/name\_corr\_re/im.fits)
    * - ``sparsify_time``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Used to select a subset of time
    * - ``corr_type``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Correlation type: linear or circular
    * - ``band``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Band to use with JimBeam: L, UHF or S
    * - ``deselect_bands``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
-     - \-
+     - Indices of sub-bands to exclude from the fitting, e.g. 1 2
 
 **Outputs**
 
@@ -14341,34 +14341,34 @@ spimple-spifit: simple spectral index fitting tool (https://github.com/ratt-ru/s
      - Type
      - Description
    * - ``alpha``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``alpha_err``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``i0``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``i0_err``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``irec_cube``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``clean_psf``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``convolved_model``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``convolved_residual``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``power_beam``
-     - ``Path | None``
+     - ``File``
      - \-
    * - ``fit_diff``
-     - ``Path | None``
+     - ``File``
      - \-
 
 split
@@ -15052,193 +15052,193 @@ tigger-convert: convert sky models into Tigger format (https://github.com/ska-sa
      - Default
      - Description
    * - ``sky_model``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Input sky model, any format importable by Tigger
    * - ``output_model``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output model (always native Tigger format); auto-generated if omitted
    * - ``force``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Force overwrite of output model
    * - ``type``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Input model type: Tigger, ASCII, BBS, NEWSTAR, AIPSCC, AIPSCCFITS, Gaul, auto
    * - ``output_type``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Output model type: Tigger, ASCII, BBS, NEWSTAR, auto
    * - ``append``
-     - ``list[Path] | None``
+     - ``List[File]``
      - ``None``
-     - \-
+     - Append another model to the input model (repeatable)
    * - ``append_type``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Appended model type
    * - ``format``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Input format for ASCII/BBS tables, e.g. "name ra\_h ra\_m ra\_s dec\_d dec\_m dec\_s i q u v spi rm emaj\_s emin\_s pa\_d freq0 tags..."
    * - ``append_format``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Format of the appended file (default: --format)
    * - ``output_format``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Output format for ASCII/BBS tables
    * - ``help_format``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Print help on format strings
    * - ``min_extent``
-     - ``float | None``
+     - ``float``
      - ``0.0``
-     - \-
+     - Minimal source extent (arcsec) when importing NEWSTAR/ASCII; smaller sources become point sources
    * - ``tags``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Extract sources with the specified tags
    * - ``select``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Select a subset of sources by tag<>value comparison (repeatable, logical-AND)
    * - ``remove_nans``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Removes the named source(s) from the model (NAME may use \*/? wildcards)
    * - ``app_to_int``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Treat fluxes as apparent, rescale to intrinsic via the primary beam model
    * - ``int_to_app``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Treat fluxes as intrinsic, rescale to apparent via the primary beam model
    * - ``newstar_app_to_int``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Convert NEWSTAR apparent fluxes to intrinsic
    * - ``newstar_int_to_app``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Convert NEWSTAR intrinsic fluxes to apparent
    * - ``center``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Override the nominal field centre, e.g. "Xdeg,Ydeg" or a pyrap.measures direction string
    * - ``refresh_r``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Recompute each source's radial distance from the current field centre
    * - ``ref_freq``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Set or change the model's reference frequency (MHz)
    * - ``primary_beam``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Primary beam expression (in r, fq) or FITS beam pattern to estimate apparent fluxes
    * - ``linear_pol``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use XY basis for beam filenames/Mueller matrices [default: RL]
    * - ``fits_l_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - CTYPE for the L axis in the FITS PB file
    * - ``fits_m_axis``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - CTYPE for the M axis in the FITS PB file
    * - ``beam_freq``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Frequency (MHz) to use for the primary beam model
    * - ``beam_clip``
-     - ``float | None``
+     - ``float``
      - ``0.001``
-     - \-
+     - Clip (power) beam gains at this level
    * - ``beam_spi``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Bandwidth (MHz, centred on --beam-freq) for a beam-based spectral index fit
    * - ``force_beam_spi_wo_spectrum``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Apply beam-derived spectral indices even to sources without an intrinsic spectrum
    * - ``beam_nopol``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Apply intensity beam model only, ignoring polarization
    * - ``beam_diag``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Use diagonal Jones terms only for the beam model
    * - ``pa``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Rotate the primary beam pattern through this parallactic angle (degrees)
    * - ``pa_range``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Rotate through a parallactic angle range FROM,TO and average
    * - ``pa_from_ms``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Rotate through the parallactic angle range from MS1[:FIELD1],... and average
    * - ``beam_average_jones``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Convert Jones(PA) to Mueller(PA) before averaging over PA
    * - ``cluster_dist``
-     - ``float | None``
+     - ``float``
      - ``60.0``
-     - \-
+     - Distance (arcsec) for source clustering, 0 to disable
    * - ``rename``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Rename sources using the COPART scheme
    * - ``radial_step``
-     - ``float | None``
+     - ``float``
      - ``10.0``
-     - \-
+     - Radial-distance step size (arcmin) for the COPART scheme
    * - ``merge_clusters``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Merge source clusters bearing the given tag(s) (comma-separated, or 'ALL')
    * - ``prefix``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Prefix all source names with the given string
    * - ``remove_source``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Remove the named source(s) (NAME may use \*/? wildcards)
    * - ``add_brick``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Add a uv-brick: NAME:FILE[:PAD\_FACTOR:[TAGS:...]]
    * - ``recenter``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Shift the sky model to a different field centre (see --center)
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Increases verbosity
    * - ``debug``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Set verbosity of a named Python context: Context=Level (repeatable)
    * - ``enable_plots``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable various diagnostic plots
 
 **Outputs**
 
@@ -15250,8 +15250,8 @@ tigger-convert: convert sky models into Tigger format (https://github.com/ska-sa
      - Type
      - Description
    * - ``output_model``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output model (always native Tigger format); auto-generated if omitted
 
 tigger-restore
 --------------
@@ -15273,73 +15273,73 @@ tigger-restore: restore sky-model sources into a FITS image (https://github.com/
      - Default
      - Description
    * - ``input_image``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Input FITS image to restore sources into
    * - ``sky_model``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Sky model to restore from
    * - ``output_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Output image; auto-generated if omitted
    * - ``type``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Input model type: ASCII, Tigger, BBS, NEWSTAR, AIPSCC, AIPSCCFITS, Gaul, auto
    * - ``format``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Input format for ASCII/BBS tables
    * - ``num_sources``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Only restore the NSRC brightest sources
    * - ``scale``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Rescale model fluxes by FLUXSCALE[,N] (N brightest only if given)
    * - ``restoring_beam``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Restoring beam size, overriding the image's BMAJ/BMIN/BPA: BMAJ[,BMIN,PA]
    * - ``psf_file``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Determine the restoring beam by fitting this PSF file
    * - ``clear``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Clear the contents of the FITS file before adding in sources
    * - ``pb``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Apply the model primary beam function during restoration where defined
    * - ``beamgain``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Apply the beamgain attribute during restoration where defined
    * - ``ignore_nobeam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Apply PB or beamgain even if a source is tagged 'nobeam'
    * - ``freq``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Frequency (MHz) to use for spectral indices and primary beams
    * - ``force``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Overwrite the output image even if it already exists
    * - ``verbose``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Verbosity level (0 is silent, higher is more verbose)
    * - ``timestamps``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Enable timestamps in debug messages
 
 **Outputs**
 
@@ -15351,8 +15351,8 @@ tigger-restore: restore sky-model sources into a FITS image (https://github.com/
      - Type
      - Description
    * - ``output_image``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Output image; auto-generated if omitted
 
 tigger-tag
 ----------
@@ -15374,33 +15374,33 @@ tigger-tag: set or change tags of selected sources in a sky model (https://githu
      - Default
      - Description
    * - ``sky_model``
-     - ``Path``
+     - ``File``
      - *required*
-     - \-
+     - Sky model to tag
    * - ``selectors``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Source selector(s) (NAME, =SELTAG, or SELTAG<>SELVAL) followed by tag expressions (TAG=[TYPE:]VALUE, +TAG, !TAG, /TAG)
    * - ``list_sources``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - List selected sources only; does not apply any tags
    * - ``output``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Save changes to a different output model [default: save in place]
    * - ``force``
-     - ``bool | None``
+     - ``bool``
      - ``None``
-     - \-
+     - Save changes without prompting [default: prompt]
    * - ``transfer_tags``
-     - ``str | None``
+     - ``str``
      - ``None``
-     - \-
+     - Transfer tags from a reference LSM (FROM\_LSM:TOL) to this model, within TOL arcsec
    * - ``debug``
-     - ``list[str] | None``
+     - ``List[str]``
      - ``None``
-     - \-
+     - Set verbosity of a named Python context: Context=Level (repeatable)
 
 **Outputs**
 
@@ -15412,8 +15412,8 @@ tigger-tag: set or change tags of selected sources in a sky model (https://githu
      - Type
      - Description
    * - ``output``
-     - ``Path | None``
-     - \-
+     - ``File``
+     - Save changes to a different output model [default: save in place]
 
 tricolour
 ---------
@@ -15439,59 +15439,59 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - *required*
      - \-
    * - ``config``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``ignore_flags``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``flagging_strategy``
-     - ``Literal['standard', 'polarisation', 'total_power'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Choices: ['standard', 'polarisation', 'total\_power']
    * - ``row_chunks``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``baseline_chunks``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dilate_masks``
-     - ``int | str | None``
+     - ``Union[int,str]``
      - ``None``
      - \-
    * - ``data_column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
      - \-
    * - ``field_names``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``scan_numbers``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``disable_post_mortem``
-     - ``bool | None``
+     - ``bool``
      - ``True``
      - \-
    * - ``window_backend``
-     - ``Literal['numpy', 'zarr-disk'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Choices: ['numpy', 'zarr-disk']
    * - ``temporary_directory``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
      - \-
    * - ``subtract_model_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
 
@@ -15505,7 +15505,7 @@ Tricolour RFI flagger (https://github.com/ratt-ru/tricolour)
      - Type
      - Description
    * - ``ms``
-     - ``MSv2 | None``
+     - ``MSv2``
      - \-
 
 uvcontsub
@@ -15881,93 +15881,93 @@ mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/m
      - Default
      - Description
    * - ``ms``
-     - ``Path``
+     - ``MS``
      - *required*
-     - \-
+     - Input MS file
    * - ``input_column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
-     - \-
+     - Column which contains the data to be continuum subtracted.
    * - ``output_column``
      - ``str``
      - *required*
-     - \-
+     - Column name to write the continuum subtracted data to. Required: there is no standard MS column for continuum-subtracted visibilities, so naming one is left to you. Pass DATA if the imager you feed the result to expects that column -- but note that without --output-ms this writes back into the input MS, so it must differ from --input-column.
    * - ``fit_model``
-     - ``Literal['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline'] | None``
+     - ``str``
      - ``'b-spline'``
-     - \-
+     - Fit function to model the continuum. The 'scipy-median-filter' model is much faster than 'median-filter', but treats band edges and masked channels differently, so the two do not give identical continuum models. WARNING: A median-filter continuum model may subsume low SNR line emission, use it with great care. Choices: ['b-spline', 'spline', 'polynomial', 'median-filter', 'scipy-median-filter', 'gcv-spline']
    * - ``order``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Order of spline/polynomial or number of top coefficients to use for DCT reconstruction
    * - ``vel_width``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Width of spline segments or median filter window in km/s. Give this or chan-width, not both -- mowjsub refuses the pair rather than silently preferring one.
    * - ``chan_width``
-     - ``int | None``
+     - ``int``
      - ``None``
-     - \-
+     - Width of spline segments or median filter window in number of channels. The alternative to vel-width, for a caller that wants the window fixed in channels rather than converted from a velocity against the band centre. Must be at least 1. Honoured from mowjsub 2.0.1 -- before that both CLIs accepted it and neither passed it to a fitter, so it satisfied no requirement and changed no result.
    * - ``gcv_lambda``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - GCV spline penalty. Zero is equivalent to an interpolating spline, high values lead to a flatter curve. If unset the parameter will be estimated using the GCV criterion; this can be very slow. Experience suggests that values chanwidth/nchan work best.
    * - ``segments``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - ## This has been replaced by --vel-width. It will be removed in future releases ## Width of spline segments or median filter window in km/s. If given as a list, then it must have same size as --order.
    * - ``spwid``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Spectral Window ID
    * - ``field_id``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Field ID
    * - ``row_chunks``
-     - ``int | None``
+     - ``int``
      - ``10000``
-     - \-
+     - Chunking strategy (Done along the time axis)
    * - ``time_chunks``
-     - ``int | None``
+     - ``int``
      - ``64``
-     - \-
+     - Chunk size for time axis
    * - ``bl_chunks``
-     - ``int | None``
+     - ``int``
      - ``10``
-     - \-
+     - Chunk size for baseline axis
    * - ``cont_fit_tol``
-     - ``float | None``
+     - ``float``
      - ``0``
-     - \-
+     - Minimum percentage of valid spectrum data points required to do a fit. If the percentage of data points is below this percentage, original data will be returned.
    * - ``nworkers``
-     - ``int | None``
+     - ``int``
      - ``4``
-     - \-
+     - Number of parallel worker threads (roughly one per CPU core). Runtime for fitting-bound models scales with this, so raise it to speed up large datasets.
    * - ``output_ms``
-     - ``Path | None``
+     - ``MS``
      - ``None``
      - \-
    * - ``load_from_cache``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Load the MS from a cache (give Zarr file name) if available, otherwise create it.
    * - ``doppler_frame``
-     - ``Literal['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Spectral reference frame to Doppler-correct the output to. When set, the continuum-subtracted visibilities are resampled onto a channel grid fixed in this frame, as CASA mstransform does with regridms=True. The continuum is always fitted on the native topocentric grid first, so the fit sees the bandpass structure where it is stationary. Requires --output-ms, since the output channel grid differs from the input. Leave unset to skip Doppler correction. Choices: ['topo', 'geo', 'bary', 'lsrk', 'lsrd', 'galacto', 'lgroup', 'cmb', 'source']
    * - ``doppler_chan_grid``
-     - ``str | None``
+     - ``str``
      - ``'auto'``
-     - \-
+     - Output channel grid for the Doppler correction. 'auto' derives the grid that every timestamp of this observation covers. Otherwise give 'nchan,chan0,chanwidth' with frequency units, e.g. '1000,1419.5MHz,26.1kHz'; use this to place several MSs on one common grid, since 'auto' only ever sees a single MS.
    * - ``doppler_interpolation``
-     - ``Literal['nearest', 'linear'] | None``
+     - ``str``
      - ``'nearest'``
-     - \-
+     - Interpolation used when resampling onto the Doppler-corrected grid. 'nearest' is what caracal asks of CASA mstransform and leaves channel noise uncorrelated; 'linear' is smoother but correlates adjacent channels. Choices: ['nearest', 'linear']
    * - ``doppler_source_vel``
-     - ``float | None``
+     - ``float``
      - ``None``
-     - \-
+     - Systemic radial velocity of the source in km/s, positive for recession. Only used with --doppler-frame=source; when unset it is read from the MS SOURCE::SYSVEL column.
 
 **Outputs**
 
@@ -15979,10 +15979,10 @@ mowjsub: visibility-plane continuum subtraction (https://github.com/laduma-dev/m
      - Type
      - Description
    * - ``ms``
-     - ``Path | None``
-     - \-
+     - ``MS``
+     - Input MS file
    * - ``output_ms``
-     - ``Path | None``
+     - ``MS``
      - \-
 
 widebandpbcor
@@ -16081,7 +16081,7 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Default
      - Description
    * - ``ms``
-     - ``list[MSv2]``
+     - ``List[MSv2]``
      - *required*
      - \-
    * - ``prefix``
@@ -16089,677 +16089,677 @@ WSClean imager (https://wsclean.readthedocs.io)
      - *required*
      - \-
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
      - \-
    * - ``model_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_storage_manager``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``nchan``
      - ``int``
      - ``1``
-     - \-
+     - Number of output channels (-channels-out); multiple channels also produce MFS images. Nullable: False
    * - ``deconvolution_channels``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``channel_range``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``channel_division_frequencies``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
      - \-
    * - ``gap_channel_division``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``pol``
-     - ``str | list[str]``
+     - ``Union[str, List[str]]``
      - ``'I'``
-     - \-
+     - Polarizations; case insensitive, comma separated or packed (e.g. IQUV). Nullable: False
    * - ``join_polarizations``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``link_polarizations``
-     - ``str | list[str] | None``
+     - ``Union[str, List[str]]``
      - ``None``
      - \-
    * - ``intervals_out``
      - ``int``
      - ``1``
-     - \-
+     - Number of output time intervals inside the selected interval. Nullable: False
    * - ``interval``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``even_timesteps``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``odd_timesteps``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``field``
-     - ``str | list[int] | None``
+     - ``Union[str, List[int]]``
      - ``None``
      - \-
    * - ``spws``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``parallel_gridding``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``parallel_reordering``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``no_work_on_master``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``channel_to_node``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``max_mpi_message_size``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``mem``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``abs_mem``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``log_time``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``quiet``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reorder``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_reorder``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reuse_reordered``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``save_reordered``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``update_model_required``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_update_model_required``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_dirty``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``save_first_residual``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``save_weights``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``save_uv``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reuse_psf``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``reuse_dirty``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``make_psf``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``make_psf_only``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``weight``
-     - ``str | tuple[str, float] | None``
+     - ``Union[str, Tuple[str, float]]``
      - ``None``
      - \-
    * - ``super_weight``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``mf_weighting``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_mf_weighting``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``weighting_rank_filter``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``weighting_rank_filter_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``taper_gaussian``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``taper_tukey``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``taper_inner_tukey``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``taper_edge``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``taper_edge_tukey``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``use_weights_as_taper``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``store_imaging_weights``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``size``
-     - ``tuple[int, int]``
+     - ``Tuple[int, int]``
      - *required*
      - \-
    * - ``padding``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``scale``
-     - ``str | float``
+     - ``Union[str, float]``
      - *required*
      - \-
    * - ``predict``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``continue_``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``subtract_model``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``gridder``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``use_wgridder``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``shift``
-     - ``tuple[str, str] | None``
+     - ``Tuple[str, str]``
      - ``None``
      - \-
    * - ``facet_regions``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``feather_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``no_min_grid_resolution``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``min_grid_resolution``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``visibility_weighting_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``baseline_averaging``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``simulate_noise``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``simulate_baseline_noise``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``idg_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``wstack_nwlayers``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``wstack_nwlayers_factor``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``wstack_nwlayers_for_size``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``wstack_grid_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``wstack_kernel_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``wstack_oversampling``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``wgridder_accuracy``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``compound_tasks``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``shared_facet_reads``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``aterm_config``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``grid_with_beam``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``beam_aterm_update``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``aterm_kernel_size``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``apply_facet_solutions``
-     - ``list[Path | str] | None``
+     - ``List[Union[File, str]]``
      - ``None``
      - \-
    * - ``no_solution_directions_check``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``scalar_visibilities``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``diagonal_visibilities``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``apply_facet_beam``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``facet_beam_update``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``save_aterms``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``apply_primary_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reuse_primary_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``use_differential_lofar_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``primary_beam_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``mwa_path``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
      - \-
    * - ``save_psf_pb``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``pb_grid_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dd_psf_grid``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``beam_model``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``beam_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``beam_normalisation_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``dry_run``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``maxuvw_m``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``minuvw_m``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``maxuv_l``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``minuv_l``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``maxw``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``niter``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Maximum number of deconvolution iterations; zero performs dirty imaging.
    * - ``nmiter``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``auto_threshold``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``abs_threshold``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``None``
      - \-
    * - ``auto_mask``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``abs_auto_mask``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``None``
      - \-
    * - ``local_rms``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``local_rms_strength``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``local_rms_window``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``local_rms_method``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``gain``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``mgain``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``join_channels``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``spectral_correction``
-     - ``tuple[float, str] | None``
+     - ``Tuple[float, str]``
      - ``None``
      - \-
    * - ``no_fast_subminor``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``multiscale``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``multiscale_scale_bias``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``multiscale_max_scales``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``multiscale_scales``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
      - \-
    * - ``multiscale_shape``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``multiscale_gain``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``multiscale_convolution_padding``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``asp``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_multiscale_fast_subminor``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``python_deconvolution``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``iuwt``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``iuwt_snr_test``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_iuwt_snr_test``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``moresane_ext``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
      - \-
    * - ``moresane_arg``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``moresane_sl``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
      - \-
    * - ``save_source_list``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``clean_border``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``fits_mask``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``casa_mask``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``horizon_mask``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``no_negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``stop_negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``fit_spectral_pol``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``fit_spectral_log_pol``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``force_spectrum``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``squared_channel_joining``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``parallel_deconvolution``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``deconvolution_threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``restore``
-     - ``tuple[Path, Path, Path] | None``
+     - ``Tuple[File, File, File]``
      - ``None``
      - \-
    * - ``restore_list``
-     - ``tuple[Path, Path, Path] | None``
+     - ``Tuple[File, File, File]``
      - ``None``
      - \-
    * - ``beam_size``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``None``
      - \-
    * - ``beam_shape``
-     - ``tuple[str | float, str | float, str | float] | None``
+     - ``Tuple[Union[str, float], Union[str, float], Union[str, float]]``
      - ``None``
      - \-
    * - ``fit_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_fit_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``beam_fitting_size``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``theoretic_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``circular_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``elliptical_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``local_rms_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Precomputed local RMS image used for local-noise thresholding.
    * - ``direct_ft_precision``
-     - ``Literal['float', 'double', 'ldouble'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Arithmetic precision for the direct Fourier transform gridder. Choices: ['float', 'double', 'ldouble']
    * - ``temp_dir``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
-     - \-
+     - Scratch location for temporary reordered MeasurementSets.
 
 **Outputs**
 
@@ -16771,29 +16771,29 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Type
      - Description
    * - ``image``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Image FITS products indexed by time, frequency, polarization and component.
    * - ``dirty``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Dirty FITS products indexed by time, frequency, polarization and component.
    * - ``residual``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Residual FITS products indexed by time, frequency, polarization and component.
    * - ``model``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Model FITS products indexed by time, frequency, polarization and component.
    * - ``psf``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Shared PSF FITS products indexed by time and frequency; no polarization axis.
    * - ``source_list``
-     - ``ProductFamily[Path] | None``
-     - \-
+     - ``ProductFamily[File]``
+     - Component list emitted by -save-source-list; no channel or polarization suffix.
    * - ``continued_beam_model``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
    * - ``continued_facet_beam_model``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
 
 wsclean-readonly
 ----------------
@@ -16815,7 +16815,7 @@ WSClean read-only MSv2 imaging; temporary reordered data must be outside the inp
      - Default
      - Description
    * - ``ms``
-     - ``list[MSv2]``
+     - ``List[MSv2]``
      - *required*
      - \-
    * - ``prefix``
@@ -16823,677 +16823,677 @@ WSClean read-only MSv2 imaging; temporary reordered data must be outside the inp
      - *required*
      - \-
    * - ``column``
-     - ``str | None``
+     - ``str``
      - ``'DATA'``
      - \-
    * - ``model_column``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``model_storage_manager``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``nchan``
      - ``int``
      - ``1``
-     - \-
+     - Number of output channels (-channels-out); multiple channels also produce MFS images. Nullable: False
    * - ``deconvolution_channels``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``channel_range``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``channel_division_frequencies``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
      - \-
    * - ``gap_channel_division``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``pol``
-     - ``str | list[str]``
+     - ``Union[str, List[str]]``
      - ``'I'``
-     - \-
+     - Polarizations; case insensitive, comma separated or packed (e.g. IQUV). Nullable: False
    * - ``join_polarizations``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``link_polarizations``
-     - ``str | list[str] | None``
+     - ``Union[str, List[str]]``
      - ``None``
      - \-
    * - ``intervals_out``
      - ``int``
      - ``1``
-     - \-
+     - Number of output time intervals inside the selected interval. Nullable: False
    * - ``interval``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``even_timesteps``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``odd_timesteps``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``field``
-     - ``str | list[int] | None``
+     - ``Union[str, List[int]]``
      - ``None``
      - \-
    * - ``spws``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``parallel_gridding``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``parallel_reordering``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``no_work_on_master``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``channel_to_node``
-     - ``list[int] | None``
+     - ``List[int]``
      - ``None``
      - \-
    * - ``max_mpi_message_size``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``mem``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``abs_mem``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``verbose``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``log_time``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``quiet``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reorder``
-     - ``Literal[True]``
+     - ``bool``
      - ``True``
-     - \-
+     - Choices: [True] Nullable: False
    * - ``no_reorder``
-     - ``Literal[False]``
+     - ``bool``
      - ``False``
-     - \-
+     - Choices: [False] Nullable: False
    * - ``reuse_reordered``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``save_reordered``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``update_model_required``
-     - ``Literal[False]``
+     - ``bool``
      - ``False``
-     - \-
+     - Choices: [False] Nullable: False
    * - ``no_update_model_required``
-     - ``Literal[True]``
+     - ``bool``
      - ``True``
-     - \-
+     - Choices: [True] Nullable: False
    * - ``no_dirty``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``save_first_residual``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``save_weights``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``save_uv``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reuse_psf``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``reuse_dirty``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``make_psf``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``make_psf_only``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``weight``
-     - ``str | tuple[str, float] | None``
+     - ``Union[str, Tuple[str, float]]``
      - ``None``
      - \-
    * - ``super_weight``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``mf_weighting``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_mf_weighting``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``weighting_rank_filter``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``weighting_rank_filter_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``taper_gaussian``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``taper_tukey``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``taper_inner_tukey``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``taper_edge``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``taper_edge_tukey``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``use_weights_as_taper``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``store_imaging_weights``
-     - ``Literal[False]``
+     - ``bool``
      - ``False``
-     - \-
+     - Choices: [False] Nullable: False
    * - ``size``
-     - ``tuple[int, int]``
+     - ``Tuple[int, int]``
      - *required*
      - \-
    * - ``padding``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``scale``
-     - ``str | float``
+     - ``Union[str, float]``
      - *required*
      - \-
    * - ``predict``
-     - ``Literal[False]``
+     - ``bool``
      - ``False``
-     - \-
+     - Choices: [False] Nullable: False
    * - ``continue_``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``subtract_model``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``gridder``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``use_wgridder``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``shift``
-     - ``tuple[str, str] | None``
+     - ``Tuple[str, str]``
      - ``None``
      - \-
    * - ``facet_regions``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``feather_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``no_min_grid_resolution``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``min_grid_resolution``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``visibility_weighting_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``baseline_averaging``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``simulate_noise``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``simulate_baseline_noise``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``idg_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``wstack_nwlayers``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``wstack_nwlayers_factor``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``wstack_nwlayers_for_size``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``wstack_grid_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``wstack_kernel_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``wstack_oversampling``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``wgridder_accuracy``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``compound_tasks``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``shared_facet_reads``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``aterm_config``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``grid_with_beam``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``beam_aterm_update``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``aterm_kernel_size``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``apply_facet_solutions``
-     - ``list[Path | str] | None``
+     - ``List[Union[File, str]]``
      - ``None``
      - \-
    * - ``no_solution_directions_check``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``scalar_visibilities``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``diagonal_visibilities``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``apply_facet_beam``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``facet_beam_update``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``save_aterms``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``apply_primary_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``reuse_primary_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``use_differential_lofar_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``primary_beam_limit``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``mwa_path``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
      - \-
    * - ``save_psf_pb``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``pb_grid_size``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``dd_psf_grid``
-     - ``tuple[int, int] | None``
+     - ``Tuple[int, int]``
      - ``None``
      - \-
    * - ``beam_model``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``beam_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``beam_normalisation_mode``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``dry_run``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``maxuvw_m``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``minuvw_m``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``maxuv_l``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``minuv_l``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``maxw``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``niter``
-     - ``int | None``
+     - ``int``
      - ``0``
-     - \-
+     - Maximum number of deconvolution iterations; zero performs dirty imaging.
    * - ``nmiter``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``auto_threshold``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``abs_threshold``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``None``
      - \-
    * - ``auto_mask``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``abs_auto_mask``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``None``
      - \-
    * - ``local_rms``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``local_rms_strength``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``local_rms_window``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``local_rms_method``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``gain``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``mgain``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``join_channels``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``spectral_correction``
-     - ``tuple[float, str] | None``
+     - ``Tuple[float, str]``
      - ``None``
      - \-
    * - ``no_fast_subminor``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``multiscale``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``multiscale_scale_bias``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``multiscale_max_scales``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``multiscale_scales``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
      - \-
    * - ``multiscale_shape``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``multiscale_gain``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``multiscale_convolution_padding``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``asp``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_multiscale_fast_subminor``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``python_deconvolution``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``iuwt``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``iuwt_snr_test``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_iuwt_snr_test``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``moresane_ext``
-     - ``Path | None``
+     - ``Directory``
      - ``None``
      - \-
    * - ``moresane_arg``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``moresane_sl``
-     - ``list[float] | None``
+     - ``List[float]``
      - ``None``
      - \-
    * - ``save_source_list``
      - ``bool``
      - ``False``
-     - \-
+     - Nullable: False
    * - ``clean_border``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``fits_mask``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``casa_mask``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``horizon_mask``
-     - ``str | None``
+     - ``str``
      - ``None``
      - \-
    * - ``no_negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``stop_negative``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``fit_spectral_pol``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``fit_spectral_log_pol``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``force_spectrum``
-     - ``Path | None``
+     - ``File``
      - ``None``
      - \-
    * - ``squared_channel_joining``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``parallel_deconvolution``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``deconvolution_threads``
-     - ``int | None``
+     - ``int``
      - ``None``
      - \-
    * - ``restore``
-     - ``tuple[Path, Path, Path] | None``
+     - ``Tuple[File, File, File]``
      - ``None``
      - \-
    * - ``restore_list``
-     - ``tuple[Path, Path, Path] | None``
+     - ``Tuple[File, File, File]``
      - ``None``
      - \-
    * - ``beam_size``
-     - ``str | float | None``
+     - ``Union[str, float]``
      - ``None``
      - \-
    * - ``beam_shape``
-     - ``tuple[str | float, str | float, str | float] | None``
+     - ``Tuple[Union[str, float], Union[str, float], Union[str, float]]``
      - ``None``
      - \-
    * - ``fit_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``no_fit_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``beam_fitting_size``
-     - ``float | None``
+     - ``float``
      - ``None``
      - \-
    * - ``theoretic_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``circular_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``elliptical_beam``
-     - ``bool | None``
+     - ``bool``
      - ``None``
      - \-
    * - ``local_rms_image``
-     - ``Path | None``
+     - ``File``
      - ``None``
-     - \-
+     - Precomputed local RMS image used for local-noise thresholding.
    * - ``direct_ft_precision``
-     - ``Literal['float', 'double', 'ldouble'] | None``
+     - ``str``
      - ``None``
-     - \-
+     - Arithmetic precision for the direct Fourier transform gridder. Choices: ['float', 'double', 'ldouble']
    * - ``temp_dir``
-     - ``Path``
+     - ``Directory``
      - *required*
-     - \-
+     - Scratch location for temporary reordered MeasurementSets. Nullable: False
 
 **Outputs**
 
@@ -17505,29 +17505,29 @@ WSClean read-only MSv2 imaging; temporary reordered data must be outside the inp
      - Type
      - Description
    * - ``image``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Image FITS products indexed by time, frequency, polarization and component.
    * - ``dirty``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Dirty FITS products indexed by time, frequency, polarization and component.
    * - ``residual``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Residual FITS products indexed by time, frequency, polarization and component.
    * - ``model``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Model FITS products indexed by time, frequency, polarization and component.
    * - ``psf``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Shared PSF FITS products indexed by time and frequency; no polarization axis.
    * - ``source_list``
-     - ``ProductFamily[Path] | None``
-     - \-
+     - ``ProductFamily[File]``
+     - Component list emitted by -save-source-list; no channel or polarization suffix.
    * - ``continued_beam_model``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
    * - ``continued_facet_beam_model``
-     - ``ProductFamily[FITSImage] | None``
-     - \-
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
 
 wvrgcal
 -------

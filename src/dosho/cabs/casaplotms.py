@@ -1,4 +1,4 @@
-"""`@shinobi.pystep` wrapper for CASA's `plotms` task
+"""`@dosho.pystep` wrapper for CASA's `plotms` task
 (`casaplotms.plotms`, a sibling package to `casatasks`, not part of it --
 same `ctx.import_func`-inside-container mechanism as
 `dosho.cabs.casatasks`, see that module's own docstring for the full
@@ -14,9 +14,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import shinobi
 from pydantic import BaseModel
 
+import dosho
 from dosho import images
 
 
@@ -52,7 +52,7 @@ class PlotmsOutputs(BaseModel):
     plotfile: Path
 
 
-@shinobi.pystep(image=images.CASA6, write_paths=["plotfile"])
+@dosho.pystep(image=images.CASA6, write_paths=["plotfile"])
 def plotms(
     ctx,
     vis: Path,

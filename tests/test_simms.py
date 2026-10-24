@@ -11,6 +11,7 @@ from uuid import uuid4
 import pytest
 from pydantic import BaseModel, ValidationError
 from shinobi import Cab, InputRef, MSv2, OutputRef, Recipe
+from shinobi.cabs import get as get_runtime
 from shinobi.config import AppConfig
 from shinobi.dataset_backends import SharedStorageQualification
 from shinobi.offload.bundle import RecipeBundle, freeze_recipe
@@ -18,17 +19,16 @@ from shinobi.offload.slurm import prepare_worker_slurm, submit_worker_slurm
 from shinobi.offload.worker import ExecutionPlan
 from shinobi.policies import build_argv
 
-import dosho
 from dosho import images
 
 
 def _argv(name, **params):
-    cab = dosho.get(f"simms-{name}")
+    cab = get_runtime(f"simms-{name}")
     return build_argv(cab, cab.inputs_model(**params).model_dump())
 
 
 def test_telsim_cli_parameters_and_passthrough():
-    cab = dosho.get("simms-telsim")
+    cab = get_runtime("simms-telsim")
     assert isinstance(cab, Cab)
     assert cab.image == images.SIMMS
     argv = _argv(
@@ -66,7 +66,7 @@ def test_telsim_cli_parameters_and_passthrough():
 
 
 def test_skysim_noise_controls_have_the_real_cli_spelling():
-    cab = dosho.get("simms-skysim")
+    cab = get_runtime("simms-skysim")
     assert isinstance(cab, Cab)
     assert cab.image == images.SIMMS
     argv = _argv(
@@ -120,16 +120,16 @@ def test_skysim_repeats_spectral_maps_and_validates_modes():
     assert [argv[i + 1] for i in indices] == ["alpha.fits", "beta.fits"]
     for params in [{"mode": "bogus"}, {"fits_beam_mode": "bogus"}]:
         with pytest.raises(ValidationError):
-            dosho.get("simms-skysim").inputs_model(ms="x.ms", **params)
+            get_runtime("simms-skysim").inputs_model(ms="x.ms", **params)
 
 
 def test_simms_file_inputs_remain_paths():
-    telsim = dosho.get("simms-telsim").inputs_model(
+    telsim = get_runtime("simms-telsim").inputs_model(
         ms="x.ms", telescope="meerkat", subarray_file="antennas.yaml", sensitivity_file="sefd.yaml"
     )
     assert telsim.subarray_file == Path("antennas.yaml")
     assert telsim.sensitivity_file == Path("sefd.yaml")
-    skysim = dosho.get("simms-skysim").inputs_model(
+    skysim = get_runtime("simms-skysim").inputs_model(
         ms="x.ms", ascii_sky="sky.txt", primary_beam="beams.yaml", source_schema="schema.yaml"
     )
     assert skysim.ascii_sky == Path("sky.txt")
@@ -149,11 +149,11 @@ def _recipe():
         backend="docker",
     )
     recipe.add_step(
-        "create", dosho.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+        "create", get_runtime("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
     )
     recipe.add_step(
         "populate",
-        dosho.get("simms-skysim"),
+        get_runtime("simms-skysim"),
         ms=OutputRef(step="create", field="ms"),
         sefd=551,
         seed=20261023,
@@ -182,7 +182,7 @@ def test_simms_freezes_as_worker_cabs_without_tool_code(tmp_path, monkeypatch):
     assert restored.steps[1].wiring["ms"].step == "create"
     assert (
         restored.steps[1].scope.restore().dataset_accesses
-        == dosho.get("simms-skysim").dataset_accesses
+        == get_runtime("simms-skysim").dataset_accesses
     )
     assert "simms" not in sys.modules
 

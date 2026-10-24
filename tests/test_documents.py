@@ -12,14 +12,15 @@ survive the load.
 
 from __future__ import annotations
 
+import inspect
 import pathlib
 
 import pytest
-from shinobi.steps.schema import Cab, StepRef
 
 import dosho
 import dosho.cabs as C
 from dosho.registry import _DOCUMENT_DIR, _index
+from dosho.validation import CabSpec, describe_cab
 
 DOCUMENTS = sorted(_DOCUMENT_DIR.glob("*.yaml"))
 
@@ -29,11 +30,11 @@ def test_there_are_documents():
 
 
 @pytest.mark.parametrize("path", DOCUMENTS, ids=lambda p: p.stem)
-def test_every_document_loads_into_a_cab(path: pathlib.Path):
+def test_every_document_loads_into_a_definition(path: pathlib.Path):
     cab = dosho.get(path.stem)
-    assert isinstance(cab, Cab)
+    assert isinstance(cab, CabSpec)
     assert cab.name == path.stem
-    assert cab.command
+    assert describe_cab(cab).command
 
 
 @pytest.mark.parametrize("path", DOCUMENTS, ids=lambda p: p.stem)
@@ -42,7 +43,7 @@ def test_every_document_resolves_its_image(path: pathlib.Path):
     it. If the key is missing from the manifest it survives the load as a bare
     word and fails much later, at pull time, in a container runtime.
     """
-    cab = dosho.get(path.stem)
+    cab = describe_cab(dosho.get(path.stem))
     assert "/" in cab.image or ":" in cab.image, f"{cab.image!r} looks like an unresolved key"
 
 
@@ -76,14 +77,16 @@ def test_every_index_entry_resolves():
     """
     for name, entry in _index().items():
         obj = getattr(C, entry["attr"])
-        assert isinstance(obj, (Cab, StepRef)), f"{name} -> {entry['attr']} is {type(obj).__name__}"
+        assert isinstance(obj, CabSpec) or inspect.isfunction(obj), (
+            f"{name} -> {entry['attr']} is {type(obj).__name__}"
+        )
 
 
 def test_pysteps_are_still_python():
     """The half that is not documents, and cannot be: a pystep is a function."""
     pysteps = [n for n, e in _index().items() if "document" not in e]
     assert len(pysteps) > 60
-    assert all(isinstance(dosho.get(n), StepRef) for n in pysteps)
+    assert all(inspect.isfunction(dosho.get(n)) for n in pysteps)
 
 
 def test_pattern_cabs_kept_their_patterns():
@@ -91,8 +94,7 @@ def test_pattern_cabs_kept_their_patterns():
     silently: a cab without its patterns rejects every dynamic parameter.
     """
     for name in ("cubical", "quartical", "wsclean"):
-        cab = dosho.get(name)
+        cab = describe_cab(dosho.get(name))
         assert cab.input_patterns or cab.output_patterns, f"{name} lost its patterns"
-    cubical = dosho.get("cubical")
-    assert cubical.inputs_model.model_config.get("extra") == "allow"
-    assert cubical.match_pattern("g1-solvable") is not None
+    cubical = describe_cab(dosho.get("cubical"))
+    assert any(pattern.matches("g1-solvable") is not None for pattern in cubical.input_patterns)
