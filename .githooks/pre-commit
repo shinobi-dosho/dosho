@@ -91,7 +91,7 @@ if printf '%s\n' "$staged" | grep -qE '^(src/dosho/|docs/_ext/cab_catalog\.py$)'
 pre-commit: docs/reference/cabs.rst is stale (or its staged copy is).
 
   fix:    git add docs/reference/cabs.rst   (it has been regenerated for you)
-  rerun:  uv run python docs/_ext/cab_catalog.py
+  rerun:  uv run --group docs python docs/_ext/cab_catalog.py
   bypass: git commit --no-verify
 
 MSG

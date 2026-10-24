@@ -227,6 +227,7 @@ dev = [
 docs = [
     { name = "furo" },
     { name = "myst-parser" },
+    { name = "pydantic" },
     { name = "sphinx", version = "9.0.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-copybutton" },
@@ -249,6 +250,7 @@ dev = [
 docs = [
     { name = "furo", specifier = ">=2024.1" },
     { name = "myst-parser", specifier = ">=2.0" },
+    { name = "pydantic", specifier = ">=2.14" },
     { name = "sphinx", specifier = ">=7.2" },
     { name = "sphinx-copybutton", specifier = ">=0.5" },
 ]

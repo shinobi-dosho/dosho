@@ -11,6 +11,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 from shinobi import FITSImage, MSv2, ProductFamily, Recipe
+from shinobi.cabs import get as get_runtime
 from shinobi.steps.schema import InputRef, OutputRef, StepRef
 
 import dosho
@@ -61,7 +62,7 @@ pipeline.add_step(
 populated = OutputRef(step="populate", field="ms")
 pipeline.add_step(
     "backup",
-    StepRef(name="backup", step=dosho.get("msutils-flags-backup"), params={"name": "before"}),
+    StepRef(name="backup", step=get_runtime("msutils-flags-backup"), params={"name": "before"}),
     ms=populated,
 )
 pipeline.add_step(
@@ -74,7 +75,7 @@ pipeline.add_step(
 )
 pipeline.add_step(
     "restore",
-    StepRef(name="restore", step=dosho.get("msutils-flags-restore"), params={"name": "before"}),
+    StepRef(name="restore", step=get_runtime("msutils-flags-restore"), params={"name": "before"}),
     ms=OutputRef(step="flag", field="ms"),
 )
 restored = OutputRef(step="restore", field="ms")

@@ -7,15 +7,15 @@ ParamPattern against real CubiCal CLI conventions.
 """
 
 import yaml
+from shinobi.cabs import get as get_runtime
 from shinobi.loaders import yaml_cab
 from shinobi.policies import build_argv
 
-import dosho
 from dosho import registry
 
 
 def _cab():
-    return dosho.get("cubical")
+    return get_runtime("cubical")
 
 
 def _path_only_cab():

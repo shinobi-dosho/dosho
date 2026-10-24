@@ -20,6 +20,7 @@ import pytest
 import shinobi.dataset_access as access_module
 from pydantic import BaseModel
 from shinobi import DatasetAccess, DatasetColumns, MSv2, Recipe
+from shinobi.cabs import get as get_runtime
 from shinobi.dataset_access import (
     DatasetAccessError,
     plan_recipe_accesses,
@@ -109,7 +110,7 @@ def _scope(cab):
 def _all_scopes() -> dict[str, object]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")  # experimental-cab warnings
-        return {name: _scope(registry.get(name)) for name in registry.list_cabs()}
+        return {name: _scope(get_runtime(name)) for name in registry.list_cabs()}
 
 
 def _load(name: str, text: str) -> Cab:
@@ -220,11 +221,11 @@ class _Empty(BaseModel):
 def test_ddfacet_after_simulation_has_a_complete_contained_contract(no_closure, tmp_path):
     recipe = Recipe(name="strict-ddfacet", inputs_model=_MS, outputs_model=_Empty)
     recipe.add_step(
-        "simulate", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+        "simulate", get_runtime("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
     )
     recipe.add_step(
         "image",
-        registry.get("ddfacet"),
+        get_runtime("ddfacet"),
         data_ms=[OutputRef(step="simulate", field="ms")],
         output_name="image",
     )
@@ -241,12 +242,12 @@ def test_ddfacet_after_simulation_has_a_complete_contained_contract(no_closure, 
 def test_ddfacet_scratch_cannot_write_inside_the_ms(no_closure, tmp_path, field):
     recipe = Recipe(name="strict-ddfacet-overlap", inputs_model=_MS, outputs_model=_Empty)
     recipe.add_step(
-        "simulate", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+        "simulate", get_runtime("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
     )
     ms = tmp_path / "sim.ms"
     recipe.add_step(
         "image",
-        registry.get("ddfacet"),
+        get_runtime("ddfacet"),
         data_ms=[OutputRef(step="simulate", field="ms")],
         output_name="image",
         **{field: str(ms / "unowned-scratch")},
@@ -270,20 +271,20 @@ def _pipeline(backup: Cab) -> Recipe:
     from the one recipe input, so every ordering edge is an access hazard."""
     ms = InputRef(field="ms")
     recipe = Recipe(name="strict-flagging", inputs_model=_MS, outputs_model=_Empty)
-    recipe.add_step("sim", registry.get("simms-telsim"), ms=ms, telescope="meerkat")
+    recipe.add_step("sim", get_runtime("simms-telsim"), ms=ms, telescope="meerkat")
     # The msutils flags cabs take their version as a `name` input, which
     # collides with `add_step`'s own first argument -- so it rides in on a
     # StepRef's params rather than as a keyword.
     recipe.add_step("backup", StepRef(name="backup", step=backup, params={"name": "pre"}), ms=ms)
-    recipe.add_step("flag", registry.get("tricolour"), ms=ms)
-    restore = registry.get("msutils-flags-restore")
+    recipe.add_step("flag", get_runtime("tricolour"), ms=ms)
+    restore = get_runtime("msutils-flags-restore")
     recipe.add_step("restore", StepRef(name="restore", step=restore, params={"name": "pre"}), ms=ms)
     return recipe
 
 
 def test_a_strict_flagging_pipeline_plans_in_order(no_closure, tmp_path):
     plan = plan_recipe_accesses(
-        _pipeline(registry.get("msutils-flags-backup")),
+        _pipeline(get_runtime("msutils-flags-backup")),
         {"ms": tmp_path / "sim.ms"},
         workspace=tmp_path,
     )
@@ -314,7 +315,7 @@ def test_telsim_declared_as_a_reader_is_refused(no_closure, tmp_path):
     """telsim writes its MS (`write_path: true`), so a `read` contract on it
     contradicts the schema and planning refuses it, rather than recording a
     creation as a read."""
-    telsim = registry.get("simms-telsim")
+    telsim = get_runtime("simms-telsim")
     reader = telsim.model_copy(
         update={"dataset_accesses": [DatasetAccess(field="ms", mode="read")]}
     )
@@ -333,13 +334,13 @@ def test_a_simulate_flag_image_chain_plans_through_output_refs(no_closure, tmp_p
     producer's passthrough output, and wsclean takes a list of one."""
     recipe = Recipe(name="simulate-image", inputs_model=_MS, outputs_model=_Empty)
     recipe.add_step(
-        "sim", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+        "sim", get_runtime("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
     )
-    recipe.add_step("sky", registry.get("simms-skysim"), ms=OutputRef(step="sim", field="ms"))
-    recipe.add_step("flag", registry.get("aoflagger"), msname=OutputRef(step="sky", field="ms"))
+    recipe.add_step("sky", get_runtime("simms-skysim"), ms=OutputRef(step="sim", field="ms"))
+    recipe.add_step("flag", get_runtime("aoflagger"), msname=OutputRef(step="sky", field="ms"))
     recipe.add_step(
         "image",
-        registry.get("wsclean"),
+        get_runtime("wsclean"),
         ms=[OutputRef(step="flag", field="msname")],
         prefix=str(tmp_path / "img"),
     )
@@ -368,8 +369,8 @@ def test_a_simulate_flag_image_chain_plans_through_output_refs(no_closure, tmp_p
 def test_backups_order_on_shared_flag_history(no_closure, tmp_path, second_name):
     recipe = Recipe(name="backups", inputs_model=_MS, outputs_model=_Empty)
     ms = InputRef(field="ms")
-    recipe.add_step("sim", registry.get("simms-telsim"), ms=ms, telescope="meerkat")
-    backup = registry.get("msutils-flags-backup")
+    recipe.add_step("sim", get_runtime("simms-telsim"), ms=ms, telescope="meerkat")
+    backup = get_runtime("msutils-flags-backup")
     assert "ms" not in backup.outputs_model.model_fields
     assert "flagversions" in backup.outputs_model.model_fields
     for step, version in [("first", "pre"), ("second", second_name)]:
@@ -395,9 +396,9 @@ def test_aoflagger_orders_after_a_uvw_writer(no_closure, tmp_path):
     )
     recipe = Recipe(name="uvw-flagging", inputs_model=_MS, outputs_model=_Empty)
     ms = InputRef(field="ms")
-    recipe.add_step("sim", registry.get("simms-telsim"), ms=ms, telescope="meerkat")
+    recipe.add_step("sim", get_runtime("simms-telsim"), ms=ms, telescope="meerkat")
     recipe.add_step("uvw", writer, ms=ms)
-    recipe.add_step("flag", registry.get("aoflagger"), msname=ms)
+    recipe.add_step("flag", get_runtime("aoflagger"), msname=ms)
     plan = plan_recipe_accesses(recipe, {"ms": tmp_path / "sim.ms"}, workspace=tmp_path)
     assert plan.accesses["uvw"][0].declaration.columns.write == ("UVW",)
     assert "UVW" in plan.accesses["flag"][0].declaration.columns.read
@@ -418,19 +419,19 @@ def test_a_simulate_calibrate_image_chain_plans_in_order(no_closure, tmp_path):
     ordered behind the one before it."""
     recipe = Recipe(name="simulate-calibrate-image", inputs_model=_MS, outputs_model=_Empty)
     recipe.add_step(
-        "sim", registry.get("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
+        "sim", get_runtime("simms-telsim"), ms=InputRef(field="ms"), telescope="meerkat"
     )
-    recipe.add_step("sky", registry.get("simms-skysim"), ms=OutputRef(step="sim", field="ms"))
+    recipe.add_step("sky", get_runtime("simms-skysim"), ms=OutputRef(step="sim", field="ms"))
     recipe.add_step(
         "calibrate",
-        registry.get("cubical"),
+        get_runtime("cubical"),
         data_ms=OutputRef(step="sky", field="ms"),
         out_mode="sc",
         sol_jones=["G"],
     )
     recipe.add_step(
         "image",
-        registry.get("wsclean"),
+        get_runtime("wsclean"),
         ms=[OutputRef(step="calibrate", field="data_ms")],
         column="CORRECTED_DATA",
         prefix="img",

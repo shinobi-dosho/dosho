@@ -34,8 +34,9 @@ dev = [
     # Synthetic WSClean products exercise real FITS validation in CI.
     "astropy>=7.2,<9",
 ]
-# Documentation build (Sphinx + Furo + autodoc). `uv sync --group docs`.
+# Documentation builds inspect definitions and Python signatures without Shinobi.
 docs = [
+    "pydantic>=2.14",
     "sphinx>=7.2",
     "furo>=2024.1",
     "sphinx-copybutton>=0.5",

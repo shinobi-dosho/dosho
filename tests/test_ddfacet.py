@@ -5,13 +5,12 @@ shape (case-preserved, bracketed list values) -- not exhaustive
 per-field coverage, given the scale (273 fields).
 """
 
+from shinobi.cabs import get as get_runtime
 from shinobi.policies import build_argv
-
-import dosho
 
 
 def test_ddfacet_registered_and_uses_pinned_image():
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     assert cab.name == "ddfacet"
     assert cab.command == "DDF.py"
     from dosho import images
@@ -22,11 +21,11 @@ def test_ddfacet_registered_and_uses_pinned_image():
 def test_ddfacet_full_field_count():
     # 274 real DefaultParset.cfg options, minus 1 #no_cmdline:1 (Misc.ParsetVersion),
     # plus 1 for the positional `parset` field (not a DefaultParset.cfg option itself)
-    assert len(dosho.get("ddfacet").inputs_model.model_fields) == 274
+    assert len(get_runtime("ddfacet").inputs_model.model_fields) == 274
 
 
 def test_ddfacet_case_preserved_flags_and_bracketed_ms_list():
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     argv = build_argv(
         cab,
         {
@@ -48,18 +47,18 @@ def test_ddfacet_case_preserved_flags_and_bracketed_ms_list():
 
 def test_ddfacet_no_cmdline_only_field_is_excluded():
     # Misc.ParsetVersion is #no_cmdline:1 in the real .cfg -- can't be set via CLI
-    assert "misc_parset_version" not in dosho.get("ddfacet").inputs_model.model_fields
+    assert "misc_parset_version" not in get_runtime("ddfacet").inputs_model.model_fields
 
 
 def test_ddfacet_parset_is_a_bare_head_positional():
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     argv = build_argv(cab, {"parset": "base.parset", "image_n_pix": 6000})
     # DDF.py [parset file] <options> -- bare value before every --flag, no --Parset flag
     assert argv == ["DDF.py", "base.parset", "--Image-NPix", "6000"]
 
 
 def test_ddfacet_parset_omitted_when_not_given():
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     argv = build_argv(cab, {"image_n_pix": 6000})
     assert "base.parset" not in argv
     assert argv == ["DDF.py", "--Image-NPix", "6000"]
@@ -72,7 +71,7 @@ def test_ddfacet_read_side_paths_are_path_dtypes_not_str():
     # never workspace-anchored. Classified from each option's own .cfg help.
     from shinobi.steps.schema import path_fields
 
-    assert path_fields(dosho.get("ddfacet").inputs_model) == {
+    assert path_fields(get_runtime("ddfacet").inputs_model) == {
         "parset",
         "data_ms",
         "predict_from_image",
@@ -98,7 +97,7 @@ def test_ddfacet_write_targets_and_column_names_stay_str():
     # DDESolutions-DDSols is a name resolved against SolsDir, not a path.
     from shinobi.steps.schema import path_fields
 
-    paths = path_fields(dosho.get("ddfacet").inputs_model)
+    paths = path_fields(get_runtime("ddfacet").inputs_model)
     for field in (
         "data_cache_dir",
         "cache_dir_wisdom_fftw",
@@ -117,7 +116,7 @@ def test_ddfacet_ms_is_a_strict_list_writer():
     # explicit DatasetAccess instead of Python-object mutability.
     from shinobi.steps.schema import Mutability, mutated_path_fields
 
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     assert cab.mutability_of("data_ms") is Mutability.IMMUTABLE
     assert mutated_path_fields(cab) == {"data_ms"}
     # a read-side path keeps its content hash -- swapping the mask really is
@@ -127,7 +126,7 @@ def test_ddfacet_ms_is_a_strict_list_writer():
 
 def test_ddfacet_dtype_changes_do_not_touch_argv_shape():
     argv = build_argv(
-        dosho.get("ddfacet"),
+        get_runtime("ddfacet"),
         {"data_ms": ["/x.ms"], "mask_external": "/m.fits", "dde_solutions_sols_dir": "/sols"},
     )
     assert "--Data-MS" in argv and "[/x.ms]" in argv
@@ -143,7 +142,7 @@ def test_ddfacet_declares_the_products_a_pipeline_wires(tmp_path, monkeypatch):
     from shinobi.steps.dispatch import _prepare_inputs
 
     monkeypatch.chdir(tmp_path)
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     inputs = _prepare_inputs(cab, {"data_ms": [tmp_path / "obs.ms"], "output_name": "run1"})
     capture = ProductCapture(cab, inputs, tmp_path)
     for suffix in (
@@ -177,7 +176,7 @@ def test_ddfacet_declares_the_products_a_pipeline_wires(tmp_path, monkeypatch):
 def test_ddfacet_harvest_covers_the_letter_code_family():
     # What the declared fields cannot enumerate: `Output-Images` codes choose at
     # run time which products exist, so the rest ride on a glob.
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     assert cab.harvest == ["{output_name}.*"]
     assert cab.inputs_model.model_fields["output_name"].default == "image"
     assert cab.sandbox is None
@@ -194,7 +193,7 @@ def test_ddfacet_experimental_marker_names_only_the_wiring_residual():
     # the residual is a *wiring* limit now, not a lost write
     assert "cycle" in reason
     assert "qualification" in reason.lower()
-    assert dosho.get("ddfacet").info.startswith("EXPERIMENTAL:")
+    assert get_runtime("ddfacet").info.startswith("EXPERIMENTAL:")
 
 
 def test_ddfacet_get_warns_once():
@@ -205,8 +204,8 @@ def test_ddfacet_get_warns_once():
     registry._warned_experimental.discard("ddfacet")
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        dosho.get("ddfacet")
-        dosho.get("ddfacet")
+        registry.get("ddfacet")
+        registry.get("ddfacet")
     assert len(caught) == 1
     assert "EXPERIMENTAL" in str(caught[0].message)
 
@@ -215,7 +214,7 @@ def test_ddfacet_scratch_targets_are_declared_but_never_harvested():
     """A cache is a write target that must be mounted and must never follow the
     products into the caller's workspace -- `Scope.scratch`, not an output.
     """
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     assert cab.scratch == [
         "{data_cache_dir}/*",
         "{cache_dir_wisdom_fftw}/*",
@@ -233,7 +232,7 @@ def test_ddfacet_scratch_defaults_are_concrete_and_outside_home():
     from shinobi.steps.dispatch import _prepare_inputs
     from shinobi.steps.schema import declared_output_dirs
 
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     inputs = _prepare_inputs(cab, {"data_ms": ["obs.ms"], "output_name": "img/run1"})
     dirs = {str(d) for d, _ in declared_output_dirs(cab, inputs)}
     assert {"img", ".ddfacet-cache", ".ddfacet-wisdom"} <= dirs
@@ -254,7 +253,7 @@ def _default_argv(**inputs):
     """
     from shinobi.steps.dispatch import _prepare_inputs
 
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     return build_argv(cab, _prepare_inputs(cab, inputs))
 
 
@@ -270,7 +269,7 @@ def test_ddfacet_scratch_defaults_cannot_be_disabled_with_none():
 
     for field in ("data_cache_dir", "cache_dir_wisdom_fftw", "montblanc_log_file"):
         with pytest.raises(ValidationError):
-            dosho.get("ddfacet").inputs_model(data_ms=["obs.ms"], **{field: None})
+            get_runtime("ddfacet").inputs_model(data_ms=["obs.ms"], **{field: None})
 
 
 def test_ddfacet_requires_explicit_ms_even_with_a_parset():
@@ -278,7 +277,7 @@ def test_ddfacet_requires_explicit_ms_even_with_a_parset():
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError, match="data_ms"):
-        dosho.get("ddfacet").inputs_model(parset="hidden-ms.parset")
+        get_runtime("ddfacet").inputs_model(parset="hidden-ms.parset")
 
 
 def test_ddfacet_hmp_scales_preserves_one_item_lists():
@@ -287,7 +286,7 @@ def test_ddfacet_hmp_scales_preserves_one_item_lists():
     Omitted scales still use the native default. Explicit values must not
     become scalars after command-line serialization.
     """
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     assert cab.inputs_model.model_fields["hmp_scales"].default is None
     assert "--HMP-Scales" not in _default_argv(data_ms=["/obs.ms"], output_name="img/run1")
     # Explicit lists use the bracket form accepted by ReadCFG.
@@ -312,7 +311,7 @@ def test_ddfacet_bools_never_render_as_a_bare_flag():
 
 
 def test_ddfacet_boolean_tokens_and_singleton_list_match_its_parser():
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     argv = build_argv(cab, {"output_clobber": False, "data_sort": True, "hmp_scales": [0]})
     assert argv[argv.index("--Output-Clobber") + 1] == "0"
     assert argv[argv.index("--Data-Sort") + 1] == "1"

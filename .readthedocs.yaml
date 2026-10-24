@@ -11,7 +11,7 @@ sphinx:
   configuration: docs/conf.py
   fail_on_warning: false
 
-# Validation is local; docs/requirements.txt explicitly supplies the execution adapter.
+# Catalogue generation inspects Dosho definitions without the execution framework.
 python:
   install:
     - method: pip

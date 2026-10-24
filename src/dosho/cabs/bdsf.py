@@ -1,4 +1,4 @@
-"""`@shinobi.pystep` wrapper for PyBDSF's source-finding catalog workflow
+"""`@dosho.pystep` wrapper for PyBDSF's source-finding catalog workflow
 (`bdsf.process_image` + `Image.write_catalog`,
 https://github.com/lofar-astron/PyBDSF).
 
@@ -7,7 +7,7 @@ plain Python functions taking `**kwargs` validated against an internal
 options registry (`bdsf.opts.Opts`, 158 traits), not a fixed signature --
 cult-cargo's own `bdsf.yml` is `flavour: python-code` for exactly this
 reason. Per `AGENTS.md` ("never import/execute an external Cab's own
-schema-generation code"), this is a `@shinobi.pystep` instead (matching
+schema-generation code"), this is a `@dosho.pystep` instead (matching
 `casatasks.py`), calling `ctx.import_func("process_image", "bdsf")` inside
 the running container.
 
@@ -30,9 +30,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import shinobi
 from pydantic import BaseModel
 
+import dosho
 from dosho import images
 
 
@@ -44,7 +44,7 @@ class BdsfCatalogOutputs(BaseModel):
     outdir: Path
 
 
-@shinobi.pystep(name="bdsf-catalog", image=images.BDSF, write_paths=["outfile_gaul", "outfile_srl"])
+@dosho.pystep(name="bdsf-catalog", image=images.BDSF, write_paths=["outfile_gaul", "outfile_srl"])
 def catalog(
     ctx,
     image: Path,

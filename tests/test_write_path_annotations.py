@@ -30,6 +30,7 @@ import warnings
 
 import pytest
 import yaml
+from shinobi.cabs import adapt_definition, get as get_runtime
 from shinobi.steps.schema import (
     Cab,
     ParamMeta,
@@ -233,13 +234,13 @@ def _all_scopes() -> dict[str, object]:
         warnings.simplefilter("ignore")  # experimental-cab warnings
         scopes = {}
         for name in registry.list_cabs():
-            cab = registry.get(name)
+            cab = get_runtime(name)
             scopes[name] = getattr(cab, "step", cab)
         return scopes
 
 
 def _binary_cabs() -> list[Cab]:
-    return [c for n in C.__all__ if isinstance(c := getattr(C, n), Cab)]
+    return [c for n in C.__all__ if isinstance(c := adapt_definition(getattr(C, n)), Cab)]
 
 
 def test_every_marked_field_is_accounted_for():
@@ -362,10 +363,10 @@ def test_a_documents_marker_survives_its_own_output_declaration():
     exactly these fields (fixed in ninja #93). Pin it from this side too: the
     marker is worth nothing if it does not survive loading.
     """
-    doc_destinations = [(n, f) for n, f in sorted(DESTINATIONS) if isinstance(registry.get(n), Cab)]
+    doc_destinations = [(n, f) for n, f in sorted(DESTINATIONS) if isinstance(get_runtime(n), Cab)]
     assert doc_destinations, "no document cab carries a destination marker any more"
     for name, field in doc_destinations:
-        assert field in write_path_fields(registry.get(name)), (
+        assert field in write_path_fields(get_runtime(name)), (
             f"{name}.{field}: write_path lost while loading the document"
         )
 

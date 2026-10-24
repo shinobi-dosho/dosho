@@ -20,7 +20,7 @@ shows up in three places:
 The warning fires once per name per process, from :func:`dosho.get` -- and so
 also from a direct ``from dosho.cabs import ddfacet``, which resolves through
 the same function. It is a ``UserWarning``, so ``python -W ignore::UserWarning``
-or a :func:`warnings.catch_warnings` block silences it; the reason is carried on
+or a :class:`warnings.catch_warnings` block silences it; the reason is carried on
 the cab's own ``info`` as well, which is what reaches ``ninja cabs show`` and the
 catalog.
 

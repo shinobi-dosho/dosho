@@ -319,6 +319,19 @@ def validate_nullable(spec: dict[str, Any], *, error: type[Exception]) -> bool |
     return nullable
 
 
+def normalize_required_default(
+    required: bool,
+    default: Any,
+    *,
+    nullable: bool | None = None,
+    error: type[Exception] = ValueError,
+) -> tuple[bool, Any]:
+    """Normalize presence/default data without resolving a declared dtype."""
+    if nullable is False and default is None and not required:
+        raise error("nullable: false without a default requires required: true")
+    return required and default is None, default
+
+
 def required_field_spec(
     py_type: Any,
     required: bool,
@@ -334,6 +347,9 @@ def required_field_spec(
     needs either a default or ``required: true``. Explicit true permits null
     even when the caller must supply the field.
     """
+    required, default = normalize_required_default(
+        required, default, nullable=nullable, error=error
+    )
     if nullable is False:
         base_type = py_type
         while get_origin(base_type) is Annotated:
@@ -345,10 +361,8 @@ def required_field_spec(
             or (origin is Literal and None in get_args(base_type))
         ):
             raise error("nullable: false conflicts with an annotation accepting null")
-        if default is None and not required:
-            raise error("nullable: false without a default requires required: true")
-        return (py_type, ... if default is None else default)
-    if required and default is None:
+        return (py_type, ... if required else default)
+    if required:
         return (py_type | None if nullable is True else py_type, ...)
     return (py_type | None, default)
 

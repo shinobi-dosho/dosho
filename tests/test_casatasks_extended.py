@@ -13,8 +13,8 @@ from pathlib import Path
 from types import ModuleType
 
 import pytest
+from shinobi.cabs import adapt_definition, get as get_runtime
 
-import dosho
 from dosho import images
 from dosho.cabs.casatasks import (
     clearstat,
@@ -31,6 +31,22 @@ from dosho.cabs.casatasks import (
     uvsub,
     virtualconcat,
 )
+
+# These tests inspect the explicit runtime adapters of Dosho definitions.
+clearstat = adapt_definition(clearstat)
+delmod = adapt_definition(delmod)
+fixplanets = adapt_definition(fixplanets)
+ft = adapt_definition(ft)
+rerefant = adapt_definition(rerefant)
+rmtables = adapt_definition(rmtables)
+sdintimaging = adapt_definition(sdintimaging)
+smoothcal = adapt_definition(smoothcal)
+statwt = adapt_definition(statwt)
+tclean = adapt_definition(tclean)
+uvcontsub_old = adapt_definition(uvcontsub_old)
+uvsub = adapt_definition(uvsub)
+virtualconcat = adapt_definition(virtualconcat)
+
 
 _NEW_TASK_NAMES = [
     "accor",
@@ -83,13 +99,13 @@ _NEW_TASK_NAMES = [
 def test_all_44_new_tasks_are_registered():
     assert len(_NEW_TASK_NAMES) == 44
     for name in _NEW_TASK_NAMES:
-        resolved = dosho.get(name)
+        resolved = get_runtime(name)
         assert resolved.name == name
 
 
 def test_all_44_new_tasks_use_the_pinned_casa6_image():
     for name in _NEW_TASK_NAMES:
-        ref = dosho.get(name)
+        ref = get_runtime(name)
         assert ref.step.image == images.CASA_TASKS, name
 
 
@@ -221,7 +237,7 @@ def test_a_new_pystep_wires_into_a_recipe_like_a_cab():
         pass
 
     recipe = Recipe(name="t", inputs_model=Inputs, outputs_model=Outputs)
-    recipe.add_step("delmod", dosho.get("delmod"), vis=recipe.inputs.ms)
+    recipe.add_step("delmod", get_runtime("delmod"), vis=recipe.inputs.ms)
     assert [s.name for s in recipe.steps] == ["delmod"]
     assert recipe.steps[0].wiring == {"vis": recipe.inputs.ms}
 
@@ -264,7 +280,7 @@ class _FakeCtx:
 def test_flagdata_declares_saved_params_file_as_output(casa_logging):
     from dosho.cabs.casatasks import flagdata
 
-    body = flagdata.func.__wrapped__
+    body = flagdata
     out = body(_FakeCtx(), vis=Path("x.ms"), savepars=True, outfile="cmds.txt")
     assert out.outfile == Path("cmds.txt")
     # empty outfile saves to FLAG_CMD in the MS: no file output to declare
@@ -275,7 +291,7 @@ def test_flagdata_declares_saved_params_file_as_output(casa_logging):
 def test_flagcmd_declares_saved_params_and_plot_files_as_outputs(casa_logging):
     from dosho.cabs.casatasks import flagcmd
 
-    body = flagcmd.func.__wrapped__
+    body = flagcmd
     out = body(_FakeCtx(), vis=Path("x.ms"), action="plot", plotfile="flags.png")
     assert out.plotfile == Path("flags.png")
     assert out.outfile is None
@@ -287,7 +303,7 @@ def test_flagcmd_declares_saved_params_and_plot_files_as_outputs(casa_logging):
 def test_fluxscale_declares_listfile_as_output(casa_logging):
     from dosho.cabs.casatasks import fluxscale
 
-    body = fluxscale.func.__wrapped__
+    body = fluxscale
     kwargs = {
         "vis": Path("x.ms"),
         "caltable": Path("c.tbl"),
@@ -301,7 +317,7 @@ def test_fluxscale_declares_listfile_as_output(casa_logging):
 def test_predictcomp_declares_savefig_as_output(casa_logging):
     from dosho.cabs.casatasks import predictcomp
 
-    body = predictcomp.func.__wrapped__
+    body = predictcomp
     out = body(_FakeCtx(), objname="Jupiter", prefix=Path("jup"), savefig="amp.png")
     assert out.savefig == Path("amp.png")
     assert body(_FakeCtx(), objname="Jupiter", prefix=Path("jup")).savefig is None

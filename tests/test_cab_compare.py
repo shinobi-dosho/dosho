@@ -10,9 +10,7 @@ real cabs.
 
 from __future__ import annotations
 
-import importlib
 import itertools
-import sys
 
 import pytest
 from shinobi.steps.schema import Cab
@@ -21,26 +19,20 @@ from tests.cab_compare import FIELD_ATTRS, cab_differences, cabs_equivalent
 
 
 def _fresh_cabs() -> dict[str, Cab]:
-    """Import `dosho.cabs` from scratch, so every `Cab` is a distinct object
-    built by a distinct `create_model` call -- which is the situation the
-    migration is actually in: two builds of the same definition.
+    """Adapt each definition afresh so generated model classes are distinct.
 
-    `sys.modules` is put back exactly as found. Without that, the rest of the
-    suite inherits freshly-imported dosho modules with their module-level state
-    reset -- `images`' import-time override constants and `registry`'s
-    warned-once set both live there, and both have tests that then fail for
-    reasons having nothing to do with them.
+    Definition lookup is cached, but adaptation is deliberately explicit. There
+    is no reason to unload modules and duplicate shared schema type identities.
     """
-    saved = {m: sys.modules[m] for m in list(sys.modules) if m.startswith("dosho")}
-    try:
-        for mod in saved:
-            del sys.modules[mod]
-        pkg = importlib.import_module("dosho.cabs")
-        return {n: obj for n in pkg.__all__ if isinstance(obj := getattr(pkg, n), Cab)}
-    finally:
-        for mod in [m for m in sys.modules if m.startswith("dosho")]:
-            del sys.modules[mod]
-        sys.modules.update(saved)
+    from shinobi.cabs import adapt_definition
+
+    from dosho import registry
+
+    return {
+        name: adapt_definition(registry.get(name))
+        for name, entry in registry._index().items()
+        if "document" in entry
+    }
 
 
 @pytest.fixture(scope="module")
@@ -161,9 +153,9 @@ def test_differences_name_the_field_that_differs(pair):
 
 
 def _cab():
-    import dosho.cabs as C
+    from shinobi.cabs import get
 
-    return C.cubical
+    return get("cubical")
 
 
 CAB_MUTATIONS = {

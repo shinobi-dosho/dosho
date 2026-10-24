@@ -42,6 +42,7 @@ rather define cabs in Python than maintain documents.
 
 .. autofunction:: dosho._builder.define_cab
 
+
 Tools
 --------
 
@@ -63,8 +64,7 @@ import and inspect them directly, e.g.:
     $ ninja cabs show wsclean
 
 .. automodule:: dosho.cabs
-   :members:
-   :imported-members:
+   :no-members:
 
 Standalone validation
 ---------------------
@@ -73,6 +73,10 @@ These APIs require ``dosho[validation]`` and never import Shinobi. A
 ``CabSpec`` is inert document data; ``CompiledCab`` contains validated
 parameter models and formatting metadata, rather than an executable step.
 See :doc:`../concepts/validation` for the boundary and a complete example.
+
+.. autofunction:: dosho.validation.build_document
+
+.. autofunction:: dosho.validation.describe_cab
 
 .. autofunction:: dosho.validation.parse_document
 
@@ -88,6 +92,15 @@ See :doc:`../concepts/validation` for the boundary and a complete example.
    :members:
 
 .. autoclass:: dosho.validation.CompiledCab
+   :members:
+
+.. autoclass:: dosho.validation.compiled.CompiledParamMeta
+   :members:
+
+.. autoclass:: dosho.validation.description.CabDescription
+   :members:
+
+.. autoclass:: dosho.validation.description.ParameterDescription
    :members:
 
 .. autoclass:: dosho.validation.TypeBinding

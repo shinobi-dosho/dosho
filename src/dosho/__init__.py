@@ -22,27 +22,19 @@ try:
 except PackageNotFoundError:  # pragma: no cover -- uninstalled source tree
     __version__ = "0+unknown"
 
-__all__ = ["__version__", "define_cab", "get", "images", "list_cabs"]
+__all__ = ["__version__", "define_cab", "get", "images", "list_cabs", "pystep"]
 
 
 def __getattr__(name: str):
-    """`define_cab`, imported only when asked for.
+    """Load authoring helpers only when requested.
 
-    It is the authoring helper, and it is the only thing in this package that
-    needs shinobi at import time -- `_builder` builds real `Cab` objects, so it
-    imports the schema. Importing it eagerly here made `import dosho` pull in
-    29 shinobi modules, which means a consumer that only wants dosho's cab
-    *definitions* -- to read, diff, pin, or serve them -- had to install the
-    framework that runs them.
-
-    Deferring it costs nothing: `dosho.cabs.*` reach `_builder` directly, so
-    the authoring path is unaffected, and `define_cab` still resolves through
-    `from dosho import define_cab` (PEP 562 covers that form).
-
-    `registry` and `images` are already shinobi-free at runtime -- registry's
-    shinobi imports are under `TYPE_CHECKING`, and `get()` reaches the cab
-    modules lazily. `tests/test_import_is_shinobi_free.py` pins the property.
+    Base catalogue access needs neither Pydantic nor an execution framework.
+    ``define_cab`` uses the validation extra; ``pystep`` only marks a function.
     """
+    if name == "pystep":
+        from dosho._pystep import pystep
+
+        return pystep
     if name == "define_cab":
         from dosho._builder import define_cab
 

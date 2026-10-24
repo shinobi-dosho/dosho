@@ -2,11 +2,11 @@
 (https://github.com/shinobi-dosho/fitstoolz).
 
 Like simms 3.0 (see `simms.py`), fitstoolz authors its apps **inside the
-tool itself** as `@shinobi.pystep` functions (`fitstoolz.apps.{header,
+tool itself** as `@dosho.pystep` functions (`fitstoolz.apps.{header,
 stats,slice,add_axis,remove_axis,stack}`), each with a typed outputs model
 and a module-level `runit(opts)` its click command and its pystep both
 delegate to. dosho therefore consumes them as pysteps rather than shelling
-out to the `fitstoolz` CLI -- the `@shinobi.pystep` + `ctx.import_func`
+out to the `fitstoolz` CLI -- the `@dosho.pystep` + `ctx.import_func`
 pattern `casatasks.py` documents in full: the wrappers below run *inside
 the fitstoolz container* at step-execution time, importing
 `fitstoolz.apps.<app>.runit` there and never on the host (the app modules
@@ -43,9 +43,9 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
-import shinobi
 from pydantic import BaseModel, Field
 
+import dosho
 from dosho import images
 
 
@@ -95,7 +95,7 @@ def _opts(local_vars: dict) -> SimpleNamespace:
     return SimpleNamespace(**{k: _plain(v) for k, v in local_vars.items() if k != "ctx"})
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="fitstoolz-header",
     image=images.FITSTOOLZ,
     info="Show, add, edit or remove FITS header entries.",
@@ -119,7 +119,7 @@ def header(
     return FitsOutputs(outfile=written)
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="fitstoolz-stats",
     image=images.FITSTOOLZ,
     info="Get image statistics (min, max, mean, standard deviation).",
@@ -146,7 +146,7 @@ def stats(
     return StatsOutputs(min=result.min, max=result.max, mean=result.mean, std=result.std)
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="fitstoolz-slice",
     image=images.FITSTOOLZ,
     info="Slice a FITS image along one or more axes.",
@@ -168,7 +168,7 @@ def slice_(
     return FitsOutputs(outfile=ctx.import_func("runit", "fitstoolz.apps.slice")(opts))
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="fitstoolz-add-axis",
     image=images.FITSTOOLZ,
     info="Add an axis to a FITS image.",
@@ -194,7 +194,7 @@ def add_axis(
     return FitsOutputs(outfile=ctx.import_func("runit", "fitstoolz.apps.add_axis")(opts))
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="fitstoolz-remove-axis",
     image=images.FITSTOOLZ,
     info="Remove an axis from a FITS image.",
@@ -225,7 +225,7 @@ def remove_axis(
     return FitsOutputs(outfile=ctx.import_func("runit", "fitstoolz.apps.remove_axis")(opts))
 
 
-@shinobi.pystep(
+@dosho.pystep(
     name="fitstoolz-stack",
     image=images.FITSTOOLZ,
     info="Stack FITS images along an axis.",

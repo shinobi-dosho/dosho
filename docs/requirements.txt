@@ -1,7 +1,4 @@
-# Documentation tooling and the explicit execution adapter for catalogue rendering.
-# The compatible Ninja adapter is on main pending its v0.2 beta publication.
-# For exact pair testing, install both local candidate wheels instead.
-stimela-ninja @ git+https://github.com/shinobi-dosho/stimela-ninja.git@main
+# Documentation tooling; Dosho's validation extra supplies schema inspection.
 sphinx>=7.2
 furo>=2024.1
 sphinx-copybutton>=0.5

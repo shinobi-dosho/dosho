@@ -8,7 +8,7 @@ from typing import Any
 
 from .compiled import CompiledCab as Cab, CompiledParamMeta as ParamMeta
 from .exceptions import CabLoadError
-from .modelgen import DtypeError, build_model, sanitize_unique, validate_choices
+from .modelgen import sanitize_unique, validate_choices
 
 
 def load_file(path: str | Path) -> Cab:
@@ -35,38 +35,41 @@ def loads(text: str, *, type_bindings=None) -> Cab:
     return _build_cabdef(json.loads(text), type_bindings=type_bindings)
 
 
-def _build_cabdef(spec: dict[str, Any], *, type_bindings=None) -> Cab:
+def parse_classic(text: str):
+    """Normalize classic JSON into the shared neutral document dialect."""
+    return _parse_cabdef(json.loads(text))
+
+
+def _parse_cabdef(spec):
+    from .compiled import CabSpec
+
     base = spec.get("base") or ""
-    flavour = "casa-task" if "casa" in base else "binary"
-
-    name = spec["task"]
-    fields: dict[str, tuple[str, bool, Any]] = {}
-    metas: dict[str, ParamMeta] = {}
-    seen: dict[str, str] = {}
+    fields = {}
+    seen = {}
     for param in spec.get("parameters", []):
-        field = sanitize_unique(param["name"], seen)
-        dtype, meta = _build_param(param, original=param["name"], field=field)
-        fields[field] = dtype
+        original = param["name"]
+        field = sanitize_unique(original, seen)
+        (dtype, required, default), meta = _build_param(param, original=original, field=field)
+        value = {"dtype": dtype, "required": required, "default": default}
         if meta is not None:
-            metas[field] = meta
+            value.update(meta.model_dump(mode="python", exclude_defaults=True))
+        fields[original] = value
+    return CabSpec(
+        name=spec["task"],
+        document={
+            "command": spec.get("binary", spec["task"]),
+            "info": spec.get("description"),
+            "image": base or None,
+            "flavour": "casa-task" if "casa" in base else "binary",
+            "inputs": fields,
+        },
+    )
 
-    choices = {field: meta.choices for field, meta in metas.items() if meta.choices}
 
-    try:
-        return Cab(
-            name=name,
-            command=spec.get("binary", name),
-            info=spec.get("description"),
-            image=base or None,
-            flavour=flavour,
-            inputs_model=build_model(
-                f"{name}_Inputs", fields, choices=choices, type_bindings=type_bindings
-            ),
-            outputs_model=build_model(f"{name}_Outputs", {}),
-            field_meta=metas,
-        )
-    except DtypeError as exc:
-        raise CabLoadError(f"cab {name!r}: {exc}") from exc
+def _build_cabdef(spec: dict[str, Any], *, type_bindings=None) -> Cab:
+    from .compiler import compile_cab
+
+    return compile_cab(_parse_cabdef(spec), type_bindings=type_bindings)
 
 
 def _build_param(

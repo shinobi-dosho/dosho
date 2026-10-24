@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 import yaml
 from shinobi.backends.recording import RecordingBackend
+from shinobi.cabs import get as get_runtime
 from shinobi.loaders import yaml_cab
 from shinobi.policies import build_argv
 from shinobi.products import FamilyPlan
@@ -15,12 +16,11 @@ from shinobi.sandbox import clear_stale_outputs
 from shinobi.steps import register_step_backend
 from shinobi.steps.dispatch import _dispatch
 
-import dosho
 from dosho import registry
 
 
 def _cab():
-    return dosho.get("wsclean")
+    return get_runtime("wsclean")
 
 
 def test_registered_under_its_own_name():

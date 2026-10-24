@@ -7,10 +7,9 @@ container image (KEY, version, provenance) and its input/output schema, pulled
 straight from the same objects the pipeline runs. There is no hand-maintained
 list to keep in sync.
 
-Both cab flavours are covered: a ``Cab`` (real binary tool) exposes
-``name``/``info``/``image``/``inputs_model``/``outputs_model`` directly; a
-``StepRef`` (from ``@shinobi.pystep``, e.g. a CASA task) exposes the same on its
-underlying ``.step``. ``_schema_obj`` resolves whichever it is.
+Binary definitions expose exact declared dtype labels through Dosho's public
+schema description. Marked Python functions use its shared signature helpers.
+Neither path imports or constructs a Shinobi execution object.
 """
 
 from __future__ import annotations
@@ -37,12 +36,32 @@ _SECTIONS = ("Args:", "Arguments:", "Returns:", "Yields:", "Raises:", "Parameter
 _MODULE_QUALIFIER = re.compile(r"""(?<!['"\w.])(?:[A-Za-z_]\w*\.)+(?=[A-Za-z_])""")
 
 
-def _schema_obj(cab: Any) -> Any:
-    """The schema-bearing object for a registry entry: the Cab itself, or a
-    StepRef's underlying `.step`."""
-    if getattr(cab, "inputs_model", None) is not None:
-        return cab
-    return getattr(cab, "step", cab)
+def _schema_obj(definition: Any) -> Any:
+    """Read neutral binary descriptions or trusted Python function schemas."""
+    import inspect
+    from types import SimpleNamespace
+
+    from dosho.validation import CabSpec, describe_cab
+    from dosho.validation.pyfunc import (
+        get_pystep_definition,
+        inputs_model_from_signature,
+        outputs_model_from_return,
+    )
+
+    if isinstance(definition, CabSpec):
+        return describe_cab(definition)
+    declaration = get_pystep_definition(definition)
+    if declaration is None:
+        raise TypeError("catalogue entry is not a neutral definition")
+    options = declaration.options
+    inputs, _, _ = inputs_model_from_signature(definition, options.get("write_paths") or ())
+    outputs, _ = outputs_model_from_return(definition)
+    return SimpleNamespace(
+        info=options.get("info") if options.get("info") is not None else inspect.getdoc(definition),
+        image=options.get("image"),
+        inputs_model=inputs,
+        outputs_model=outputs,
+    )
 
 
 def _summary(info: str | None) -> str:
@@ -167,18 +186,41 @@ def _image_index() -> dict[str, dict[str, str]]:
 
 def _field_table(model: Any, with_default: bool) -> list[str]:
     """A list-table of a pydantic model's fields (Field/Type[/Default]/Description)."""
-    if model is None or not model.model_fields:
+    fields = model if isinstance(model, dict) else getattr(model, "model_fields", {})
+    if not fields:
         return ["*(none)*", ""]
     widths = "25 20 15 40" if with_default else "30 25 45"
     lines = [".. list-table::", "   :header-rows: 1", f"   :widths: {widths}", ""]
     header = ["Field", "Type"] + (["Default"] if with_default else []) + ["Description"]
     lines.append("   * - " + header[0])
     lines += [f"     - {h}" for h in header[1:]]
-    for name, field in model.model_fields.items():
-        row = [f"``{name}``", f"``{_type_name(field.annotation, tuple(field.metadata))}``"]
+    for name, field in fields.items():
+        dtype = (
+            field.dtype
+            if hasattr(field, "dtype")
+            else _type_name(field.annotation, tuple(field.metadata))
+        )
+        row = [f"``{name}``", f"``{dtype}``"]
         if with_default:
-            row.append("*required*" if field.is_required() else f"``{field.default!r}``")
-        row.append(_rst_cell(field.description or ""))
+            required = field.required if hasattr(field, "required") else field.is_required()
+            row.append("*required*" if required else f"``{field.default!r}``")
+        description = field.description or ""
+        if hasattr(field, "dtype"):
+            constraints = []
+            if field.choices:
+                constraints.append(f"Choices: {field.choices!r}")
+            if field.nullable is not None:
+                constraints.append(f"Nullable: {field.nullable}")
+            for key, label in (
+                ("min_length", "Minimum length"),
+                ("max_length", "Maximum length"),
+                ("string_pattern", "Pattern"),
+            ):
+                value = getattr(field.meta, key)
+                if value is not None:
+                    constraints.append(f"{label}: {value}")
+            description = " ".join([description, *constraints]).strip()
+        row.append(_rst_cell(description))
         lines.append(f"   * - {row[0]}")
         lines += [f"     - {c}" for c in row[1:]]
     lines.append("")
@@ -234,10 +276,14 @@ def _generate(app: Any) -> None:
 
         lines.append("**Inputs**")
         lines.append("")
-        lines += _field_table(getattr(obj, "inputs_model", None), with_default=True)
+        lines += _field_table(
+            getattr(obj, "inputs", getattr(obj, "inputs_model", None)), with_default=True
+        )
         lines.append("**Outputs**")
         lines.append("")
-        lines += _field_table(getattr(obj, "outputs_model", None), with_default=False)
+        lines += _field_table(
+            getattr(obj, "outputs", getattr(obj, "outputs_model", None)), with_default=False
+        )
 
     out = Path(app.srcdir) / "reference" / "cabs.rst"
     out.parent.mkdir(parents=True, exist_ok=True)

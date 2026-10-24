@@ -51,7 +51,7 @@ def test_importing_the_image_manifest_loads_no_shinobi():
     assert _shinobi_modules_after_importing("dosho.images") == 0
 
 
-def test_define_cab_import_is_lazy_but_construction_imports_shinobi():
+def test_define_cab_import_and_construction_are_shinobi_free():
     """The other half: deferring it must not break the authoring API, and it
     must actually be the thing that was costing the import.
     """
@@ -62,14 +62,11 @@ def test_define_cab_import_is_lazy_but_construction_imports_shinobi():
 
     probe = "import dosho, sys; dosho.define_cab; assert not any(m.startswith('shinobi') for m in sys.modules); dosho.define_cab('t', 't', 'image', {}); print(len([m for m in sys.modules if m.startswith('shinobi')]))"
     out = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, check=True)
-    assert int(out.stdout.strip()) > 0
+    assert int(out.stdout.strip()) == 0
 
 
 def test_getting_a_cab_still_works():
-    """`get()` returns a real `Cab`, so it needs shinobi -- correctly. The
-    layering is about what `import dosho` costs, not about pretending the
-    objects can exist without the schema that defines them.
-    """
+    """Definition lookup needs no execution adapter."""
     import dosho
 
     assert dosho.get("breizorro").name == "breizorro"
@@ -132,17 +129,12 @@ def test_importing_dosho_cabs_works_without_shinobi():
     assert int(out.stdout.strip()) > 100
 
 
-def test_building_a_cab_without_shinobi_says_what_to_install():
-    """The failure a user actually meets. A bare ModuleNotFoundError three
-    frames deep in a loader does not tell them they need the execution adapter.
-    """
+def test_resolving_definitions_without_shinobi():
     out = _without_shinobi(
-        "import dosho.cabs\n"
-        "try:\n"
-        "    dosho.cabs.wsclean\n"
-        "except ImportError as exc:\n"
-        "    print(exc)\n"
+        "import inspect, dosho, dosho.cabs\n"
+        "from dosho.validation import CabSpec, describe_cab\n"
+        "assert isinstance(dosho.cabs.wsclean, CabSpec)\n"
+        "assert describe_cab(dosho.cabs.wsclean).inputs['ms'].dtype == 'List[MSv2]'\n"
+        "assert inspect.isfunction(dosho.get('listobs'))\n"
     )
     assert out.returncode == 0, out.stderr
-    assert "stimela-ninja" in out.stdout
-    assert "stimela-ninja" in out.stdout

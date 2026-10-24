@@ -1,3 +1,8 @@
+> Historical design record: the neutral-definition boundary supersedes the
+> runtime lookup described below. Dosho now builds cab definitions and keeps
+> pysteps as ordinary annotated functions; Shinobi adapts them at recipe use.
+> See `concepts/validation.rst` for the maintained contract.
+
 > Historical design note. Its dependency direction is superseded by the approved
 > v0.2.0b1 boundary in [validation](concepts/validation.rst).
 

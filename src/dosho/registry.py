@@ -1,24 +1,18 @@
-"""name -> `Cab`/`StepRef` map, registered under shinobi's `shinobi.cabs`
-entry-point group (see this package's `pyproject.toml`). String-keyed
-runtime lookup, for a caller that doesn't know the tool name until it
-runs (`ninja cabs list/show`, `shinobi.cabs` entry-point discovery) --
-for the write-time-known case, `from dosho.cabs import <tool>` (see
-`dosho/cabs/__init__.py`) is the more ergonomic, direct interface.
+"""Resolve neutral cab documents and marked Python functions by name.
+
+Binary definitions need Dosho's validation extra. Python step modules contain
+ordinary trusted source; importing them declares their functions without
+running their bodies. No catalogue operation imports Shinobi.
 """
 
 from __future__ import annotations
 
 import importlib
 import warnings
-from importlib import metadata
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import yaml
-
-if TYPE_CHECKING:
-    from shinobi import Cab
-    from shinobi.steps.schema import StepRef
 
 _INDEX_PATH = Path(__file__).with_name("cab_index.yaml")
 _DOCUMENT_DIR = Path(__file__).with_name("documents")
@@ -30,8 +24,7 @@ def _index() -> dict[str, dict[str, Any]]:
     """Registered name -> where its definition lives, from the maintained index.
 
     Read from a file rather than derived from `dosho.cabs.__all__`, which
-    would import every cab in the repo and, through `_builder`, shinobi
-    itself. Everything on this side of the module -- `list_cabs`,
+    would import every cab in the repo and its optional schema dependencies. Everything on this side of the module -- `list_cabs`,
     `get_document`, the experimental warning -- stays usable by a consumer
     that wants dosho's definitions without the framework that runs them.
 
@@ -126,55 +119,7 @@ def _warn_if_experimental(name: str) -> None:
     )
 
 
-def _required_shinobi() -> str:
-    """The lazy execution adapter API supported by this catalogue generation."""
-    return "stimela-ninja>=0.2.0b1,<0.3"
-
-
-def _build_document():
-    """Lazily access the execution adapter; base catalogue access stays independent.
-
-    The old dosho[run] extra is retired. Install stimela-ninja, which now
-    depends on dosho[validation], to obtain runnable Cab/StepRef objects.
-    """
-    try:
-        from shinobi.cabs import build_document
-        from shinobi.loaders.yaml_cab import CAB_ADAPTER_CONTRACT_VERSION
-
-        if CAB_ADAPTER_CONTRACT_VERSION != 1:
-            raise ImportError("unsupported Dosho cab adapter contract")
-    except ModuleNotFoundError as exc:
-        # Only shinobi's own absence means "not installed". A missing
-        # `shinobi.cabs` is a shinobi too old to have the module at all, which
-        # is the version problem below, not a missing install.
-        if exc.name != "shinobi":
-            raise _too_old(exc) from exc
-        raise ModuleNotFoundError(
-            "dosho's document cabs are built by shinobi, which is not installed. "
-            "Install it with `pip install 'stimela-ninja>=0.2.0b1,<0.3'`. dosho's cab "
-            "documents (`dosho.list_cabs`, `dosho.registry.get_document`) do not need it."
-        ) from exc
-    except ImportError as exc:
-        raise _too_old(exc) from exc
-    return build_document
-
-
-def _too_old(exc: ImportError) -> ImportError:
-    """The error for a Shinobi without the versioned Dosho validation adapter."""
-    required = _required_shinobi() or "a newer stimela-ninja"
-    try:
-        installed = metadata.version("stimela-ninja")
-    except metadata.PackageNotFoundError:  # pragma: no cover -- editable/source
-        installed = "unknown"
-    return ImportError(
-        f"dosho's document cabs need the versioned Dosho validation adapter "
-        f"(`shinobi.cabs.build_document`), which stimela-ninja {installed} does not "
-        f"have. dosho requires {required}; upgrade with `pip install -U '{required}'`. "
-        f"dosho's pysteps are unaffected."
-    )
-
-
-def get(name: str) -> Cab | StepRef:
+def get(name: str) -> Any:
     """Resolve a cab/pystep by name. Raises `KeyError` if `name` isn't
     one of this repo's entries -- the contract `shinobi.cabs.get` relies
     on to fall through to the next installed provider.
@@ -196,9 +141,9 @@ def get(name: str) -> Cab | StepRef:
         if name in _cab_cache:
             return _cab_cache[name]
         # One code path with `shinobi.cabs.get`: the same document, the same
-        # builder, the same options. A second path here would be a second
+        # neutral builder, the same options. A second path here would be a second
         # place for the two to disagree about what a cab is.
-        build_document = _build_document()
+        from .validation import build_document
 
         dialect, text = get_document(name)
         cab = build_document(dialect, text, name=name, **loader_options())

@@ -31,7 +31,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: uv sync --locked --extra validation --group dev
       - name: Independent catalogue and validation tests
-        run: uv run --no-sync pytest -q tests/test_validation.py tests/test_cli.py tests/test_images.py tests/test_image_publish_gate.py tests/test_image_publisher_cli.py tests/test_version.py
+        run: |
+          uv run --no-sync pytest -q \
+            tests/test_validation.py tests/test_registry.py tests/test_documents.py \
+            tests/test_import_is_shinobi_free.py tests/test_neutral_definitions.py \
+            tests/test_cab_catalog.py tests/test_cli.py tests/test_images.py \
+            tests/test_image_publish_gate.py tests/test_image_publisher_cli.py tests/test_version.py
       - run: uv run --no-sync ruff check .
       - run: uv run --no-sync ruff format --check .
 
@@ -94,17 +99,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --locked --extra validation --group docs
-
-      - name: Check out Shinobi for paired validation
-        uses: actions/checkout@v7
-        with:
-          repository: shinobi-dosho/stimela-ninja
-          ref: ${{ inputs.ninja-ref || 'main' }}
-          path: .work-cache/shinobi-candidate
-
-      - name: Install and verify candidate wheel pair
-        run: bash .github/scripts/install-pair.sh .work-cache/shinobi-candidate
+        run: uv sync --locked --group docs
 
       - name: Build docs
         run: uv run --no-sync sphinx-build -b html docs docs/_build/html -W --keep-going
@@ -115,6 +110,6 @@ jobs:
       - name: Check cab catalog is up to date
         run: |
           if ! git diff --exit-code docs/reference/cabs.rst; then
-            echo "::error file=docs/reference/cabs.rst::Cab catalog is stale. Regenerate with 'uv run python docs/_ext/cab_catalog.py' and commit docs/reference/cabs.rst -- or run 'git config core.hooksPath .githooks' once and the pre-commit hook keeps it fresh at commit time."
+            echo "::error file=docs/reference/cabs.rst::Cab catalog is stale. Regenerate with 'uv run --group docs python docs/_ext/cab_catalog.py' and commit docs/reference/cabs.rst -- or run 'git config core.hooksPath .githooks' once and the pre-commit hook keeps it fresh at commit time."
             exit 1
           fi

@@ -4,13 +4,12 @@ cab-level policies (stimela-ninja commit 6cb1238, added specifically to
 fix quartical's hydra-style argv shape) end to end against a real port.
 """
 
+from shinobi.cabs import get as get_runtime
 from shinobi.policies import build_argv
-
-import dosho
 
 
 def _cab():
-    return dosho.get("quartical")
+    return get_runtime("quartical")
 
 
 def test_registered_under_its_own_name():
@@ -232,7 +231,7 @@ def test_quartical_plotter_output_path_is_declared_as_a_write_target():
     # gets the directory bind-mounted.
     from shinobi.steps.schema import path_fields
 
-    cab = dosho.get("quartical-plotter")
+    cab = get_runtime("quartical-plotter")
     assert "output_path" in cab.outputs_model.model_fields
     assert "output_path" not in path_fields(cab.inputs_model)
     assert "output_path" in path_fields(cab.outputs_model)

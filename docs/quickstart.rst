@@ -31,14 +31,15 @@ registered names:
     listobs = dosho.get("listobs")
     dosho.list_cabs()  # every registered name
 
-``wsclean`` here is a real :class:`~shinobi.Cab` -- ``listobs`` is a
-``StepRef`` (from :func:`@shinobi.pystep <shinobi.pystep>`, since CASA
-tasks are Python-package calls with no standalone binary). Both are
-first-class for :meth:`Recipe.add_step <shinobi.Recipe.add_step>`; a
-pipeline author doesn't need to know or care which shape a given tool is.
+``wsclean`` is a :class:`~dosho.validation.CabSpec` containing its composed
+document; ``listobs`` is an ordinary annotated Python function marked with
+``@dosho.pystep``. Looking up either needs ``dosho[validation]`` and no
+Shinobi installation. Both are accepted by :meth:`Recipe.add_step
+<shinobi.Recipe.add_step>`, which adapts them for execution.
 
-Both of these build a cab, so both need the ``stimela-ninja`` execution adapter (see
-:doc:`installation`).
+For an explicit runtime object, use ``shinobi.cabs.get(name)`` or
+``shinobi.cabs.adapt_definition(definition)``. That is the interface for
+callers needing runtime attributes such as ``inputs_model`` or ``step``.
 
 Read a definition without shinobi
 ----------------------------------
@@ -110,8 +111,8 @@ all accesses to a strict dataset must use compatible declared contracts.
 Inspect a tool from the command line
 --------------------------------------
 
-Every registered ``dosho`` tool is discoverable through shinobi's own
-``ninja`` CLI, without importing anything:
+Every registered ``dosho`` tool is discoverable through Shinobi's own
+``ninja`` CLI:
 
 .. code-block:: console
 

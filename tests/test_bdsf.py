@@ -14,10 +14,13 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel
 from shinobi import Recipe
+from shinobi.cabs import adapt_definition, get as get_runtime
 
-import dosho
 from dosho import images
 from dosho.cabs.bdsf import catalog
+
+# These tests inspect the explicit runtime adapters of Dosho definitions.
+catalog = adapt_definition(catalog)
 
 
 def test_bdsf_catalog_uses_the_pinned_bdsf_image():
@@ -37,7 +40,7 @@ def test_bdsf_image_pins_numpy_below_2():
 
 
 def test_bdsf_catalog_resolves_through_the_registry():
-    resolved = dosho.get("bdsf-catalog")
+    resolved = get_runtime("bdsf-catalog")
     assert resolved.name == "bdsf-catalog"
 
 
@@ -69,7 +72,10 @@ def test_bdsf_catalog_wires_into_a_recipe_like_a_cab():
 
     recipe = Recipe(name="t", inputs_model=Inputs, outputs_model=Outputs)
     recipe.add_step(
-        "catalog", dosho.get("bdsf-catalog"), image=recipe.inputs.image, outfile_srl=Path("out.srl")
+        "catalog",
+        get_runtime("bdsf-catalog"),
+        image=recipe.inputs.image,
+        outfile_srl=Path("out.srl"),
     )
     assert [s.name for s in recipe.steps] == ["catalog"]
     assert recipe.steps[0].wiring == {"image": recipe.inputs.image}

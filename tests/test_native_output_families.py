@@ -5,9 +5,8 @@ import shutil
 from pathlib import Path
 
 import pytest
+from shinobi.cabs import get as get_runtime
 from shinobi.steps.dispatch import _dispatch
-
-import dosho
 
 _MS = os.environ.get("DOSHO_OUTPUT_FAMILY_TEST_MS")
 _CUBE = os.environ.get("DOSHO_SOFIA_TEST_CUBE")
@@ -32,7 +31,7 @@ def test_native_product_capture_and_cache(tmp_path, monkeypatch, name, mode):
         pytest.skip("set DOSHO_OUTPUT_FAMILY_TEST_MS and DOSHO_KILLMS_TEST_SKY_MODEL")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("SHINOBI_OWNERSHIP_REGISTRY", str(tmp_path / "ownership.json"))
-    cab = dosho.get(name).model_copy(
+    cab = get_runtime(name).model_copy(
         update={
             "backend": os.environ.get("DOSHO_OUTPUT_FAMILY_TEST_BACKEND", "docker"),
             "cache": True,

@@ -5,12 +5,11 @@ from pathlib import Path
 import pytest
 from shinobi import ProductFamily, ProductMember
 from shinobi.backends.recording import RecordingBackend
+from shinobi.cabs import get as get_runtime
 from shinobi.exceptions import DatasetLifecycleViolationError, ParameterError
 from shinobi.fits_products import validate_fits_outputs
 from shinobi.steps import register_step_backend
 from shinobi.steps.dispatch import _dispatch
-
-import dosho
 
 
 class _Products(RecordingBackend):
@@ -57,7 +56,7 @@ CASES = [
 
 @pytest.mark.parametrize("field", ["dirty", "restored", "model", "residual", "psf"])
 def test_ddfacet_image_families_reject_non_fits_members(tmp_path, field):
-    cab = dosho.get("ddfacet")
+    cab = get_runtime("ddfacet")
     path = tmp_path / "invalid.fits"
     path.write_text("not a FITS image")
     outputs = cab.outputs_model(
@@ -83,7 +82,7 @@ def test_capture_cache_and_missing_member(
     (tmp_path / "cube.fits").write_text("input fixture")
     backend = _Products(files)
     register_step_backend("family-products", backend)
-    cab = dosho.get(name).model_copy(
+    cab = get_runtime(name).model_copy(
         update={
             "backend": "family-products",
             "cache": True,
@@ -116,7 +115,7 @@ def test_quartical_bundle_rejects_remote_store_as_a_local_directory(tmp_path, mo
     monkeypatch.chdir(tmp_path)
     backend = _Products([])
     register_step_backend("remote-gains", backend)
-    cab = dosho.get("quartical").model_copy(update={"backend": "remote-gains"})
+    cab = get_runtime("quartical").model_copy(update={"backend": "remote-gains"})
     with pytest.raises(ValueError, match="remote stores"):
         _dispatch(cab, None, input_ms_path="obs.ms", output_gain_directory="s3://bucket/gains.qc")
     assert not backend.calls
@@ -126,7 +125,7 @@ def test_killms_requires_an_owned_solutions_root():
     from pydantic import ValidationError
 
     with pytest.raises(ValidationError, match="solutions_sols_dir"):
-        dosho.get("killms").inputs_model(vis_data_ms_name="obs.ms")
+        get_runtime("killms").inputs_model(vis_data_ms_name="obs.ms")
 
 
 @pytest.mark.parametrize("sandbox", [False, True])
@@ -153,7 +152,9 @@ def test_killms_solutions_cannot_overlap_ms(tmp_path, monkeypatch, sandbox, dest
         destination = str(ms / "solutions")
     backend = _Products([])
     register_step_backend("forbidden-gains", backend)
-    cab = dosho.get("killms").model_copy(update={"backend": "forbidden-gains", "sandbox": sandbox})
+    cab = get_runtime("killms").model_copy(
+        update={"backend": "forbidden-gains", "sandbox": sandbox}
+    )
     with pytest.raises(ParameterError, match="overlaps input tree"):
         _dispatch(cab, None, vis_data_ms_name=ms, solutions_sols_dir=destination)
     assert not backend.calls
@@ -179,12 +180,12 @@ def test_killms_rejects_native_parser_path_reinterpretation(tmp_path, monkeypatc
     monkeypatch.chdir(tmp_path)
     backend = _Products([])
     register_step_backend("parser-gains", backend)
-    cab = dosho.get("killms").model_copy(update={"backend": "parser-gains"})
+    cab = get_runtime("killms").model_copy(update={"backend": "parser-gains"})
     with pytest.raises(ParameterError, match="pattern"):
         _dispatch(cab, None, vis_data_ms_name="input.ms", solutions_sols_dir=destination)
     assert not backend.calls
 
 
 def test_killms_parser_constraint_is_loaded_into_the_model():
-    cab = dosho.get("killms")
+    cab = get_runtime("killms")
     assert "pattern" in cab.inputs_model.model_json_schema()["properties"]["solutions_sols_dir"]

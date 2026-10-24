@@ -1,7 +1,6 @@
 """Python cab authoring over the same static compiler used by documents.
 
-Importing this module needs only Dosho's validation extra. The execution
-adapter is imported lazily when a runnable cab is requested.
+Importing this module needs only Dosho's validation extra. It returns neutral definitions that execution frameworks can adapt.
 """
 
 from __future__ import annotations
@@ -53,17 +52,12 @@ def define_cab(
     scratch=None,
     experimental=None,
 ):
-    """Build a runnable cab from raw names and (dtype, required, default[, meta]).
+    """Build a neutral cab definition from raw names and (dtype, required, default[, meta]).
 
     Raw names are sanitized by the shared compiler. Metadata, nullability,
     choices, and write declarations have exactly the document semantics.
-    Install stimela-ninja for this lazy execution bridge; dosho[run] is retired.
+    Shinobi adapts the returned definition when a recipe binds it.
     """
-    from .registry import _build_document
-
-    _build_document()  # Verify the execution adapter generation before constructing.
-    from shinobi.loaders.yaml_cab import _compile
-
     from .validation.compiled import CabSpec
 
     unknown = sorted(set(input_mutability or {}) - set(fields))
@@ -111,4 +105,4 @@ def define_cab(
     # Python authors are trusted source, as are their typed defaults and
     # implicit values. Do not send those through the untrusted JSON parser.
     # Compilation still uses the identical parameter and metadata algorithms.
-    return _compile(CabSpec.model_construct(name=name, document=document, images={}))
+    return CabSpec.model_construct(name=name, document=document, images={})

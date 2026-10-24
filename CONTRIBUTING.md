@@ -13,7 +13,7 @@ Everyone taking part is expected to follow the
 ## Scope and philosophy
 
 Every tool must contain a single executable, a Cab's `command`
-or a `@shinobi.pystep` function. No other tool attribute/section
+or a `@dosho.pystep` function. No other tool attribute/section
 will be executed, i.e, no `exec()/eval()` executions or
 dynamic parameter creation at loadtime. Tools must be fully defined
 when they are authored. The `ParamPattern` construct should be more
@@ -45,7 +45,8 @@ The project uses [uv](https://docs.astral.sh/uv/). `stimela-ninja` is
 an explicit candidate installation. Dosho's independent lock has no Shinobi
 or Git-source dependency. See [installation](https://dosho.readthedocs.io/en/latest/installation.html) for the
 candidate wheel-pair procedure. After installing the pair, use `uv run --no-sync`
-for integration tests and docs so sync does not remove the explicit adapter.
+for integration tests so sync does not remove the explicit adapter. Documentation
+builds inspect definitions and require no Shinobi installation.
 
 ### The pre-commit hook
 
@@ -103,14 +104,11 @@ from `.github/workflows/ci.yml` after `uv sync --locked --extra validation
 
 ## Documentation
 
-The build imports both `dosho` and shinobi -- autodoc needs the first,
-the cab-catalog extension builds every cab with the second -- so it needs
-the `validation` extra plus an explicit Shinobi installation too:
+The build reads Dosho cab declarations and Python function annotations.
+The docs group supplies all dependencies; Shinobi is not needed:
 
 ```bash
-uv sync --locked --extra validation --group docs
-# Install the explicit candidate pair as described in docs/installation.rst.
-uv run --no-sync sphinx-build -b html docs docs/_build/html -W --keep-going
+uv run --python 3.12 --locked --group docs sphinx-build -E -n -W --keep-going -b html docs docs/_build/html
 open docs/_build/html/index.html
 ```
 
@@ -126,8 +124,8 @@ CI builds with `-W`, so a warning is a failure.
    (e.g. "Closes #12").
 4. **CI must be green.** The independent `core` job tests catalogue/validation
    and lint without Shinobi. Every push to `main` and every PR also runs the
-   full paired suite on Python 3.11/3.12 and renders docs against Shinobi
-   `main`. Reusable and manually dispatched CI accept a `ninja-ref` override
+   full paired suite on Python 3.11/3.12 against Shinobi `main`. The separate
+   docs job builds without Shinobi. Reusable and manually dispatched CI accept a `ninja-ref` override
    for a specific branch, tag, or commit. `publish.yml` reuses this complete
    CI workflow, so core tests, paired tests, and docs must pass before upload.
 

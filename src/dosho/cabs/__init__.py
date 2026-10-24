@@ -1,25 +1,14 @@
-"""Every tool dosho provides, by name.
+"""Every neutral tool definition Dosho provides, by exported name.
 
-`from dosho.cabs import wsclean` gives you the `Cab`; `from dosho.cabs import
-listobs` gives you the pystep `StepRef`. Both are first-class for
-`Recipe.add_step`, and a pipeline author does not need to know which one a
-given tool is.
+``from dosho.cabs import wsclean`` returns a ``CabSpec``; ``listobs`` is an
+ordinary function marked with ``@dosho.pystep``. Shinobi's recipe entry points
+adapt either shape for execution. Definition lookup never imports Shinobi.
 
-Nothing is imported eagerly. A name resolves on first access, through
-`dosho.registry.get` -- the same path `shinobi.cabs.get` takes -- so there is
-one answer to "what is this tool" and one place for it to be wrong. Repeated
-access returns the same object, as it did when these were module-level
-assignments.
-
-That laziness is also what makes shinobi optional. Building a `Cab` from its
-document, or importing a pystep, needs the schema; *naming* one does not. So
-`import dosho.cabs` costs nothing and works without shinobi installed, and
-only attribute access requires an explicit `stimela-ninja` installation.
-
-For runtime, string-keyed lookup -- the CLI, `shinobi.cabs` entry-point
-discovery -- use `dosho.get(name)` instead. Same objects, keyed by registered
-name (`msutils-addcol`) rather than by the attribute this module exports it
-as (`addcol`).
+Nothing is imported eagerly. First access resolves through ``dosho.get`` and
+caches the definition, so repeated access returns the same object. Importing
+this namespace needs neither Pydantic nor Shinobi; resolving definitions needs
+``dosho[validation]``. ``dosho.get(name)`` uses registered names such as
+``msutils-addcol`` instead of their exported attributes such as ``addcol``.
 """
 
 from __future__ import annotations
@@ -31,14 +20,7 @@ def __getattr__(name: str):
     registered = registered_name_for_attr(name)
     if registered is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    try:
-        obj = get(registered)
-    except ImportError as exc:  # shinobi absent
-        raise ImportError(
-            f"dosho.cabs.{name} needs stimela-ninja, which is not installed. "
-            "dosho ships its cab definitions without it -- install `stimela-ninja>=0.2.0b1,<0.3` "
-            "to build and run them."
-        ) from exc
+    obj = get(registered)
     globals()[name] = obj
     return obj
 

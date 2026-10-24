@@ -13,10 +13,10 @@ installs; the MSUTILS `dev:` entry in images.yaml tracks `main`.
 
 import pytest
 from pydantic import ValidationError
+from shinobi.cabs import get as get_runtime
 from shinobi.policies import build_argv
 from shinobi.steps.schema import Mutability
 
-import dosho
 from dosho import images
 
 MSUTILS_CABS = [
@@ -59,13 +59,13 @@ IN_PLACE = [
 
 
 def argv(name: str, params: dict) -> list[str]:
-    cab = dosho.get(name)
+    cab = get_runtime(name)
     return build_argv(cab, cab.inputs_model(**params).model_dump())
 
 
 @pytest.mark.parametrize("name", MSUTILS_CABS)
 def test_every_cab_is_on_the_msutils_image_and_calls_a_real_subcommand(name):
-    cab = dosho.get(name)
+    cab = get_runtime(name)
     assert cab.image == images.MSUTILS
     script, *subcommand = cab.command.split()
     assert script == ("gainutils" if name.startswith("gainutils-") else "msutils")
@@ -79,7 +79,7 @@ def test_an_ms_changed_in_place_is_declared_mutable(name):
     flag version) it added is thrown away with it -- the tool succeeds and the
     pipeline sees nothing.
     """
-    cab = dosho.get(name)
+    cab = get_runtime(name)
     if name == "msutils-flags-delete":
         assert cab.dataset_accesses[0].exclusive and cab.dataset_accesses[0].mode.value == "read"
     else:
@@ -87,7 +87,7 @@ def test_an_ms_changed_in_place_is_declared_mutable(name):
 
 
 def test_flags_backup_reserves_associated_ms_exclusively():
-    cab = dosho.get("msutils-flags-backup")
+    cab = get_runtime("msutils-flags-backup")
     assert cab.mutability_of("ms") is Mutability.IMMUTABLE
     assert "ms" not in cab.outputs_model.model_fields
     assert cab.dataset_accesses[0].mode.value == "read"
@@ -179,7 +179,7 @@ def test_subset_and_average_carry_binning_and_reindex():
         {"ms": "obs.ms", "outms": "avg.ms", "time_bin": 8.0, "chan_bin": 4, "reindex": True},
     )
     assert "--time-bin" in tokens and "--chan-bin" in tokens and "--reindex" in tokens
-    subset = dosho.get("msutils-subset").inputs_model.model_fields
+    subset = get_runtime("msutils-subset").inputs_model.model_fields
     assert {"taql", "time_bin", "chan_bin", "reindex"} <= set(subset)
 
 
@@ -187,7 +187,7 @@ def test_dashed_flags_keep_their_python_field_names():
     """`--no-pointing`/`--json-stdout` are not identifiers; the loader
     sanitises the field and remembers the real flag.
     """
-    fields = dosho.get("msutils-convert").inputs_model.model_fields
+    fields = get_runtime("msutils-convert").inputs_model.model_fields
     assert "no_pointing" in fields
     tokens = argv("msutils-convert", {"ms": "obs.ms", "outpath": "obs.ps", "no_pointing": True})
     assert "--no-pointing" in tokens
@@ -198,9 +198,9 @@ def test_convert_and_subset_declare_the_product_they_write():
     """An output named after the input that names it picks that value up, so a
     downstream step can be wired to it.
     """
-    assert set(dosho.get("msutils-convert").outputs_model.model_fields) == {"outpath"}
-    assert set(dosho.get("msutils-subset").outputs_model.model_fields) == {"outms"}
-    assert dosho.get("msutils-convert").field_meta["outpath"].write_path
+    assert set(get_runtime("msutils-convert").outputs_model.model_fields) == {"outpath"}
+    assert set(get_runtime("msutils-subset").outputs_model.model_fields) == {"outms"}
+    assert get_runtime("msutils-convert").field_meta["outpath"].write_path
 
 
 def test_taql_query_is_positional_and_the_ms_is_an_option():
@@ -235,14 +235,14 @@ def test_gainutils_choices_are_narrowed_to_the_tools_own():
     """A wrong `--statistic`/`--axis`/`--scope` is a click.Choice error at run
     time; narrowing them here fails at step construction instead.
     """
-    normalise = dosho.get("gainutils-normalise")
+    normalise = get_runtime("gainutils-normalise")
     with pytest.raises(ValidationError):
         normalise.inputs_model(gains="b.B", statistic="mode")
     assert normalise.inputs_model(gains="b.B", axis="freq", scope="block")
 
 
 def test_smooth_windows_take_a_count_or_a_physical_width():
-    smooth = dosho.get("gainutils-smooth")
+    smooth = get_runtime("gainutils-smooth")
     assert smooth.inputs_model(gains="g.qc", time_window="120s").time_window == "120s"
     assert smooth.inputs_model(gains="g.qc", freq_window=8).freq_window == 8
     tokens = argv("gainutils-smooth", {"gains": "g.qc", "time_window": "5min", "fill": True})
@@ -257,7 +257,7 @@ def test_flag_history_preserves_old_versions_beside_native_ms_path(tmp_path, san
     from shinobi.products import DirectoryBundle, FamilyPlan
     from shinobi.sandbox import ProductCapture, absolutize_path_inputs, clear_stale_outputs
 
-    cab = dosho.get("msutils-flags-backup")
+    cab = get_runtime("msutils-flags-backup")
     real_ms = tmp_path / "real.ms"
     real_ms.mkdir()
     ms = tmp_path / "obs.ms"
