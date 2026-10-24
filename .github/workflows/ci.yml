@@ -1,5 +1,7 @@
 name: CI
 
+# Temporary bootstrap for the companion neutral-dosho-adapter change.
+# Restore ninja-ref defaults and fallback to main after the companion merges.
 on:
   push:
     branches: [main]
@@ -8,12 +10,12 @@ on:
     inputs:
       ninja-ref:
         type: string
-        default: main
+        default: "8798fd170ea51f2271b0e54fdee170f977c744e8"
   workflow_dispatch:
     inputs:
       ninja-ref:
         description: Shinobi ref for paired validation (branch, tag, or commit)
-        default: main
+        default: "8798fd170ea51f2271b0e54fdee170f977c744e8"
         required: false
         type: string
 
@@ -67,7 +69,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: shinobi-dosho/stimela-ninja
-          ref: ${{ inputs.ninja-ref || 'main' }}
+          ref: ${{ inputs.ninja-ref || '8798fd170ea51f2271b0e54fdee170f977c744e8' }}
           path: .work-cache/shinobi-candidate
 
       - name: Install and verify candidate wheel pair
