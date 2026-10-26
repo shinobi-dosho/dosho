@@ -1,0 +1,104 @@
+_include: (dosho)documents/simms-skysim.yaml
+cabs:
+  simms-predict-gaul-aterm:
+    _use: cabs.simms-skysim
+    info: Unpolarized intrinsic PyBDSF Gaussian components predicted through shared
+      diagonal screens into MODEL_GAUL only.
+    inputs:
+      ascii-sky:
+        dtype: File
+        required: true
+        writable: false
+      ascii-species:
+        dtype: str
+        default: bdsf_gaul
+        implicit: bdsf_gaul
+        choices:
+        - bdsf_gaul
+        nullable: false
+      aterm-config:
+        dtype: File
+        required: true
+        writable: false
+      aterm-image:
+        dtype: File
+        required: true
+        writable: false
+        pass_to_command: false
+      column:
+        dtype: str
+        default: MODEL_GAUL
+        implicit: MODEL_GAUL
+        choices:
+        - MODEL_GAUL
+        nullable: false
+      mode:
+        dtype: str
+        default: sim
+        implicit: sim
+        choices:
+        - sim
+        nullable: false
+      smearing:
+        dtype: str
+        default: none
+        implicit: none
+        choices:
+        - none
+        nullable: false
+      no-polarisation:
+        dtype: bool
+        default: true
+        implicit: true
+        choices:
+        - true
+        nullable: false
+      beam-grid-max-gib:
+        dtype: float
+        required: true
+      primary-beam:
+        default: null
+        choices:
+        - null
+      source-schema:
+        default: null
+        choices:
+        - null
+      fits-sky:
+        default: null
+        choices:
+        - null
+      wsclean-sky:
+        default: null
+        choices:
+        - null
+      polarisation:
+        default: null
+        choices:
+        - null
+    dataset_accesses:
+    - field: ms
+      mode: write
+      columns:
+        create:
+        - MODEL_GAUL
+      allow_schema_change: true
+    derived_reads:
+      aterm_screen:
+        member: file
+        family:
+          coordinates: {}
+          rules:
+          - path: '{aterm_image}'
+            required: true
+      aterm_parset:
+        member: file
+        family:
+          coordinates: {}
+          rules:
+          - path: '{aterm_config}'
+            required: true
+    outputs:
+      model_token:
+        dtype: str
+        implicit: MODEL_GAUL

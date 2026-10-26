@@ -65,6 +65,7 @@ nitpick_ignore = [
     ("py:obj", "dosho.validation.schema.MetaT"),
     ("py:class", "annotated_types.Ge"),
     ("py:class", "ge=0"),
+    ("py:class", "strict=True"),
     ("py:class", "BaseModel"),
     ("py:class", "TypeAliasForwardRef"),
     ("py:class", "'dosho.validation.compiled.CompiledParamMeta'"),

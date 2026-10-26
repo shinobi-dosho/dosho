@@ -1220,6 +1220,166 @@ Source-find within an image (PyBDSF's `process_image`) and write a Gaussian and/
      - ``Path``
      - \-
 
+bdsf-gaul
+---------
+
+Native ASCII Gaussian components with the broad wrapper's exact process settings.
+
+:Image: ``ghcr.io/shinobi-dosho/bdsf:1.14.1-numpy1-multiarch1-d0.1.0`` (``BDSF`` 1.14.1-numpy1-multiarch1, build)
+:Source: https://github.com/lofar-astron/PyBDSF
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``image``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``outfile_gaul``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``catalog_format``
+     - ``str``
+     - ``'ascii'``
+     - \-
+   * - ``detection_image``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``thresh_isl``
+     - ``float``
+     - ``3.0``
+     - \-
+   * - ``thresh_pix``
+     - ``float``
+     - ``5.0``
+     - \-
+   * - ``rms_box``
+     - ``tuple[int, int] | None``
+     - ``None``
+     - \-
+   * - ``rms_map``
+     - ``bool | None``
+     - ``None``
+     - \-
+   * - ``adaptive_rms_box``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``trim_box``
+     - ``tuple[int, int, int, int] | None``
+     - ``None``
+     - \-
+   * - ``flagging_opts``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``flag_maxsize_bm``
+     - ``float | None``
+     - ``None``
+     - \-
+   * - ``spectralindex_do``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``polarisation_do``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``advanced_opts``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``src_ra_dec``
+     - ``list[tuple[float, float]] | None``
+     - ``None``
+     - \-
+   * - ``src_radius_pix``
+     - ``float | None``
+     - ``None``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``outfile_gaul``
+     - ``Path``
+     - \-
+
+bdsf-runtime-probe
+------------------
+
+Exercise the real container image, manager socket and blended source fit.
+
+:Image: ``ghcr.io/shinobi-dosho/bdsf:1.14.1-numpy1-multiarch1-d0.1.0`` (``BDSF`` 1.14.1-numpy1-multiarch1, build)
+:Source: https://github.com/lofar-astron/PyBDSF
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``scratch``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``receipt``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``catalog``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``expected_tmp``
+     - ``str``
+     - ``'/ninja-tmp'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``scratch``
+     - ``Path``
+     - \-
+   * - ``receipt``
+     - ``Path``
+     - \-
+   * - ``catalog``
+     - ``Path``
+     - \-
+   * - ``fitted_sources``
+     - ``int``
+     - \-
+   * - ``socket_address_bytes``
+     - ``int``
+     - \-
+
 blcal
 -----
 
@@ -6360,6 +6520,56 @@ One generic wrapper covers every `mode` (`manual`/`list`/`clip`/ `quack`/`shadow
      - ``Path | None``
      - \-
 
+flagdata-manual-msv2
+--------------------
+
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``mode``
+     - ``Literal['manual']``
+     - ``'manual'``
+     - \-
+   * - ``autocorr``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``spw``
+     - ``str``
+     - ``''``
+     - \-
+   * - ``flagbackup``
+     - ``Literal[False]``
+     - ``False``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+
 flagmanager
 -----------
 
@@ -6417,6 +6627,63 @@ Real CASA flag-version management (`mode="list"/"save"/"restore"/ "delete"/"rena
      - \-
    * - ``versionlist``
      - ``list[str] | None``
+     - \-
+
+flagmanager-save
+----------------
+
+Save flags to a preflighted fresh fixed CASA history; no retention/replay claim.
+
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``flagversions``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``versionname``
+     - ``str``
+     - *required*
+     - \-
+   * - ``merge``
+     - ``Literal['replace']``
+     - ``'replace'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+   * - ``flagversions``
+     - ``Path``
+     - \-
+   * - ``flag_digest``
+     - ``str``
+     - \-
+   * - ``version_digest``
+     - ``str``
      - \-
 
 flagms
@@ -6610,6 +6877,61 @@ flag-ms.py: manipulates flags (bitflags and legacy FLAG/FLAG_ROW) in a measureme
    * - ``export``
      - ``File``
      - Export all flags to this flag file (.gz for gzip-compressed); done after any flagging actions
+
+flagversion-restore-replace
+---------------------------
+
+Replace flags from one fixed CASA saved table using readonly casatools.
+
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``flagversions``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``versionname``
+     - ``str``
+     - *required*
+     - \-
+   * - ``expected_digest``
+     - ``str``
+     - *required*
+     - \-
+   * - ``merge``
+     - ``Literal['replace']``
+     - ``'replace'``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``vis``
+     - ``Path``
+     - \-
+   * - ``flag_digest``
+     - ``str``
+     - \-
 
 fluxscale
 ---------
@@ -8827,8 +9149,12 @@ Split/combine/regrid an MS and optionally average in channel/time.
      - ``False``
      - \-
    * - ``callib``
-     - ``str``
-     - ``''``
+     - ``Path | None``
+     - ``None``
+     - \-
+   * - ``calibration_tables``
+     - ``Path | None``
+     - ``None``
      - \-
    * - ``douvcontsub``
      - ``bool``
@@ -9737,6 +10063,55 @@ msutils sumcols: sum (or, with --subtract, difference) MS columns into a new col
      - ``MS``
      - Measurement set to operate on
 
+msutils-sumcols-msv2
+--------------------
+
+msutils sumcols: sum (or, with --subtract, difference) MS columns into a new column
+
+:Command: ``msutils sumcols``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-multiarch1-d0.1.0`` (``MSUTILS`` 3.1.0-multiarch1, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - Measurement set to operate on
+   * - ``cols``
+     - ``List[str]``
+     - *required*
+     - Columns to combine (two or more; exactly two with --subtract).
+   * - ``out``
+     - ``str``
+     - *required*
+     - Output column.
+   * - ``subtract``
+     - ``bool``
+     - ``None``
+     - Subtract the second column from the first (needs exactly 2 cols).
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - Measurement set to operate on
+
 msutils-summary
 ---------------
 
@@ -9758,6 +10133,51 @@ msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations).
      - Description
    * - ``ms``
      - ``MS``
+     - *required*
+     - Measurement set to summarise
+   * - ``json_out``
+     - ``File``
+     - ``None``
+     - Also write the summary to this JSON file.
+   * - ``quiet``
+     - ``bool``
+     - ``None``
+     - Do not print the summary.
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``json_out``
+     - ``File``
+     - Also write the summary to this JSON file.
+
+msutils-summary-msv2
+--------------------
+
+msutils summary: dump MS metadata (fields, SPWs, antennas, scans, correlations). Deprecated upstream since msutils 3.0 -- it prints a warning and keeps the legacy dict layout; use msutils-info, which also reads MSv4.
+
+:Command: ``msutils summary``
+:Image: ``ghcr.io/shinobi-dosho/msutils:3.1.0-multiarch1-d0.1.0`` (``MSUTILS`` 3.1.0-multiarch1, build)
+:Source: https://github.com/shinobi-dosho/msutils
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
      - *required*
      - Measurement set to summarise
    * - ``json_out``
@@ -11006,6 +11426,249 @@ goquartical-backup: back up a measurement set column to zarr
    * - ``zarr_dir``
      - ``Directory``
      - Directory for the backup location (not the zarr name itself; also accepts s3 URLs)
+
+quartical-msv2
+--------------
+
+Local MSv2 scalar solve/apply writer; external parsets are forbidden.
+
+:Command: ``goquartical``
+:Image: ``ghcr.io/shinobi-dosho/quartical:0.2.5-multiarch1-d0.1.0`` (``QUARTICAL`` 0.2.5-multiarch1, build)
+:Source: https://github.com/ratt-ru/QuartiCal
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``parset``
+     - ``File``
+     - ``None``
+     - Optional YAML config file to load before applying all other parameters (any bare \*.yaml/\*.yml argv token, per goquartical's own parser.py) Choices: [None]
+   * - ``input_ms_path``
+     - ``MSv2``
+     - *required*
+     - \-
+   * - ``input_ms_data_column``
+     - ``str``
+     - ``'DATA'``
+     - \-
+   * - ``input_ms_sigma_column``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``input_ms_weight_column``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``input_ms_time_chunk``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``input_ms_freq_chunk``
+     - ``str``
+     - ``'0'``
+     - \-
+   * - ``input_ms_is_bda``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``input_ms_group_by``
+     - ``List[str]``
+     - ``['SCAN_NUMBER', 'FIELD_ID', 'DATA_DESC_ID']``
+     - \-
+   * - ``input_ms_select_corr``
+     - ``List[int]``
+     - ``None``
+     - \-
+   * - ``input_ms_select_fields``
+     - ``List[int]``
+     - ``[]``
+     - \-
+   * - ``input_ms_select_ddids``
+     - ``List[int]``
+     - ``[]``
+     - \-
+   * - ``input_ms_select_uv_range``
+     - ``List[float]``
+     - ``[0, 0]``
+     - \-
+   * - ``input_model_recipe``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``input_model_beam``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``input_model_beam_l_axis``
+     - ``str``
+     - ``'X'``
+     - \-
+   * - ``input_model_beam_m_axis``
+     - ``str``
+     - ``'Y'``
+     - \-
+   * - ``input_model_invert_uvw``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``input_model_source_chunks``
+     - ``int``
+     - ``500``
+     - \-
+   * - ``input_model_apply_p_jones``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``output_gain_directory``
+     - ``str``
+     - ``'gains.qc'``
+     - \-
+   * - ``output_log_directory``
+     - ``str``
+     - ``'logs.qc'``
+     - \-
+   * - ``output_log_to_terminal``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``output_overwrite``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``output_products``
+     - ``List[str]``
+     - ``None``
+     - \-
+   * - ``output_columns``
+     - ``List[str]``
+     - ``None``
+     - \-
+   * - ``output_flags``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``output_apply_p_jones_inv``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``output_subtract_directions``
+     - ``List[int]``
+     - ``None``
+     - \-
+   * - ``output_net_gains``
+     - ``List[Any]``
+     - ``None``
+     - \-
+   * - ``output_compute_baseline_corrections``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``output_apply_baseline_corrections``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``mad_flags_enable``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``mad_flags_whitening``
+     - ``str``
+     - ``'disabled'``
+     - \-
+   * - ``mad_flags_threshold_bl``
+     - ``float``
+     - ``5``
+     - \-
+   * - ``mad_flags_threshold_global``
+     - ``float``
+     - ``10``
+     - \-
+   * - ``mad_flags_max_deviation``
+     - ``float``
+     - ``0``
+     - \-
+   * - ``mad_flags_use_off_diagonals``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``solver_terms``
+     - ``List[str]``
+     - ``['G']``
+     - \-
+   * - ``solver_iter_recipe``
+     - ``List[int]``
+     - ``[25]``
+     - \-
+   * - ``solver_propagate_flags``
+     - ``bool``
+     - ``True``
+     - \-
+   * - ``solver_robust``
+     - ``bool``
+     - ``False``
+     - \-
+   * - ``solver_threads``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``solver_convergence_fraction``
+     - ``float``
+     - ``0.99``
+     - \-
+   * - ``solver_convergence_criteria``
+     - ``float``
+     - ``1e-06``
+     - \-
+   * - ``solver_reference_antenna``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``dask_threads``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``dask_workers``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``dask_address``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``dask_scheduler``
+     - ``str``
+     - ``'threads'``
+     - \-
+   * - ``dask_scheduler_plugin``
+     - ``bool``
+     - ``True``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``gain_directory``
+     - ``ProductFamily[DirectoryBundle]``
+     - Complete local gain store, including every group, metadata file and chunk.
+   * - ``input_ms_path``
+     - ``MSv2``
+     - \-
+   * - ``gain_root_token``
+     - ``str``
+     - \-
 
 quartical-plotter
 -----------------
@@ -12979,6 +13642,614 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
    * - ``msname``
      - ``MS``
      - Name of MS file to be created
+
+simms-aterm-to-fits
+-------------------
+
+Time-dependent diagonal sky-frame Jones screens and absolute parset from one MS; requires candidate Simms a-term support.
+
+:Command: ``simms primary-beam``
+:Image: ``ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0`` (``SIMMS`` 3.0.2-multiarch1, build)
+:Source: https://github.com/shinobi-dosho/simms
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - \-
+   * - ``beam_pattern``
+     - ``str``
+     - *required*
+     - Choices: ['L', 'UHF']
+   * - ``output``
+     - ``str``
+     - *required*
+     - Absolute filename stem without .fits suffix; native FITS bytes use this exact name, parset appends .parset. Pattern: (?i)^.+(?<!\\.fits)$
+   * - ``fits_format``
+     - ``str``
+     - ``'wsclean'``
+     - Choices: ['wsclean'] Nullable: False
+   * - ``pol_basis``
+     - ``str``
+     - ``'linear'``
+     - Choices: ['linear'] Nullable: False
+   * - ``pixel_size``
+     - ``str``
+     - *required*
+     - \-
+   * - ``npix``
+     - ``int``
+     - *required*
+     - \-
+   * - ``beam_pa_step``
+     - ``float``
+     - *required*
+     - \-
+   * - ``field_id``
+     - ``int``
+     - *required*
+     - \-
+   * - ``spw_id``
+     - ``int``
+     - *required*
+     - Native Simms DATA\_DESC\_ID selection, not direct SPW row.
+   * - ``start_freq``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``chan_width``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - *required*
+     - \-
+   * - ``nworkers``
+     - ``int``
+     - ``4``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``'to-fits'``
+     - Choices: ['to-fits'] Nullable: False
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``screen``
+     - ``File``
+     - \-
+   * - ``aterm_config``
+     - ``File``
+     - \-
+
+simms-aterm-to-fits-csv
+-----------------------
+
+Shared time-dependent diagonal Jones screens from an explicit readonly analytic coefficient CSV.
+
+:Command: ``simms primary-beam``
+:Image: ``ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0`` (``SIMMS`` 3.0.2-multiarch1, build)
+:Source: https://github.com/shinobi-dosho/simms
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - \-
+   * - ``beam_pattern``
+     - ``File``
+     - *required*
+     - \-
+   * - ``output``
+     - ``str``
+     - *required*
+     - Absolute filename stem without .fits suffix; native FITS bytes use this exact name, parset appends .parset. Pattern: (?i)^.+(?<!\\.fits)$
+   * - ``fits_format``
+     - ``str``
+     - ``'wsclean'``
+     - Choices: ['wsclean'] Nullable: False
+   * - ``pol_basis``
+     - ``str``
+     - ``'linear'``
+     - Choices: ['linear'] Nullable: False
+   * - ``pixel_size``
+     - ``str``
+     - *required*
+     - \-
+   * - ``npix``
+     - ``int``
+     - *required*
+     - \-
+   * - ``beam_pa_step``
+     - ``float``
+     - *required*
+     - \-
+   * - ``field_id``
+     - ``int``
+     - *required*
+     - \-
+   * - ``spw_id``
+     - ``int``
+     - *required*
+     - Native Simms DATA\_DESC\_ID selection, not direct SPW row.
+   * - ``start_freq``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``chan_width``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - *required*
+     - \-
+   * - ``nworkers``
+     - ``int``
+     - ``4``
+     - \-
+   * - ``mode``
+     - ``str``
+     - ``'to-fits'``
+     - Choices: ['to-fits'] Nullable: False
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``screen``
+     - ``File``
+     - \-
+   * - ``aterm_config``
+     - ``File``
+     - \-
+
+simms-predict-gaul-apparent
+---------------------------
+
+Predict unpolarized apparent PyBDSF Gaussian components into MODEL_GAUL without applying another primary beam or a-term.
+
+:Command: ``simms skysim``
+:Image: ``ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0`` (``SIMMS`` 3.0.2-multiarch1, build)
+:Source: https://github.com/shinobi-dosho/simms
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - Measurement set.
+   * - ``ascii_sky``
+     - ``File``
+     - *required*
+     - Catalogue of sources. See the documentation for accepted units.
+   * - ``fits_sky``
+     - ``File``
+     - ``None``
+     - FITS file (or directory of Stokes cubes) containing the sky model. Choices: [None]
+   * - ``wsclean_sky``
+     - ``File``
+     - ``None``
+     - WSClean component list (point and Gaussian components, Stokes I). Choices: [None]
+   * - ``fits_sky_interp``
+     - ``str``
+     - ``'linear'``
+     - Interpolation method when the MS and FITS frequency grids do not match and the cube is kept. Choices: ['nearest', 'linear', 'cubic']
+   * - ``polarisation``
+     - ``bool``
+     - ``None``
+     - Enable polarised simulation. To disable it, set no\_polarisation=true. Choices: [None]
+   * - ``no_polarisation``
+     - ``bool``
+     - ``True``
+     - Disable polarised simulation (simulate Stokes I only). Choices: [True] Nullable: False
+   * - ``pol_basis``
+     - ``str``
+     - ``'linear'``
+     - Polarization basis for the simulation. Choices: ['linear', 'circular']
+   * - ``pixel_tol``
+     - ``float``
+     - ``1e-07``
+     - Minimum brightness for a pixel to be considered in direct Fourier transform.
+   * - ``fits_spectrum``
+     - ``str``
+     - ``'auto'``
+     - How the FITS sky model varies with frequency. Choices: ['auto', 'flat', 'poly', 'cube']
+   * - ``fits_spi``
+     - ``List[File]``
+     - ``None``
+     - Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
+   * - ``fits_ref_freq``
+     - ``float``
+     - ``None``
+     - Reference frequency (Hz) of an analytic FITS spectrum. Defaults to the MS band centre.
+   * - ``fits_spectrum_order``
+     - ``int``
+     - ``2``
+     - Order of the fitted log-polynomial spectrum. 1 is a plain spectral index.
+   * - ``predict_backend``
+     - ``str``
+     - ``'auto'``
+     - Backend for FITS sky model prediction. Choices: ['auto', 'dft', 'fft', 'perchan']
+   * - ``fft_precision``
+     - ``str``
+     - ``'double'``
+     - Precision of the FFT calculation. Choices: ['single', 'double']
+   * - ``do_wstacking``
+     - ``bool``
+     - ``True``
+     - Enable w-stacking. To disable it, set no\_do\_wstacking=true. Choices: [True]
+   * - ``no_do_wstacking``
+     - ``bool``
+     - ``False``
+     - Disable w-stacking for FFT visibility prediction.
+   * - ``ascii_delimiter``
+     - ``str``
+     - ``None``
+     - Delimiter used in the ascii-sky.
+   * - ``column``
+     - ``str``
+     - ``'MODEL_GAUL'``
+     - Data column for simulation. Choices: ['MODEL\_GAUL'] Nullable: False
+   * - ``nworkers``
+     - ``int``
+     - ``4``
+     - Number of workers (one per CPU).
+   * - ``row_chunks``
+     - ``int``
+     - ``10000``
+     - Maximum number of rows per chunk. Controls the row-wise task/memory granularity; the effective size is reduced when needed so every worker gets several chunks.
+   * - ``chan_chunks``
+     - ``int``
+     - ``None``
+     - Number of channels per chunk. Defaults to all channels in one chunk.
+   * - ``primary_beam``
+     - ``File``
+     - ``None``
+     - Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when --beam-jones full is selected. Choices: [None]
+   * - ``beam_band``
+     - ``str``
+     - ``'L'``
+     - Default band for JimBeam entries that omit an explicit model/CSV. Choices: ['UHF', 'L']
+   * - ``beam_pa_step``
+     - ``float``
+     - ``1.0``
+     - Spacing (degrees) of the parallactic-angle grid the beam is sampled on.
+   * - ``beam_grid_max_gib``
+     - ``float``
+     - ``4.0``
+     - Hard ceiling (GiB) on the sampled beam grid held in memory for the whole run.
+   * - ``beam_jones``
+     - ``str``
+     - ``'diagonal'``
+     - Primary-beam application: per-feed voltage or full 2x2 E-Jones. Choices: ['diagonal', 'full']
+   * - ``fits_beam_mode``
+     - ``str``
+     - ``'aterm'``
+     - Primary-beam handling for the FITS-image path: 'aterm' applies exact per-antenna a-terms in the image domain (time- and frequency-interpolated, heterogeneity-aware); 'average' multiplies the sky by a single PA-averaged power beam (legacy approximation). Choices: ['aterm', 'average']
+   * - ``aterm_freq_tol``
+     - ``float``
+     - ``0.001``
+     - Largest allowed error (in voltage-beam units, beam peak ~1) of the a-term's linear-in-frequency interpolation between knot channels. Smaller means more frequency knots; 0 or negative samples the beam at every channel.
+   * - ``telescope_name_column``
+     - ``str``
+     - ``'TELESCOPE_NAME'``
+     - ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
+   * - ``beam_l_axis``
+     - ``str``
+     - ``'-X'``
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSLAxis. Choices: ['-X', 'X']
+   * - ``beam_m_axis``
+     - ``str``
+     - ``'Y'``
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSMAxis. Choices: ['Y', '-Y']
+   * - ``field_id``
+     - ``int``
+     - ``0``
+     - Field ID.
+   * - ``spw_id``
+     - ``int``
+     - ``0``
+     - Spectral Window ID.
+   * - ``sefd``
+     - ``float``
+     - ``None``
+     - Add noise using this SEFD value.
+   * - ``seed``
+     - ``int``
+     - ``None``
+     - Random seed for the thermal noise. Omit for a non-reproducible run. The realisation also depends on the row chunking, which --nworkers feeds into, so reproducing a previous run needs the same --seed, --row-chunks and --nworkers.
+   * - ``ascii_species``
+     - ``str``
+     - ``'bdsf_gaul'``
+     - Non-simms sky model type. Choices: ['bdsf\_gaul'] Nullable: False
+   * - ``input_column``
+     - ``str``
+     - ``None``
+     - Input column (see option --mode).
+   * - ``mode``
+     - ``str``
+     - ``'sim'``
+     - Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it. Choices: ['sim'] Nullable: False
+   * - ``source_schema``
+     - ``File``
+     - ``None``
+     - Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects. Choices: [None]
+   * - ``smearing``
+     - ``str``
+     - ``'none'``
+     - Choices: ['none'] Nullable: False
+   * - ``aterm_config``
+     - ``File``
+     - ``None``
+     - Choices: [None]
+   * - ``aterm_image``
+     - ``File``
+     - ``None``
+     - Choices: [None]
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - Populated Measurement Set.
+   * - ``model_token``
+     - ``str``
+     - \-
+
+simms-predict-gaul-aterm
+------------------------
+
+Unpolarized intrinsic PyBDSF Gaussian components predicted through shared diagonal screens into MODEL_GAUL only.
+
+:Command: ``simms skysim``
+:Image: ``ghcr.io/shinobi-dosho/simms:3.0.2-multiarch1-d0.1.0`` (``SIMMS`` 3.0.2-multiarch1, build)
+:Source: https://github.com/shinobi-dosho/simms
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - Measurement set.
+   * - ``ascii_sky``
+     - ``File``
+     - *required*
+     - Catalogue of sources. See the documentation for accepted units.
+   * - ``fits_sky``
+     - ``File``
+     - ``None``
+     - FITS file (or directory of Stokes cubes) containing the sky model. Choices: [None]
+   * - ``wsclean_sky``
+     - ``File``
+     - ``None``
+     - WSClean component list (point and Gaussian components, Stokes I). Choices: [None]
+   * - ``fits_sky_interp``
+     - ``str``
+     - ``'linear'``
+     - Interpolation method when the MS and FITS frequency grids do not match and the cube is kept. Choices: ['nearest', 'linear', 'cubic']
+   * - ``polarisation``
+     - ``bool``
+     - ``None``
+     - Enable polarised simulation. To disable it, set no\_polarisation=true. Choices: [None]
+   * - ``no_polarisation``
+     - ``bool``
+     - ``True``
+     - Disable polarised simulation (simulate Stokes I only). Choices: [True] Nullable: False
+   * - ``pol_basis``
+     - ``str``
+     - ``'linear'``
+     - Polarization basis for the simulation. Choices: ['linear', 'circular']
+   * - ``pixel_tol``
+     - ``float``
+     - ``1e-07``
+     - Minimum brightness for a pixel to be considered in direct Fourier transform.
+   * - ``fits_spectrum``
+     - ``str``
+     - ``'auto'``
+     - How the FITS sky model varies with frequency. Choices: ['auto', 'flat', 'poly', 'cube']
+   * - ``fits_spi``
+     - ``List[File]``
+     - ``None``
+     - Spectral-index (and higher-order) coefficient maps, ordered c1, c2, ... Requires --fits-ref-freq.
+   * - ``fits_ref_freq``
+     - ``float``
+     - ``None``
+     - Reference frequency (Hz) of an analytic FITS spectrum. Defaults to the MS band centre.
+   * - ``fits_spectrum_order``
+     - ``int``
+     - ``2``
+     - Order of the fitted log-polynomial spectrum. 1 is a plain spectral index.
+   * - ``predict_backend``
+     - ``str``
+     - ``'auto'``
+     - Backend for FITS sky model prediction. Choices: ['auto', 'dft', 'fft', 'perchan']
+   * - ``fft_precision``
+     - ``str``
+     - ``'double'``
+     - Precision of the FFT calculation. Choices: ['single', 'double']
+   * - ``do_wstacking``
+     - ``bool``
+     - ``True``
+     - Enable w-stacking. To disable it, set no\_do\_wstacking=true. Choices: [True]
+   * - ``no_do_wstacking``
+     - ``bool``
+     - ``False``
+     - Disable w-stacking for FFT visibility prediction.
+   * - ``ascii_delimiter``
+     - ``str``
+     - ``None``
+     - Delimiter used in the ascii-sky.
+   * - ``column``
+     - ``str``
+     - ``'MODEL_GAUL'``
+     - Data column for simulation. Choices: ['MODEL\_GAUL'] Nullable: False
+   * - ``nworkers``
+     - ``int``
+     - ``4``
+     - Number of workers (one per CPU).
+   * - ``row_chunks``
+     - ``int``
+     - ``10000``
+     - Maximum number of rows per chunk. Controls the row-wise task/memory granularity; the effective size is reduced when needed so every worker gets several chunks.
+   * - ``chan_chunks``
+     - ``int``
+     - ``None``
+     - Number of channels per chunk. Defaults to all channels in one chunk.
+   * - ``primary_beam``
+     - ``File``
+     - ``None``
+     - Beam model config: a simms beam-config YAML mapping each ANTENNA telescope name to a beam model, or a Cattery/DDFacet heterogeneous-beam json (--Beam-FITSFile json form, keyed by ANTENNA.NAME) if the path ends in .json. For Cattery/DDFacet beams a circular-correlation MS may be used when --beam-jones full is selected. Choices: [None]
+   * - ``beam_band``
+     - ``str``
+     - ``'L'``
+     - Default band for JimBeam entries that omit an explicit model/CSV. Choices: ['UHF', 'L']
+   * - ``beam_pa_step``
+     - ``float``
+     - ``1.0``
+     - Spacing (degrees) of the parallactic-angle grid the beam is sampled on.
+   * - ``beam_grid_max_gib``
+     - ``float``
+     - ``4.0``
+     - Hard ceiling (GiB) on the sampled beam grid held in memory for the whole run.
+   * - ``beam_jones``
+     - ``str``
+     - ``'diagonal'``
+     - Primary-beam application: per-feed voltage or full 2x2 E-Jones. Choices: ['diagonal', 'full']
+   * - ``fits_beam_mode``
+     - ``str``
+     - ``'aterm'``
+     - Primary-beam handling for the FITS-image path: 'aterm' applies exact per-antenna a-terms in the image domain (time- and frequency-interpolated, heterogeneity-aware); 'average' multiplies the sky by a single PA-averaged power beam (legacy approximation). Choices: ['aterm', 'average']
+   * - ``aterm_freq_tol``
+     - ``float``
+     - ``0.001``
+     - Largest allowed error (in voltage-beam units, beam peak ~1) of the a-term's linear-in-frequency interpolation between knot channels. Smaller means more frequency knots; 0 or negative samples the beam at every channel.
+   * - ``telescope_name_column``
+     - ``str``
+     - ``'TELESCOPE_NAME'``
+     - ANTENNA-table column holding the per-antenna telescope/type label that maps to a beam model.
+   * - ``beam_l_axis``
+     - ``str``
+     - ``'-X'``
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's L axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSLAxis. Choices: ['-X', 'X']
+   * - ``beam_m_axis``
+     - ``str``
+     - ``'Y'``
+     - Sign convention for a Cattery/DDFacet .json primary-beam config's M axis; ignored for YAML beam configs, which specify their own axis convention. Matches DDFacet's --Beam-FITSMAxis. Choices: ['Y', '-Y']
+   * - ``field_id``
+     - ``int``
+     - ``0``
+     - Field ID.
+   * - ``spw_id``
+     - ``int``
+     - ``0``
+     - Spectral Window ID.
+   * - ``sefd``
+     - ``float``
+     - ``None``
+     - Add noise using this SEFD value.
+   * - ``seed``
+     - ``int``
+     - ``None``
+     - Random seed for the thermal noise. Omit for a non-reproducible run. The realisation also depends on the row chunking, which --nworkers feeds into, so reproducing a previous run needs the same --seed, --row-chunks and --nworkers.
+   * - ``ascii_species``
+     - ``str``
+     - ``'bdsf_gaul'``
+     - Non-simms sky model type. Choices: ['bdsf\_gaul'] Nullable: False
+   * - ``input_column``
+     - ``str``
+     - ``None``
+     - Input column (see option --mode).
+   * - ``mode``
+     - ``str``
+     - ``'sim'``
+     - Simulation mode: 'sim' creates a new column, 'add' adds to it, 'subtract' subtracts from it. Choices: ['sim'] Nullable: False
+   * - ``source_schema``
+     - ``File``
+     - ``None``
+     - Custom source schema (YAML) mapping columns in a custom sky model to the columns simms expects. Choices: [None]
+   * - ``aterm_config``
+     - ``File``
+     - *required*
+     - \-
+   * - ``aterm_image``
+     - ``File``
+     - *required*
+     - \-
+   * - ``smearing``
+     - ``str``
+     - ``'none'``
+     - Choices: ['none'] Nullable: False
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - Populated Measurement Set.
+   * - ``model_token``
+     - ``str``
+     - \-
 
 simms-primary-beam
 ------------------
@@ -15794,6 +17065,57 @@ Subtract (or, `reverse=True`, add) MODEL_DATA from/to CORRECTED_DATA, in place.
      - ``Path``
      - \-
 
+verify-saved-flag-history
+-------------------------
+
+Check saved flags against the actual prior SAVE, never against live flags.
+
+:Image: ``ghcr.io/shinobi-dosho/casa-tasks:6.7.0.31-d0.1.0`` (``CASA_TASKS`` 6.7.0.31, build)
+:Source: https://open-bitbucket.nrao.edu/scm/casa/casa6.git
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``vis``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``history``
+     - ``Path``
+     - *required*
+     - \-
+   * - ``versionname``
+     - ``str``
+     - *required*
+     - \-
+   * - ``expected_digest``
+     - ``str``
+     - *required*
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``valid``
+     - ``bool``
+     - \-
+   * - ``version_digest``
+     - ``str``
+     - \-
+
 virtualconcat
 -------------
 
@@ -16794,6 +18116,1584 @@ WSClean imager (https://wsclean.readthedocs.io)
    * - ``continued_facet_beam_model``
      - ``ProductFamily[FITSImage]``
      - Existing beam-corrected model files read and updated in continuation mode.
+
+wsclean-idg-aterm
+-----------------
+
+XX/YY-capable Stokes-I IDG imaging and prediction with one validated shared diagonal screen parset.
+
+:Command: ``wsclean``
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-noble-d0.1.0`` (``WSCLEAN`` 3.6-idg-noble, build)
+:Source: https://gitlab.com/aroffringa/wsclean
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - \-
+   * - ``prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``column``
+     - ``str``
+     - ``'DATA'``
+     - \-
+   * - ``model_column``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``model_storage_manager``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``1``
+     - Number of output channels (-channels-out); multiple channels also produce MFS images. Nullable: False
+   * - ``deconvolution_channels``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``channel_range``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``channel_division_frequencies``
+     - ``List[float]``
+     - ``None``
+     - \-
+   * - ``gap_channel_division``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``pol``
+     - ``str``
+     - ``'I'``
+     - Polarizations; case insensitive, comma separated or packed (e.g. IQUV). Choices: ['I'] Nullable: False
+   * - ``join_polarizations``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``link_polarizations``
+     - ``Union[str, List[str]]``
+     - ``None``
+     - \-
+   * - ``intervals_out``
+     - ``int``
+     - ``1``
+     - Number of output time intervals inside the selected interval. Nullable: False
+   * - ``interval``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``even_timesteps``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``odd_timesteps``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``Union[str, List[int]]``
+     - ``None``
+     - \-
+   * - ``spws``
+     - ``List[int]``
+     - ``None``
+     - \-
+   * - ``threads``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``parallel_gridding``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``parallel_reordering``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``no_work_on_master``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``channel_to_node``
+     - ``List[int]``
+     - ``None``
+     - \-
+   * - ``max_mpi_message_size``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``mem``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``abs_mem``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``log_time``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``quiet``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reorder``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_reorder``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reuse_reordered``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``save_reordered``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``update_model_required``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_update_model_required``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_dirty``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``save_first_residual``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``save_weights``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``save_uv``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reuse_psf``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``reuse_dirty``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``make_psf``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``make_psf_only``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``weight``
+     - ``Union[str, Tuple[str, float]]``
+     - ``None``
+     - \-
+   * - ``super_weight``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``mf_weighting``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_mf_weighting``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``weighting_rank_filter``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``weighting_rank_filter_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``taper_gaussian``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``taper_tukey``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``taper_inner_tukey``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``taper_edge``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``taper_edge_tukey``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``use_weights_as_taper``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``store_imaging_weights``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``size``
+     - ``Tuple[int, int]``
+     - *required*
+     - \-
+   * - ``padding``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``scale``
+     - ``Union[str, float]``
+     - *required*
+     - \-
+   * - ``predict``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``continue_``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``subtract_model``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``gridder``
+     - ``str``
+     - ``'idg'``
+     - Choices: ['idg'] Nullable: False
+   * - ``use_wgridder``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``shift``
+     - ``Tuple[str, str]``
+     - ``None``
+     - \-
+   * - ``facet_regions``
+     - ``File``
+     - ``None``
+     - Choices: [None]
+   * - ``feather_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``no_min_grid_resolution``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``min_grid_resolution``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``visibility_weighting_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``baseline_averaging``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``simulate_noise``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``simulate_baseline_noise``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``idg_mode``
+     - ``str``
+     - ``'cpu'``
+     - Choices: ['cpu'] Nullable: False
+   * - ``wstack_nwlayers``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers_factor``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers_for_size``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``wstack_grid_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``wstack_kernel_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``wstack_oversampling``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``wgridder_accuracy``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``compound_tasks``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``shared_facet_reads``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``aterm_config``
+     - ``File``
+     - *required*
+     - \-
+   * - ``grid_with_beam``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``beam_aterm_update``
+     - ``float``
+     - ``None``
+     - Choices: [None]
+   * - ``aterm_kernel_size``
+     - ``float``
+     - ``None``
+     - Choices: [None]
+   * - ``apply_facet_solutions``
+     - ``List[Union[File, str]]``
+     - ``None``
+     - Choices: [None]
+   * - ``no_solution_directions_check``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``scalar_visibilities``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``diagonal_visibilities``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``apply_facet_beam``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``facet_beam_update``
+     - ``float``
+     - ``None``
+     - Choices: [None]
+   * - ``save_aterms``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``apply_primary_beam``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``reuse_primary_beam``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``use_differential_lofar_beam``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``primary_beam_limit``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``mwa_path``
+     - ``Directory``
+     - ``None``
+     - Choices: [None]
+   * - ``save_psf_pb``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``pb_grid_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``dd_psf_grid``
+     - ``Tuple[int, int]``
+     - ``None``
+     - Choices: [None]
+   * - ``beam_model``
+     - ``str``
+     - ``None``
+     - Choices: [None]
+   * - ``beam_mode``
+     - ``str``
+     - ``None``
+     - Choices: [None]
+   * - ``beam_normalisation_mode``
+     - ``str``
+     - ``None``
+     - Choices: [None]
+   * - ``dry_run``
+     - ``bool``
+     - ``False``
+     - Choices: [False] Nullable: False
+   * - ``maxuvw_m``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``minuvw_m``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``maxuv_l``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``minuv_l``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``maxw``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``0``
+     - Maximum number of deconvolution iterations; zero performs dirty imaging.
+   * - ``nmiter``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``auto_threshold``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``abs_threshold``
+     - ``Union[str, float]``
+     - ``None``
+     - \-
+   * - ``auto_mask``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``abs_auto_mask``
+     - ``Union[str, float]``
+     - ``None``
+     - \-
+   * - ``local_rms``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``local_rms_strength``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``local_rms_window``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``local_rms_method``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``gain``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``mgain``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``join_channels``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``spectral_correction``
+     - ``Tuple[float, str]``
+     - ``None``
+     - \-
+   * - ``no_fast_subminor``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``multiscale``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``multiscale_scale_bias``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``multiscale_max_scales``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``multiscale_scales``
+     - ``List[float]``
+     - ``None``
+     - \-
+   * - ``multiscale_shape``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``multiscale_gain``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``multiscale_convolution_padding``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``asp``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_multiscale_fast_subminor``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``python_deconvolution``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``iuwt``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``iuwt_snr_test``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_iuwt_snr_test``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``moresane_ext``
+     - ``Directory``
+     - ``None``
+     - \-
+   * - ``moresane_arg``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``moresane_sl``
+     - ``List[float]``
+     - ``None``
+     - \-
+   * - ``save_source_list``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``clean_border``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``fits_mask``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``casa_mask``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``horizon_mask``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``no_negative``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``negative``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``stop_negative``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``fit_spectral_pol``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``fit_spectral_log_pol``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``force_spectrum``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``squared_channel_joining``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``parallel_deconvolution``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``deconvolution_threads``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``restore``
+     - ``Tuple[File, File, File]``
+     - ``None``
+     - \-
+   * - ``restore_list``
+     - ``Tuple[File, File, File]``
+     - ``None``
+     - \-
+   * - ``beam_size``
+     - ``Union[str, float]``
+     - ``None``
+     - \-
+   * - ``beam_shape``
+     - ``Tuple[Union[str, float], Union[str, float], Union[str, float]]``
+     - ``None``
+     - \-
+   * - ``fit_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_fit_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``beam_fitting_size``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``theoretic_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``circular_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``elliptical_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``local_rms_image``
+     - ``File``
+     - ``None``
+     - Precomputed local RMS image used for local-noise thresholding.
+   * - ``direct_ft_precision``
+     - ``str``
+     - ``None``
+     - Arithmetic precision for the direct Fourier transform gridder. Choices: ['float', 'double', 'ldouble']
+   * - ``temp_dir``
+     - ``Directory``
+     - ``None``
+     - Scratch location for temporary reordered MeasurementSets.
+   * - ``aterm_image``
+     - ``File``
+     - *required*
+     - Actual FITS file referenced by aterm-config; explicit non-argv dependency.
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``image``
+     - ``ProductFamily[FITSImage]``
+     - Image FITS products indexed by time, frequency, polarization and component.
+   * - ``dirty``
+     - ``ProductFamily[FITSImage]``
+     - Dirty FITS products indexed by time, frequency, polarization and component.
+   * - ``residual``
+     - ``ProductFamily[FITSImage]``
+     - Residual FITS products indexed by time, frequency, polarization and component.
+   * - ``model``
+     - ``ProductFamily[FITSImage]``
+     - Model FITS products indexed by time, frequency, polarization and component.
+   * - ``psf``
+     - ``ProductFamily[FITSImage]``
+     - Shared PSF FITS products indexed by time and frequency; no polarization axis.
+   * - ``source_list``
+     - ``ProductFamily[File]``
+     - Component list emitted by -save-source-list; no channel or polarization suffix.
+   * - ``continued_beam_model``
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
+   * - ``continued_facet_beam_model``
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
+   * - ``ms``
+     - ``MSv2``
+     - \-
+   * - ``image_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected image; native product, not a static image division.
+   * - ``residual_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected residual; native product, not a static image division.
+   * - ``model_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected model; native product, not a static image division.
+   * - ``beam``
+     - ``ProductFamily[FITSImage]``
+     - Native IDG scalar beam; explicit channel/MFS dependency for guarded header normalization.
+
+wsclean-msv2
+------------
+
+WSClean imager (https://wsclean.readthedocs.io)
+
+:Command: ``wsclean``
+:Image: ``ghcr.io/shinobi-dosho/wsclean:3.6-idg-noble-d0.1.0`` (``WSCLEAN`` 3.6-idg-noble, build)
+:Source: https://gitlab.com/aroffringa/wsclean
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``ms``
+     - ``MSv2``
+     - *required*
+     - \-
+   * - ``prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``column``
+     - ``str``
+     - ``'DATA'``
+     - \-
+   * - ``model_column``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``model_storage_manager``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``1``
+     - Number of output channels (-channels-out); multiple channels also produce MFS images. Nullable: False
+   * - ``deconvolution_channels``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``channel_range``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``channel_division_frequencies``
+     - ``List[float]``
+     - ``None``
+     - \-
+   * - ``gap_channel_division``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``pol``
+     - ``Union[str, List[str]]``
+     - ``'I'``
+     - Polarizations; case insensitive, comma separated or packed (e.g. IQUV). Nullable: False
+   * - ``join_polarizations``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``link_polarizations``
+     - ``Union[str, List[str]]``
+     - ``None``
+     - \-
+   * - ``intervals_out``
+     - ``int``
+     - ``1``
+     - Number of output time intervals inside the selected interval. Nullable: False
+   * - ``interval``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``even_timesteps``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``odd_timesteps``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``field``
+     - ``Union[str, List[int]]``
+     - ``None``
+     - \-
+   * - ``spws``
+     - ``List[int]``
+     - ``None``
+     - \-
+   * - ``threads``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``parallel_gridding``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``parallel_reordering``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``no_work_on_master``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``channel_to_node``
+     - ``List[int]``
+     - ``None``
+     - \-
+   * - ``max_mpi_message_size``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``mem``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``abs_mem``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``verbose``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``log_time``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``quiet``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reorder``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_reorder``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reuse_reordered``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``save_reordered``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``update_model_required``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_update_model_required``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_dirty``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``save_first_residual``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``save_weights``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``save_uv``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reuse_psf``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``reuse_dirty``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``make_psf``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``make_psf_only``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``weight``
+     - ``Union[str, Tuple[str, float]]``
+     - ``None``
+     - \-
+   * - ``super_weight``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``mf_weighting``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_mf_weighting``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``weighting_rank_filter``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``weighting_rank_filter_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``taper_gaussian``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``taper_tukey``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``taper_inner_tukey``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``taper_edge``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``taper_edge_tukey``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``use_weights_as_taper``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``store_imaging_weights``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``size``
+     - ``Tuple[int, int]``
+     - *required*
+     - \-
+   * - ``padding``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``scale``
+     - ``Union[str, float]``
+     - *required*
+     - \-
+   * - ``predict``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``continue_``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``subtract_model``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``gridder``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``use_wgridder``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``shift``
+     - ``Tuple[str, str]``
+     - ``None``
+     - \-
+   * - ``facet_regions``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``feather_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``no_min_grid_resolution``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``min_grid_resolution``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``visibility_weighting_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``baseline_averaging``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``simulate_noise``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``simulate_baseline_noise``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``idg_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers_factor``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``wstack_nwlayers_for_size``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``wstack_grid_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``wstack_kernel_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``wstack_oversampling``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``wgridder_accuracy``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``compound_tasks``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``shared_facet_reads``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``aterm_config``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``grid_with_beam``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``beam_aterm_update``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``aterm_kernel_size``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``apply_facet_solutions``
+     - ``List[Union[File, str]]``
+     - ``None``
+     - \-
+   * - ``no_solution_directions_check``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``scalar_visibilities``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``diagonal_visibilities``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``apply_facet_beam``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``facet_beam_update``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``save_aterms``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``apply_primary_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``reuse_primary_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``use_differential_lofar_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``primary_beam_limit``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``mwa_path``
+     - ``Directory``
+     - ``None``
+     - \-
+   * - ``save_psf_pb``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``pb_grid_size``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``dd_psf_grid``
+     - ``Tuple[int, int]``
+     - ``None``
+     - \-
+   * - ``beam_model``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``beam_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``beam_normalisation_mode``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``dry_run``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``maxuvw_m``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``minuvw_m``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``maxuv_l``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``minuv_l``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``maxw``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``0``
+     - Maximum number of deconvolution iterations; zero performs dirty imaging.
+   * - ``nmiter``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``auto_threshold``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``abs_threshold``
+     - ``Union[str, float]``
+     - ``None``
+     - \-
+   * - ``auto_mask``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``abs_auto_mask``
+     - ``Union[str, float]``
+     - ``None``
+     - \-
+   * - ``local_rms``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``local_rms_strength``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``local_rms_window``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``local_rms_method``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``gain``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``mgain``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``join_channels``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``spectral_correction``
+     - ``Tuple[float, str]``
+     - ``None``
+     - \-
+   * - ``no_fast_subminor``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``multiscale``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``multiscale_scale_bias``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``multiscale_max_scales``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``multiscale_scales``
+     - ``List[float]``
+     - ``None``
+     - \-
+   * - ``multiscale_shape``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``multiscale_gain``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``multiscale_convolution_padding``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``asp``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_multiscale_fast_subminor``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``python_deconvolution``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``iuwt``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``iuwt_snr_test``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_iuwt_snr_test``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``moresane_ext``
+     - ``Directory``
+     - ``None``
+     - \-
+   * - ``moresane_arg``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``moresane_sl``
+     - ``List[float]``
+     - ``None``
+     - \-
+   * - ``save_source_list``
+     - ``bool``
+     - ``False``
+     - Nullable: False
+   * - ``clean_border``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``fits_mask``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``casa_mask``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``horizon_mask``
+     - ``str``
+     - ``None``
+     - \-
+   * - ``no_negative``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``negative``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``stop_negative``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``fit_spectral_pol``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``fit_spectral_log_pol``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``force_spectrum``
+     - ``File``
+     - ``None``
+     - \-
+   * - ``squared_channel_joining``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``parallel_deconvolution``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``deconvolution_threads``
+     - ``int``
+     - ``None``
+     - \-
+   * - ``restore``
+     - ``Tuple[File, File, File]``
+     - ``None``
+     - \-
+   * - ``restore_list``
+     - ``Tuple[File, File, File]``
+     - ``None``
+     - \-
+   * - ``beam_size``
+     - ``Union[str, float]``
+     - ``None``
+     - \-
+   * - ``beam_shape``
+     - ``Tuple[Union[str, float], Union[str, float], Union[str, float]]``
+     - ``None``
+     - \-
+   * - ``fit_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``no_fit_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``beam_fitting_size``
+     - ``float``
+     - ``None``
+     - \-
+   * - ``theoretic_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``circular_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``elliptical_beam``
+     - ``bool``
+     - ``None``
+     - \-
+   * - ``local_rms_image``
+     - ``File``
+     - ``None``
+     - Precomputed local RMS image used for local-noise thresholding.
+   * - ``direct_ft_precision``
+     - ``str``
+     - ``None``
+     - Arithmetic precision for the direct Fourier transform gridder. Choices: ['float', 'double', 'ldouble']
+   * - ``temp_dir``
+     - ``Directory``
+     - ``None``
+     - Scratch location for temporary reordered MeasurementSets.
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``image``
+     - ``ProductFamily[FITSImage]``
+     - Image FITS products indexed by time, frequency, polarization and component.
+   * - ``dirty``
+     - ``ProductFamily[FITSImage]``
+     - Dirty FITS products indexed by time, frequency, polarization and component.
+   * - ``residual``
+     - ``ProductFamily[FITSImage]``
+     - Residual FITS products indexed by time, frequency, polarization and component.
+   * - ``model``
+     - ``ProductFamily[FITSImage]``
+     - Model FITS products indexed by time, frequency, polarization and component.
+   * - ``psf``
+     - ``ProductFamily[FITSImage]``
+     - Shared PSF FITS products indexed by time and frequency; no polarization axis.
+   * - ``source_list``
+     - ``ProductFamily[File]``
+     - Component list emitted by -save-source-list; no channel or polarization suffix.
+   * - ``continued_beam_model``
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
+   * - ``continued_facet_beam_model``
+     - ``ProductFamily[FITSImage]``
+     - Existing beam-corrected model files read and updated in continuation mode.
+   * - ``ms``
+     - ``MSv2``
+     - \-
+
+wsclean-normalize-stokes-i
+--------------------------
+
+Validate singleton-I IDG products and create separately owned Stokes-I corrected copies; native host guard and fitstoolz batch adapter, never modifies native producer files.
+
+:Command: ``dosho wsclean-normalize-stokes-i``
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``source_prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``receipt``
+     - ``File``
+     - *required*
+     - \-
+   * - ``native_image``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_model``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_residual``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_image_pb``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_model_pb``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_residual_pb``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_beam``
+     - ``List[File]``
+     - ``[]``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``image_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected image; native product, not a static image division.
+   * - ``model_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected model; native product, not a static image division.
+   * - ``residual_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected residual; native product, not a static image division.
+   * - ``receipt``
+     - ``File``
+     - \-
 
 wsclean-readonly
 ----------------

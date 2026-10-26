@@ -108,3 +108,67 @@ constraints for strings and containers. Bounds must be nonnegative integers
 and the minimum cannot exceed the maximum. Constrained defaults are validated
 when constructing the model. These shared constraints also serve Shinobi's
 worker configuration models; no cab-specific validation callback is loaded.
+
+
+Non-argv dependency inputs
+--------------------------
+
+A declared input may set ``pass_to_command: false``. Its normal type,
+requiredness and readonly metadata still apply; it remains available to the
+execution adapter for fingerprinting and mounts. Only native argv emission is
+suppressed. The default is ``true`` and must be a boolean. This supports, for
+example, the explicit FITS dependency referenced by a native a-term parset,
+without inventing a nonexistent command-line option. The tool adapter must
+validate that the parset references this exact artifact; suppression does not
+validate arbitrary file contents or authorize writes.
+
+The shared-screen profiles require candidate Simms a-term support and a
+qualified WSClean runtime. Their declarations do not qualify native numerical
+behavior. The fixed CASA history SAVE profile declares MS WRITE capability because
+native CASA opens the MS read/write, checks exact FLAG/FLAG_ROW preservation
+with native casatools and returns the authoritative same-field vis. It accepts
+only a fresh history root; callers must run a preserving preflight before creator cleanup. It does
+not retain pre-existing history or promise partial-sidecar rollback. SAVE is
+cache-enabled for strict mutation recovery; restart reuse requires a fresh
+read-only history verification against the actual saved version digest.
+
+
+``flagversion-restore-replace`` is a separate casatools utility, not a wrapper
+around CASA agentflagger RESTORE (which opens history read/write). It requires
+the actual SAVE version digest and a fixed fully populated two-column boolean
+saved table. Every row/type/shape is checked before the MS is opened for writes;
+FLAG and FLAG_ROW are copied independently and post-close identity is verified.
+Native oracle equivalence, including inconsistent FLAG_ROW/FLAG cases, remains
+an explicit qualification requirement. Partial target writes use the normal
+strict MS recovery mechanism; readonly history is never a rollback target.
+
+
+Guarded WSClean header copies
+-----------------------------
+
+``wsclean-normalize-stokes-i`` is an ordinary host binary cab, explicitly run
+with the native backend and ``cache: false``. It reads seven explicit native
+source families and creates independent corrected FITS families and a receipt.
+It never changes the native WSClean producer's files or its MS writer state.
+The singleton-I IDG scalar-beam family is an explicit producer dependency.
+
+The helper proves the known uniform I/V signature, grids, units, frequency and
+weight lineage, channel apparent/beam division and exact nonfinite masks before
+copying. MFS residual/model checks follow native finite-pixel weighted channels;
+restored MFS rendering is bounded by separate native stock/fixed parity rather
+than a second renderer. Source products may be native cache hits under the
+existing structural FITS cache contract. Rendered MFS pixels are preserved as
+provided; arbitrary prior corruption of that rendered image is not detected.
+Identity BSCALE/BZERO cards are accepted. Native model
+unit quirks are preserved, including JY/BEAM on corrected and MFS model files.
+The thin batch adapter delegates all copy/header writes to pinned
+``fitstoolz==0.2.2`` through its existing ``fitstoolz.apps.header.runit`` operation.
+V products request ``edit=["CRVAL4=1"]``; already-I products request no edit.
+V inputs with an existing CHECKSUM are refused before writing because this
+version does not update that checksum. Already-I checksums must remain valid.
+Only the copied STOKES card may change; payload bytes, DATASUM and unrelated
+metadata remain exact. A receipt records source/destination paths, checks,
+payload digests and actual tool version/operation. Source bytes and modification
+times are checked unchanged, including on failure. Failed operations clean only
+their newly created files. Fitstoolz writes full independent copies, which can
+add several GB per large channel/MFS imaging round.

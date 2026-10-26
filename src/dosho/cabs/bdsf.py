@@ -29,8 +29,9 @@ remaining ~140.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import dosho
 from dosho import images
@@ -143,3 +144,57 @@ def catalog(
 
     outdir = (outfile_gaul or outfile_srl).parent
     return BdsfCatalogOutputs(outfile_gaul=outfile_gaul, outfile_srl=outfile_srl, outdir=outdir)
+
+
+class GaulOutputs(BaseModel):
+    """Only the real Gaussian catalogue created by this scoped operation."""
+
+    outfile_gaul: Path
+
+
+@dosho.pystep(name="bdsf-gaul", image=images.BDSF, write_paths=["outfile_gaul"])
+def gaul(
+    ctx,
+    image: Annotated[Path, Field(json_schema_extra={"writable": False})],
+    outfile_gaul: Path,
+    catalog_format: str = "ascii",
+    detection_image: Path | None = None,
+    thresh_isl: float = 3.0,
+    thresh_pix: float = 5.0,
+    rms_box: tuple[int, int] | None = None,
+    rms_map: bool | None = None,
+    adaptive_rms_box: bool = False,
+    trim_box: tuple[int, int, int, int] | None = None,
+    flagging_opts: bool = False,
+    flag_maxsize_bm: float | None = None,
+    spectralindex_do: bool = False,
+    polarisation_do: bool = False,
+    advanced_opts: bool = False,
+    src_ra_dec: list[tuple[float, float]] | None = None,
+    src_radius_pix: float | None = None,
+) -> GaulOutputs:
+    """Native ASCII Gaussian components with the broad wrapper's exact process settings."""
+    if catalog_format != "ascii":
+        raise ValueError("bdsf-gaul requires native ASCII Gaussian components")
+    result = catalog(
+        ctx,
+        image=image,
+        outfile_gaul=outfile_gaul,
+        outfile_srl=None,
+        catalog_format=catalog_format,
+        detection_image=detection_image,
+        thresh_isl=thresh_isl,
+        thresh_pix=thresh_pix,
+        rms_box=rms_box,
+        rms_map=rms_map,
+        adaptive_rms_box=adaptive_rms_box,
+        trim_box=trim_box,
+        flagging_opts=flagging_opts,
+        flag_maxsize_bm=flag_maxsize_bm,
+        spectralindex_do=spectralindex_do,
+        polarisation_do=polarisation_do,
+        advanced_opts=advanced_opts,
+        src_ra_dec=src_ra_dec,
+        src_radius_pix=src_radius_pix,
+    )
+    return GaulOutputs(outfile_gaul=result.outfile_gaul)

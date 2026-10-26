@@ -1,0 +1,15 @@
+_include: (dosho)documents/wsclean.yaml
+cabs:
+  wsclean-msv2:
+    _use: cabs.wsclean
+    inputs:
+      ms:
+        dtype: MSv2
+        mutable: true
+    dataset_accesses:
+    - field: ms
+      mode: write
+      allow_schema_change: true
+    outputs:
+      ms:
+        dtype: MSv2

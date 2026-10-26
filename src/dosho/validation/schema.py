@@ -136,6 +136,7 @@ class ParamMeta(BaseModel):
     abbreviation: str | None = None
     write_path: bool = False
     writable: bool | None = None
+    pass_to_command: bool = Field(default=True, strict=True)
 
 
 class Policies(BaseModel):

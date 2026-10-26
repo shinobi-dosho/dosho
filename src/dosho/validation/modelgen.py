@@ -582,6 +582,7 @@ COMMON_LEAF_KEYS = {
     "abbreviation",
     "policies",
     "writable",
+    "pass_to_command",
     "must_exist",
     "path_policies",
 }

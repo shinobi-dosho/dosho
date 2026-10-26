@@ -160,7 +160,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import dosho
 from dosho import images
@@ -226,7 +226,11 @@ class ListobsOutputs(BaseModel):
     listfile: Path
 
 
-@dosho.pystep(image=images.CASA_TASKS, write_paths=["listfile"])
+@dosho.pystep(
+    image=images.CASA_TASKS,
+    write_paths=["listfile"],
+    dataset_accesses=[{"field": "vis", "mode": "read"}],
+)
 def listobs(
     ctx,
     vis: Path,
@@ -333,7 +337,14 @@ class MstransformOutputs(BaseModel):
     outputvis: Path
 
 
-@dosho.pystep(image=images.CASA_TASKS, write_paths=["outputvis"])
+@dosho.pystep(
+    image=images.CASA_TASKS,
+    write_paths=["outputvis"],
+    dataset_accesses=[
+        {"field": "vis", "mode": "read", "external_read": True},
+        {"field": "outputvis", "mode": "create"},
+    ],
+)
 def mstransform(
     ctx,
     vis: Path,
@@ -379,7 +390,12 @@ def mstransform(
     timespan: str = "",
     maxuvwdistance: float = 0.0,
     docallib: bool = False,
-    callib: str = "",
+    callib: Path | None = Field(
+        default=None, json_schema_extra={"param_meta": {"writable": False}}
+    ),
+    calibration_tables: Path | None = Field(
+        default=None, json_schema_extra={"param_meta": {"writable": False}}
+    ),
     douvcontsub: bool = False,
     fitspw: str = "",
     fitorder: int = 0,
@@ -522,7 +538,7 @@ def mstransform(
         timespan=timespan,
         maxuvwdistance=maxuvwdistance,
         docallib=docallib,
-        callib=callib,
+        callib=str(callib) if callib else "",
         douvcontsub=douvcontsub,
         fitspw=fitspw,
         fitorder=fitorder,
@@ -633,7 +649,13 @@ class InitweightsOutputs(BaseModel):
     vis: Path
 
 
-@dosho.pystep(image=images.CASA_TASKS)
+@dosho.pystep(
+    image=images.CASA_TASKS,
+    dataset_accesses=[
+        {"field": "vis", "mode": "write", "allow_schema_change": True},
+        {"field": "vis", "mode": "write", "table": "HISTORY", "allow_row_count_change": True},
+    ],
+)
 def initweights(
     ctx,
     vis: Path,
