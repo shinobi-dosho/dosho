@@ -18866,6 +18866,9 @@ XX/YY-capable Stokes-I IDG imaging and prediction with one validated shared diag
    * - ``model_pb``
      - ``ProductFamily[FITSImage]``
      - Intrinsic IDG a-term corrected model; native product, not a static image division.
+   * - ``beam``
+     - ``ProductFamily[FITSImage]``
+     - Native IDG scalar beam; explicit channel/MFS dependency for guarded header normalization.
 
 wsclean-msv2
 ------------
@@ -19602,6 +19605,94 @@ WSClean imager (https://wsclean.readthedocs.io)
      - Existing beam-corrected model files read and updated in continuation mode.
    * - ``ms``
      - ``MSv2``
+     - \-
+
+wsclean-normalize-stokes-i
+--------------------------
+
+Validate singleton-I IDG products and create separately owned Stokes-I corrected copies; native host guard and fitstoolz batch adapter, never modifies native producer files.
+
+:Command: ``dosho wsclean-normalize-stokes-i``
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``source_prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``prefix``
+     - ``str``
+     - *required*
+     - \-
+   * - ``nchan``
+     - ``int``
+     - ``1``
+     - \-
+   * - ``niter``
+     - ``int``
+     - ``0``
+     - \-
+   * - ``receipt``
+     - ``File``
+     - *required*
+     - \-
+   * - ``native_image``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_model``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_residual``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_image_pb``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_model_pb``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_residual_pb``
+     - ``List[File]``
+     - ``[]``
+     - \-
+   * - ``native_beam``
+     - ``List[File]``
+     - ``[]``
+     - \-
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``image_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected image; native product, not a static image division.
+   * - ``model_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected model; native product, not a static image division.
+   * - ``residual_pb``
+     - ``ProductFamily[FITSImage]``
+     - Intrinsic IDG a-term corrected residual; native product, not a static image division.
+   * - ``receipt``
+     - ``File``
      - \-
 
 wsclean-readonly

@@ -518,3 +518,6 @@ cabs:
     attr: verify_saved_flag_history
     module: dosho.cabs.saved_history
     symbol: verify_saved_flag_history
+  wsclean-normalize-stokes-i:
+    attr: wsclean_normalize_stokes_i
+    document: wsclean-normalize-stokes-i.yaml

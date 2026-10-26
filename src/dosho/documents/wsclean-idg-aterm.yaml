@@ -361,6 +361,74 @@ cabs:
             required: true
             when_set:
               niter: true
+      beam:
+        dtype: ProductFamily[FITSImage]
+        family:
+          coordinates:
+            component: str
+            frequency:
+            - int
+            - str
+            polarization: str
+            time: int
+          rules:
+          - axes:
+              frequency:
+                aggregate:
+                  only_multiple: true
+                  suffix: -MFS
+                  value: mfs
+                count_input: nchan
+                singleton_suffix: ''
+                suffix: -{index:04d}
+              polarization:
+                include:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                singleton_suffix: ''
+                split: csv_or_compact
+                suffix: -{value}
+                tokens:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YX
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                uppercase: true
+                values_input: pol
+              time:
+                count_input: intervals_out
+                singleton_suffix: ''
+                suffix: -t{index:04d}
+            coordinates:
+              component: real
+            path: '{prefix}{time}{frequency}{polarization}-beam.fits'
+            required: true
+            when:
+              dry_run:
+              - false
+              make_psf_only:
+              - false
+              predict:
+              - false
+        info: Native IDG scalar beam; explicit channel/MFS dependency for guarded
+          header normalization.
     derived_reads:
       aterm_screen:
         member: file

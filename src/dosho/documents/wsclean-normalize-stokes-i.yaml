@@ -1,0 +1,155 @@
+cabs:
+  wsclean-normalize-stokes-i:
+    command: dosho wsclean-normalize-stokes-i
+    cache: false
+    info: Validate singleton-I IDG products and create separately owned Stokes-I corrected
+      copies; native host guard and fitstoolz batch adapter, never modifies native producer files.
+    policies:
+      prefix: --
+      replace:
+        _: '-'
+      repeat_list: true
+    inputs:
+      source-prefix:
+        dtype: str
+        required: true
+      prefix:
+        dtype: str
+        required: true
+        write_path: true
+      nchan:
+        dtype: int
+        default: 1
+      niter:
+        dtype: int
+        default: 0
+      receipt:
+        dtype: File
+        required: true
+        write_path: true
+      native-image:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: image
+      native-model:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: model
+      native-residual:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: residual
+      native-image-pb:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: image-pb
+      native-model-pb:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: model-pb
+      native-residual-pb:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: residual-pb
+      native-beam:
+        dtype: List[File]
+        default: []
+        writable: false
+        nom_de_guerre: beam
+    outputs:
+      image_pb:
+        dtype: ProductFamily[FITSImage]
+        family:
+          coordinates:
+            component: str
+            frequency:
+            - int
+            - str
+            polarization: str
+            time: int
+          rules:
+          - axes:
+              frequency:
+                aggregate:
+                  only_multiple: true
+                  suffix: -MFS
+                  value: mfs
+                count_input: nchan
+                singleton_suffix: ''
+                suffix: -{index:04d}
+            coordinates:
+              component: real
+              time: 0
+              polarization: I
+            path: '{prefix}{frequency}-image-pb.fits'
+            required: true
+        info: Intrinsic IDG a-term corrected image; native product, not a static image
+          division.
+      model_pb:
+        dtype: ProductFamily[FITSImage]
+        family:
+          coordinates:
+            component: str
+            frequency:
+            - int
+            - str
+            polarization: str
+            time: int
+          rules:
+          - axes:
+              frequency:
+                aggregate:
+                  only_multiple: true
+                  suffix: -MFS
+                  value: mfs
+                count_input: nchan
+                singleton_suffix: ''
+                suffix: -{index:04d}
+            coordinates:
+              component: real
+              time: 0
+              polarization: I
+            path: '{prefix}{frequency}-model-pb.fits'
+            required: true
+            when_set:
+              niter: true
+        info: Intrinsic IDG a-term corrected model; native product, not a static image
+          division.
+      residual_pb:
+        dtype: ProductFamily[FITSImage]
+        family:
+          coordinates:
+            component: str
+            frequency:
+            - int
+            - str
+            polarization: str
+            time: int
+          rules:
+          - axes:
+              frequency:
+                aggregate:
+                  only_multiple: true
+                  suffix: -MFS
+                  value: mfs
+                count_input: nchan
+                singleton_suffix: ''
+                suffix: -{index:04d}
+            coordinates:
+              component: real
+              time: 0
+              polarization: I
+            path: '{prefix}{frequency}-residual-pb.fits'
+            required: true
+            when_set:
+              niter: true
+        info: Intrinsic IDG a-term corrected residual; native product, not a static
+          image division.
+      receipt:
+        dtype: File

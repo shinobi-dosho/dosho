@@ -111,7 +111,7 @@ worker configuration models; no cab-specific validation callback is loaded.
 
 
 Non-argv dependency inputs
--------------------------
+--------------------------
 
 A declared input may set ``pass_to_command: false``. Its normal type,
 requiredness and readonly metadata still apply; it remains available to the
@@ -141,3 +141,34 @@ FLAG and FLAG_ROW are copied independently and post-close identity is verified.
 Native oracle equivalence, including inconsistent FLAG_ROW/FLAG cases, remains
 an explicit qualification requirement. Partial target writes use the normal
 strict MS recovery mechanism; readonly history is never a rollback target.
+
+
+Guarded WSClean header copies
+-----------------------------
+
+``wsclean-normalize-stokes-i`` is an ordinary host binary cab, explicitly run
+with the native backend and ``cache: false``. It reads seven explicit native
+source families and creates independent corrected FITS families and a receipt.
+It never changes the native WSClean producer's files or its MS writer state.
+The singleton-I IDG scalar-beam family is an explicit producer dependency.
+
+The helper proves the known uniform I/V signature, grids, units, frequency and
+weight lineage, channel apparent/beam division and exact nonfinite masks before
+copying. MFS residual/model checks follow native finite-pixel weighted channels;
+restored MFS rendering is bounded by separate native stock/fixed parity rather
+than a second renderer. Source products may be native cache hits under the
+existing structural FITS cache contract. Rendered MFS pixels are preserved as
+provided; arbitrary prior corruption of that rendered image is not detected.
+Identity BSCALE/BZERO cards are accepted. Native model
+unit quirks are preserved, including JY/BEAM on corrected and MFS model files.
+The thin batch adapter delegates all copy/header writes to pinned
+``fitstoolz==0.2.2`` through its existing ``fitstoolz.apps.header.runit`` operation.
+V products request ``edit=["CRVAL4=1"]``; already-I products request no edit.
+V inputs with an existing CHECKSUM are refused before writing because this
+version does not update that checksum. Already-I checksums must remain valid.
+Only the copied STOKES card may change; payload bytes, DATASUM and unrelated
+metadata remain exact. A receipt records source/destination paths, checks,
+payload digests and actual tool version/operation. Source bytes and modification
+times are checked unchanged, including on failure. Failed operations clean only
+their newly created files. Fitstoolz writes full independent copies, which can
+add several GB per large channel/MFS imaging round.

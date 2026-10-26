@@ -175,6 +175,7 @@ __all__ = [
     "wsclean",
     "wsclean_idg_aterm",
     "wsclean_msv2",
+    "wsclean_normalize_stokes_i",
     "wsclean_readonly",
     "wvrgcal",
 ]

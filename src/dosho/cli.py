@@ -608,5 +608,36 @@ def images_verify(key: str | None) -> None:
         raise click.ClickException(f"{len(missing)} image(s) missing from the registry")
 
 
+@main.command("wsclean-normalize-stokes-i")
+@click.option("--source-prefix", required=True, type=click.Path(path_type=Path))
+@click.option("--prefix", required=True, type=click.Path(path_type=Path))
+@click.option("--nchan", required=True, type=click.IntRange(min=1))
+@click.option("--niter", required=True, type=click.IntRange(min=0))
+@click.option("--image", multiple=True, type=click.Path(path_type=Path))
+@click.option("--model", multiple=True, type=click.Path(path_type=Path))
+@click.option("--residual", multiple=True, type=click.Path(path_type=Path))
+@click.option("--image-pb", multiple=True, type=click.Path(path_type=Path))
+@click.option("--model-pb", multiple=True, type=click.Path(path_type=Path))
+@click.option("--residual-pb", multiple=True, type=click.Path(path_type=Path))
+@click.option("--beam", multiple=True, type=click.Path(path_type=Path))
+@click.option("--receipt", required=True, type=click.Path(path_type=Path))
+def wsclean_normalize_stokes_i(source_prefix, prefix, nchan, niter, receipt, **sources):
+    """Validate singleton-I native IDG products and create owned header-normalized copies."""
+    from dosho.cabs.wsclean_runtime import normalize_stokes_i
+
+    try:
+        report = normalize_stokes_i(
+            source_prefix=source_prefix,
+            prefix=prefix,
+            nchan=nchan,
+            niter=niter,
+            sources=sources,
+            receipt=receipt,
+        )
+    except (ValueError, OSError) as error:
+        raise click.ClickException(str(error)) from error
+    click.echo(json.dumps(report, sort_keys=True))
+
+
 if __name__ == "__main__":
     main()

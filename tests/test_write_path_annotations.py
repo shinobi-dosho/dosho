@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import re
 import warnings
+from pathlib import Path
 
 import pytest
 import yaml
@@ -146,6 +147,7 @@ STEMS.add(("quartical-readonly", "output_log_directory"))
 # authoritative in-place passthroughs, never stale-clear targets.
 STEMS.update(
     {
+        ("wsclean-normalize-stokes-i", "prefix"),
         ("wsclean-msv2", "prefix"),
         ("wsclean-idg-aterm", "prefix"),
         ("quartical-msv2", "output_log_directory"),
@@ -155,6 +157,7 @@ STEMS.update(
 )
 DESTINATIONS.update(
     {
+        ("wsclean-normalize-stokes-i", "receipt"),
         ("bdsf-gaul", "outfile_gaul"),
         ("bdsf-runtime-probe", "scratch"),
         ("bdsf-runtime-probe", "receipt"),
@@ -366,7 +369,16 @@ def test_every_marked_stem_resolves_a_write_directory():
         # "{output_directory}/{output_filename}...", and `declared_output_dirs`
         # skips a template it cannot fully resolve, so feeding one at a time
         # would report a correctly-declared cab as declaring nothing.
-        dirs = declared_output_dirs(cab, dict.fromkeys(stems, "/tmp/dosho-probe/stem"))
+        defaults = {
+            name: field.get_default(call_default_factory=True)
+            for name, field in cab.inputs_model.model_fields.items()
+            if not field.is_required()
+        }
+        dirs = declared_output_dirs(
+            cab,
+            {**defaults, **dict.fromkeys(stems, "products/stem")},
+            workspace=Path("/tmp/dosho-probe"),
+        )
         assert dirs, f"{cab.name}: stems {stems} declare no write directory"
 
 

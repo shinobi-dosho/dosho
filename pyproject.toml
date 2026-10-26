@@ -34,6 +34,7 @@ dev = [
     # Synthetic WSClean products exercise real FITS validation in CI.
     "astropy>=7.2,<9",
     "python-casacore>=3.7,<4",
+    "fitstoolz==0.2.2",
 ]
 # Documentation builds inspect definitions and Python signatures without Shinobi.
 docs = [

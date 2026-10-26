@@ -44,6 +44,11 @@ def test_every_document_resolves_its_image(path: pathlib.Path):
     word and fails much later, at pull time, in a container runtime.
     """
     cab = describe_cab(dosho.get(path.stem))
+    if path.stem == "wsclean-normalize-stokes-i":
+        # This explicit host CLI is selected with backend=native, without a tool image.
+        assert cab.image is None
+        assert dosho.get(path.stem).document["cache"] is False
+        return
     assert "/" in cab.image or ":" in cab.image, f"{cab.image!r} looks like an unresolved key"
 
 
