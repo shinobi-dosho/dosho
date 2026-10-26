@@ -40,12 +40,12 @@ marker stores metadata and preserves their signatures and annotations. Shared
 function-schema helpers derive Pydantic models without calling the bodies.
 
 ``build_model`` also creates reusable Pydantic input models for Python recipes;
-no recipe language is introduced. Shinobi's compatibility helper supplies
+no recipe language is introduced. Shinobi's model-building adapter supplies
 explicit trusted bindings for MSv2/CasaTab/FITS/ProductFamily/DirectoryBundle.
 Known framework dtypes without bindings are errors, including nested types.
 Declarations for dataset accesses, FITS accesses, derived reads and families
 are inert JSON until Shinobi validates its authoritative models. Dynamic
-matched extras retain historical pass-through behavior.
+matched extras pass through to the tool.
 
 Static YAML composition is safe data processing: ``_include`` containment and
 cycles, ``_use`` merge precedence and warnings remain supported. Package roots
@@ -57,34 +57,28 @@ Shinobi's versioned cab cache identity separately records schema/formatter
 contract versions and argument semantics. Frozen bundle version 3 verifies
 those semantics without confusing them with dataset states or worker attempts.
 
-Migrating from v0.1
--------------------
+Runtime adaptation
+------------------
 
-Install ``dosho[validation]>=0.2.0b1,<0.3`` for standalone schema compilation
-and argv formatting. For runnable cabs and recipes, install the compatible
-Shinobi source adapter as described in :doc:`../installation`; the
-``stimela-ninja>=0.2.0b1,<0.3`` registry requirement applies once its beta
-is published. Replace the retired ``dosho[run]`` extra with an explicit Shinobi
-installation. The dependency direction is Shinobi to Dosho validation;
+Install ``dosho[validation]>=0.2.0b1`` for standalone schema compilation
+and argv formatting, or ``stimela-ninja>=0.2.0b1`` for runnable cabs and
+recipes. The dependency direction is Shinobi to Dosho validation;
 Dosho's independent lock contains no framework dependency.
 
-Import shared metadata and model helpers from ``dosho.validation``. Existing
-Shinobi imports remain supported: ``Policies`` is re-exported, while
-``ParamMeta``, ``ParamPattern`` and ``ParamSegment`` extend the shared types
-with framework declarations. Its model-building adapter supplies trusted
+Import shared metadata and model helpers from ``dosho.validation``. For
+framework declarations, use Shinobi's metadata types. ``Policies`` is
+re-exported; ``ParamMeta``, ``ParamPattern`` and ``ParamSegment`` extend the
+shared types with framework declarations. Shinobi's adapter supplies trusted
 dtype bindings for strict datasets and product families.
 ``dosho.validation.build_argv`` accepts validated parameter values and formats
 argv. ``shinobi.policies.build_argv`` additionally normalizes framework inputs
 and outputs. A standalone ``CompiledCab`` is not a runnable ``shinobi.Cab``.
 
-Provider documents carry the ``dosho-cab-v1`` dialect tag. Old Shinobi releases
-reject it rather than silently substituting their earlier compiler.
+Provider documents carry the ``dosho-cab-v1`` dialect tag.
 ``Recipe.add_step`` and ``Recipe.add_loop`` adapt definitions at the recipe
 boundary; ``shinobi.cabs.get`` and ``adapt_definition`` provide explicit
 runtime access. Callers needing runtime attributes on a ``dosho.get`` result
-must use that adapter. The neutral-definition API requires matching source
-changes in both projects until a coordinated release. Ordinary third-party ``yaml_cab`` documents
-remain supported by the new adapter.
+use that adapter. Third-party ``yaml_cab`` documents are also supported.
 
 For cross-repository development, use the verified candidate wheel-pair
 procedure in :doc:`../installation` rather than adding a reverse dependency

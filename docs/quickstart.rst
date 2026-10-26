@@ -99,7 +99,7 @@ Use it in a recipe
 Save the Python snippet as ``myrecipe.py``. This reader leaves the input MS
 read-only and places reordered temporary data outside it. The ordinary
 ``wsclean`` cab retains conservative write access. Strict MS execution also
-needs the framework's ``ms-contract`` and ``fits-contract`` extras and a
+needs the framework's ``ms`` and ``fits`` extras and a
 qualified backend route (see :doc:`installation`); Apptainer
 is Shinobi's default backend. ``--dryrun`` inspects the declared plan without
 dispatching the tool. See :doc:`concepts/read_only_access` for the guarded

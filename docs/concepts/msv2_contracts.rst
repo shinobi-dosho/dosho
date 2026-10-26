@@ -66,22 +66,14 @@ fixed. The telescope creator retains its distinct upstream ``rowchunks``
 input and ``--rowchunks`` spelling. List options such as ``subarray_range``
 and ``fits_spi`` repeat their CLI flag for each value.
 
-The historical imports ``from dosho.cabs import skysim, telsim`` and
-``from dosho.cabs.simms import skysim, telsim`` resolve to these same cabs.
-Callers that inspected pystep internals must use the cab's ``inputs_model``,
-``outputs_model`` and ``image`` directly instead of ``.step``; there is no
-``.func`` wrapper to call or bundle. ``simms-primary-beam`` retains its
+Import these definitions with ``from dosho.cabs import skysim, telsim`` or
+``from dosho.cabs.simms import skysim, telsim``. ``simms-primary-beam`` uses a
 Python adapter.
 
 Two boolean controls follow the CLI's paired switches: set
 ``no_polarisation=True`` for Stokes I only, or ``no_do_wstacking=True`` to
 disable w-stacking. Both default to false, preserving Simms' enabled
-defaults. The old positive inputs still accept ``True``; ``False`` is
-rejected so it cannot silently leave a feature enabled. Migrate old
-``polarisation=False`` and ``do_wstacking=False`` values to the negative
-inputs. ``log_level`` was a Python-wrapper input; it is not a subcommand
-option and is no longer exposed by these cabs. Simms uses its root CLI's
-default INFO logging.
+defaults. Simms uses its root CLI's default INFO logging.
 
 The standard frozen-worker route needs no Simms code roots. Strict MSv2
 submission still requires the framework's site-issued shared-storage
@@ -127,19 +119,20 @@ those happen depends on options a static list cannot follow, and naming any
 under ``create`` would require it after every run, so the contract is a
 whole-dataset write with schema-change permission. Its gain tables and plots
 go to ``out-dir``, not into the MS. The MS comes back as the ``data_ms``
-output, named like the input it echoes; a recipe that wired ``calibrate.ms``
-from a path-only ``cubical`` wires ``calibrate.data_ms`` now.
+output, named like the input it echoes. Wire downstream steps to
+``calibrate.data_ms``.
 
 Run the example
 ---------------
 
-Use a Python 3.11 driver with the compatible Shinobi adapter installed through
-the :doc:`../installation` pairing procedure. For strict MS inspection and
-the image-family checks, install ``python-casacore`` and ``astropy`` (the
-framework's ``ms-contract`` and ``fits-contract`` extras). The qualified
-container boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.1.0 and WSClean
-3.6/IDG, resolved through ``images.yaml``. Import tool packages inside the
-running container; cab loading never imports their schema-generation code.
+Use a Python 3.11 driver and install Shinobi with its MS and FITS inspectors::
+
+    pip install "stimela-ninja[ms,fits]>=0.2.0b1"
+
+See :doc:`../installation` for installation options. The qualified container
+boundary is Simms 3.0.2, tricolour 0.2.1, MSUtils 3.1.0 and WSClean 3.6/IDG,
+resolved through ``images.yaml``. Import tool packages inside the running
+container; cab loading never imports their schema-generation code.
 
 Prepare these two small input files in a fresh output directory:
 
@@ -235,12 +228,10 @@ scratch stays inside an isolated working directory when that execution
 policy is enabled. Absolute destinations can be supplied explicitly and are
 subject to the same ownership and MS-overlap checks.
 
-Use ``data_cache_dir`` to set DDFacet's ``--Cache-Dir``. The former tool
-field ``cache_dir`` conflicted with Shinobi's execution-cache keyword; the
-new name distinguishes these two caches without changing DDFacet's CLI.
-``cache_dir_wisdom_fftw`` and ``montblanc_log_file`` keep their names. All
-three scratch fields require concrete values; ``None`` would restore an
-implicit write location the contained lifecycle cannot prove.
+Use ``data_cache_dir`` to set DDFacet's ``--Cache-Dir``,
+``cache_dir_wisdom_fftw`` for FFTW wisdom and ``montblanc_log_file`` for the
+Montblanc log. All three scratch fields require concrete values; ``None``
+would restore an implicit write location the contained lifecycle cannot prove.
 
 The MS boundary and scratch declarations cover ordinary single-MS imaging.
 Multi-MS, beam and runtime product-selection workflows need separate

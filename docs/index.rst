@@ -6,11 +6,11 @@ dosho
 **dosho** is the native cab repository for `shinobi
 <https://stimela-ninja.readthedocs.io/>`_ (stimela-ninja, Stimela 3.0).
 A tool here is one of two shapes. A real binary is a YAML **document**,
-built into a :class:`~shinobi.Cab` on demand; a Python-package tool with
-no standalone binary (CASA tasks are the running example) is a
-:func:`@shinobi.pystep <shinobi.pystep>`-decorated function, producing a
-``StepRef``. Either way a cab is parameter configuration, so what matters
-is that it stays declarative rather than which format carries it: there
+exposed as a ``CabSpec``; a Python-package tool with no standalone binary
+(CASA tasks are the running example) is an ordinary function marked with
+``@dosho.pystep``. Shinobi adapts either into a runnable ``Cab`` or ``StepRef``
+when a recipe uses it. A cab is parameter configuration, so what matters is
+that it stays declarative rather than which format carries it: there
 is no ``dynamic_schema``-style Python-execution step at cab-load time, no
 expression language, and no dtype coverage gaps -- see
 :doc:`concepts/authoring` for why this exists and how it's structured.
@@ -21,19 +21,17 @@ definition into a runnable object needs Shinobi, which installs Dosho validation
 
 .. code-block:: console
 
-    $ pip install "dosho>=0.2.0b1,<0.3"             # catalogue data only
-    $ pip install "dosho[validation]>=0.2.0b1,<0.3"  # standalone schemas and argv
-    $ pip install -e "/path/to/dosho[validation]" -e /path/to/stimela-ninja
+    $ pip install "dosho>=0.2.0b1"             # catalogue data only
+    $ pip install "dosho[validation]>=0.2.0b1"  # standalone schemas and argv
+    $ pip install "stimela-ninja>=0.2.0b1"     # runnable cabs and recipes
 
-The last command installs matching candidate checkouts. The neutral-definition
-change requires both source trees until their coordinated release; installing
-Shinobi alone can select an older Dosho without the shared schema helpers.
-See :doc:`installation` for reproducible development wheel pairing.
+These docs assume Dosho and Shinobi 0.2.0b1 or newer. See :doc:`installation`
+for installation options and development wheel pairing.
 
-Since v0.2.0b1, Dosho owns parameter validation, metadata, policies, patterns
+Dosho owns parameter validation, metadata, policies, patterns
 and argv formatting. Shinobi owns framework types, DAG construction and
 execution, filesystem enforcement and dataset lifecycle. See
-:doc:`concepts/validation` for the APIs and migration notes, and
+:doc:`concepts/validation` for the APIs and runtime adaptation, and
 :doc:`concepts/read_only_access` for guarded MS readers and exclusive
 flag-history reservations.
 

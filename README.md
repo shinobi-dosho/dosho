@@ -24,11 +24,11 @@ Citation information can be found in [CITATION.cff](CITATION.cff).
 
 ```
 # Catalogue data only
-pip install "dosho>=0.2.0b1,<0.3"
+pip install "dosho>=0.2.0b1"
 # Standalone schemas and argv
-pip install "dosho[validation]>=0.2.0b1,<0.3"
-# Runnable cabs and recipes from matching candidate checkouts
-pip install -e "/path/to/dosho[validation]" -e /path/to/stimela-ninja
+pip install "dosho[validation]>=0.2.0b1"
+# Runnable cabs and recipes
+pip install "stimela-ninja>=0.2.0b1"
 ```
 
 The definitions are data — YAML documents under `dosho/documents/`, readable
@@ -37,14 +37,13 @@ without the framework. `dosho.cabs.<tool>`, `dosho.get(...)` and
 Listing names and reading raw documents need neither Pydantic nor Shinobi;
 definition building, Python schemas and argv formatting need `dosho[validation]`.
 Shinobi depends on that extra and constructs runtime `Cab`/`StepRef` objects
-when a recipe uses a definition. The retired `dosho[run]` extra is no longer needed.
-Pin a source commit for reproducibility. After Ninja's beta is published,
-`stimela-ninja>=0.2.0b1,<0.3` can be installed from PyPI instead.
+when a recipe uses a definition. These docs assume Dosho and Shinobi 0.2.0b1
+or newer.
 
-Since v0.2.0b1, Dosho owns schema compilation, parameter metadata, policies,
+Dosho owns schema compilation, parameter metadata, policies,
 patterns and validated argv formatting. Shinobi owns framework annotations,
 DAG wiring, execution, filesystem enforcement and dataset lifecycle. See
-[validation and migration](https://dosho.readthedocs.io/en/latest/concepts/validation.html)
+[validation and runtime adaptation](https://dosho.readthedocs.io/en/latest/concepts/validation.html)
 for the standalone API and compatibility boundary.
 
 ## Usage
@@ -66,8 +65,7 @@ wsclean = dosho.get("wsclean")
 
 Both definitions can be passed directly to `Recipe.add_step`. For a runtime
 object outside a recipe, use `shinobi.cabs.get("wsclean")` or
-`shinobi.cabs.adapt_definition(wsclean)`. These APIs require matching Shinobi
-and Dosho sources for the neutral-definition boundary described here.
+`shinobi.cabs.adapt_definition(wsclean)`.
 
 Or, from shinobi itself (any installed `shinobi.cabs`-entry-point
 provider, `dosho` included):
