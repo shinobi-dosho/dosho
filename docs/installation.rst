@@ -1,5 +1,5 @@
-Installation and the v0.2 boundary
-==================================
+Installation
+============
 
 The base catalogue requires Python 3.11+ and a YAML parser; it can list and
 read cab documents without Pydantic or Shinobi::
@@ -11,32 +11,21 @@ are optional and need no Shinobi installation::
 
     pip install "dosho[validation]>=0.2.0b1"
 
-The neutral-definition boundary currently requires matching candidate sources
-of both projects. Install both checkouts explicitly to construct runnable
-``Cab``/``StepRef`` objects::
+To construct runnable ``Cab``/``StepRef`` objects and execute recipes, install
+Shinobi, which depends on Dosho validation::
 
-    pip install -e "/path/to/dosho[validation]" -e /path/to/stimela-ninja
+    pip install "stimela-ninja>=0.2.0b1"
 
-Installing Shinobi from Git alone can resolve an older published Dosho beta
-that lacks the new function-schema helpers. Package version bounds do not yet
-identify this coordinated source change. Pin both source commits for a
-reproducible candidate environment, or use the wheel-pair procedure below.
-
-The explicit Dosho beta floor selects the v0.2 APIs even while an older stable
-release remains available. Shinobi requires Dosho validation. The reverse
-``dosho[run]`` extra has been retired. ``dosho.get``, ``dosho.cabs.<name>`` and
-``dosho.define_cab`` return neutral definitions without importing Shinobi.
-``Recipe.add_step`` adapts them for execution; ``shinobi.cabs.get`` and
-``shinobi.cabs.adapt_definition`` expose explicit runtime adaptation.
-
-The neutral-definition API requires the matching source changes in both
-projects. For candidate testing, install the two checkouts together as below;
-an older published Dosho beta does not supply the new function-schema helpers.
+These docs assume Dosho and Shinobi 0.2.0b1 or newer. ``dosho.get``,
+``dosho.cabs.<name>`` and ``dosho.define_cab`` return neutral definitions without
+importing Shinobi. ``Recipe.add_step`` adapts them for execution;
+``shinobi.cabs.get`` and ``shinobi.cabs.adapt_definition`` expose explicit runtime
+adaptation.
 
 Strict MSv2 execution and FITS image-family inspection use optional framework
-inspectors. For those workflows, install the source adapter with both extras::
+inspectors. For those workflows, install Shinobi with both extras::
 
-    pip install -e "/path/to/dosho[validation]" -e "/path/to/stimela-ninja[ms-contract,fits-contract]"
+    pip install "stimela-ninja[ms,fits]>=0.2.0b1"
 
 The annotations and catalogue remain available without those inspectors.
 
@@ -76,4 +65,4 @@ To regenerate only the committed catalogue::
 
     uv run --locked --group docs python docs/_ext/cab_catalog.py
 
-See :doc:`concepts/validation` for the ownership and migration contract.
+See :doc:`concepts/validation` for the ownership and runtime adaptation contract.

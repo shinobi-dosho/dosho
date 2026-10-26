@@ -238,14 +238,14 @@ are one channel, one interval, and Stokes I, matching WSClean 3.6.
 
 WSClean's and DDFacet's FITS image families validate each observed member
 against Shinobi's header-only image contract, including on cache reuse.
-The execution/inspection environment needs its ``fits-contract`` extra;
+The execution/inspection environment needs its ``fits`` extra;
 plain-file and directory-bundle families retain their separate contracts.
 
 Every run returns a resolved collection of the products actually emitted
 or explicitly reused.
 Dirty imaging can leave ``model`` and ``residual`` empty; a singleton
-frequency has no MFS member. The former scalar ``*_mfs`` fields are replaced
-by selection from the corresponding family:
+frequency has no MFS member. Select MFS products from the corresponding
+family:
 
 .. code-block:: python
 

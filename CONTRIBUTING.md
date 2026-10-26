@@ -41,9 +41,9 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
 
 ## Development setup
 
-The project uses [uv](https://docs.astral.sh/uv/). `stimela-ninja` is
-an explicit candidate installation. Dosho's independent lock has no Shinobi
-or Git-source dependency. See [installation](https://dosho.readthedocs.io/en/latest/installation.html) for the
+The project uses [uv](https://docs.astral.sh/uv/). Integration tests pair
+Dosho with an explicit Shinobi checkout or wheel. Dosho's independent lock has
+no Shinobi or Git-source dependency. See [installation](https://dosho.readthedocs.io/en/latest/installation.html) for the
 candidate wheel-pair procedure. After installing the pair, use `uv run --no-sync`
 for integration tests so sync does not remove the explicit adapter. Documentation
 builds inspect definitions and require no Shinobi installation.
