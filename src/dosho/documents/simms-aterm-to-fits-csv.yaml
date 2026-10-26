@@ -1,0 +1,12 @@
+_include: (dosho)documents/simms-aterm-to-fits.yaml
+cabs:
+  simms-aterm-to-fits-csv:
+    _use: cabs.simms-aterm-to-fits
+    info: Shared time-dependent diagonal Jones screens from an explicit readonly analytic
+      coefficient CSV.
+    inputs:
+      beam-pattern:
+        dtype: File
+        required: true
+        choices: []
+        writable: false

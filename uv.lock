@@ -222,6 +222,7 @@ validation = [
 dev = [
     { name = "astropy" },
     { name = "pytest" },
+    { name = "python-casacore" },
     { name = "ruff" },
 ]
 docs = [
@@ -245,6 +246,7 @@ provides-extras = ["validation"]
 dev = [
     { name = "astropy", specifier = ">=7.2,<9" },
     { name = "pytest", specifier = ">=8.0" },
+    { name = "python-casacore", specifier = ">=3.7,<4" },
     { name = "ruff", specifier = ">=0.5" },
 ]
 docs = [
@@ -802,6 +804,22 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e4/47/b9efed96c114afcfa3c9d3fe98a76a1d14c74a9e266d397cf6eb64be5e01/pytest-9.1.1.tar.gz", hash = "sha256:1088fbde8f2b49d95a549a195707afa7a76a3ce9bcadc26b6d71f0ffda5fe313", size = 1636369, upload-time = "2026-06-19T10:58:32.857Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/24/25/1de2678b631f5a49215c6c96fff41ba892b0a34df68d6d80292b1b48aa7f/pytest-9.1.1-py3-none-any.whl", hash = "sha256:37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c", size = 386536, upload-time = "2026-06-19T10:58:31.347Z" },
+]
+
+[[package]]
+name = "python-casacore"
+version = "3.8.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/61/96bbc8e1c9751bc83a70a9e94154b9bff3633a56584c00c374dfb1591df1/python_casacore-3.8.1.tar.gz", hash = "sha256:757763cbf5bcb8e98b6809308de107bcb9b41982779b17f163ef20ca0ec18322", size = 288771, upload-time = "2026-06-26T08:19:05.304Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cd/78/9e02da53633e558dfdb75ee8f8a5812a8a723fa1825940675ee958f381e2/python_casacore-3.8.1-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:e8472fb93848a90ebc89161e111804015481b08fd628e7df6d5262437b844b43", size = 45680290, upload-time = "2026-06-26T08:18:50.049Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/11/01382c28e51adba5dd14cafdfa5c081ddbaeb069fdb1ade3940aa7cc367e/python_casacore-3.8.1-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:9cb9cecb4cb821a70ce4258dec0f5b3d5088a66317afc0df201ff19ebd4d5da9", size = 45683411, upload-time = "2026-06-26T08:18:57.194Z" },
+    { url = "https://files.pythonhosted.org/packages/64/d9/e221b2b721b16d8c04d5741ed18f571c90cc0c8cb3ba7bc571bb3b5804d8/python_casacore-3.8.1-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:cbdf22d3329eb7f550c279872d7c5a23eb307298bec86063bccec4683b4da989", size = 45683464, upload-time = "2026-06-26T08:19:00.003Z" },
+    { url = "https://files.pythonhosted.org/packages/15/0c/748fe5d476f091468b52770e1126a6cfb854fb491c397f1169a102243960/python_casacore-3.8.1-cp314-cp314-manylinux_2_28_x86_64.whl", hash = "sha256:bcfe0225a4a403ec72c0484d670ce573aa5172e192e80de8363f85ab98182bd2", size = 45687676, upload-time = "2026-06-26T08:19:02.854Z" },
 ]
 
 [[package]]

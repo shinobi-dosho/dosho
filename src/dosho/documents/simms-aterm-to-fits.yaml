@@ -1,0 +1,83 @@
+cabs:
+  simms-aterm-to-fits:
+    command: simms primary-beam
+    image: SIMMS
+    info: Time-dependent diagonal sky-frame Jones screens and absolute parset from
+      one MS; requires candidate Simms a-term support.
+    inputs:
+      ms:
+        dtype: MSv2
+        required: true
+        writable: false
+      beam-pattern:
+        dtype: str
+        required: true
+        choices:
+        - L
+        - UHF
+      output:
+        dtype: str
+        required: true
+        write_path: true
+        string_pattern: (?i)^.+(?<!\.fits)$
+        info: Absolute filename stem without .fits suffix; native FITS bytes use this
+          exact name, parset appends .parset.
+      fits-format:
+        dtype: str
+        default: wsclean
+        implicit: wsclean
+        choices:
+        - wsclean
+        nullable: false
+      pol-basis:
+        dtype: str
+        default: linear
+        implicit: linear
+        choices:
+        - linear
+        nullable: false
+      pixel-size:
+        dtype: str
+        required: true
+      npix:
+        dtype: int
+        required: true
+      beam-pa-step:
+        dtype: float
+        required: true
+      field-id:
+        dtype: int
+        required: true
+      spw-id:
+        dtype: int
+        required: true
+        info: Native Simms DATA_DESC_ID selection, not direct SPW row.
+      start-freq:
+        dtype: str
+      chan-width:
+        dtype: str
+      nchan:
+        dtype: int
+        required: true
+      nworkers:
+        dtype: int
+        default: 4
+      mode:
+        dtype: str
+        default: to-fits
+        implicit: to-fits
+        choices:
+        - to-fits
+        nullable: false
+        policies:
+          positional: true
+    outputs:
+      screen:
+        dtype: File
+        implicit: '{output}'
+      aterm_config:
+        dtype: File
+        implicit: '{output}.parset'
+    dataset_accesses:
+    - field: ms
+      mode: read

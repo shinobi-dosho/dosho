@@ -1,0 +1,12 @@
+_include: (dosho)documents/msutils-summary.yaml
+cabs:
+  msutils-summary-msv2:
+    _use: cabs.msutils-summary
+    inputs:
+      ms:
+        dtype: MSv2
+        writable: false
+    dataset_accesses:
+    - field: ms
+      mode: read
+    outputs: {}

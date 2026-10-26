@@ -102,6 +102,8 @@ def build_argv(cab, resolved: dict[str, Any]) -> list[str]:
 
     for name in cab.inputs_model.model_fields:
         meta = cab.field_meta.get(name)
+        if meta is not None and not meta.pass_to_command:
+            continue
         if meta is not None and meta.implicit is not None:
             value: Any = meta.implicit
         elif name in resolved:
@@ -135,6 +137,8 @@ def build_argv(cab, resolved: dict[str, Any]) -> list[str]:
             continue
         meta = cab.match_pattern(name)
         if meta is None:
+            continue
+        if not meta.pass_to_command:
             continue
         arg = meta.nom_de_guerre or name
         _emit_arg(flags, policies, policies.arg_name(arg), value)

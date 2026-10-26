@@ -142,6 +142,30 @@ for _collection in (STEMS, DESTINATIONS, FAMILY_ROOTS, SCRATCH_PATHS):
 SCRATCH_PATHS.add(("quartical", "output_log_directory"))
 STEMS.add(("quartical-readonly", "output_log_directory"))
 
+# Scoped profiles inherit these native destinations; generic MS outputs remain
+# authoritative in-place passthroughs, never stale-clear targets.
+STEMS.update(
+    {
+        ("wsclean-msv2", "prefix"),
+        ("wsclean-idg-aterm", "prefix"),
+        ("quartical-msv2", "output_log_directory"),
+        ("simms-aterm-to-fits", "output"),
+        ("simms-aterm-to-fits-csv", "output"),
+    }
+)
+DESTINATIONS.update(
+    {
+        ("bdsf-gaul", "outfile_gaul"),
+        ("bdsf-runtime-probe", "scratch"),
+        ("bdsf-runtime-probe", "receipt"),
+        ("bdsf-runtime-probe", "catalog"),
+        ("flagmanager-save", "flagversions"),
+        ("msutils-summary-msv2", "json_out"),
+    }
+)
+FAMILY_ROOTS.add(("quartical-msv2", "output_gain_directory"))
+SCRATCH_PATHS.update({("wsclean-msv2", "temp_dir"), ("wsclean-idg-aterm", "temp_dir")})
+
 # Every other dual declaration, and why deleting it would be wrong. Grouped by
 # the reason, because the reasons are what a new cab has to be checked against
 # -- not the names.
@@ -223,6 +247,23 @@ NOT_DESTINATIONS = {
     #    so clearing it could only ever hit something that is not the product.
     ("predictcomp", "prefix"): "a prefix; the products are `<prefix>*.cl`",
 }
+
+NOT_DESTINATIONS.update(
+    dict.fromkeys(
+        [
+            ("flagdata-manual-msv2", "vis"),
+            ("flagmanager-save", "vis"),
+            ("flagversion-restore-replace", "vis"),
+            ("msutils-sumcols-msv2", "ms"),
+            ("quartical-msv2", "input_ms_path"),
+            ("simms-predict-gaul-aterm", "ms"),
+            ("simms-predict-gaul-apparent", "ms"),
+            ("wsclean-idg-aterm", "ms"),
+            ("wsclean-msv2", "ms"),
+        ],
+        "strict in-place MS writer; deleting this passthrough destroys its input",
+    )
+)
 
 
 def _all_scopes() -> dict[str, object]:
@@ -412,3 +453,19 @@ def test_owned_store_roots_and_scratch_paths_have_declarations():
         assert field in path_fields(scope.inputs_model)
         assert "{" + field + "}/*" in scope.scratch
         assert field not in scope.outputs_model.model_fields
+
+
+def test_runtime_probe_created_directory_and_children_pass_native_preflight(tmp_path):
+    from shinobi.steps.schema import path_input_modes, validate_declared_writes
+
+    scope = get_runtime("bdsf-runtime-probe").step
+    scratch = tmp_path / "probe"
+    values = scope.inputs_model(
+        scratch=scratch, receipt=scratch / "receipt.json", catalog=scratch / "sources.gaul"
+    ).model_dump()
+    destinations = {"scratch", "receipt", "catalog"}
+    assert path_fields(scope.outputs_model) == destinations
+    assert write_path_fields(scope) == destinations
+    assert path_input_modes(scope, values) == dict.fromkeys(destinations, True)
+    # The real native pystep launcher calls this before filesystem preparation.
+    validate_declared_writes(scope, values, tmp_path)

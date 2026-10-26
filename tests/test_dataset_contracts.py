@@ -97,8 +97,65 @@ CONTRACTS: dict[str, list[DatasetAccess]] = {
     "cubical": [DatasetAccess(field="data_ms", mode="write", allow_schema_change=True)],
 }
 
+# Neutral CASA signatures deliberately retain ordinary Path annotations; explicit
+# DatasetAccess is the strict lifecycle contract, qualified by the adapter.
+NEUTRAL_PATH_CONTRACTS = {
+    "verify-saved-flag-history": [DatasetAccess(field="vis", mode="read", exclusive=True)],
+    "listobs": [DatasetAccess(field="vis", mode="read")],
+    "mstransform": [
+        DatasetAccess(field="vis", mode="read", external_read=True),
+        DatasetAccess(field="outputvis", mode="create"),
+    ],
+    "initweights": [
+        DatasetAccess(field="vis", mode="write", allow_schema_change=True),
+        DatasetAccess(field="vis", mode="write", table="HISTORY", allow_row_count_change=True),
+    ],
+    "flagmanager-save": [
+        DatasetAccess(
+            field="vis",
+            mode="write",
+            columns=DatasetColumns(read=("FLAG", "FLAG_ROW"), write=("FLAG", "FLAG_ROW")),
+        )
+    ],
+    "flagversion-restore-replace": [DatasetAccess(field="vis", mode="write", columns=FLAGS)],
+    "flagdata-manual-msv2": [
+        DatasetAccess(field="vis", mode="write", columns=FLAGS),
+        DatasetAccess(field="vis", mode="write", table="HISTORY", allow_row_count_change=True),
+    ],
+}
+CONTRACTS.update(
+    {
+        "quartical-msv2": [
+            DatasetAccess(field="input_ms_path", mode="write", allow_schema_change=True)
+        ],
+        "wsclean-msv2": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
+        "wsclean-idg-aterm": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
+        "msutils-sumcols-msv2": [DatasetAccess(field="ms", mode="write", allow_schema_change=True)],
+        "msutils-summary-msv2": [DatasetAccess(field="ms", mode="read")],
+        "simms-aterm-to-fits": [DatasetAccess(field="ms", mode="read")],
+        "simms-aterm-to-fits-csv": [DatasetAccess(field="ms", mode="read")],
+        "simms-predict-gaul-aterm": [
+            DatasetAccess(
+                field="ms",
+                mode="write",
+                columns=DatasetColumns(create=("MODEL_GAUL",)),
+                allow_schema_change=True,
+            )
+        ],
+        "simms-predict-gaul-apparent": [
+            DatasetAccess(
+                field="ms",
+                mode="write",
+                columns=DatasetColumns(create=("MODEL_GAUL",)),
+                allow_schema_change=True,
+            )
+        ],
+    }
+)
+
+
 # Cabs that must never be skipped by the step cache (see the document).
-UNCACHED = {"msutils-flags-backup", "msutils-flags-delete"}
+UNCACHED = {"msutils-flags-backup", "msutils-flags-delete", "verify-saved-flag-history"}
 
 
 def _scope(cab):
@@ -160,7 +217,7 @@ def assert_strict(scope, expected: list[DatasetAccess]) -> None:
 
 def test_strict_set_is_exactly_contracted():
     strict = {name for name, scope in _all_scopes().items() if scope_has_dataset_contract(scope)}
-    assert strict == set(CONTRACTS)
+    assert strict == set(CONTRACTS) | set(NEUTRAL_PATH_CONTRACTS)
 
 
 @pytest.mark.parametrize("name", sorted(CONTRACTS))
@@ -470,3 +527,27 @@ def test_a_simulate_calibrate_image_chain_plans_in_order(no_closure, tmp_path):
     names = plan.graph.names
     for child, parent in plan.reasons:
         assert names.index(parent) in plan.graph.deps[names.index(child)]
+
+
+@pytest.mark.parametrize("name", sorted(NEUTRAL_PATH_CONTRACTS))
+def test_neutral_path_access_contract(name):
+    from pathlib import Path
+    from typing import get_args
+
+    scope = _all_scopes()[name]
+    assert list(scope.dataset_accesses) == NEUTRAL_PATH_CONTRACTS[name]
+    validate_scope_dataset_accesses(scope)
+    for access in scope.dataset_accesses:
+        annotation = scope.inputs_model.model_fields[access.field].annotation
+        assert annotation is Path or Path in get_args(annotation)
+    if name == "flagmanager-save":
+        assert scope.cache is True
+        assert "vis" in scope.outputs_model.model_fields
+        assert scope.outputs_model.model_fields["flagversions"].annotation is Path
+
+    if name == "verify-saved-flag-history":
+        assert scope.cache is False
+        assert "vis" not in scope.outputs_model.model_fields
+        assert "vis" not in mutated_path_fields(scope)
+        assert scope.mutability_of("vis") is not Mutability.MUTABLE
+        assert scope.inputs_model.model_fields["history"].json_schema_extra["writable"] is False

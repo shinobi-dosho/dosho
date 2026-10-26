@@ -1,0 +1,378 @@
+_include: (dosho)documents/wsclean-msv2.yaml
+cabs:
+  wsclean-idg-aterm:
+    _use: cabs.wsclean-msv2
+    info: XX/YY-capable Stokes-I IDG imaging and prediction with one validated shared
+      diagonal screen parset.
+    inputs:
+      gridder:
+        dtype: str
+        default: idg
+        implicit: idg
+        choices:
+        - idg
+        nullable: false
+      idg-mode:
+        dtype: str
+        default: cpu
+        implicit: cpu
+        choices:
+        - cpu
+        nullable: false
+      pol:
+        dtype: str
+        default: I
+        choices:
+        - I
+        nullable: false
+      aterm-config:
+        dtype: File
+        required: true
+        writable: false
+      aterm-image:
+        dtype: File
+        required: true
+        writable: false
+        pass_to_command: false
+        info: Actual FITS file referenced by aterm-config; explicit non-argv dependency.
+      apply-primary-beam:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      reuse-primary-beam:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      apply-facet-beam:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      grid-with-beam:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      use-differential-lofar-beam:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      save-aterms:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      predict:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      make-psf-only:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      dry-run:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      continue:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      save-psf-pb:
+        dtype: bool
+        default: false
+        implicit: false
+        choices:
+        - false
+        nullable: false
+      facet-regions:
+        default: null
+        choices:
+        - null
+      apply-facet-solutions:
+        default: null
+        choices:
+        - null
+      beam-model:
+        default: null
+        choices:
+        - null
+      beam-mode:
+        default: null
+        choices:
+        - null
+      beam-normalisation-mode:
+        default: null
+        choices:
+        - null
+      mwa-path:
+        default: null
+        choices:
+        - null
+      beam-aterm-update:
+        default: null
+        choices:
+        - null
+      aterm-kernel-size:
+        default: null
+        choices:
+        - null
+      facet-beam-update:
+        default: null
+        choices:
+        - null
+      dd-psf-grid:
+        default: null
+        choices:
+        - null
+    outputs:
+      image_pb:
+        dtype: ProductFamily[FITSImage]
+        info: Intrinsic IDG a-term corrected image; native product, not a static image
+          division.
+        family:
+          coordinates:
+            time: int
+            frequency:
+            - int
+            - str
+            polarization: str
+            component: str
+          rules:
+          - path: '{prefix}{time}{frequency}{polarization}-image-pb.fits'
+            coordinates:
+              component: real
+            when:
+              predict:
+              - false
+              dry_run:
+              - false
+              make_psf_only:
+              - false
+            axes:
+              time:
+                count_input: intervals_out
+                suffix: -t{index:04d}
+                singleton_suffix: ''
+              frequency:
+                count_input: nchan
+                suffix: -{index:04d}
+                singleton_suffix: ''
+                aggregate:
+                  value: mfs
+                  suffix: -MFS
+                  only_multiple: true
+              polarization:
+                values_input: pol
+                tokens:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YX
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                include:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                uppercase: true
+                split: csv_or_compact
+                suffix: -{value}
+                singleton_suffix: ''
+            required: true
+      residual_pb:
+        dtype: ProductFamily[FITSImage]
+        info: Intrinsic IDG a-term corrected residual; native product, not a static
+          image division.
+        family:
+          coordinates:
+            time: int
+            frequency:
+            - int
+            - str
+            polarization: str
+            component: str
+          rules:
+          - path: '{prefix}{time}{frequency}{polarization}-residual-pb.fits'
+            coordinates:
+              component: real
+            when:
+              predict:
+              - false
+              dry_run:
+              - false
+              make_psf_only:
+              - false
+            axes:
+              time:
+                count_input: intervals_out
+                suffix: -t{index:04d}
+                singleton_suffix: ''
+              frequency:
+                count_input: nchan
+                suffix: -{index:04d}
+                singleton_suffix: ''
+                aggregate:
+                  value: mfs
+                  suffix: -MFS
+                  only_multiple: true
+              polarization:
+                values_input: pol
+                tokens:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YX
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                include:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                uppercase: true
+                split: csv_or_compact
+                suffix: -{value}
+                singleton_suffix: ''
+            required: true
+            when_set:
+              niter: true
+      model_pb:
+        dtype: ProductFamily[FITSImage]
+        info: Intrinsic IDG a-term corrected model; native product, not a static image
+          division.
+        family:
+          coordinates:
+            time: int
+            frequency:
+            - int
+            - str
+            polarization: str
+            component: str
+          rules:
+          - path: '{prefix}{time}{frequency}{polarization}-model-pb.fits'
+            coordinates:
+              component: real
+            when:
+              predict:
+              - false
+              dry_run:
+              - false
+              make_psf_only:
+              - false
+            axes:
+              time:
+                count_input: intervals_out
+                suffix: -t{index:04d}
+                singleton_suffix: ''
+              frequency:
+                count_input: nchan
+                suffix: -{index:04d}
+                singleton_suffix: ''
+                aggregate:
+                  value: mfs
+                  suffix: -MFS
+                  only_multiple: true
+              polarization:
+                values_input: pol
+                tokens:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YX
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                include:
+                - I
+                - Q
+                - U
+                - V
+                - XX
+                - XY
+                - YY
+                - RR
+                - RL
+                - LR
+                - LL
+                uppercase: true
+                split: csv_or_compact
+                suffix: -{value}
+                singleton_suffix: ''
+            required: true
+            when_set:
+              niter: true
+    derived_reads:
+      aterm_screen:
+        member: file
+        family:
+          coordinates: {}
+          rules:
+          - path: '{aterm_image}'
+            required: true
+      aterm_parset:
+        member: file
+        family:
+          coordinates: {}
+          rules:
+          - path: '{aterm_config}'
+            required: true

@@ -546,6 +546,7 @@ def _param_meta(
         string_pattern=value.get("string_pattern"),
         dtype=value.get("dtype") if with_dtype else None,
         write_path=bool(value.get("write_path", False)),
+        pass_to_command=value.get("pass_to_command", True),
         abbreviation=value.get("abbreviation"),
         # Tri-state: absent stays unmarked rather than collapsing to `true`,
         # so what the cab actually said survives the load -- `worker_schema`

@@ -1,0 +1,58 @@
+_include: (dosho)documents/library/quartical.yaml
+cabs:
+  quartical-msv2:
+    _use: lib.quartical
+    info: Local MSv2 scalar solve/apply writer; external parsets are forbidden.
+    input_patterns:
+    - segments:
+      - regex: (?!(?:input_ms|input_model|output|mad_flags|solver|dask)\.)[A-Za-z][A-Za-z0-9_]*
+      - attrs:
+          type:
+            dtype: str
+          solve_per:
+            dtype: str
+          direction_dependent:
+            dtype: bool
+          pinned_directions:
+            dtype: List[int]
+          time_interval:
+            dtype: str
+          freq_interval:
+            dtype: str
+          load_from:
+            dtype: Directory
+            writable: false
+          interp_mode:
+            dtype: str
+          interp_method:
+            dtype: str
+          respect_scan_boundaries:
+            dtype: bool
+          initial_estimate:
+            dtype: bool
+    dataset_accesses:
+    - field: input_ms_path
+      mode: write
+      allow_schema_change: true
+    inputs:
+      input_ms.path:
+        dtype: MSv2
+        mutable: true
+      parset:
+        choices:
+        - null
+        default: null
+      output.log_directory:
+        dtype: str
+        mutable: false
+        write_path: true
+      output.gain_directory:
+        dtype: str
+        mutable: false
+        write_path: true
+    outputs:
+      input_ms_path:
+        dtype: MSv2
+      gain_root_token:
+        dtype: str
+        implicit: '{output_gain_directory}'

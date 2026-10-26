@@ -108,3 +108,36 @@ constraints for strings and containers. Bounds must be nonnegative integers
 and the minimum cannot exceed the maximum. Constrained defaults are validated
 when constructing the model. These shared constraints also serve Shinobi's
 worker configuration models; no cab-specific validation callback is loaded.
+
+
+Non-argv dependency inputs
+-------------------------
+
+A declared input may set ``pass_to_command: false``. Its normal type,
+requiredness and readonly metadata still apply; it remains available to the
+execution adapter for fingerprinting and mounts. Only native argv emission is
+suppressed. The default is ``true`` and must be a boolean. This supports, for
+example, the explicit FITS dependency referenced by a native a-term parset,
+without inventing a nonexistent command-line option. The tool adapter must
+validate that the parset references this exact artifact; suppression does not
+validate arbitrary file contents or authorize writes.
+
+The shared-screen profiles require candidate Simms a-term support and a
+qualified WSClean runtime. Their declarations do not qualify native numerical
+behavior. The fixed CASA history SAVE profile declares MS WRITE capability because
+native CASA opens the MS read/write, checks exact FLAG/FLAG_ROW preservation
+with native casatools and returns the authoritative same-field vis. It accepts
+only a fresh history root; callers must run a preserving preflight before creator cleanup. It does
+not retain pre-existing history or promise partial-sidecar rollback. SAVE is
+cache-enabled for strict mutation recovery; restart reuse requires a fresh
+read-only history verification against the actual saved version digest.
+
+
+``flagversion-restore-replace`` is a separate casatools utility, not a wrapper
+around CASA agentflagger RESTORE (which opens history read/write). It requires
+the actual SAVE version digest and a fixed fully populated two-column boolean
+saved table. Every row/type/shape is checked before the MS is opened for writes;
+FLAG and FLAG_ROW are copied independently and post-close identity is verified.
+Native oracle equivalence, including inconsistent FLAG_ROW/FLAG cases, remains
+an explicit qualification requirement. Partial target writes use the normal
+strict MS recovery mechanism; readonly history is never a rollback target.

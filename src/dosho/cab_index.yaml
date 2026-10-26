@@ -467,3 +467,54 @@ cabs:
   quartical-readonly:
     attr: quartical_readonly
     document: quartical-readonly.yaml
+  quartical-msv2:
+    attr: quartical_msv2
+    document: quartical-msv2.yaml
+  wsclean-msv2:
+    attr: wsclean_msv2
+    document: wsclean-msv2.yaml
+  msutils-sumcols-msv2:
+    attr: sumcols_msv2
+    document: msutils-sumcols-msv2.yaml
+  msutils-summary-msv2:
+    attr: summary_msv2
+    document: msutils-summary-msv2.yaml
+  flagmanager-save:
+    attr: flagmanager_save
+    module: dosho.cabs.casa_selfcal
+    symbol: flagmanager_save
+  flagversion-restore-replace:
+    attr: flagversion_restore_replace
+    module: dosho.cabs.casa_selfcal
+    symbol: flagversion_restore_replace
+  flagdata-manual-msv2:
+    attr: flagdata_manual_msv2
+    module: dosho.cabs.casa_selfcal
+    symbol: flagdata_manual_msv2
+  simms-aterm-to-fits:
+    attr: simms_aterm_to_fits
+    document: simms-aterm-to-fits.yaml
+  wsclean-idg-aterm:
+    attr: wsclean_idg_aterm
+    document: wsclean-idg-aterm.yaml
+  simms-predict-gaul-aterm:
+    attr: simms_predict_gaul_aterm
+    document: simms-predict-gaul-aterm.yaml
+  simms-predict-gaul-apparent:
+    attr: simms_predict_gaul_apparent
+    document: simms-predict-gaul-apparent.yaml
+  bdsf-gaul:
+    attr: bdsf_gaul
+    module: dosho.cabs.bdsf
+    symbol: gaul
+  bdsf-runtime-probe:
+    attr: bdsf_runtime_probe
+    module: dosho.cabs.bdsf_runtime
+    symbol: probe
+  simms-aterm-to-fits-csv:
+    attr: simms_aterm_to_fits_csv
+    document: simms-aterm-to-fits-csv.yaml
+  verify-saved-flag-history:
+    attr: verify_saved_flag_history
+    module: dosho.cabs.saved_history
+    symbol: verify_saved_flag_history
