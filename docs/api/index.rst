@@ -61,7 +61,7 @@ import and inspect them directly, e.g.:
 
 .. code-block:: console
 
-    $ ninja cabs show wsclean
+    $ dosho show wsclean
 
 .. automodule:: dosho.cabs
    :no-members:

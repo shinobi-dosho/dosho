@@ -26,12 +26,12 @@ and credit you in the release notes if you'd like.
 
 ## Security posture
 
-The threat model and defensive design are documented in
-[`AGENTS.md`](AGENTS.md) — see the *"Never eval()/exec() a cab's `command`"*
-section. In short:
+Cab-loading and authoring rules are described in
+[`CONTRIBUTING.md`](CONTRIBUTING.md#before-adding-a-cab). The security boundaries
+are:
 
-- **Cab definitions are treated as untrusted content.** cult-cargo / stimela-
-  classic YAML can come from anywhere, so it is never `eval`/`exec`-ed.
+- **Cab definitions are treated as untrusted data.** Loading them parses static
+  declarations without evaluating or executing their contents.
 - Only the `binary` cab flavour is executed; other flavours are rejected by
   `build_argv()` with `UnsupportedFlavourError` *before* any argv is built.
 - Backends invoke commands with **list-form** `subprocess.run` — never

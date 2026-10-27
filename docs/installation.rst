@@ -1,68 +1,85 @@
 Installation
 ============
 
-The base catalogue requires Python 3.11+ and a YAML parser; it can list and
-read cab documents without Pydantic or Shinobi::
+You need **Python 3.11 or newer** to install Dosho. If you only want to see
+which tools are available, browse the :doc:`tool catalogue <reference/cabs>`
+without installing anything.
 
-    pip install "dosho>=0.2.0b1"
+For running tools and pipelines
+-------------------------------
 
-Definition building, Python function schemas, validation and argv formatting
-are optional and need no Shinobi installation::
+Install **Stimela Ninja**, which includes Dosho and the ``ninja`` command.
+You do not need to install Dosho separately.
 
-    pip install "dosho[validation]>=0.2.0b1"
+In a Linux or macOS terminal, create and activate a Python environment:
 
-To construct runnable ``Cab``/``StepRef`` objects and execute recipes, install
-Shinobi, which depends on Dosho validation::
+.. code-block:: console
 
-    pip install "stimela-ninja>=0.2.0b1"
+    $ python3 -m venv .venv
+    $ source .venv/bin/activate
+    $ pip install "stimela-ninja>=0.2.0b1"
 
-These docs assume Dosho and Shinobi 0.2.0b1 or newer. ``dosho.get``,
-``dosho.cabs.<name>`` and ``dosho.define_cab`` return neutral definitions without
-importing Shinobi. ``Recipe.add_step`` adapts them for execution;
-``shinobi.cabs.get`` and ``shinobi.cabs.adapt_definition`` expose explicit runtime
-adaptation.
+If you already have an environment for your pipeline work, activate it and
+run just the last command. These docs use Dosho 0.2.0b2 and Shinobi 0.2.0b1 or newer.
+Activate the same environment whenever you open a new terminal.
 
-Strict MSv2 execution and FITS image-family inspection use optional framework
-inspectors. For those workflows, install Shinobi with both extras::
+Check that the tool definitions are available:
 
-    pip install "stimela-ninja[ms,fits]>=0.2.0b1"
+.. code-block:: console
 
-The annotations and catalogue remain available without those inspectors.
+    $ ninja cabs list
+    $ ninja cabs show wsclean
 
-Development pairing
--------------------
+These commands list tools and show their parameters. They do not run a tool
+or need astronomy data.
 
-Dosho's lock resolves independently of Shinobi. Integration tests require an
-explicit candidate checkout or wheel of Shinobi; it is deliberately absent
-from Dosho's dependency graph::
+The astronomy software runs separately, either in a container or from an
+installation on your computer. Stimela Ninja uses Apptainer by default;
+its ``apptainer`` command must be available to run containerized tools.
+See `Stimela Ninja installation
+<https://stimela-ninja.readthedocs.io/en/latest/installation.html>`_ for
+other ways to run tools and the optional ``ms`` and ``fits`` extras needed
+by recipes that check Measurement Sets or FITS files. The strict WSClean
+example in :doc:`quickstart` needs both:
 
-    uv sync --locked --extra validation --group dev
-    bash .github/scripts/install-pair.sh /path/to/candidate/stimela-ninja
-    uv run --no-sync pytest -q -o pythonpath=
+.. code-block:: console
 
-The helper builds both wheels, installs them together with their runtime
-dependencies, and verifies each version and installed package origin. Temporary
-files stay under ``.work-cache/pair``. Run integration tests with
-``uv run --no-sync`` so a subsequent sync cannot remove the explicit candidate.
-Clearing pytest's configured ``pythonpath`` checks the installed wheels.
-CI pairs every push to main and every pull request with
-Shinobi main, verifying each installed version against its own source checkout
-plus package origin. Reusable and manually dispatched CI accept a ``ninja-ref``
-override for a specific branch, tag, or commit. Independent core CI requires no
-companion framework; the publication workflow also requires the full paired
-tests and docs to pass.
+    $ pip install "stimela-ninja[ms,fits]>=0.2.0b1"
 
-Documentation
--------------
+Follow :doc:`quickstart` to use a tool definition in a recipe.
 
-The docs group supplies all documentation and schema dependencies. Catalogue
-generation reads cab declarations and function annotations without importing
-Shinobi::
+For using Dosho on its own
+--------------------------
 
-    uv run --python 3.12 --locked --group docs sphinx-build -E -n -W --keep-going -b html docs docs/_build/html
+You can work with tool definitions without installing Stimela Ninja.
+Choose one of the following in your activated Python environment.
 
-To regenerate only the committed catalogue::
+To list tool names and read the raw definitions:
 
-    uv run --locked --group docs python docs/_ext/cab_catalog.py
+.. code-block:: console
 
-See :doc:`concepts/validation` for the ownership and runtime adaptation contract.
+    $ pip install "dosho>=0.2.0b2"
+    $ dosho list
+
+To also look up definitions in Python, check parameter values, and build
+command-line arguments:
+
+.. code-block:: console
+
+    $ pip install "dosho[validation]>=0.2.0b2"
+    $ dosho show wsclean
+    $ dosho validate my-cabs.yaml
+
+``show`` displays a named schema. ``validate`` checks every resolved static
+binary definition in a YAML file, including native parameter defaults and
+constraints. Framework types and access/family declarations are labelled
+``requires stimela-ninja to validate``. Data and execution qualification remain
+with Stimela Ninja. Add ``--strict`` to ``validate`` to fail when checks remain
+deferred. These commands do not run the astronomy tools.
+See :doc:`concepts/validation` for the standalone Python API.
+
+For contributors
+----------------
+
+See :doc:`contributing` for source setup, testing Dosho with a Shinobi
+checkout, documentation builds and catalogue regeneration.

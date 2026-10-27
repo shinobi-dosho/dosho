@@ -58,6 +58,8 @@ nitpicky = True
 # These are type variables, aliases or constraint metadata rather than classes
 # with linkable API entries. Preserve their annotation text without class links.
 nitpick_ignore = [
+    # Shared inert header is a private implementation base, not public API.
+    ("py:class", "dosho.validation.compiled._CabHeader"),
     ("py:class", "JsonValue"),
     ("py:class", "pydantic.types.JsonValue"),
     ("py:class", "MetaT"),

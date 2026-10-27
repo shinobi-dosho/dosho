@@ -738,3 +738,777 @@ def test_candidate_cli_revalidates_staged_and_final_publications(tmp_path, monke
     writes = [i for i, argv in enumerate(calls) if cli._registry_write(argv)]
     assert len(writes) == (3 if multi else 1)
     assert all(calls[i - 1] == ["python3", "/trusted/gate.py"] for i in writes)
+
+
+# Standalone catalogue commands inspect definitions without adapting or running them.
+def test_cabs_list_is_sorted_real_inventory():
+    from dosho.registry import list_cabs
+
+    result = CliRunner().invoke(cli.main, ["list"])
+    assert result.exit_code == 0, result.output
+    assert result.output.splitlines() == sorted(list_cabs())
+
+
+@pytest.mark.parametrize(
+    "args", [["--help"], ["list", "--help"], ["show", "--help"], ["validate", "--help"]]
+)
+def test_cabs_help_is_discoverable(args):
+    result = CliRunner().invoke(cli.main, args)
+    assert result.exit_code == 0
+    assert "Usage:" in result.output
+
+
+@pytest.mark.parametrize(
+    "name,expected",
+    [
+        (
+            "wsclean",
+            [
+                "List[MSv2]",
+                "ProductFamily[FITSImage]",
+                _images.WSCLEAN,
+                "requires stimela-ninja to validate",
+                "dataset_accesses",
+            ],
+        ),
+        ("listobs", ["Inputs:", "Outputs:", "vis:", "listfile:"]),
+        ("bdsf-catalog", ["Inputs:", "Outputs:"]),
+    ],
+)
+def test_cabs_show_real_schemas(name, expected):
+    result = CliRunner().invoke(cli.main, ["show", name])
+    assert result.exit_code == 0, result.output
+    for text in expected:
+        assert text in result.output
+    assert "--ms" not in result.output
+
+
+def test_cabs_unknown_checked_before_optional_dependency(monkeypatch):
+    def fail():
+        raise AssertionError("dependency loaded for unknown name")
+
+    monkeypatch.setattr(cli, "_inspection_dependency", fail)
+    result = CliRunner().invoke(cli.main, ["show", "unknown-tool"])
+    assert result.exit_code == 1
+    assert "unknown cab" in result.output
+
+
+def test_cabs_show_reads_python_signature_without_calling_body(monkeypatch):
+    from typing import Literal
+
+    from dosho import pystep, registry
+
+    @pystep(image="example:1", info="A schema only.")
+    def sample(
+        ctx,
+        flag: bool = False,
+        count: int = 0,
+        text: str = "",
+        mode: Literal["a", "b"] | None = None,
+    ) -> None:
+        raise AssertionError("must never run body")
+
+    monkeypatch.setattr(registry, "list_cabs", lambda: ["sample"])
+    monkeypatch.setattr(registry, "get", lambda name: sample)
+    result = CliRunner().invoke(cli.main, ["show", "sample"])
+    assert result.exit_code == 0, result.output
+    for text in [
+        "default=False",
+        "default=0",
+        "default=''",
+        "default=None",
+        "Choices: ['a', 'b']",
+        "A schema only.",
+        "example:1",
+    ]:
+        assert text in result.output
+
+
+def _check_cabs(tmp_path, text):
+    path = tmp_path / "cabs.yaml"
+    path.write_text(text)
+    return CliRunner().invoke(cli.main, ["validate", str(path)])
+
+
+def test_cabs_validate_all_definitions_and_falsey_defaults(tmp_path):
+    result = _check_cabs(
+        tmp_path,
+        """
+cabs:
+  first:
+    command: echo
+    inputs:
+      flag: {dtype: bool, default: false}
+      count: {dtype: int, default: 0}
+      text: {dtype: str, default: ''}
+      required: {dtype: int, required: true}
+  second:
+    command: other
+    flavour: {kind: binary}
+""",
+    )
+    assert result.exit_code == 0, result.output
+    assert "Static definition checks passed: first, second" in result.output
+    assert "Actual data and execution qualification" in result.output
+
+
+@pytest.mark.parametrize(
+    "fragment,expected",
+    [
+        ("command: ''", "nonempty string"),
+        ("command: [echo]", "command"),
+        ("inputs: {}", "no 'command'"),
+        ("command: echo\n  dynamic_schema: evil.make", "dynamic_schema"),
+        ("command: echo\n  flavour: python", "only binary"),
+        ("command: echo\n  cache: 7", "cache"),
+        ("command: echo\n  policies: {prefix: []}", "prefix"),
+        ("command: echo\n  inputs: []", ""),
+        ("command: echo\n  inputs: {n: {dtype: int, default: wrong}}", "inputs.n"),
+        ("command: echo\n  inputs: {n: {dtype: 'List[str]', default: wrong}}", "inputs.n"),
+        ("command: echo\n  inputs: {n: {dtype: int, choices: [1, 2], default: 3}}", "inputs.n"),
+        ("command: echo\n  inputs: {n: {dtype: str, nullable: false}}", "null"),
+        ("command: echo\n  inputs: {n: {dtype: str, min_length: 3, default: ab}}", "inputs.n"),
+        (
+            "command: echo\n  inputs: {n: {dtype: str, string_pattern: '^a', default: b}}",
+            "inputs.n",
+        ),
+        ("command: echo\n  inputs: {ms: {dtype: MSv2, min_length: -1}}", "min_length"),
+        ("command: echo\n  outputs: {n: {dtype: File, writable: false}}", "writable"),
+    ],
+)
+def test_cabs_validate_rejects_bad_definitions(tmp_path, fragment, expected):
+    result = _check_cabs(tmp_path, "bad:\n  " + fragment + "\n")
+    assert result.exit_code == 1, result.output
+    assert "cabs.yaml" in result.output and "bad" in result.output
+    assert expected in result.output
+    assert "Static definition checks passed" not in result.output
+
+
+def test_cabs_validate_checks_native_field_alongside_deferred_framework(tmp_path):
+    result = _check_cabs(
+        tmp_path,
+        """
+strict:
+  command: tool
+  inputs:
+    ms: {dtype: 'List[MSv2]', required: true}
+    count: {dtype: int, default: wrong}
+""",
+    )
+    assert result.exit_code == 1
+    assert "inputs.count" in result.output
+    assert "Static definition checks passed" not in result.output
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        "{}",
+        "[]",
+        "- tool",
+        "cabs: []",
+        "cabs: null",
+        "bad: null",
+        "bad: [echo]",
+        "bad: {command: [}",
+    ],
+)
+def test_cabs_validate_bad_document_shapes(tmp_path, text):
+    result = _check_cabs(tmp_path, text)
+    assert result.exit_code == 1, result.output
+    assert "Error:" in result.output
+
+
+def test_cabs_validate_fails_when_later_cab_is_bad(tmp_path):
+    result = _check_cabs(tmp_path, "good: {command: echo}\nbad: {command: ''}\n")
+    assert result.exit_code == 1
+    assert "bad" in result.output
+    assert "checks passed" not in result.output
+
+
+def test_cabs_validate_relative_composition(tmp_path):
+    (tmp_path / "base.yaml").write_text("base: {command: echo, inputs: {n: {dtype: int}}}\n")
+    result = _check_cabs(tmp_path, "_include: base.yaml\ncabs:\n  sample:\n    _use: base\n")
+    assert result.exit_code == 0, result.output
+    assert "checks passed: sample" in result.output
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("_include: missing.yaml", "missing.yaml"),
+        ("_include: cabs.yaml", "cycle"),
+        ("cabs:\n  a: {_use: cabs.b}\n  b: {_use: cabs.a}", "cycle"),
+        ("_include: (not_a_real_package)bad.yaml", "no filesystem root"),
+    ],
+)
+def test_cabs_validate_composition_errors(tmp_path, text, expected):
+    result = _check_cabs(tmp_path, text)
+    assert result.exit_code == 1
+    assert expected in result.output
+
+
+def test_cabs_validate_file_paths(tmp_path):
+    for path in [tmp_path, tmp_path / "missing.yaml"]:
+        result = CliRunner().invoke(cli.main, ["validate", str(path)])
+        assert result.exit_code == 2
+
+
+def test_cabs_validate_bundled_documents_report_exact_deferrals():
+    from dosho import registry
+    from dosho.validation.compiler import _check_static, load_file
+
+    root = Path(registry.__file__).parent / "documents"
+    for path in root.glob("*.yaml"):
+        definitions = load_file(path, **registry.loader_options())
+        for definition in definitions.values():
+            _check_static(definition)
+    result = CliRunner().invoke(cli.main, ["validate", str(root / "wsclean.yaml")])
+    assert result.exit_code == 0, result.output
+    assert "wsclean.inputs.ms (List[MSv2]): requires stimela-ninja to validate" in result.output
+    assert (
+        "wsclean.outputs.image (ProductFamily[FITSImage]): requires stimela-ninja to validate"
+        in result.output
+    )
+    assert (
+        "dataset_accesses (framework access declaration): requires stimela-ninja to validate"
+        in result.output
+    )
+
+
+def test_cabs_does_not_offer_execution():
+    for args in [
+        ["cab", "wsclean", "--help"],
+        ["cabs", "wsclean"],
+        ["cabs", "run"],
+        ["cabs", "list"],
+        ["cabs", "show", "wsclean"],
+    ]:
+        result = CliRunner().invoke(cli.main, args)
+        assert result.exit_code == 2
+        assert "Error:" in result.output
+
+
+def _blocked_cli(args, blocked):
+    import subprocess
+    import sys
+
+    program = """
+import importlib.abc
+import sys
+class Block(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split('.')[0] in BLOCKED:
+            raise ModuleNotFoundError(f'blocked {fullname}', name=fullname.split('.')[0])
+sys.meta_path.insert(0, Block())
+from dosho.cli import main
+main(ARGS, standalone_mode=True)
+"""
+    return subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "BLOCKED=" + repr(blocked) + "\nARGS=" + repr(args) + "\n" + program,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--help"],
+        ["validate", "--help"],
+        ["list"],
+        ["show", "wsclean", "--help"],
+        ["images", "list"],
+    ],
+)
+def test_cabs_base_commands_without_pydantic_or_shinobi(args):
+    result = _blocked_cli(args, ["pydantic", "shinobi"])
+    assert result.returncode == 0, result.stderr
+    assert result.stdout
+
+
+@pytest.mark.parametrize("args", [["show", "wsclean"], ["show", "listobs"]])
+def test_cabs_schema_commands_need_validation_extra(args):
+    result = _blocked_cli(args, ["pydantic", "shinobi"])
+    assert result.returncode == 1
+    assert 'pip install "dosho[validation]"' in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_cabs_validate_needs_validation_extra(tmp_path):
+    path = tmp_path / "cab.yaml"
+    path.write_text("sample: {command: echo}")
+    result = _blocked_cli(["validate", str(path)], ["pydantic", "shinobi"])
+    assert result.returncode == 1
+    assert 'pip install "dosho[validation]"' in result.stderr
+
+
+@pytest.mark.parametrize("name", ["wsclean", "listobs", "bdsf-catalog"])
+def test_cabs_schema_never_imports_framework_or_tool_packages(name):
+    result = _blocked_cli(["show", name], ["shinobi", "casatasks", "bdsf", "casacore"])
+    assert result.returncode == 0, result.stderr
+    assert "Inputs:" in result.stdout and "Outputs:" in result.stdout
+
+
+def test_cabs_validate_never_imports_dynamic_hook_or_framework(tmp_path):
+    path = tmp_path / "cab.yaml"
+    path.write_text("sample: {command: tool, inputs: {ms: {dtype: MSv2}}}")
+    blocked = ["shinobi", "evil", "casatasks", "bdsf"]
+    result = _blocked_cli(["validate", str(path)], blocked)
+    assert result.returncode == 0, result.stderr
+    assert "requires stimela-ninja to validate" in result.stdout
+    path.write_text("sample: {command: tool, dynamic_schema: evil.make}")
+    result = _blocked_cli(["validate", str(path)], blocked)
+    assert result.returncode == 1
+    assert "dynamic_schema" in result.stderr
+    assert "blocked" not in result.stderr
+
+
+def test_cabs_unrelated_import_error_is_not_mislabelled(monkeypatch):
+    from dosho import registry
+
+    def fail(name):
+        raise ModuleNotFoundError("unrelated dependency missing", name="unrelated")
+
+    monkeypatch.setattr(registry, "get", fail)
+    result = CliRunner().invoke(cli.main, ["show", "wsclean"])
+    assert isinstance(result.exception, ModuleNotFoundError)
+    assert result.exception.name == "unrelated"
+    assert "dosho[validation]" not in result.output
+
+
+def test_cabs_show_finite_literal_choices():
+    from typing import Literal
+
+    from dosho._inspection import _literal_choices
+
+    assert _literal_choices(Literal["a"] | Literal["b"] | None) == ["a", "b"]
+    assert _literal_choices(list[Literal["a", "b"]] | None) == ["a", "b"]
+    assert _literal_choices(str | Literal["a"]) is None
+
+
+def test_cabs_validate_json_and_explicit_dosho_root(tmp_path):
+    result = _check_cabs(tmp_path, '{"cabs": {"sample": {"command": "tool"}}}')
+    assert result.exit_code == 0, result.output
+
+
+def test_cabs_validate_explicit_dosho_root(tmp_path):
+    result = _check_cabs(tmp_path, '_include: "(dosho)documents/wsclean.yaml"')
+    assert result.exit_code == 0, result.output
+    assert "requires stimela-ninja to validate" in result.output
+
+
+def test_validate_strict_native_only_succeeds(tmp_path):
+    path = tmp_path / "native.yaml"
+    path.write_text("sample: {command: tool, inputs: {count: {dtype: int, default: 0}}}")
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 0, result.output
+    assert "Static definition checks passed: sample" in result.output
+
+
+def test_validate_strict_reports_all_framework_deferrals(tmp_path):
+    path = tmp_path / "framework.yaml"
+    path.write_text("""
+first:
+  command: tool
+  inputs:
+    ms: {dtype: MSv2}
+  outputs:
+    image:
+      dtype: ProductFamily[FITSImage]
+      family: {}
+  dataset_accesses: []
+second:
+  command: other
+  inputs:
+    fits: {dtype: FITSImage}
+""")
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 1
+    for label in (
+        "first.inputs.ms",
+        "first.outputs.image",
+        "first.outputs.image.family",
+        "first.dataset_accesses",
+        "second.inputs.fits",
+    ):
+        assert label in result.output
+    assert result.output.count("requires stimela-ninja to validate") == 5
+    assert "Strict validation failed" in result.output
+    # Even strict mode never loads framework/tool packages.
+    blocked = _blocked_cli(["validate", str(path), "--strict"], ["shinobi", "casatasks", "bdsf"])
+    assert blocked.returncode == 1
+    assert "second.inputs.fits" in blocked.stdout
+    assert "blocked" not in blocked.stderr
+
+
+def test_validate_strict_rejects_static_error(tmp_path):
+    path = tmp_path / "bad.yaml"
+    path.write_text("sample: {command: tool, inputs: {n: {dtype: int, default: wrong}}}")
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 1
+    assert "inputs.n" in result.output
+    assert "checks passed" not in result.output
+
+
+@pytest.mark.parametrize(
+    "args", [["--strict"], ["list", "--strict"], ["show", "wsclean", "--strict"]]
+)
+def test_strict_is_only_available_for_validate(args):
+    result = CliRunner().invoke(cli.main, args)
+    assert result.exit_code == 2
+    assert "No such option" in result.output and "--strict" in result.output
+
+
+@pytest.mark.parametrize(
+    "fragment,expected",
+    [
+        ("harvest: files", "harvest"),
+        ("scratch: path", "scratch"),
+        ("inputs: {n: {dtype: int, policies: []}}", "policies"),
+        ("inputs: {ms: {dtype: MSv2, policies: wrong}}", "policies"),
+        ("inputs: []", "inputs"),
+        ("inputs: false", "inputs"),
+        ("inputs: 0", "inputs"),
+        ("outputs: []", "outputs"),
+    ],
+)
+def test_validate_rejects_malformed_metadata_shapes(tmp_path, fragment, expected):
+    result = _check_cabs(tmp_path, "sample:\n  command: tool\n  " + fragment + "\n")
+    assert result.exit_code == 1
+    assert "Error:" in result.output and expected in result.output
+
+
+@pytest.mark.parametrize("direction", ["input", "output"])
+@pytest.mark.parametrize("dtype", ["MSv2", "FITSImage", "ProductFamily[FITSImage]"])
+def test_validate_strict_defers_framework_pattern_attrs(tmp_path, direction, dtype):
+    text = f"""
+patterned:
+  command: tool
+  {direction}_patterns:
+    - segments:
+        - regex: '.+'
+        - attrs:
+            data:
+              dtype: {dtype}
+              family: {{}}
+"""
+    path = tmp_path / "patterns.yaml"
+    path.write_text(text)
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 1, result.output
+    label = f"patterned.{direction}_patterns[0].segments[1].attrs.data"
+    assert f"{label} ({dtype}): requires stimela-ninja to validate" in result.output
+    assert (
+        f"{label}.family (framework family declaration): requires stimela-ninja to validate"
+        in result.output
+    )
+    assert "Strict validation failed" in result.output
+    result = CliRunner().invoke(cli.main, ["validate", str(path)])
+    assert result.exit_code == 0, result.output
+    assert label in result.output
+
+
+def test_show_displays_declared_pattern_attrs_and_framework_deferrals(monkeypatch):
+    from dosho import registry
+    from dosho.validation import parse_document
+
+    definition = parse_document(
+        "patterned",
+        {
+            "command": "tool",
+            "input_patterns": [
+                {
+                    "segments": [
+                        {"regex": ".+"},
+                        {
+                            "attrs": {
+                                "data": {"dtype": "MSv2"},
+                                "native": {"dtype": "int"},
+                                "family": {"dtype": "ProductFamily[FITSImage]", "family": {}},
+                            }
+                        },
+                    ]
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr(registry, "list_cabs", lambda: ["patterned"])
+    monkeypatch.setattr(registry, "get", lambda name: definition)
+    result = CliRunner().invoke(cli.main, ["show", "patterned"])
+    assert result.exit_code == 0, result.output
+    assert "input_patterns[0].segments[1].attrs.data: MSv2" in result.output
+    assert "input_patterns[0].segments[1].attrs.native: int" in result.output
+    assert result.output.count("requires stimela-ninja to validate") == 3
+
+
+def test_validate_strict_native_pattern_succeeds(tmp_path):
+    path = tmp_path / "native-pattern.yaml"
+    path.write_text("""
+patterned:
+  command: tool
+  input_patterns:
+    - segments:
+        - regex: '.+'
+        - attrs: {count: {dtype: int}}
+""")
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 0, result.output
+    assert "requires stimela-ninja" not in result.output
+
+
+@pytest.mark.parametrize("presence", ["required: true", "default: 1"])
+@pytest.mark.parametrize("bound", ["min_length: 2", "max_length: 2"])
+@pytest.mark.parametrize("dtype", ["int", "float", "File", "Union[str, int]"])
+def test_validate_rejects_length_constraints_on_native_scalar(tmp_path, presence, bound, dtype):
+    result = _check_cabs(
+        tmp_path,
+        f"sample: {{command: tool, inputs: {{count: {{dtype: '{dtype}', {presence}, {bound}}}}}}}",
+    )
+    assert result.exit_code == 1
+    assert "cabs.yaml" in result.output and "sample" in result.output
+    assert "inputs.count" in result.output and "string or container" in result.output
+
+
+@pytest.mark.parametrize(
+    "dtype,extra",
+    [
+        ("str", "required: true"),
+        ("List[int]", "required: true"),
+        ("Tuple[int, int]", "required: true"),
+        ("str", "choices: [abc, def], nullable: true"),
+    ],
+)
+def test_validate_accepts_length_constraints_on_sized_native_types(tmp_path, dtype, extra):
+    result = _check_cabs(
+        tmp_path,
+        f"sample: {{command: tool, inputs: {{value: {{dtype: '{dtype}', {extra}, min_length: 1}}}}}}",
+    )
+    assert result.exit_code == 0, result.output
+
+
+@pytest.mark.parametrize("value", ["1", "false", "[]", "''"])
+def test_validate_rejects_pattern_attr_nonmapping(tmp_path, value):
+    result = _check_cabs(
+        tmp_path,
+        "sample: {command: tool, input_patterns: [{segments: [{attrs: {x: " + value + "}}]}]}",
+    )
+    assert result.exit_code == 1
+    assert "sample" in result.output and "input_patterns[0].segments[0].attrs.x" in result.output
+    assert "must be a mapping" in result.output
+
+
+def test_validate_reports_invalid_pattern_regex(tmp_path):
+    result = _check_cabs(
+        tmp_path,
+        "sample: {command: tool, input_patterns: [{segments: [{regex: '['}, {attrs: {x: {dtype: str}}}]}]}",
+    )
+    assert result.exit_code == 1
+    assert "sample" in result.output and "input_patterns[0]" in result.output
+    assert "not a valid pattern" in result.output
+
+
+@pytest.mark.parametrize(
+    "fragment,location",
+    [
+        ("policies: {prefx: '--'}", "policies"),
+        ("inputs: {x: {dtype: str, policies: {positonal: true}}}", "inputs.x.policies"),
+        (
+            "input_patterns: [{segments: [{attrs: {x: {dtype: str, policies: {positonal: true}}}}]}]",
+            "input_patterns[0].segments[0].attrs.x.policies",
+        ),
+    ],
+)
+def test_validate_rejects_unknown_policy_keys(tmp_path, fragment, location):
+    result = _check_cabs(tmp_path, "sample:\n  command: tool\n  " + fragment + "\n")
+    assert result.exit_code == 1
+    assert location in result.output and "unknown policy keys" in result.output
+
+
+@pytest.mark.parametrize("key", ["write_path", "writable", "required", "mutable"])
+def test_validate_rejects_boolean_metadata_strings(tmp_path, key):
+    result = _check_cabs(
+        tmp_path, f"sample: {{command: tool, inputs: {{x: {{dtype: File, {key}: 'false'}}}}}}"
+    )
+    assert result.exit_code == 1
+    assert f"inputs.x.{key}" in result.output and "must be a boolean" in result.output
+
+
+@pytest.mark.parametrize("key", ["positional", "positional_head"])
+def test_validate_rejects_boolean_field_policy_strings(tmp_path, key):
+    result = _check_cabs(
+        tmp_path,
+        f"sample: {{command: tool, inputs: {{x: {{dtype: str, policies: {{{key}: 'false'}}}}}}}}",
+    )
+    assert result.exit_code == 1
+    assert f"inputs.x.policies.{key}" in result.output
+
+
+def test_validate_rejects_boolean_cab_policy_strings(tmp_path):
+    result = _check_cabs(tmp_path, "sample: {command: tool, policies: {key_value: 'false'}}")
+    assert result.exit_code == 1
+    assert "policies.key_value must be a boolean" in result.output
+
+
+def test_validate_accepts_boolean_false_safety_markers(tmp_path):
+    result = _check_cabs(
+        tmp_path,
+        """
+sample:
+  command: tool
+  inputs:
+    x:
+      dtype: File
+      required: false
+      mutable: false
+      write_path: false
+      writable: false
+      policies: {positional: false, positional_head: false}
+""",
+    )
+    assert result.exit_code == 0, result.output
+
+
+def test_show_pattern_attrs_include_help_choices_and_nullable(monkeypatch):
+    from dosho import registry
+    from dosho.validation import parse_document
+
+    definition = parse_document(
+        "patterned",
+        {
+            "command": "tool",
+            "input_patterns": [
+                {
+                    "segments": [
+                        {"regex": ".+"},
+                        {
+                            "attrs": {
+                                "mode": {
+                                    "dtype": "str",
+                                    "info": "Select a mode.",
+                                    "choices": ["a", "b"],
+                                    "nullable": False,
+                                },
+                            }
+                        },
+                    ]
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr(registry, "list_cabs", lambda: ["patterned"])
+    monkeypatch.setattr(registry, "get", lambda name: definition)
+    result = CliRunner().invoke(cli.main, ["show", "patterned"])
+    assert result.exit_code == 0, result.output
+    for text in (
+        "input_patterns[0].segments[1].attrs.mode: str",
+        "Select a mode.",
+        "Choices: ['a', 'b']",
+        "Nullable: False",
+    ):
+        assert text in result.output
+
+
+def test_validate_defers_framework_length_applicability(tmp_path):
+    result = _check_cabs(
+        tmp_path,
+        "sample: {command: tool, inputs: {ms: {dtype: MSv2, required: true, min_length: 2}}}",
+    )
+    assert result.exit_code == 0, result.output
+    assert "inputs.ms (MSv2): requires stimela-ninja to validate" in result.output
+
+
+@pytest.mark.parametrize("repeat", ["[list]", "{bad: true}", "false", "1", "wrong"])
+@pytest.mark.parametrize("pattern", [False, True])
+def test_validate_rejects_unsupported_field_repeat(tmp_path, repeat, pattern):
+    field = f"{{dtype: 'List[str]', policies: {{repeat: {repeat}}}}}"
+    content = (
+        "input_patterns: [{segments: [{attrs: {x: " + field + "}}]}]"
+        if pattern
+        else "inputs: {x: " + field + "}"
+    )
+    path = tmp_path / "repeat.yaml"
+    path.write_text("sample:\n  command: tool\n  " + content + "\n")
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 1
+    assert "policies.repeat must be 'list' or null" in result.output
+    assert (
+        "input_patterns[0].segments[0].attrs.x" in result.output
+        if pattern
+        else "inputs.x" in result.output
+    )
+
+
+@pytest.mark.parametrize("repeat", ["list", "null"])
+@pytest.mark.parametrize("pattern", [False, True])
+def test_validate_accepts_supported_field_repeat(tmp_path, repeat, pattern):
+    field = f"{{dtype: 'List[str]', policies: {{repeat: {repeat}}}}}"
+    content = (
+        "input_patterns: [{segments: [{attrs: {x: " + field + "}}]}]"
+        if pattern
+        else "inputs: {x: " + field + "}"
+    )
+    result = _check_cabs(tmp_path, "sample:\n  command: tool\n  " + content + "\n")
+    assert result.exit_code == 0, result.output
+
+
+def test_validate_accepts_existing_cab_repeat_token(tmp_path):
+    result = _check_cabs(tmp_path, "sample: {command: tool, policies: {repeat: '[]'}}")
+    assert result.exit_code == 0, result.output
+
+
+@pytest.mark.parametrize(
+    "reference", ["1", "0", "false", "null", "''", "{}", "[{}]", "[[bad]]", "[good, 1]"]
+)
+def test_validate_rejects_nonstring_use_references(tmp_path, reference):
+    result = _check_cabs(
+        tmp_path, "good: {command: tool}\nsample: {command: tool, _use: " + reference + "}\n"
+    )
+    assert result.exit_code == 1
+    assert "cabs.yaml" in result.output
+    assert "_use reference must be a nonempty dotted-path string" in result.output
+
+
+@pytest.mark.parametrize(
+    "include",
+    [
+        "{1: file.yaml}",
+        "{false: file.yaml}",
+        "{'(dosho)': [1]}",
+        "{'(dosho)': [false]}",
+        "{'(dosho)': null}",
+        "{'(dosho)': {bad: true}}",
+        "{'(dosho)': [[]]}",
+    ],
+)
+def test_validate_rejects_nonstring_include_keys_and_filenames(tmp_path, include):
+    result = _check_cabs(tmp_path, "_include: " + include + "\ncabs: {sample: {command: tool}}\n")
+    assert result.exit_code == 1
+    assert "cabs.yaml" in result.output
+    assert "_include" in result.output and "must be a string" in result.output
+
+
+@pytest.mark.parametrize("target", ["1", "0", "false", "null", "text", "[]", "[one, two]"])
+def test_validate_rejects_nonmapping_use_target(tmp_path, target):
+    result = _check_cabs(
+        tmp_path, f"lib: {target}\ncabs:\n  sample: {{command: tool, _use: lib}}\n"
+    )
+    assert result.exit_code == 1
+    assert "_use target 'lib' must be a mapping" in result.output
+    assert "checks passed" not in result.output
+
+
+def test_validate_simms_defaults_pass_strict_checks():
+    from dosho import registry
+
+    path = Path(registry.__file__).parent / "documents" / "simms.yaml"
+    result = CliRunner().invoke(cli.main, ["validate", str(path), "--strict"])
+    assert result.exit_code == 0, result.output
+    assert "Static definition checks passed: simms" in result.output
+    assert "requires stimela-ninja to validate" not in result.output

@@ -19,7 +19,8 @@ Everything below is the design as argued at the time, including its
 file:line citations, its counts (42 binary cabs then, 61 now) and its
 sequencing. It is a historical record and is **not** maintained against the
 tree; for what the repository does today, read
-[`concepts/authoring.rst`](concepts/authoring.rst) and `AGENTS.md`. It is
+[`concepts/authoring.rst`](concepts/authoring.rst) and
+[`CONTRIBUTING.md`](../CONTRIBUTING.md). It is
 excluded from the Sphinx build for that reason.
 
 **Context:** spans this repo and stimela-ninja (`shinobi`). §9 marks which steps
@@ -102,7 +103,7 @@ land where.
      arrives with the dialect (step 2) or the flip (step 4), and never said how
      the generator recovers a manifest key from an already-resolved reference.
      **Fixed:** §4.5.
-  Smaller: §9 step 6 cited `docs/cab-format-rule` as though the `AGENTS.md` Core
+  Smaller: §9 step 6 cited `docs/cab-format-rule` as though the core authoring
   rule were already amended — it was a *branch*, not a file, and review was right
   that on the base commit the Core rule still banned this outright. It has since
   merged (PR #39), so the rule now reads "a cab definition is parameter
@@ -149,8 +150,8 @@ Two things this deliberately does **not** claim:
   outnumber binary cabs 68 to 42.
 - **This adds no orchestration surface.** The dialect describes one tool's
   parameters and nothing else: no composition, no expression language, no
-  control flow. See `AGENTS.md`'s Core rule, which this design is an instance
-  of rather than an exception to.
+  control flow. This follows the rule that a cab definition is parameter
+  configuration, not code.
 
 ---
 
@@ -212,8 +213,8 @@ Two things this deliberately does **not** claim:
   machinery, not new.
 - **`images.yaml` is already data**, with `images.py` resolving each key to a
   full reference and applying the `$DOSHO_IMAGES` / `$DOSHO_IMAGE_<KEY>`
-  override chain. `AGENTS.md` already exempts it from any authoring-format
-  argument.
+  override chain. The manifest is declarative data, independent of the format
+  used to author tool definitions.
 
 ## 3. Assumptions
 
@@ -313,7 +314,7 @@ smallest of the three:
 
 - **No `_include`, no `_use`, no package scoping.** cult-cargo's composition is
   the single largest source of complexity in `loaders/cultcargo.py` and the
-  thing `AGENTS.md` names as a disqualifier.
+  reason for the original restriction on composition.
 - **No expression language.** `ParamMeta.implicit` stays plain `str.format`,
   exactly as `dispatch.py:649-651` resolves it today.
 - **One file, one cab.** No merging, no inheritance, no ordering rules.
@@ -343,9 +344,9 @@ harvest: [...]
 
 Raw parameter names stay raw (`restored-image`), and `sanitize_unique` derives
 the field name and `nom_de_guerre` exactly as `_builder._resolve` does now —
-so the sanitisation rule lives in one place and cannot drift, per `AGENTS.md`'s
-DRY section, which already records `cultcargo`/`worker_schema` drifting apart
-on precisely this kind of shared rule.
+so the sanitisation rule lives in one place and cannot drift.
+`cultcargo`/`worker_schema` had already drifted apart on precisely this kind of
+shared rule.
 
 ### 4.5 Images: the manifest stays, resolution moves
 
@@ -510,8 +511,8 @@ shape this design cannot carry. There is currently one.
 2. `from dosho.cabs import X` returns an object equal to what it returns today,
    whenever shinobi is installed (§4.3).
 3. No document carries executable content, an expression or substitution
-   language, or composition semantics needing a resolver (`AGENTS.md` Core
-   rule).
+   language, or composition semantics needing a resolver, following the rule
+   that cab definitions are data.
 4. Pysteps are untouched. No pystep becomes a document.
 5. Name sanitisation and model construction happen in exactly one place
    (`shinobi.loaders`), never reimplemented dosho-side.
@@ -523,8 +524,8 @@ shape this design cannot carry. There is currently one.
 
 ## 6. Known weaknesses
 
-1. **A third dialect is real, permanent maintenance**, and `AGENTS.md`'s DRY
-   section documents that this project's dialects have already drifted apart
+1. **A third dialect is real, permanent maintenance**, and this project's
+   dialects have already drifted apart
    once. Mitigated by the dialect being strictly smaller than the other two and
    by invariant 5, but not eliminated.
 2. **Authoring loses Python's typing.** Free dtypes, completion and refactoring
@@ -544,8 +545,8 @@ shape this design cannot carry. There is currently one.
    the repository.
 6. **Two call sites will resolve manifest keys**: the `dosho images` CLI
    (code half) and the loader (§4.5). That is the same key→ref+override
-   computation in two places — the precise shape `AGENTS.md`'s DRY section
-   records `cultcargo` and `worker_schema` having already drifted into. It must
+   computation in two places — the same duplication that caused `cultcargo`
+   and `worker_schema` to drift apart. It must
    ship as one shared implementation with both callers routed through it, and
    this design does not currently say where that implementation lives. Open.
 7. **The comparator can bless a lossy dialect.** §4.6 shifts the load from
@@ -581,7 +582,7 @@ shape this design cannot carry. There is currently one.
    i.e. rewriting all 42 anyway — with none of the distribution benefit.
 3. **Reuse the cult-cargo dialect instead of defining one.** Rejected: it drags
    in `_include`/`_use` composition and package scoping, the things dosho exists
-   to be free of, and `AGENTS.md` now names as disqualifiers.
+   to be free of under the authoring rules at the time of this design.
 4. **Convert pysteps too, as declarative `{package, func, kwargs}` entries.**
    Works for the thin `casatasks` pass-throughs, not for `bdsf`/`fitstoolz`/
    `simms`, which have real bodies. Splitting pysteps into "declarative enough"
@@ -643,7 +644,7 @@ shape this design cannot carry. There is currently one.
 5. **[dosho] Split the distributions**, drop `stimela-ninja` from the data
    half's dependencies. Answer §8.1 first.
 6. **[both] Docs**: `docs/concepts/authoring.rst` and shinobi's
-   `docs/concepts/cabs.rst` for the new dialect. `AGENTS.md`'s Core rule is
+   `docs/concepts/cabs.rst` for the new dialect. The authoring rule change is
    already done — PR #39 replaced the blanket "no YAML authoring path" ban with
    "a cab definition is parameter configuration, not code", which is what makes
    this design permissible in the first place. It was a genuine prerequisite,

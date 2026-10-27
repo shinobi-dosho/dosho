@@ -303,6 +303,129 @@ def main() -> None:
     """dosho tooling."""
 
 
+def _inspection_dependency():
+    try:
+        # Import at this boundary so an unrelated missing dependency stays visible.
+        from dosho import (
+            _inspection,
+            validation,  # noqa: F401
+        )
+    except ModuleNotFoundError as exc:
+        if exc.name != "pydantic":
+            raise
+        raise click.ClickException(
+            "Schema inspection requires dosho[validation]; install with "
+            'pip install "dosho[validation]"'
+        ) from exc
+    return _inspection
+
+
+@main.command("validate")
+@click.argument(
+    "definition_file", type=click.Path(path_type=Path, exists=True, dir_okay=False), metavar="FILE"
+)
+@click.option("--strict", is_flag=True, help="Fail if any definition checks require stimela-ninja.")
+def cabs_validate(definition_file: Path, strict: bool) -> None:
+    """Check every static binary definition in FILE."""
+    _inspection_dependency()
+    import yaml
+
+    from dosho import registry
+    from dosho.validation.compiler import _check_static, load_file
+    from dosho.validation.exceptions import CabLoadError
+
+    try:
+        definitions = load_file(definition_file, **registry.loader_options())
+        if not definitions:
+            raise CabLoadError("no cab definitions found")
+        deferred = []
+        for name, definition in definitions.items():
+            try:
+                deferred.extend((name, path, dtype) for path, dtype in _check_static(definition))
+            except ValueError as exc:
+                raise CabLoadError(f"cab {name!r}: {exc}") from exc
+    except (CabLoadError, OSError, yaml.YAMLError) as exc:
+        raise click.ClickException(f"{definition_file}: {exc}") from exc
+    click.echo(f"Static definition checks passed: {', '.join(definitions)}")
+    for name, path, dtype in deferred:
+        click.echo(f"  {name}.{path} ({dtype}): requires stimela-ninja to validate")
+    click.echo("Actual data and execution qualification are outside these static checks.")
+    if strict and deferred:
+        raise click.ClickException("Strict validation failed: framework checks remain deferred")
+
+
+@main.command("list")
+def cabs_list() -> None:
+    """List registered tool names."""
+    from dosho import registry
+
+    for name in sorted(registry.list_cabs()):
+        click.echo(name)
+
+
+@main.command("show")
+@click.argument("name")
+def cabs_show(name: str) -> None:
+    """Show NAME's declared input and output schema."""
+    from dosho import registry
+
+    if name not in registry.list_cabs():
+        raise click.ClickException(f"unknown cab {name!r}")
+    inspection = _inspection_dependency()
+    from dosho.validation.modelgen import _UnboundFrameworkDtype, dtype_to_type
+
+    try:
+        obj = inspection._schema_obj(registry.get(name))
+    except ValueError as exc:
+        raise click.ClickException(f"cab {name!r}: {exc}") from exc
+    click.echo(name)
+    if obj.info:
+        click.echo(inspection._summary(obj.info))
+    if obj.image:
+        click.echo(f"Image: {obj.image}")
+    for title in ("Inputs", "Outputs"):
+        model = getattr(obj, title.lower(), getattr(obj, title.lower() + "_model", None))
+        click.echo(f"{title}:")
+        fields = list(inspection._fields(model))
+        if not fields:
+            click.echo("  (none)")
+        for field_name, field in fields:
+            status = "required" if field["required"] else f"default={field['default']!r}"
+            click.echo(f"  {field_name}: {field['dtype']} ({status})")
+            if field["choices"] and not isinstance(model, dict):
+                click.echo(f"    Choices: {field['choices']!r}")
+            for text in [field["description"], *field["constraints"]]:
+                if text:
+                    click.echo(f"    {text}")
+            if isinstance(model, dict):
+                try:
+                    dtype_to_type(field["dtype"])
+                except _UnboundFrameworkDtype:
+                    click.echo("    requires stimela-ninja to validate")
+                if model[field_name].meta.framework_family is not None:
+                    click.echo("    family: requires stimela-ninja to validate")
+    from dosho.validation.compiler import _pattern_attributes
+
+    for key in ("input_patterns", "output_patterns"):
+        for path, meta in _pattern_attributes(getattr(obj, key, ()), key):
+            click.echo(f"{path}: {meta.dtype or 'str'}")
+            if meta.info:
+                click.echo(f"    {meta.info}")
+            if meta.choices:
+                click.echo(f"    Choices: {meta.choices!r}")
+            if meta.nullable is not None:
+                click.echo(f"    Nullable: {meta.nullable}")
+            if meta.dtype is not None:
+                try:
+                    dtype_to_type(meta.dtype)
+                except _UnboundFrameworkDtype:
+                    click.echo("    requires stimela-ninja to validate")
+            if meta.framework_family is not None:
+                click.echo("    family: requires stimela-ninja to validate")
+    for key in getattr(obj, "framework_declarations", {}):
+        click.echo(f"{key}: requires stimela-ninja to validate")
+
+
 @main.group()
 @click.option(
     "--source-root",

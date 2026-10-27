@@ -1,16 +1,69 @@
-# dosho
+# Dosho
 
 *A shinobi's tool bag.*
 
-`dosho` is the native cab repository for
-[shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
-Stimela 3.0). A tool is one of two shapes: a real binary is a YAML
-*document*, exposed as a `CabSpec`; a Python-package tool
-with no standalone binary (for example, CASA tasks) is an ordinary annotated
-function marked with `@dosho.pystep`. Shinobi adapts either when a recipe uses
-it. A cab is parameter configuration and stays declarative whatever
-carries it, so there's no `dynamic_schema`-style Python-execution step at
-cab-load time, no expression language, and no dtype coverage gaps.
+**Dosho** provides ready-made tool definitions for radio astronomy pipelines,
+including WSClean, CASA tasks, CubiCal, QuartiCal and AOFlagger.
+Use them with [Stimela Ninja](https://stimela-ninja.readthedocs.io/)
+to build a pipeline without describing each tool's command-line options yourself.
+
+Each definition is called a **cab**. It describes a tool's inputs, outputs
+and container image. Dosho supplies the definitions; Stimela Ninja runs the tools.
+
+## Get started
+
+You can [browse the tool catalogue](https://dosho.readthedocs.io/en/latest/reference/cabs.html)
+without installing anything.
+
+To use the tools in a pipeline, install Stimela Ninja. It includes Dosho.
+You need Python 3.11 or newer:
+
+```bash
+pip install "stimela-ninja>=0.2.0b1"
+ninja cabs list
+ninja cabs show wsclean
+```
+
+These commands list available tools and show WSClean's parameters; they do
+not run WSClean or need astronomy data. The astronomy software itself runs
+separately, in a container or from an installation on your computer.
+
+Follow the [installation guide](https://dosho.readthedocs.io/en/latest/installation.html)
+for environment setup and tool requirements, then the
+[quickstart](https://dosho.readthedocs.io/en/latest/quickstart.html) to use a cab
+in a recipe.
+
+## Use definitions in Python
+
+With Stimela Ninja installed, you can import a tool definition:
+
+```python
+from dosho.cabs import wsclean
+```
+
+Pass it to `Recipe.add_step` when building a pipeline. The quickstart shows
+a complete example.
+
+To inspect definitions with Dosho alone:
+
+```bash
+pip install "dosho[validation]>=0.2.0b2"
+dosho list
+dosho show wsclean
+dosho validate my-cabs.yaml
+```
+
+`list` needs only the base package. `show` reads schemas, and `validate`
+checks static definitions and native parameter defaults. Framework types and
+access/family declarations are labelled `requires stimela-ninja to validate`.
+Add `--strict` to `validate` to fail if any checks remain deferred.
+These checks do not qualify data or execute tools.
+
+Dosho also works on its own. See the
+[standalone installation options](https://dosho.readthedocs.io/en/latest/installation.html#for-using-dosho-on-its-own)
+for browsing definitions and checking parameters without Stimela Ninja, or
+[authoring cabs](https://dosho.readthedocs.io/en/latest/concepts/authoring.html)
+to add a tool.
 
 ## Academic attribution
 
@@ -19,61 +72,6 @@ in research, and cite the associated publications and software release
 where applicable. This is a scholarly request, not an additional licence
 condition.
 Citation information can be found in [CITATION.cff](CITATION.cff).
-
-## Installing
-
-```
-# Catalogue data only
-pip install "dosho>=0.2.0b1"
-# Standalone schemas and argv
-pip install "dosho[validation]>=0.2.0b1"
-# Runnable cabs and recipes
-pip install "stimela-ninja>=0.2.0b1"
-```
-
-The definitions are data — YAML documents under `dosho/documents/`, readable
-without the framework. `dosho.cabs.<tool>`, `dosho.get(...)` and
-`dosho.define_cab(...)` expose definitions without importing Shinobi.
-Listing names and reading raw documents need neither Pydantic nor Shinobi;
-definition building, Python schemas and argv formatting need `dosho[validation]`.
-Shinobi depends on that extra and constructs runtime `Cab`/`StepRef` objects
-when a recipe uses a definition. These docs assume Dosho and Shinobi 0.2.0b1
-or newer.
-
-Dosho owns schema compilation, parameter metadata, policies,
-patterns and validated argv formatting. Shinobi owns framework annotations,
-DAG wiring, execution, filesystem enforcement and dataset lifecycle. See
-[validation and runtime adaptation](https://dosho.readthedocs.io/en/latest/concepts/validation.html)
-for the standalone API and compatibility boundary.
-
-## Usage
-
-Know the tool at write-time? Import it directly:
-
-```python
-from dosho.cabs import wsclean
-from dosho.cabs.casatasks import listobs
-```
-
-Only know the name at runtime? Use the string-keyed registry:
-
-```python
-import dosho
-
-wsclean = dosho.get("wsclean")
-```
-
-Both definitions can be passed directly to `Recipe.add_step`. For a runtime
-object outside a recipe, use `shinobi.cabs.get("wsclean")` or
-`shinobi.cabs.adapt_definition(wsclean)`.
-
-Or, from shinobi itself (any installed `shinobi.cabs`-entry-point
-provider, `dosho` included):
-
-```console
-$ ninja cabs list
-$ ninja cabs show wsclean
-```
 
 ## License
 

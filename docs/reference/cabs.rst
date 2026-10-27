@@ -13563,7 +13563,7 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
      - Enable this to indicate that your ENU file does not have an 'up' dimension
    * - ``direction``
      - ``List[str]``
-     - ``'J2000,0deg,-30deg'``
+     - ``['J2000,0deg,-30deg']``
      - Pointing direction. Example J2000,0h0m0s,-30d0m0d. Option --direction may be specified multiple times for multiple pointings. Provide a list of directions for multiple pointings; each pointing will have a unique field ID
    * - ``synthesis``
      - ``float``
@@ -13579,11 +13579,11 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
      - Integration time in seconds
    * - ``freq0``
      - ``List[str]``
-     - ``'1.4GHz'``
+     - ``['1.4GHz']``
      - Start frequency. This is the middle of the first channel. Specify as val[unit]. E.g 700MHz, no unit => Hz. Use a comma seperated list for multiple start frequencies (for multiple subbands)
    * - ``dfreq``
      - ``List[str]``
-     - ``'2MHz'``
+     - ``['2MHz']``
      - Channel width. Specify as val[unit]. E.g 700MHz, no unit => Hz. Use a comma separated list of channel widths (for multiple subbands)
    * - ``nband``
      - ``int``
@@ -13591,7 +13591,7 @@ simms (classic): simulate an empty MS from telescope/observation parameters (pre
      - Number of subbands
    * - ``nchan``
      - ``List[int]``
-     - ``1``
+     - ``[1]``
      - Number of channels. Can be used in tandem with 'freq0, dfreq, nband' to customise the partitioning of the subbands
    * - ``init_ha``
      - ``float``

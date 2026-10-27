@@ -111,13 +111,13 @@ all accesses to a strict dataset must use compatible declared contracts.
 Inspect a tool from the command line
 --------------------------------------
 
-Every registered ``dosho`` tool is discoverable through Shinobi's own
-``ninja`` CLI:
+Inspect every registered tool with Dosho. Install ``dosho[validation]``
+for schema inspection; listing names needs only the base package:
 
 .. code-block:: console
 
-    $ ninja cabs list
-    $ ninja cabs show wsclean
+    $ dosho list
+    $ dosho show wsclean
 
 Or read the whole set, with resolved container images and full
 input/output schemas, in the :doc:`cab catalog <reference/cabs>`.

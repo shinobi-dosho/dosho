@@ -108,3 +108,74 @@ def test_generic_length_constraints_and_defaults():
     for bounds in [{"min_length": -1}, {"max_length": True}, {"min_length": 2, "max_length": 1}]:
         with pytest.raises(ValueError):
             build_model("BadBounds", {"items": ("List[str]", False, [])}, lengths={"items": bounds})
+
+
+@pytest.mark.parametrize("pol,token", [(["I", "Q"], "I,Q"), ("IQUV", "IQUV")])
+def test_wsclean_pol_formats_without_redundant_repeat_hint(pol, token):
+    from dosho import registry
+
+    document = registry.get("wsclean").document
+    field = document["inputs"]["pol"]
+    # The former comma hint was ignored; the cab's normal list separator owns this.
+    for parameter in (field, {**field, "policies": {"repeat": ","}}):
+        cab = compile_cab(
+            parse_document(
+                "wsclean_pol",
+                {
+                    "command": document["command"],
+                    "policies": document["policies"],
+                    "inputs": {"pol": parameter},
+                },
+            )
+        )
+        values = cab.inputs_model(pol=pol).model_dump()
+        assert build_argv(cab, values) == ["wsclean", "-pol", token]
+
+
+def test_simms_list_defaults_validate_and_preserve_complete_argv():
+    from dosho import registry
+
+    cab = compile_cab(registry.get("simms"))
+    expected_defaults = {
+        "direction": ["J2000,0deg,-30deg"],
+        "freq0": ["1.4GHz"],
+        "dfreq": ["2MHz"],
+        "nchan": [1],
+    }
+    values = cab.inputs_model(msname="example.ms", telescope="meerkat").model_dump()
+    checked = cab.inputs_model.model_validate(values)
+    for name, expected in expected_defaults.items():
+        assert cab.inputs_model.model_fields[name].default == expected
+        assert values[name] == expected
+        assert getattr(checked, name) == expected
+    assert build_argv(cab, values) == [
+        "simms",
+        "--name",
+        "example.ms",
+        "--tel",
+        "meerkat",
+        "--type",
+        "casa",
+        "--coord-sys",
+        "itrf",
+        "--direction",
+        "J2000,0deg,-30deg",
+        "--synthesis",
+        "4",
+        "--dtime",
+        "2",
+        "--freq0",
+        "1.4GHz",
+        "--dfreq",
+        "2MHz",
+        "--nband",
+        "1",
+        "--nchan",
+        "1",
+        "--pol",
+        "XX XY YX YY",
+        "--feed",
+        "perfect X Y",
+        "--scan-lag",
+        "0",
+    ]
