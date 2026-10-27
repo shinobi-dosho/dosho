@@ -43,6 +43,10 @@ class DtypeError(ValueError):
     """A reserved or protected dtype cannot be compiled."""
 
 
+class _UnboundFrameworkDtype(ValueError):
+    """A dtype needs trusted bindings from the execution framework."""
+
+
 class ResolutionCycleGuard:
     """Detect recursion through one composition directive.
 
@@ -197,7 +201,7 @@ def dtype_to_type(dtype: str, *, type_bindings: Mapping[str, TypeBinding] | None
         "directorybundle",
         "msv4",
     } or lower.startswith("productfamily["):
-        raise ValueError(f"{dtype} requires an explicit framework dtype binding")
+        raise _UnboundFrameworkDtype(f"{dtype} requires an explicit framework dtype binding")
     if lower.startswith("list:"):
         return list[dtype_to_type(dtype[5:], type_bindings=type_bindings)]
     if m := _BRACKET_LIST_RE.match(dtype):
@@ -557,8 +561,13 @@ def resolve_use(node: Any, root: dict[str, Any], *, error: type[Exception]) -> A
         Returns:
             The target node with its own `_use` directives resolved.
         """
+        if not isinstance(dotted, str) or not dotted:
+            raise error(f"_use reference must be a nonempty dotted-path string, got {dotted!r}")
         with cycles.enter(dotted, error=error):
-            return resolve_directive(get_path(root, dotted, error=error), "_use", entry_to_dict)
+            target = get_path(root, dotted, error=error)
+            if not isinstance(target, dict):
+                raise error(f"_use target {dotted!r} must be a mapping")
+            return resolve_directive(target, "_use", entry_to_dict)
 
     return resolve_directive(node, "_use", entry_to_dict)
 

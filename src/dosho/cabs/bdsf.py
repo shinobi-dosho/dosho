@@ -6,8 +6,8 @@ PyBDSF has no standalone CLI binary -- `process_image`/`write_catalog` are
 plain Python functions taking `**kwargs` validated against an internal
 options registry (`bdsf.opts.Opts`, 158 traits), not a fixed signature --
 cult-cargo's own `bdsf.yml` is `flavour: python-code` for exactly this
-reason. Per `AGENTS.md` ("never import/execute an external Cab's own
-schema-generation code"), this is a `@dosho.pystep` instead (matching
+reason. Loading a cab must never import or execute an external tool's
+schema-generation code, so this is a `@dosho.pystep` instead (matching
 `casatasks.py`), calling `ctx.import_func("process_image", "bdsf")` inside
 the running container.
 
@@ -21,9 +21,8 @@ in cult-cargo's version: `rms_map`'s real type is a tri-state
 `float`, not an `int`. `write_catalog`'s real default `format` is `"bbs"`,
 not cult-cargo's claimed `"ascii"`. Only options the caller actually sets
 are forwarded to `process_image`/`write_catalog`, so every other one of the
-158 traits still gets PyBDSF's own default -- exactly `AGENTS.md`'s "leave
-the field out and come back when a real pipeline needs it" for the
-remaining ~140.
+158 traits still gets PyBDSF's own default. The remaining options can be
+added when a real pipeline needs them.
 """
 
 from __future__ import annotations

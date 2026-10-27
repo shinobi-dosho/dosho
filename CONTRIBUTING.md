@@ -2,9 +2,8 @@
 
 Thanks for your interest in contributing! **dosho** ("a shinobi's tool
 bag") is the native cab repository for
-[shinobi](https://github.com/shinobi-dosho/stimela-ninja) (stimela-ninja,
-Stimela 3.0). It's early software, so the most valuable contributions
-right now are new tool ports, bug reports, focused fixes, tests,
+[shinobi](https://github.com/shinobi-dosho/stimela-ninja) (Stimela Ninja).
+It's early software, so the most valuable contributions right now are new tool ports, bug reports, focused fixes, tests,
 documentation, and feedback on the design.
 
 Everyone taking part is expected to follow the
@@ -19,16 +18,15 @@ dynamic parameter creation at loadtime. Tools must be fully defined
 when they are authored. The `ParamPattern` construct should be more
 than enough for most cases, and anything beyond that should be
 configured in the Python recipe's logic. See
-**[`AGENTS.md`](https://github.com/shinobi-dosho/dosho/blob/main/AGENTS.md)**
-for the full design rationale and tool-authoring conventions; read it
-before porting a new tool or touching `dosho/_builder.py`/
-`dosho/registry.py`.
+[authoring guide](https://dosho.readthedocs.io/en/latest/concepts/authoring.html)
+for the design rationale and tool formats, and the checklist below before
+porting a new tool or changing `dosho/_builder.py` or `dosho/registry.py`.
 
 Our core philosophy: **avoid unnecessary complexity like the plague**.
 
 ## Ways to contribute
 
-- **Port a new tool** -- see `AGENTS.md`'s "Before adding a cab" section.
+- **Port a new tool** -- follow [Before adding a cab](https://github.com/shinobi-dosho/dosho/blob/main/CONTRIBUTING.md#before-adding-a-cab).
   Every ported tool needs a test that checks real CLI/schema shape, not
   just that the object constructs without error.
 - **Report bugs** and request features via
@@ -39,14 +37,50 @@ Our core philosophy: **avoid unnecessary complexity like the plague**.
   opening an issue to discuss it first is a great way to align before
   writing code.
 
+## Before adding a cab
+
+Use the real tool's `--help` and documentation as the source of truth. For a
+Python function wrapper, check the actual function signature. Cross-check a
+matching cult-cargo definition when available, but do not copy it blindly.
+Never import or execute an external tool's schema-generation code when loading
+a cab. Describe parameters statically; leave unsupported fields out until a
+real pipeline needs them.
+
+Put a binary tool's definition in `src/dosho/documents/<name>.yaml`, or a
+`@dosho.pystep` function in the relevant `src/dosho/cabs/` module. Register it in
+`src/dosho/cab_index.yaml` and add its exported attribute to
+`src/dosho/cabs/__init__.py`. Use the existing image manifest and shared schema
+helpers. Add a test that checks representative arguments or recipe wiring
+against the real tool's interface, then regenerate the catalogue as described
+under [Documentation](https://github.com/shinobi-dosho/dosho/blob/main/CONTRIBUTING.md#documentation).
+
 ## Development setup
 
-The project uses [uv](https://docs.astral.sh/uv/). Integration tests pair
-Dosho with an explicit Shinobi checkout or wheel. Dosho's independent lock has
-no Shinobi or Git-source dependency. See [installation](https://dosho.readthedocs.io/en/latest/installation.html) for the
-candidate wheel-pair procedure. After installing the pair, use `uv run --no-sync`
-for integration tests so sync does not remove the explicit adapter. Documentation
-builds inspect definitions and require no Shinobi installation.
+The project uses [uv](https://docs.astral.sh/uv/).
+
+### Testing with Shinobi
+
+Dosho's lock resolves independently of Shinobi. Integration tests require an
+explicit candidate checkout or wheel of Shinobi; it is deliberately absent
+from Dosho's dependency graph:
+
+```bash
+uv sync --locked --extra validation --group dev
+bash .github/scripts/install-pair.sh /path/to/candidate/stimela-ninja
+uv run --no-sync pytest -q -o pythonpath=
+```
+
+The helper builds both wheels, installs them together with their runtime
+dependencies, and verifies each version and installed package origin. Temporary
+files stay under `.work-cache/pair`. Run integration tests with
+`uv run --no-sync` so a subsequent sync cannot remove the explicit candidate.
+Clearing pytest's configured `pythonpath` checks the installed wheels.
+CI pairs every push to main and every pull request with
+Shinobi main, verifying each installed version against its own source checkout
+plus package origin. Reusable and manually dispatched CI accept a `ninja-ref`
+override for a specific branch, tag, or commit. Independent core CI requires no
+companion framework; the publication workflow also requires the full paired
+tests and docs to pass.
 
 ### The pre-commit hook
 
@@ -192,9 +226,16 @@ their own release processes.
 Write clear, descriptive commit messages explaining *why* a change is made. No
 formal convention (Conventional Commits, sign-off/DCO, or CLA) is required.
 
-Provenance for an assistant-assisted commit goes in a commit trailer and never
-in the PR description — see
-[*Attribution: commit trailers yes, PR trailers no*](https://github.com/shinobi-dosho/dosho/blob/main/AGENTS.md#attribution-commit-trailers-yes-pr-trailers-no).
+If a coding assistant helped with a commit, end its message with a plain-text
+trailer naming the assistant and model:
+
+```text
+Assisted-by: <LLM> <MODEL>
+```
+
+Use no email address or assistant `Co-authored-by:` trailer. Pull request
+descriptions carry no assistant trailer, badge or generated-by notice; they
+describe the change and its validation.
 
 ## Versioning and releases
 

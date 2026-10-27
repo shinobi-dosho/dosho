@@ -1,37 +1,25 @@
 """`@dosho.pystep` wrappers for CASA tasks (the `casatasks` Python
 package, run in-container via `ctx.import_func`).
 
-CASA tasks are Python-package function calls, not standalone binaries --
-cult-cargo's own `casa/*.yml` cabs declare `flavour: python`/`python-code`
-for exactly this reason, and shinobi's `build_argv` refuses to execute any
-cab whose `flavour != "binary"` (a deliberate security boundary: never
-treat cab-supplied command content as code to run). A `@dosho.pystep` is
-architecturally different and safe here: `ctx.import_func("<task>",
-"casatasks")` runs *inside the running container*, at step-execution
-time, calling a real Python function the pystep author wrote directly
-into trusted source -- not shinobi interpreting untrusted cab data. See
-`shinobi.steps.pyfunc`'s own docstring for the full mechanism.
+CASA tasks are Python-package functions. Each `@dosho.pystep` wrapper is
+trusted Python code that calls `ctx.import_func("<task>", "casatasks")`
+inside the running container at step-execution time. Shinobi derives the
+step's parameters from its annotated signature. Static binary cab definitions
+use a separate execution path that builds argv for a standalone executable.
+See `shinobi.steps.pyfunc` for the Python execution mechanism.
 
 Each wrapper here is a thin, generic pass-through to one real CASA task
 with its own real keyword names -- no pipeline-specific orchestration
 logic (flag-version bookkeeping, per-worker config translation, etc.)
 belongs here; that stays in whatever pipeline calls these.
 
-Every task below is audited field-by-field against CASA's own docs
-(casadocs.readthedocs.io/en/stable/api/casatasks.html), not against
-cult-cargo -- cult-cargo's `casa/*.yml` cabs are known to be incomplete
-for exactly the same reasons dosho exists (see wsclean.py/cubical.py's own
-docstrings), so cross-checking against another possibly-gapped source
-would just propagate the same gaps. Two consequences of that audit worth
-flagging: (1) several parameter *defaults* below now match CASA's real
-default rather than a value this file previously hardcoded (e.g.
-`applycal`'s `calwt` now defaults to `[True]` per gaintable, not
-`[False]`; `initweights`'s `wtmode` now defaults to `'nyq'`, not
-`'ones'`) -- a deliberate correctness fix, not preserved for
-compatibility; (2) truly internal-only CASA parameters explicitly marked
-"Hidden parameter for internal use only" in the docs (`mstransform`'s
-`disableparallel`/`ddistart`/`reindex`/`monolithic_processing`) are not
-exposed here, since they're not meaningful for a pipeline to control.
+Parameters and defaults are checked field-by-field against CASA's own docs
+(casadocs.readthedocs.io/en/stable/api/casatasks.html). For example,
+`applycal.calwt` defaults to `[True]` per gaintable and
+`initweights.wtmode` defaults to `'nyq'`. Parameters marked
+"Hidden parameter for internal use only", including `mstransform`'s
+`disableparallel`/`ddistart`/`reindex`/`monolithic_processing`, remain outside
+the public wrapper signature.
 
 "variant"-typed CASA parameters (can be several different Python types
 depending on context) are typed here as whichever concrete type real

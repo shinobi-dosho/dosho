@@ -78,8 +78,6 @@ cabs:
         dtype: Union[str, List[str]]
         default: I
         info: Polarizations; case insensitive, comma separated or packed (e.g. IQUV).
-        policies:
-          repeat: ","
       join-polarizations:
         dtype: bool
       link-polarizations:

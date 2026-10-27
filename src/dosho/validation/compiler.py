@@ -5,9 +5,10 @@ from __future__ import annotations
 import functools
 import re
 import warnings
-from collections.abc import Mapping
+from collections.abc import Mapping, Sized
 from pathlib import Path
-from typing import Any
+from types import UnionType
+from typing import Annotated, Any, Literal, Union, get_args, get_origin
 
 import yaml
 
@@ -17,6 +18,7 @@ from .compiled import (
     CompiledParamMeta as ParamMeta,
     ParamPattern,
     ParamSegment,
+    _CabHeader,
 )
 from .exceptions import CabLoadError
 from .modelgen import (
@@ -24,9 +26,11 @@ from .modelgen import (
     DtypeError,
     ResolutionCycleGuard,
     TypeBinding,
+    _UnboundFrameworkDtype,
     build_model,
     contain_include,
     deep_merge,
+    dtype_to_type,
     length_constraints,
     merge_field_meta,
     normalize_required_default,
@@ -66,8 +70,7 @@ def load_file(
     roots = package_roots or {}
     raw = _load_raw(path.resolve(), roots)
     resolved = resolve_use(raw, raw, error=CabLoadError)
-    cabs_section = resolved.get("cabs", resolved)
-    return {name: parse_document(name, spec, images=images) for name, spec in cabs_section.items()}
+    return _documents(resolved, images=images)
 
 
 def loads(
@@ -101,13 +104,34 @@ def loads(
             ``_include`` or ``_use`` cycle. Cycle errors name the closed path.
     """
     roots = package_roots or {}
-    raw = yaml.safe_load(text) or {}
+    raw = yaml.safe_load(text)
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, dict):
+        raise CabLoadError("document root must be a mapping")
     raw = resolve_directive(
         raw, "_include", lambda entry: _include_entry_to_dict(entry, None, roots)
     )
     resolved = resolve_use(raw, raw, error=CabLoadError)
-    cabs_section = resolved.get("cabs", resolved)
-    return {name: parse_document(name, spec, images=images) for name, spec in cabs_section.items()}
+    return _documents(resolved, images=images)
+
+
+def _documents(resolved, *, images):
+    if not isinstance(resolved, dict):
+        raise CabLoadError("document root must be a mapping")
+    cabs = resolved.get("cabs", resolved)
+    if not isinstance(cabs, dict):
+        raise CabLoadError("'cabs' must be a mapping")
+    for name, spec in cabs.items():
+        if not isinstance(name, str) or not isinstance(spec, dict):
+            raise CabLoadError(f"cab {name!r}: expected a named definition mapping")
+    definitions = {}
+    for name, spec in cabs.items():
+        try:
+            definitions[name] = parse_document(name, spec, images=images)
+        except ValueError as exc:
+            raise CabLoadError(f"cab {name!r}: {exc}") from exc
+    return definitions
 
 
 _PKG_INCLUDE_RE = re.compile(r"^\((?P<pkg>[\w.]+)\)(?P<rest>.*)$")
@@ -159,10 +183,14 @@ def _include_entry_to_dict(
         return _load_raw(target.resolve(), package_roots, containment_root)
     if isinstance(entry, dict) and len(entry) == 1:
         ((key, files),) = entry.items()
+        if not isinstance(key, str):
+            raise CabLoadError(f"_include package key must be a string, got {key!r}")
         if (m := _PKG_INCLUDE_RE.match(key)) and not m.group("rest"):
             pkg_dir = _resolve_package_root(m.group("pkg"), package_roots)
             merged: dict[str, Any] = {}
             for f in files if isinstance(files, list) else [files]:
+                if not isinstance(f, str):
+                    raise CabLoadError(f"_include {key!r}: filename must be a string, got {f!r}")
                 target = contain_include(pkg_dir / f, pkg_dir, entry=f, error=CabLoadError)
                 merged = deep_merge(merged, _load_raw(target, package_roots, pkg_dir))
             return merged
@@ -196,7 +224,11 @@ def _load_raw_cached(
     path: Path, roots_key: tuple[tuple[str, Path], ...], containment_root: Path | None
 ) -> dict[str, Any]:
     package_roots = dict(roots_key)
-    data = yaml.safe_load(path.read_text()) or {}
+    data = yaml.safe_load(path.read_text())
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        raise CabLoadError(f"{path}: document root must be a mapping")
     return resolve_directive(
         data,
         "_include",
@@ -232,14 +264,10 @@ def compile_cab(
         raise CabLoadError(f"cab '{spec.name}': {exc}") from exc
 
 
-def _build_cab(
-    name: str,
-    spec: dict[str, Any],
-    package_roots: dict[str, Path],
-    images: dict[str, str] | None = None,
-    *,
-    type_bindings=None,
-) -> CompiledCab:
+def _header(name, spec, images):
+    for key in ("policies", "management"):
+        if spec.get(key) is not None and not isinstance(spec[key], dict):
+            raise CabLoadError(f"cab {name!r}: {key} must be a mapping")
     cache = spec.get("cache")
     if cache is not None and not isinstance(cache, bool):
         raise CabLoadError(f"cab '{name}': 'cache' must be true, false or null")
@@ -258,6 +286,31 @@ def _build_cab(
     if "command" not in spec:
         raise CabLoadError(f"cab '{name}' has no 'command' (check its _use references)")
 
+    return _CabHeader(
+        name=name,
+        command=spec["command"],
+        info=spec.get("info"),
+        image=image,
+        flavour=flavour,
+        policies=Policies(**(spec.get("policies") or {})),
+        wranglers=((spec.get("management") or {}).get("wranglers")) or {},
+        sandbox=spec.get("sandbox"),
+        harvest=list(spec.get("harvest") or []),
+        scratch=list(spec.get("scratch") or []),
+        cache=cache,
+    )
+
+
+def _build_cab(
+    name: str,
+    spec: dict[str, Any],
+    package_roots: dict[str, Path],
+    images: dict[str, str] | None = None,
+    *,
+    type_bindings=None,
+) -> CompiledCab:
+    header = _header(name, spec, images)
+
     if spec.get("dynamic_schema"):
         warnings.warn(
             f"cab '{name}' uses dynamic_schema ({spec['dynamic_schema']!r}), which "
@@ -269,15 +322,9 @@ def _build_cab(
             stacklevel=2,
         )
 
-    policies_spec = spec.get("policies") or {}
-    wranglers = ((spec.get("management") or {}).get("wranglers")) or {}
-
     in_fields, field_meta, input_mutability = _collect(spec.get("inputs") or {})
     out_fields, out_meta, _out_mutability = _collect(spec.get("outputs") or {})
     out_meta = _drop_output_writable(name, out_meta)
-
-    in_choices = {field: meta.choices for field, meta in field_meta.items() if meta.choices}
-    out_choices = {field: meta.choices for field, meta in out_meta.items() if meta.choices}
 
     # Field hints that ride `json_schema_extra` rather than the annotation,
     # because their consumer reads the *model*, not `field_meta`:
@@ -297,63 +344,19 @@ def _build_cab(
             in_extras[field] = extra
 
     input_patterns = _param_patterns(spec.get("input_patterns"), cab=name, key="input_patterns")
-    inputs_model = build_model(
+    inputs_model = _parameter_model(
         f"{name}_Inputs",
         in_fields,
+        field_meta,
         type_bindings=type_bindings,
-        choices=in_choices,
-        lengths={
-            field: {
-                key: getattr(meta, key)
-                for key in ("min_length", "max_length")
-                if getattr(meta, key) is not None
-            }
-            for field, meta in field_meta.items()
-            if meta.min_length is not None or meta.max_length is not None
-        },
-        nullable={
-            field: meta.nullable for field, meta in field_meta.items() if meta.nullable is not None
-        },
-        error=CabLoadError,
         extras=in_extras,
-        string_patterns={
-            field: meta.string_pattern
-            for field, meta in field_meta.items()
-            if meta.string_pattern is not None
-        },
         allow_extra=bool(input_patterns),
     )
-    outputs_model = build_model(
-        f"{name}_Outputs",
-        out_fields,
-        type_bindings=type_bindings,
-        choices=out_choices,
-        lengths={
-            field: {
-                key: getattr(meta, key)
-                for key in ("min_length", "max_length")
-                if getattr(meta, key) is not None
-            }
-            for field, meta in out_meta.items()
-            if meta.min_length is not None or meta.max_length is not None
-        },
-        nullable={
-            field: meta.nullable for field, meta in out_meta.items() if meta.nullable is not None
-        },
-        error=CabLoadError,
-        string_patterns={
-            field: meta.string_pattern
-            for field, meta in out_meta.items()
-            if meta.string_pattern is not None
-        },
+    outputs_model = _parameter_model(
+        f"{name}_Outputs", out_fields, out_meta, type_bindings=type_bindings
     )
     return CompiledCab(
-        name=name,
-        command=spec["command"],
-        info=spec.get("info"),
-        image=image,
-        flavour=flavour,
-        policies=Policies(**policies_spec),
+        **header.model_dump(),
         # `allow_extra` when the cab has input patterns, matching
         # `dosho._builder.define_cab`. A pattern exists precisely to accept
         # names no field declares -- cubical's `g1-solvable`, QuartiCal's
@@ -377,17 +380,180 @@ def _build_cab(
         # the sharp edge that used to be inherited here dropped the input
         # side's `write_path` for exactly the fields that carry it.
         field_meta=merge_field_meta(field_meta, out_meta),
-        wranglers=wranglers,
         input_mutability=input_mutability,
         input_patterns=input_patterns,
         output_patterns=_param_patterns(
             spec.get("output_patterns"), cab=name, key="output_patterns"
         ),
-        sandbox=spec.get("sandbox"),
-        harvest=list(spec.get("harvest") or []),
-        scratch=list(spec.get("scratch") or []),
-        cache=cache,
     )
+
+
+def _parameter_model(name, fields, metas, **options):
+    return build_model(
+        name,
+        fields,
+        error=CabLoadError,
+        choices={field: meta.choices for field, meta in metas.items() if meta.choices},
+        lengths={
+            field: {
+                key: getattr(meta, key)
+                for key in ("min_length", "max_length")
+                if getattr(meta, key) is not None
+            }
+            for field, meta in metas.items()
+            if meta.min_length is not None or meta.max_length is not None
+        },
+        nullable={
+            field: meta.nullable for field, meta in metas.items() if meta.nullable is not None
+        },
+        string_patterns={
+            field: meta.string_pattern
+            for field, meta in metas.items()
+            if meta.string_pattern is not None
+        },
+        **options,
+    )
+
+
+_FIELD_POLICY_KEYS = {"positional", "positional_head", "repeat"}
+
+
+def _check_static_policies(raw, *, location, field=False):
+    if raw is None:
+        return
+    if not isinstance(raw, dict):
+        raise CabLoadError(f"{location} must be a mapping")
+    allowed = _FIELD_POLICY_KEYS if field else Policies.model_fields
+    unknown = raw.keys() - allowed
+    if unknown:
+        raise CabLoadError(f"{location}: unknown policy keys: {', '.join(sorted(unknown))}")
+    boolean_keys = (
+        ("positional", "positional_head")
+        if field
+        else (name for name, item in Policies.model_fields.items() if item.annotation is bool)
+    )
+    for key in boolean_keys:
+        if key in raw and type(raw[key]) is not bool:
+            raise CabLoadError(f"{location}.{key} must be a boolean")
+    if field and raw.get("repeat") is not None and raw["repeat"] != "list":
+        raise CabLoadError(f"{location}.repeat must be 'list' or null")
+
+
+def _check_static_parameter(raw, location):
+    for key in ("required", "mutable", "write_path", "writable", "pass_to_command"):
+        if key not in raw or (key == "writable" and raw[key] is None):
+            continue
+        if type(raw[key]) is not bool:
+            raise CabLoadError(f"{location}.{key} must be a boolean")
+    _check_static_policies(raw.get("policies"), location=f"{location}.policies", field=True)
+
+
+def _check_static_parameter_tree(raw, location):
+    for name, value in (raw or {}).items():
+        path = f"{location}.{name}"
+        if value is None:
+            continue
+        if not isinstance(value, dict):
+            raise CabLoadError(f"{path} must be a parameter mapping")
+        if _is_section(value):
+            _check_static_parameter_tree(value, path)
+        else:
+            _check_static_parameter(value, path)
+
+
+def _length_compatible(annotation):
+    """Whether every non-null value accepted by this annotation has a length."""
+    origin = get_origin(annotation)
+    if origin is Annotated:
+        return _length_compatible(get_args(annotation)[0])
+    if origin in (Union, UnionType):
+        return all(_length_compatible(arg) for arg in get_args(annotation) if arg is not type(None))
+    if origin is Literal:
+        return all(isinstance(value, Sized) for value in get_args(annotation) if value is not None)
+    base = origin or annotation
+    return isinstance(base, type) and issubclass(base, Sized)
+
+
+def _check_static(spec: CabSpec) -> list[tuple[str, str]]:
+    """Check inert definitions and native defaults, reporting framework deferrals."""
+    from pydantic import TypeAdapter
+
+    document = spec.document
+    if "dynamic_schema" in document:
+        raise CabLoadError("dynamic_schema is unsupported in static definitions")
+    for key in ("harvest", "scratch"):
+        if document.get(key) is not None and not isinstance(document[key], list):
+            raise CabLoadError(f"{key} must be a list of strings")
+    _check_static_policies(document.get("policies"), location="policies")
+    header = _header(spec.name, document, spec.images)
+    if header.flavour != "binary":
+        raise CabLoadError("only binary flavour is supported")
+    if not isinstance(document.get("command"), str) or not document["command"].strip():
+        raise CabLoadError("command must be a nonempty string")
+    deferred = []
+    for direction in ("inputs", "outputs"):
+        names = {}
+        raw = document.get(direction)
+        if raw is not None and not isinstance(raw, dict):
+            raise CabLoadError(f"{direction} must be a mapping")
+        _check_static_parameter_tree(raw, direction)
+        fields, metas, _ = _collect(raw or {}, _seen=names)
+        if direction == "outputs":
+            metas = _drop_output_writable(spec.name, metas)
+        native = {}
+        for name, (dtype, required, default) in fields.items():
+            meta = metas.get(name, ParamMeta())
+            normalize_required_default(
+                required, default, nullable=meta.nullable, error=CabLoadError
+            )
+            try:
+                dtype_to_type(dtype)
+            except _UnboundFrameworkDtype:
+                deferred.append((f"{direction}.{names[name]}", dtype))
+            else:
+                native[name] = fields[name]
+            if meta.framework_family is not None:
+                deferred.append(
+                    (f"{direction}.{names[name]}.family", "framework family declaration")
+                )
+        model = _parameter_model(
+            f"{spec.name}_{direction}",
+            native,
+            {key: value for key, value in metas.items() if key in native},
+        )
+        for name, field in model.model_fields.items():
+            meta = metas.get(name, ParamMeta())
+            if (
+                meta.min_length is not None or meta.max_length is not None
+            ) and not _length_compatible(field.annotation):
+                raise CabLoadError(
+                    f"{direction}.{names[name]}: length constraints require a string or container annotation"
+                )
+            if not field.is_required():
+                try:
+                    TypeAdapter(field.rebuild_annotation()).validate_python(field.default)
+                except ValueError as exc:
+                    raise CabLoadError(f"{direction}.{names[name]}: {exc}") from exc
+        key = direction[:-1] + "_patterns"
+        patterns = _param_patterns(document.get(key), cab=spec.name, key=key)
+        # Inspect the original attr values before bool() normalization loses their types.
+        for index, entry in enumerate(document.get(key) or []):
+            for segment_index, segment in enumerate(entry["segments"]):
+                for name, value in (segment.get("attrs") or {}).items():
+                    path = f"{key}[{index}].segments[{segment_index}].attrs.{name}"
+                    _check_static_parameter(value or {}, path)
+        for path, meta in _pattern_attributes(patterns, key):
+            if meta.dtype is not None:
+                try:
+                    dtype_to_type(meta.dtype)
+                except _UnboundFrameworkDtype:
+                    deferred.append((path, meta.dtype))
+            if meta.framework_family is not None:
+                deferred.append((f"{path}.family", "framework family declaration"))
+    for key in ("dataset_accesses", "fits_accesses", "derived_reads"):
+        if key in document:
+            deferred.append((key, "framework access declaration"))
+    return deferred
 
 
 def _is_section(value: dict) -> bool:
@@ -447,17 +613,33 @@ def _param_patterns(raw: Any, *, cab: str, key: str) -> list[ParamPattern]:
             # declared field, where an all-default meta carries no information
             # and is dropped, the *set of attr names* is what the pattern
             # matches on -- dropping an empty one would delete the attr.
-            attrs = {
-                name: _param_meta(spec or {}, with_dtype=True) for name, spec in attrs_raw.items()
-            }
+            attrs = {}
+            for name, spec in attrs_raw.items():
+                location = f"{key}[{i}].segments[{j}].attrs.{name}"
+                if spec is not None and not isinstance(spec, dict):
+                    raise CabLoadError(f"cab {cab!r}: {location} must be a mapping")
+                if not isinstance(name, str):
+                    raise CabLoadError(f"cab {cab!r}: {location} attr name must be a string")
+                try:
+                    attrs[name] = _param_meta(spec or {}, with_dtype=True)
+                except ValueError as exc:
+                    raise CabLoadError(f"cab {cab!r}: {location}: {exc}") from exc
             segments.append(ParamSegment(attrs=attrs))
         try:
             patterns.append(ParamPattern(separator=entry.get("separator", "."), segments=segments))
-        except ValueError as exc:
+        except (ValueError, re.error) as exc:
             raise CabLoadError(
                 f"cab '{cab}': '{key}[{i}]' is not a valid pattern -- {exc}"
             ) from exc
     return patterns
+
+
+def _pattern_attributes(patterns, key):
+    """Yield declared pattern attr paths without inventing matched parameter names."""
+    for index, pattern in enumerate(patterns):
+        for segment_index, segment in enumerate(pattern.segments):
+            for name, meta in (segment.attrs or {}).items():
+                yield f"{key}[{index}].segments[{segment_index}].attrs.{name}", meta
 
 
 _DEFAULT_PARAM_META = ParamMeta()
@@ -512,8 +694,7 @@ def _param_meta(
     Shared by declared fields and by `ParamPattern` attrs, which are the same
     shape -- an attr is a param spec that happens to name part of a pattern
     rather than a whole field. Keeping one reader means a key added for one is
-    understood by the other, which is the drift `AGENTS.md` warns about for
-    these loaders.
+    understood by the other, preventing the two loaders from drifting apart.
 
     `with_dtype` is the one asymmetry, and it is not cosmetic. A declared
     field's dtype lives in its model annotation, so repeating it here would
@@ -531,6 +712,8 @@ def _param_meta(
         raise CabLoadError(
             "length constraints are supported only on literal fields, not dynamic parameter attrs"
         )
+    if value.get("policies") is not None and not isinstance(value["policies"], dict):
+        raise CabLoadError("parameter policies must be a mapping")
     policies = value.get("policies") or {}
     return ParamMeta(
         nom_de_guerre=nom_de_guerre,
@@ -571,7 +754,11 @@ def _collect(
     metas: dict[str, ParamMeta] = {}
     mutability: dict[str, str] = {}
     seen = _seen if _seen is not None else {}
+    if not isinstance(raw, dict):
+        raise CabLoadError("parameters must be a mapping")
     for key, value in raw.items():
+        if not isinstance(key, str):
+            raise CabLoadError("parameter names must be strings")
         if value is not None and not isinstance(value, dict):
             raise CabLoadError(
                 f"expected a param spec mapping, got {value!r} -- this usually means an "

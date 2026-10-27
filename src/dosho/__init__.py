@@ -1,5 +1,5 @@
 """dosho -- a shinobi's tool bag. The native shinobi (stimela-ninja) cab
-repository. See AGENTS.md for the design rationale.
+repository. See :doc:`/concepts/authoring` for the design rationale.
 """
 
 from importlib.metadata import PackageNotFoundError, version as _dist_version

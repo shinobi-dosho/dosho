@@ -1,7 +1,7 @@
 # dosho -- design conventions
 
 `dosho` ("a shinobi's tool bag") is the native cab repository for shinobi
-(stimela-ninja, Stimela 3.0). cult-cargo and scabha did the real work of
+(Stimela Ninja). cult-cargo and scabha did the real work of
 cataloguing this ecosystem's tools first, and dosho's cab set leans on
 that prior art throughout -- it's a new repository, not a rejection of
 the old one. It exists because cult-cargo's YAML cab format -- built for

@@ -1,52 +1,63 @@
 Authoring tools in dosho
 =========================
 
-Why not cult-cargo's YAML?
---------------------------------------------------
+Why a separate cab registry
+---------------------------
 
-cult-cargo and scabha did the real work of cataloguing this ecosystem's
-tools first, and ``dosho`` leans on that prior art throughout -- this is
-a new repository, not a rejection of the old one. ``dosho`` exists
-because cult-cargo's cab YAML format -- built for Stimela 2.0/scabha --
-carries assumptions shinobi deliberately doesn't carry forward:
-``dynamic_schema`` (a Python function imported and *executed* at
-cab-load time to compute a real tool's schema), import-based
-``_include`` resolution, and dtype coverage gaps that silently degrade
-to ``str``.
+The original Stimela did the foundational work of cataloguing this
+ecosystem's radio astronomy tools. cult-cargo and scabha made that catalogue
+simpler to maintain and more accessible to pipeline authors. Dosho builds
+on that work.
 
-A cab definition is parameter configuration -- names, dtypes, defaults,
-metadata and policies. Dosho's static scabha-compatible YAML supports
-``_include`` and ``_use`` composition through caller-supplied filesystem
-roots. Resolving a package-scoped include never imports a package or runs
-``dynamic_schema``. See :doc:`validation` and ``AGENTS.md``'s Core rule.
+A separate registry lets Dosho maintain tool definitions against Shinobi's
+execution model:
 
-Because a document is inert data, ``import dosho`` needs no shinobi at
-all: a consumer that only wants the definitions -- to read, diff, pin or
-serve them -- installs ``dosho``. Schema compilation and argv formatting
-need only ``dosho[validation]``; constructing runnable ``Cab`` and ``StepRef``
-objects needs the ``stimela-ninja`` execution adapter.
+* **Explicit recipe wiring.** Shinobi connects recipe inputs and step outputs
+  through typed references in Python. Cab definitions describe the inputs and
+  products those connections depend on. Recipe expressions, aliases and
+  automatic value propagation are deliberately left out.
+* **Measurement Set and FITS contracts.** Definitions can declare which data a
+  tool reads, changes or creates, including Measurement Set columns and
+  families of FITS products. Shinobi uses these declarations to plan access,
+  protect inputs and check results. A strict ``MSv2`` or ``FITSImage``
+  declaration must retain its meaning throughout loading and execution.
+  See :doc:`msv2_contracts` for the tools with strict Measurement Set support.
+* **Deliberate limits on behaviour and artifacts.** Loading a cab never runs
+  ``dynamic_schema`` code, imports a package to locate an include, or evaluates
+  cross-step expressions. Strict contracts refuse unsupported dataset
+  representations, conflicting read/write declarations, and products that
+  violate their declared format or ownership rules. These limits are part of
+  the tool definition and execution contract.
+
+Dosho therefore maintains its own definitions with the declarations and
+boundaries Shinobi needs. Cab documents use scabha's YAML
+vocabulary. Static ``_include`` and ``_use`` composition is supported through
+caller-supplied filesystem roots. See :doc:`validation` and
+:doc:`../contributing` for the authoring rules.
+
+Install ``dosho`` to read, compare, pin or serve tool definitions.
+``dosho[validation]`` adds schema compilation and argv formatting.
+``stimela-ninja`` adapts the definitions into runnable ``Cab`` and ``StepRef``
+objects and executes them.
 
 Two shapes: ``Cab`` and pystep
 --------------------------------
 
-Not every tool can be a :class:`~shinobi.Cab`. shinobi only ever executes
-``flavour="binary"`` cabs -- real standalone executables, argv-built and
-shelled out to. A tool that's actually a Python-package function call
-with no standalone binary at all (CASA tasks are the running example:
-``casatasks.listobs``, ``casaplotms.plotms``) is instead a
-``@dosho.pystep``-marked ordinary function. The decorator records inert
+A :class:`~shinobi.Cab` describes a standalone executable. Shinobi builds its
+argument list and launches it as a subprocess; executable cabs use
+``flavour="binary"``.
+
+Python-package tools, such as ``casatasks.listobs`` and ``casaplotms.plotms``,
+use ordinary functions marked with ``@dosho.pystep``. The decorator records
 metadata and preserves the function signature and annotations. Shinobi
-constructs a ``StepRef`` when a recipe uses it.
+constructs a ``StepRef`` when a recipe uses the function.
 
-That's architecturally distinct from, and doesn't violate, "never import
-a cab package": a pystep's ``ctx.import_func("<task>", "<package>")``
-imports *inside the running container, at step-execution time*, calling
-a real Python function the pystep author wrote directly into trusted
-source -- not shinobi interpreting untrusted cab data on the host at
-load time.
+A pystep is trusted Python code. Its
+``ctx.import_func("<task>", "<package>")`` call imports the tool inside the
+running container when the step executes. Cab loading reads static parameter
+definitions; tool imports and function calls belong to step execution.
 
-So the two shapes are stored differently, and this is the one thing to
-know before adding a tool:
+The two forms live in separate locations:
 
 ============  ==================================
 Shape         Lives in
@@ -58,19 +69,17 @@ pystep        ``dosho/cabs/<family>.py``
 The live inventory, with each tool's resolved image and
 full schema, is the :doc:`cab catalog </reference/cabs>`.
 
-Both are first-class for :meth:`Recipe.add_step
-<shinobi.Recipe.add_step>`, and a caller doesn't need to know or care
-which one a given tool is.
+Both are accepted directly by :meth:`Recipe.add_step
+<shinobi.Recipe.add_step>`.
 
 Defining a ``Cab``
 --------------------
 
 A cab is a document under ``dosho/documents/``, named after the tool.
-The vocabulary is scabha's -- ``inputs``/``outputs`` with
+The schema uses scabha's vocabulary: ``inputs``/``outputs`` with
 ``dtype``/``required``/``default``/``info``/``choices``, ``policies``,
-``command``, ``image`` -- so a cult-cargo file is a readable subset,
-plus a few shinobi-native keys (``write_path``, ``mutable``, ``harvest``,
-``scratch``) covered below:
+``command`` and ``image``. Shinobi adds ``write_path``, ``mutable``,
+``harvest`` and ``scratch``, covered below:
 
 .. code-block:: yaml
 
@@ -106,8 +115,7 @@ parameter name outright, ``nom_de_guerre`` says so.
 which is what lets a deployment repoint it (see `Container images`_
 below) without editing the document.
 
-Four keys are shinobi's rather than scabha's, and each matters for
-correctness rather than convenience. Per parameter: ``write_path: true``
+Four keys declare filesystem handling. Per parameter: ``write_path: true``
 marks a path the tool *creates* (so a stale one from a previous run is
 cleared before it trips the tool up), and ``mutable: true`` marks an
 input the step rewrites in place. Per cab: ``harvest`` is a list of globs
@@ -438,3 +446,9 @@ execute tool code to discover a schema. ``nullable: false`` on defaulted
 mode controls accepts omission and rejects an explicit null.
 
 See :doc:`read_only_access` for guarded imaging variants and the access audit.
+
+Before registering a static definition, run
+``dosho validate path/to/my-cabs.yaml`` with ``dosho[validation]``
+installed. This checks native defaults and declaration structure; parameters
+labelled ``requires stimela-ninja to validate`` still need framework checks.
+See :doc:`validation` for the supported file structure and limits.

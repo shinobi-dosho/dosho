@@ -57,6 +57,40 @@ Shinobi's versioned cab cache identity separately records schema/formatter
 contract versions and argument semantics. Frozen bundle version 3 verifies
 those semantics without confusing them with dataset states or worker attempts.
 
+Static definition checks
+------------------------
+
+With ``dosho[validation]`` installed:
+
+.. code-block:: console
+
+    $ dosho list
+    $ dosho show wsclean
+    $ dosho validate my-cabs.yaml
+
+``list`` also works with the base package. ``show NAME`` reads a definition's
+schema and resolves its image; Python step bodies are never called.
+
+``validate FILE`` accepts the static YAML dialect: a ``cabs:`` mapping or
+a direct mapping of names to definitions. JSON with the same structure works
+too. It resolves relative ``_include`` and ``_use`` composition and Dosho's
+explicit filesystem root, without importing named packages. It checks every
+binary definition's header, metadata, patterns, native dtypes, defaults and
+constraints. Required parameters need no supplied values. Empty catalogues,
+``dynamic_schema`` and non-binary flavours fail.
+
+Use ``dosho validate FILE --strict`` to fail when any framework checks remain
+deferred. It reports every deferred parameter and declaration before
+returning a nonzero exit status, without importing Stimela Ninja.
+
+Success reports ``Static definition checks passed`` only after checking every
+cab. Parameters needing framework types retain their exact declared dtypes and
+are labelled ``requires stimela-ninja to validate``. Their dtype/default
+semantics, and access/family declarations, require the framework's authoritative
+models. Unknown dtype names retain the compiler's existing string fallback;
+this command does not establish that every spelling is recognized. Actual
+data validation and execution qualification are outside these static checks.
+
 Runtime adaptation
 ------------------
 
@@ -81,7 +115,7 @@ runtime access. Callers needing runtime attributes on a ``dosho.get`` result
 use that adapter. Third-party ``yaml_cab`` documents are also supported.
 
 For cross-repository development, use the verified candidate wheel-pair
-procedure in :doc:`../installation` rather than adding a reverse dependency
+procedure in :doc:`../contributing` rather than adding a reverse dependency
 or a local-path source to either published package.
 
 Automatic paired CI

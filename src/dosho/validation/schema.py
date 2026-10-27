@@ -245,7 +245,7 @@ class ParamPattern(BaseModel, Generic[MetaT]):
     exactly one segment is `attrs` (the known, enumerable part, each value
     with its own ParamMeta -- dtype/nom_de_guerre/info); every other segment
     is a `regex` (soft shape-validation of a level that can't be enumerated
-    ahead of time). See AGENTS.md for the motivating tools.
+    ahead of time).
 
     The `attrs` segment is usually last (cubical/QuartiCal: an
     unenumerable term name followed by a known attribute, `g1.solvable`),

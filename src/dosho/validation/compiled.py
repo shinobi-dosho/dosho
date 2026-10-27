@@ -28,18 +28,11 @@ ParamSegment = Segment[CompiledParamMeta]
 ParamPattern = Pattern[CompiledParamMeta]
 
 
-class CompiledCab(BaseModel):
+class _CabHeader(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     name: str
     command: str
-    inputs_model: type[BaseModel]
-    outputs_model: type[BaseModel]
     policies: Policies = Field(default_factory=Policies)
-    field_meta: dict[str, CompiledParamMeta] = Field(default_factory=dict)
-    input_patterns: list[ParamPattern] = Field(default_factory=list)
-    output_patterns: list[ParamPattern] = Field(default_factory=list)
-    framework_declarations: dict[str, JsonValue] = Field(default_factory=dict)
-    input_mutability: dict[str, str] = Field(default_factory=dict)
     flavour: str = "binary"
     image: str | None = None
     info: str | None = None
@@ -48,6 +41,16 @@ class CompiledCab(BaseModel):
     harvest: list[str] = Field(default_factory=list)
     scratch: list[str] = Field(default_factory=list)
     cache: bool | None = None
+
+
+class CompiledCab(_CabHeader):
+    inputs_model: type[BaseModel]
+    outputs_model: type[BaseModel]
+    field_meta: dict[str, CompiledParamMeta] = Field(default_factory=dict)
+    input_patterns: list[ParamPattern] = Field(default_factory=list)
+    output_patterns: list[ParamPattern] = Field(default_factory=list)
+    framework_declarations: dict[str, JsonValue] = Field(default_factory=dict)
+    input_mutability: dict[str, str] = Field(default_factory=dict)
 
     def param_name(self, field: str) -> str:
         return parameter_name(self.field_meta, field)
