@@ -4052,7 +4052,7 @@ DDFacet read-only MSv2 imaging; caches, wisdom and logs must be outside the inpu
    * - ``output_mode``
      - ``str``
      - ``'Clean'``
-     - What to do. (Default: Clean) [choices: Dirty, Clean, Predict, PSF] Choices: ['Clean', 'Dirty', 'PSF'] Nullable: False
+     - What to do. (Default: Clean) [choices: Dirty, Clean, Predict, PSF] Choices: ['Clean', 'Dirty', 'DirtyPSF', 'PSF'] Nullable: False
    * - ``output_clobber``
      - ``bool``
      - ``False``
