@@ -29,6 +29,7 @@ cabs:
         choices:
         - Clean
         - Dirty
+        - DirtyPSF
         - PSF
         default: Clean
         nullable: false

@@ -316,3 +316,11 @@ def test_ddfacet_boolean_tokens_and_singleton_list_match_its_parser():
     assert argv[argv.index("--Output-Clobber") + 1] == "0"
     assert argv[argv.index("--Data-Sort") + 1] == "1"
     assert argv[argv.index("--HMP-Scales") + 1] == "[0]"
+
+
+def test_readonly_dirty_psf_mode():
+    cab = get_runtime("ddfacet-readonly")
+    inputs = cab.inputs_model(data_ms=["noise.ms"], output_mode="DirtyPSF", output_images="dP")
+    argv = build_argv(cab, inputs.model_dump(exclude_unset=True))
+    assert argv[argv.index("--Output-Mode") + 1] == "DirtyPSF"
+    assert argv[argv.index("--Output-Images") + 1] == "dP"
