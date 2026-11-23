@@ -94,6 +94,7 @@ __all__ = [
     "im_mowjsub",
     "impbcor",
     "initweights",
+    "katdal_mvftoms",
     "killms",
     "listobs",
     "makemask",

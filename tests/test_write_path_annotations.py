@@ -100,6 +100,9 @@ DESTINATIONS = {
     ("breizorro", "outfile"),
     ("breizorro", "outregion"),
     ("flagms", "export"),
+    # mvftoms.py resumes into an existing MS instead of refusing it, so a
+    # stale one must go before a re-run rather than be extended.
+    ("katdal-mvftoms", "output_ms"),
     ("msutils-flagstats", "json_out"),
     ("msutils-flagstats", "plot"),
     ("msutils-summary", "json_out"),
