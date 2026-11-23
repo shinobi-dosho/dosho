@@ -394,6 +394,27 @@ images:
         RUN python3 -c 'import numpy as np; from casacore.tables import table, maketabdesc, makescacoldesc; from tempfile import TemporaryDirectory; assert np.__version__.startswith("1."); d=TemporaryDirectory(); p=d.name+"/smoke"; t=table(p, tabledesc=maketabdesc(makescacoldesc("x", 0.0)), nrow=1, readonly=False, ack=False); t.putcell("x", 0, 1.0); t.close(); t=table(p, ack=False); assert t.getcell("x", 0)==1.0; t.close(); d.cleanup()'
       cmd: "smops --help"
       dockerfile: pip/Dockerfile
+  KATDAL:
+    source: "https://github.com/ska-sa/katdal"
+    name: katdal
+    build:
+      version: "0.24"
+      # amd64 only: the arm64 build has not been run (no QEMU on the host that
+      # ported it). Add linux/arm64 with a -multiarch1 version suffix once it
+      # has. The [ms] extra is satisfied by BASE_ASTRO's apt python-casacore.
+      platforms: [linux/amd64]
+      base: BASE_ASTRO
+      package: "katdal[ms]==0.24"
+      # rdbtools (katsdptelstate[rdb]) needs python-lzf, which is sdist-only.
+      pre_install: |
+        RUN apt-get update -o APT::Update::Error-Mode=any && apt-get install -y --no-install-recommends build-essential python3-dev && rm -rf /var/lib/apt/lists/*
+        ENV CC=gcc CXX=g++
+      # Preserve BASE_ASTRO's NumPy 1.x casacore ABI.
+      extra_deps: "'numpy<2'"
+      post_install: |
+        RUN python3 -c 'import numpy, katdal, casacore.tables; from katdal import ms_extra; assert numpy.__version__.startswith("1."), numpy.__version__; assert katdal.__version__ == "0.24", katdal.__version__'
+      cmd: "mvftoms.py --help"
+      dockerfile: pip/Dockerfile
   AEGEAN:
     source: "https://github.com/PaulHancock/Aegean"
     name: aegean

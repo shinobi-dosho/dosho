@@ -199,6 +199,9 @@ cabs:
     attr: initweights
     module: dosho.cabs.casatasks
     symbol: initweights
+  katdal-mvftoms:
+    attr: katdal_mvftoms
+    document: katdal-mvftoms.yaml
   killms:
     attr: killms
     document: killms.yaml

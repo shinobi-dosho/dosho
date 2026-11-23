@@ -8276,6 +8276,139 @@ Initialize weight-related columns in the MS.
      - ``Path``
      - \-
 
+katdal-mvftoms
+--------------
+
+Convert a MeerKAT MVF dataset to a Measurement Set with katdal's mvftoms.py (https://github.com/ska-sa/katdal). Give a local MVFv3 HDF5 file as `dataset`, or a SARAO archive MVFv4 RDB URL as `archive-url`. TOKEN RISK: an archive URL usually carries a personal access token in its query string (`?token=...`). Neither Dosho nor Shinobi can mark a parameter secret, so the full URL, token included, appears in the tool's argv (process listings, container and batch-job command lines) and in Shinobi's provenance records of resolved inputs. Use a short-lived token and treat run records as sensitive. mvftoms.py resumes into an existing output MS rather than refusing it; the strict CREATE contract makes Shinobi refuse an existing target first. With `output-ms` set, every spectral window is written to that one MS, so use a single-window dataset.
+
+:Command: ``mvftoms.py``
+:Image: ``ghcr.io/shinobi-dosho/katdal:0.24-d0.1.0`` (``KATDAL`` 0.24, build)
+:Source: https://github.com/ska-sa/katdal
+
+**Inputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 15 40
+
+   * - Field
+     - Type
+     - Default
+     - Description
+   * - ``dataset``
+     - ``File``
+     - ``None``
+     - Local MVF dataset, usually an MVFv3 HDF5 (.h5) file. A local MVFv4 .rdb file also needs its chunk-store directory, which katdal looks for beside the RDB's parent directory and which container backends do not mount.
+   * - ``archive_url``
+     - ``str``
+     - ``None``
+     - MVF dataset URL, e.g. a SARAO archive MVFv4 URL 'https://archive-gw-1.kat.ac.za/<cbid>/<cbid>\_sdp\_l0.full.rdb?token=<token>'. The token is recorded in argv and provenance in clear text (see the cab info). Pattern: \\A(https?\|redis)://\\S+\\Z
+   * - ``output_ms``
+     - ``MSv2``
+     - *required*
+     - Name of output MeasurementSet (mvftoms.py otherwise derives one from the dataset name).
+   * - ``circular``
+     - ``bool``
+     - ``None``
+     - Produce quad circular polarisation. (RR, RL, LR, LL) \*\*\* Currently just relabels the linear pols \*\*\*\*
+   * - ``ref_ant``
+     - ``str``
+     - ``None``
+     - Override the reference antenna used to pick targets and scans (default is the 'array' antenna in MVFv4 and the first antenna in older formats)
+   * - ``full_pol``
+     - ``bool``
+     - ``None``
+     - Produce a full polarisation MS in CASA canonical order (HH, HV, VH, VV). Default is to produce HH,VV only.
+   * - ``verbose``
+     - ``bool``
+     - ``None``
+     - More verbose progress information
+   * - ``stop_w``
+     - ``bool``
+     - ``None``
+     - Use W term to stop fringes for each baseline
+   * - ``pols_to_use``
+     - ``str``
+     - ``None``
+     - Select polarisation products to include in MS as comma-separated list (from HH, HV, VH, VV). Default is all available from (HH, VV). Pattern: \\A(HH\|HV\|VH\|VV)(,(HH\|HV\|VH\|VV))\*\\Z
+   * - ``uvfits``
+     - ``bool``
+     - ``None``
+     - Print command to convert MS to miriad uvfits in casapy
+   * - ``no_auto``
+     - ``bool``
+     - ``None``
+     - MeasurementSet will exclude autocorrelation data
+   * - ``keep_spaces``
+     - ``bool``
+     - ``None``
+     - Keep spaces in source names, default removes spaces
+   * - ``channel_range``
+     - ``str``
+     - ``None``
+     - Range of frequency channels to keep (zero-based inclusive 'first\_chan,last\_chan', default is all channels) Pattern: \\A\\s\*\\d+\\s\*,\\s\*\\d+\\s\*\\Z
+   * - ``elevation_range``
+     - ``str``
+     - ``None``
+     - Flag elevations outside the range 'lowest\_elevation,highest\_elevation'
+   * - ``model_data``
+     - ``bool``
+     - ``None``
+     - Add MODEL\_DATA and CORRECTED\_DATA columns to the MS. MODEL\_DATA initialised to unity amplitude zero phase, CORRECTED\_DATA initialised to DATA.
+   * - ``flags``
+     - ``str``
+     - ``'all'``
+     - Comma-separated list of online flags to apply (from static, cam, data\_lost, ingest\_rfi, predicted\_rfi, cal\_rfi, postproc); default is all flags, '' applies no flags.
+   * - ``dumptime``
+     - ``float``
+     - ``0.0``
+     - Output time averaging interval in seconds, default is no averaging
+   * - ``chanbin``
+     - ``int``
+     - ``0``
+     - Bin width for channel averaging in channels, default is no averaging
+   * - ``flagav``
+     - ``bool``
+     - ``None``
+     - If a single element in an averaging bin is flagged, flag the averaged bin
+   * - ``quack``
+     - ``int``
+     - ``1``
+     - Discard the first N dumps (which are frequently incomplete)
+   * - ``applycal``
+     - ``str``
+     - ``None``
+     - List of calibration solutions to apply to data as a string of comma-separated names, e.g. 'l1' or 'K,B,G'. Use 'default' for L1 + L2 and 'all' for all available products. Unset applies none.
+   * - ``target``
+     - ``List[str]``
+     - ``None``
+     - Select only these target fields (names), one --target per item. Default is select all fields.
+   * - ``target_tag``
+     - ``List[str]``
+     - ``None``
+     - Select only target fields with these tags (e.g. 'bpcal'), one --target-tag per item. Default is select all fields.
+   * - ``ant``
+     - ``List[str]``
+     - ``None``
+     - Select only these antennas (names), one --ant per item. Default is select all antennas.
+   * - ``scans``
+     - ``str``
+     - ``None``
+     - Only select a range of tracking scans. Default is select all tracking scans. Accepts a comma list or a casa style range such as 5~10.
+
+**Outputs**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 25 45
+
+   * - Field
+     - Type
+     - Description
+   * - ``output_ms``
+     - ``MSv2``
+     - Created Measurement Set.
+
 killms
 ------
 

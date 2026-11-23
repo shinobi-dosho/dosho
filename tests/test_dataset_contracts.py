@@ -50,6 +50,7 @@ AOFLAGGER_STATISTICS = (
 # reads as the whole dataset.
 CONTRACTS: dict[str, list[DatasetAccess]] = {
     "simms-telsim": [DatasetAccess(field="ms", mode="create")],
+    "katdal-mvftoms": [DatasetAccess(field="output_ms", mode="create")],
     "simms-skysim": [
         DatasetAccess(
             field="ms",

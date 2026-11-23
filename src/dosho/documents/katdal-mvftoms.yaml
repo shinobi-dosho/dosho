@@ -1,0 +1,135 @@
+# katdal 0.24: checked against `mvftoms.py --help` and katdal/scripts/mvftoms.py
+# in images.KATDAL. `-t/--tar` is left out: it writes an undeclared `<ms>.tar`
+# beside the MS. Multi-dataset concatenation is reachable only by setting both
+# `dataset` and `archive-url`; neither is a list.
+cabs:
+  katdal-mvftoms:
+    command: mvftoms.py
+    image: KATDAL
+    policies:
+      repeat_list: true
+    info: >-
+      Convert a MeerKAT MVF dataset to a Measurement Set with katdal's mvftoms.py
+      (https://github.com/ska-sa/katdal). Give a local MVFv3 HDF5 file as `dataset`, or a SARAO
+      archive MVFv4 RDB URL as `archive-url`. TOKEN RISK: an archive URL usually carries a personal
+      access token in its query string (`?token=...`). Neither Dosho nor Shinobi can mark a parameter
+      secret, so the full URL, token included, appears in the tool's argv (process listings, container
+      and batch-job command lines) and in Shinobi's provenance records of resolved inputs. Use a
+      short-lived token and treat run records as sensitive. mvftoms.py resumes into an existing
+      output MS rather than refusing it; the strict CREATE contract makes Shinobi refuse an existing
+      target first. With `output-ms` set, every spectral window is written to that one MS, so use a
+      single-window dataset.
+    inputs:
+      dataset:
+        dtype: File
+        writable: false
+        info: Local MVF dataset, usually an MVFv3 HDF5 (.h5) file. A local MVFv4 .rdb file also needs
+          its chunk-store directory, which katdal looks for beside the RDB's parent directory and which
+          container backends do not mount.
+        policies:
+          positional: true
+      archive-url:
+        dtype: str
+        info: MVF dataset URL, e.g. a SARAO archive MVFv4 URL
+          'https://archive-gw-1.kat.ac.za/<cbid>/<cbid>_sdp_l0.full.rdb?token=<token>'. The token is
+          recorded in argv and provenance in clear text (see the cab info).
+        string_pattern: \A(https?|redis)://\S+\Z
+        policies:
+          positional: true
+      output-ms:
+        dtype: MSv2
+        required: true
+        write_path: true
+        info: Name of output MeasurementSet (mvftoms.py otherwise derives one from the dataset name).
+      circular:
+        dtype: bool
+        info: Produce quad circular polarisation. (RR, RL, LR, LL) *** Currently just relabels the linear
+          pols ****
+      ref-ant:
+        dtype: str
+        info: Override the reference antenna used to pick targets and scans (default is the 'array'
+          antenna in MVFv4 and the first antenna in older formats)
+      full-pol:
+        dtype: bool
+        nom_de_guerre: full_pol
+        info: Produce a full polarisation MS in CASA canonical order (HH, HV, VH, VV). Default is to
+          produce HH,VV only.
+      verbose:
+        dtype: bool
+        info: More verbose progress information
+      stop-w:
+        dtype: bool
+        info: Use W term to stop fringes for each baseline
+      pols-to-use:
+        dtype: str
+        string_pattern: \A(HH|HV|VH|VV)(,(HH|HV|VH|VV))*\Z
+        info: Select polarisation products to include in MS as comma-separated list (from HH, HV, VH,
+          VV). Default is all available from (HH, VV).
+      uvfits:
+        dtype: bool
+        info: Print command to convert MS to miriad uvfits in casapy
+      no-auto:
+        dtype: bool
+        info: MeasurementSet will exclude autocorrelation data
+      keep-spaces:
+        dtype: bool
+        info: Keep spaces in source names, default removes spaces
+      channel-range:
+        dtype: str
+        string_pattern: \A\s*\d+\s*,\s*\d+\s*\Z
+        info: Range of frequency channels to keep (zero-based inclusive 'first_chan,last_chan', default
+          is all channels)
+      elevation-range:
+        dtype: str
+        info: Flag elevations outside the range 'lowest_elevation,highest_elevation'
+      model-data:
+        dtype: bool
+        info: Add MODEL_DATA and CORRECTED_DATA columns to the MS. MODEL_DATA initialised to unity
+          amplitude zero phase, CORRECTED_DATA initialised to DATA.
+      flags:
+        dtype: str
+        default: all
+        info: Comma-separated list of online flags to apply (from static, cam, data_lost, ingest_rfi,
+          predicted_rfi, cal_rfi, postproc); default is all flags, '' applies no flags.
+      dumptime:
+        dtype: float
+        default: 0.0
+        info: Output time averaging interval in seconds, default is no averaging
+      chanbin:
+        dtype: int
+        default: 0
+        info: Bin width for channel averaging in channels, default is no averaging
+      flagav:
+        dtype: bool
+        info: If a single element in an averaging bin is flagged, flag the averaged bin
+      quack:
+        dtype: int
+        default: 1
+        info: Discard the first N dumps (which are frequently incomplete)
+      applycal:
+        dtype: str
+        info: List of calibration solutions to apply to data as a string of comma-separated names, e.g.
+          'l1' or 'K,B,G'. Use 'default' for L1 + L2 and 'all' for all available products. Unset applies
+          none.
+      target:
+        dtype: List[str]
+        info: Select only these target fields (names), one --target per item. Default is select all
+          fields.
+      target-tag:
+        dtype: List[str]
+        info: Select only target fields with these tags (e.g. 'bpcal'), one --target-tag per item.
+          Default is select all fields.
+      ant:
+        dtype: List[str]
+        info: Select only these antennas (names), one --ant per item. Default is select all antennas.
+      scans:
+        dtype: str
+        info: Only select a range of tracking scans. Default is select all tracking scans. Accepts a comma
+          list or a casa style range such as 5~10.
+    outputs:
+      output-ms:
+        dtype: MSv2
+        info: Created Measurement Set.
+    dataset_accesses:
+    - field: output_ms
+      mode: create
