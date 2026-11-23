@@ -169,6 +169,12 @@ and preserves published tags: a version change builds that image, a bundle
 version change builds all moved tags, and existing tags are skipped. See
 CONTRIBUTING.md for the dispatch command.
 
+A PR that adds or moves an image tag is not done when CI passes: the image must
+be published by a successful `images.yml` dispatch **before merge**, because
+the gate refuses merged PRs. Say so in the PR description, and do not suggest
+merging until the dispatch has succeeded. CONTRIBUTING.md describes recovery
+when a merge got there first.
+
 ## Repo layout
 
 A tool here is one of two things, and which one is not a matter of taste
