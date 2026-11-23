@@ -584,9 +584,12 @@ def test_dev_images_never_enter_the_release_build_plan():
 
 def test_all_remaining_build_images_declare_both_platforms():
     expected = ["linux/amd64", "linux/arm64"]
+    # KATDAL's arm64 build has not been run yet; see its manifest comment.
+    amd64_only = {"KATDAL"}
     for key, entry in _images.manifest["images"].items():
         if "build" in entry and key != "CASA6":
-            assert entry["build"]["platforms"] == expected, key
+            want = ["linux/amd64"] if key in amd64_only else expected
+            assert entry["build"]["platforms"] == want, key
     assert "platforms" not in _images.manifest["images"]["CASA6"]["build"]
     assert "ref" in _images.manifest["images"]["SIMMS_CLASSIC"]
 
