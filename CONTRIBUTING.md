@@ -221,6 +221,15 @@ cancelling a publisher already running. The separate `images-verify.yml`
 retains Monday registry checks; `images-dev.yml` and PyPI's `publish.yml` have
 their own release processes.
 
+**Dispatch before you merge.** The gate accepts only an open PR, so a merged
+or closed PR can never publish its images. Merging an image change without a
+successful dispatch leaves the manifest naming a tag that does not exist in
+GHCR, and every cab using that image fails to pull. To recover, open any
+follow-up PR from current `main`, get it reviewed, and dispatch `images.yml`
+for that PR's head. `build-plan --missing-only` picks up every tag that is
+still absent and skips the rest, so the follow-up PR need not touch the image
+entry itself.
+
 ### Commit messages
 
 Write clear, descriptive commit messages explaining *why* a change is made. No
