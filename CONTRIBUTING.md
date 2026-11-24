@@ -173,21 +173,29 @@ the **admin or maintain** role on the repository comments on the PR:
 /build-images
 ```
 
-The command must be the whole first line of the comment. The `images.yml`
-workflow then:
+The command must be the whole first line of the comment, with nothing before
+it. The `images.yml` workflow then:
 
 1. reacts with 👀 and checks the commenter's role (organisation owners count
    as admin);
 2. pins the PR's current head and waits, for up to an hour, until the
-   `ci.yml` run for that head passes;
+   `ci.yml` run for that head passes, including its `core`, `test` and `docs`
+   jobs;
 3. builds and pushes every tag in the PR's manifest that GHCR does not have
    yet (`build-plan --missing-only`: bases first, published tags never
    overwritten);
 4. replies on the PR with what it published, or why it refused or failed.
 
-It refuses fork PRs, closed or merged PRs, and a head that changed after the
-comment: a push after the command, including one made while waiting for CI,
-needs a new `/build-images`. To retry a failed build, comment again.
+It refuses fork PRs, closed or merged PRs, PRs that do not target `main`, and a
+head that changed after the comment: a push after the command, including one
+made while waiting for CI, needs a new `/build-images`. To retry a failed
+build, comment again.
+
+It also refuses a PR that changes anything under `.github/`. A PR's CI runs
+the PR's own workflows and the scripts they call, so such a PR could make its
+own CI pass without testing anything. Land CI changes in a PR of their own
+first. Green CI still only means the PR's tests passed, and a PR can change
+its tests too: the maintainer's review is what authorizes the build.
 
 The workflow always runs `main`'s copy of itself, of
 `scripts/image_publish_gate.py` and of the `dosho images` CLI, so a PR cannot

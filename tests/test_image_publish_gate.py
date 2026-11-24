@@ -30,9 +30,17 @@ class API:
         self.role = "maintain"
         self.collaborator = True
         self.pr = {
+            "number": 93,
             "state": "open",
+            "changed_files": 2,
+            "base": {"ref": "main", "repo": {"full_name": self.repository}},
             "head": {"sha": SHA, "repo": {"full_name": self.repository}},
         }
+        self.files = [
+            {"filename": "src/dosho/images.yaml"},
+            {"filename": "src/dosho/cargo/tool/Dockerfile"},
+        ]
+        self.jobs = [{"name": name, "conclusion": "success"} for name in gate.CI_JOBS]
         self.ci = {
             "id": 1,
             "path": ".github/workflows/ci.yml",
@@ -58,7 +66,13 @@ class API:
             self.on_pr_read(self.pr_reads)
         return copy.deepcopy(self.pr)
 
-    def pages(self, path, key):
+    def pages(self, path, key=None):
+        if path == "pulls/93/files":
+            assert key is None
+            return copy.deepcopy(self.files)
+        if path == "actions/runs/1/jobs":
+            assert key == "jobs"
+            return copy.deepcopy(self.jobs)
         assert path == f"actions/runs?head_sha={SHA}&event=pull_request"
         assert key == "workflow_runs"
         return copy.deepcopy(self.runs)
@@ -100,7 +114,11 @@ def test_non_collaborator_is_refused():
     "body,ok",
     [
         ("/build-images", True),
-        ("  /build-images  \nplease", True),
+        ("/build-images  \nplease", True),
+        # The workflow's startsWith() never starts a run for these, so the
+        # gate must not claim to accept them either.
+        ("  /build-images", False),
+        ("\n/build-images", False),
         ("/build-images now", False),
         ("/build-imagesx", False),
         ("/Build-Images", False),
@@ -129,6 +147,57 @@ def test_fork_pr_is_refused(repo):
     api = API()
     api.pr["head"]["repo"] = repo
     with pytest.raises(gate.GateError, match="fork"):
+        run_gate(api)
+
+
+@pytest.mark.parametrize(
+    "base",
+    [
+        {"ref": "feature", "repo": {"full_name": "owner/dosho"}},
+        {"ref": "main", "repo": {"full_name": "other/dosho"}},
+    ],
+)
+def test_pr_not_targeting_main_is_refused(base):
+    api = API()
+    api.pr["base"] = base
+    with pytest.raises(gate.GateError, match="targeting main"):
+        run_gate(api)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"filename": ".github/workflows/ci.yml"},
+        {"filename": ".github/scripts/install-pair.sh"},
+        {"filename": "elsewhere.sh", "previous_filename": ".github/scripts/install-pair.sh"},
+    ],
+)
+def test_pr_changing_ci_is_refused(change):
+    # A pull_request CI run uses the PR's own workflows: such a PR could pass
+    # its own CI trivially.
+    api = API()
+    api.files.append(change)
+    api.pr["changed_files"] += 1
+    with pytest.raises(gate.GateError, match="must merge"):
+        run_gate(api)
+
+
+def test_incomplete_file_list_is_refused():
+    api = API()
+    api.pr["changed_files"] = 3001  # the files API stops at 3000
+    with pytest.raises(gate.GateError, match="every file"):
+        run_gate(api)
+
+
+@pytest.mark.parametrize("name", gate.CI_JOBS)
+@pytest.mark.parametrize("problem", ["missing", "skipped"])
+def test_every_ci_job_must_run_and_pass(name, problem):
+    api = API()
+    if problem == "missing":
+        api.jobs = [j for j in api.jobs if j["name"] != name]
+    else:
+        next(j for j in api.jobs if j["name"] == name)["conclusion"] = "skipped"
+    with pytest.raises(gate.GateError, match="did not run and pass"):
         run_gate(api)
 
 
@@ -211,7 +280,7 @@ def test_head_moving_while_waiting_is_refused():
 def test_api_failure_fails_closed():
     api = API()
 
-    def fail(path, key):
+    def fail(path, key=None):
         raise OSError("API unavailable")
 
     api.pages = fail
@@ -316,6 +385,27 @@ def test_builds_run_mains_cli_on_the_gated_source():
         assert jobs[name]["steps"][1]["with"]["ref"] == "${{ needs.discover.outputs.source }}"
     # A non-comment trigger may only build from main.
     assert "github.ref == 'refs/heads/main'" in jobs["discover"]["if"]
+
+
+def test_skipped_request_does_not_skip_builds_on_main():
+    # On push/dispatch `request` is skipped; a build job whose `if:` lacks a
+    # status function inherits that skip through discover.
+    for name in ("discover", "build-base", "build-tools"):
+        condition = _workflow()["jobs"][name]["if"]
+        assert "!cancelled()" in condition or "always()" in condition, name
+
+
+def test_only_trusted_commenters_join_a_pr_queue():
+    # Joining a queue replaces the run already waiting there, so an outside
+    # comment must not land in a PR's queue.
+    group = _workflow()["concurrency"]["group"]
+    assert "github.event.comment.author_association" in group
+    assert '"OWNER", "MEMBER", "COLLABORATOR"' in group
+
+
+def test_reply_names_the_pinned_head_when_planning_fails():
+    env = _workflow()["jobs"]["report"]["env"]
+    assert env["SOURCE"] == "${{ needs.discover.outputs.source || needs.request.outputs.sha }}"
 
 
 def _shell(script, env):

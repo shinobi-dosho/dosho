@@ -158,7 +158,9 @@ workflow. A `/build-images` PR comment from someone with the admin or maintain
 role pins the PR head, waits for its `ci.yml` run to pass, and builds missing
 tags from it. The workflow, gate (`scripts/image_publish_gate.py`) and CLI
 always come from main; the PR supplies only manifest/cargo data. Fork PRs,
-closed PRs and a head pushed after the comment are refused. Every push to main
+closed PRs, PRs not targeting main, PRs changing anything under `.github/`
+and a head pushed after the comment are refused, so an image change and a CI
+change belong in separate PRs. Every push to main
 touching the manifest or cargo runs the same missing-only build from main as a
 backstop. The separate `images-verify.yml` checks registry health on Mondays.
 Every tool is dosho-built except deprecated `SIMMS_CLASSIC` (a `ref:` until

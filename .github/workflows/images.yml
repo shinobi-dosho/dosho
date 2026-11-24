@@ -27,14 +27,17 @@ on:
 permissions:
   contents: read
 
-# One queue per PR and one for main. Every comment anywhere triggers this
-# workflow, so non-commands get a throwaway group and cannot displace a queued
-# build. A newer request replaces an older *queued* one in the same queue (the
-# newest PR head or main commit covers it); a running build is never cancelled.
+# One queue per PR and one for main. A newer request replaces an older *queued*
+# one in the same queue (the newest PR head or main commit covers it); a running
+# build is never cancelled. Every comment anywhere triggers this workflow, so
+# only commands from owners, org members and collaborators join a PR queue:
+# anyone else's comment gets a throwaway group (and, for a command, a refusal)
+# and cannot displace a maintainer's queued build.
 concurrency:
   group: >-
     ${{ github.event_name != 'issue_comment' && 'images-main'
-    || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/build-images'))
+    || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/build-images')
+    && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
     && format('images-pr-{0}', github.event.issue.number)
     || format('images-ignored-{0}', github.run_id) }}
   cancel-in-progress: false
@@ -109,7 +112,9 @@ jobs:
 
   build-base:
     needs: discover
-    if: needs.discover.outputs.bases != '[]'
+    # `request` is skipped on push/dispatch; without !cancelled() that skip
+    # would propagate here even though discover succeeded.
+    if: "!cancelled() && needs.discover.result == 'success' && needs.discover.outputs.bases != '[]'"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -205,7 +210,7 @@ jobs:
       PR_NUMBER: ${{ github.event.issue.number }}
       REQUEST: ${{ needs.request.result }}
       ERROR: ${{ needs.request.outputs.error }}
-      SOURCE: ${{ needs.discover.outputs.source }}
+      SOURCE: ${{ needs.discover.outputs.source || needs.request.outputs.sha }}
       BASES: ${{ needs.discover.outputs.bases }}
       TOOLS: ${{ needs.discover.outputs.tools }}
       RESULTS: ${{ needs.discover.result }} ${{ needs.build-base.result }} ${{ needs.build-tools.result }}

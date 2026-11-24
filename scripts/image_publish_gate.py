@@ -22,6 +22,11 @@ from datetime import datetime
 COMMAND = "/build-images"
 ROLES = {"admin", "maintain"}  # org owners report as "admin"
 CI_PATH = ".github/workflows/ci.yml"
+# CI's own jobs must have run, so a PR cannot pass by renaming or dropping them.
+CI_JOBS = ("core (3.11)", "core (3.12)", "test (3.11)", "test (3.12)", "docs")
+# A pull_request CI run uses the PR's own workflows and the scripts they call,
+# so a PR that changes them could make its own CI pass trivially.
+PROTECTED = ".github/"
 TIMEOUT = 3600
 INTERVAL = 30
 
@@ -52,11 +57,12 @@ class GitHub:
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.load(response)
 
-    def pages(self, path, key):
+    def pages(self, path, key=None):
         result = []
         for page in range(1, 101):
             separator = "&" if "?" in path else "?"
-            items = self.get(f"{path}{separator}per_page=100&page={page}")[key]
+            payload = self.get(f"{path}{separator}per_page=100&page={page}")
+            items = payload[key] if key else payload
             require(isinstance(items, list), "Invalid paginated API response")
             result.extend(items)
             if len(items) < 100:
@@ -65,8 +71,9 @@ class GitHub:
 
 
 def is_command(body):
-    lines = (body or "").strip().splitlines()
-    return bool(lines) and lines[0].strip() == COMMAND
+    # Must start the comment: the workflow only starts for bodies that do.
+    lines = (body or "").splitlines()
+    return bool(lines) and lines[0].rstrip() == COMMAND
 
 
 def timestamp(value):
@@ -85,15 +92,32 @@ def authorize(api, login):
     require(payload.get("role_name") in ROLES, denied)
 
 
-def pr_head(api, number):
+def pull(api, number):
     pr = api.get(f"pulls/{number}")
     require(
         pr["state"] == "open",
         "This PR is not open. Merged image changes build automatically on main",
     )
+    require(
+        pr["base"]["ref"] == "main" and pr["base"]["repo"]["full_name"] == api.repository,
+        "Images can only be built from PRs targeting main",
+    )
     head_repo = pr["head"]["repo"] or {}
     require(head_repo.get("full_name") == api.repository, "Images cannot be built from fork PRs")
-    return pr["head"]["sha"]
+    return pr
+
+
+def require_ci_untouched(api, pr):
+    files = api.pages(f"pulls/{pr['number']}/files")
+    # The files API stops at 3000; an incomplete list cannot prove anything.
+    require(len(files) == pr["changed_files"], "Could not list every file this PR changes")
+    for f in files:
+        for name in (f["filename"], f.get("previous_filename") or ""):
+            require(
+                not name.startswith(PROTECTED),
+                f"This PR changes `{name}`. Changes under `{PROTECTED}` must merge "
+                "before images can be built from a PR",
+            )
 
 
 def ci_state(api, number, sha, requested_at):
@@ -118,6 +142,12 @@ def ci_state(api, number, sha, requested_at):
     if run["status"] != "completed":
         return "pending"
     require(run["conclusion"] == "success", f"CI did not pass: {run['html_url']}")
+    jobs = {j["name"]: j for j in api.pages(f"actions/runs/{run['id']}/jobs", "jobs")}
+    for name in CI_JOBS:
+        require(
+            name in jobs and jobs[name]["conclusion"] == "success",
+            f"CI job `{name}` did not run and pass: {run['html_url']}",
+        )
     return "success"
 
 
@@ -132,12 +162,15 @@ def wait_for_ci(
     clock=time.monotonic,
 ):
     """Pin the PR head, wait until its CI passes, and return the pinned SHA."""
-    sha = pr_head(api, number)
+    pr = pull(api, number)
+    sha = pr["head"]["sha"]
+    require_ci_untouched(api, pr)  # the head re-check below covers this listing too
     deadline = clock() + timeout
     while True:
         state = ci_state(api, number, sha, requested_at)
         require(
-            pr_head(api, number) == sha, "The PR head changed while waiting for CI. Comment again"
+            pull(api, number)["head"]["sha"] == sha,
+            "The PR head changed while waiting for CI. Comment again",
         )
         if state == "success":
             return sha
