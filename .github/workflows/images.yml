@@ -1,51 +1,92 @@
-# Human-triggered publication from the exact reviewed PR head, before merge.
+# Build and publish every missing release image tag.
+#
+# * PR comment `/build-images` from someone with the admin or maintain role:
+#   pins the PR head, waits for its CI to pass, then builds from that head and
+#   replies on the PR with the result. Use it before merging an image change so
+#   the merged manifest never names a tag that is not in GHCR.
+# * Push to main touching the manifest or cargo: builds whatever is still
+#   missing, so an image change merged without a `/build-images` heals itself.
+#   `workflow_dispatch` on main does the same by hand.
+#
+# issue_comment runs always use main's copy of this file and of the gate, so a
+# PR cannot change the rules it is judged by. The PR checkout ("candidate")
+# supplies only the manifest, Dockerfiles and build contexts, read by main's
+# CLI ("trusted"); no PR code runs on the credential-bearing host.
 name: images
 
 on:
+  issue_comment:
+    types: [created]
+  push:
+    branches: [main]
+    paths:
+      - src/dosho/images.yaml
+      - "src/dosho/cargo/**"
   workflow_dispatch:
-    inputs:
-      pr_number:
-        description: "Open, non-draft PR targeting main"
-        required: true
-        type: string
-      head_sha:
-        description: "Exact 40-character PR head SHA (dispatch on main)"
-        required: true
-        type: string
-      override_unreviewed:
-        description: "Admin only: allow missing approvals; checks must still pass"
-        type: boolean
-        default: false
 
 permissions:
   contents: read
-  actions: read
-  checks: read
-  statuses: read
-  pull-requests: read
 
+# One queue per PR and one for main. Every comment anywhere triggers this
+# workflow, so non-commands get a throwaway group and cannot displace a queued
+# build. A newer request replaces an older *queued* one in the same queue (the
+# newest PR head or main commit covers it); a running build is never cancelled.
 concurrency:
-  group: image-publication
+  group: >-
+    ${{ github.event_name != 'issue_comment' && 'images-main'
+    || (github.event.issue.pull_request && startsWith(github.event.comment.body, '/build-images'))
+    && format('images-pr-{0}', github.event.issue.number)
+    || format('images-ignored-{0}', github.run_id) }}
   cancel-in-progress: false
 
-env:
-  PR_NUMBER: ${{ inputs.pr_number }}
-  HEAD_SHA: ${{ inputs.head_sha }}
-  OVERRIDE_UNREVIEWED: ${{ inputs.override_unreviewed }}
-  CANDIDATE_ROOT: ../candidate
-  GH_TOKEN: ${{ github.token }}
-
-defaults:
-  run:
-    working-directory: trusted
-
 jobs:
+  request:
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/build-images')
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      issues: write
+    outputs:
+      sha: ${{ steps.gate.outputs.sha }}
+      error: ${{ steps.gate.outputs.error }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Acknowledge the command
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: gh api "repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_ID/reactions" -f content=eyes
+      - name: Check the commenter's role and wait for CI on the PR head
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+          COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
+        run: python3 scripts/image_publish_gate.py
+
   discover:
-    if: github.ref == 'refs/heads/main'
+    needs: request
+    if: >-
+      !cancelled() && (needs.request.result == 'success'
+      || (needs.request.result == 'skipped' && github.event_name != 'issue_comment'
+      && github.ref == 'refs/heads/main'))
     runs-on: ubuntu-latest
     outputs:
+      source: ${{ steps.plan.outputs.source }}
       bases: ${{ steps.plan.outputs.bases }}
       tools: ${{ steps.plan.outputs.tools }}
+    defaults:
+      run:
+        working-directory: trusted
     steps:
       - uses: actions/checkout@v7
         with:
@@ -54,11 +95,9 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.head_sha }}
+          ref: ${{ needs.request.outputs.sha || github.sha }}
           path: candidate
           persist-credentials: false
-      - name: Require approved PR head and successful checks
-        run: python3 scripts/image_publish_gate.py
       - uses: astral-sh/setup-uv@v7
       - uses: docker/setup-buildx-action@v3
       # Public registry reads need no GHCR login or package write permission.
@@ -66,6 +105,7 @@ jobs:
         run: |
           plan="$(uv run --locked dosho images --source-root ../candidate build-plan --missing-only)"
           echo "$plan" | python3 -c 'import json,os,sys; p=json.load(sys.stdin); f=open(os.environ["GITHUB_OUTPUT"], "a"); f.write("bases="+json.dumps(p["bases"])+"\ntools="+json.dumps(p["tools"])+"\n")'
+          echo "source=$(git -C ../candidate rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build-base:
     needs: discover
@@ -73,15 +113,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
-      checks: read
-      statuses: read
-      pull-requests: read
       packages: write
     strategy:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.discover.outputs.bases) }}
+    defaults:
+      run:
+        working-directory: trusted
     steps:
       - uses: actions/checkout@v7
         with:
@@ -90,11 +129,9 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.head_sha }}
+          ref: ${{ needs.discover.outputs.source }}
           path: candidate
           persist-credentials: false
-      - name: Require approved PR head and successful checks
-        run: python3 scripts/image_publish_gate.py
       - uses: astral-sh/setup-uv@v7
       - uses: docker/setup-qemu-action@v3
         with:
@@ -109,9 +146,8 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
         run: |
-          # Stage every base platform; revalidate separately before the release manifest.
           flags="--push --sequential-platforms --prune-between-platforms"
-          uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags
+          uv run --locked dosho images --source-root ../candidate build "$IMAGE" $flags
 
   build-tools:
     needs: [discover, build-base]
@@ -119,15 +155,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
-      checks: read
-      statuses: read
-      pull-requests: read
       packages: write
     strategy:
       fail-fast: false
       matrix:
         image: ${{ fromJson(needs.discover.outputs.tools) }}
+    defaults:
+      run:
+        working-directory: trusted
     steps:
       - uses: actions/checkout@v7
         with:
@@ -136,11 +171,9 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.head_sha }}
+          ref: ${{ needs.discover.outputs.source }}
           path: candidate
           persist-credentials: false
-      - name: Require approved PR head and successful checks
-        run: python3 scripts/image_publish_gate.py
       - uses: astral-sh/setup-uv@v7
       - uses: docker/setup-qemu-action@v3
         with:
@@ -159,4 +192,34 @@ jobs:
           if [ "$IMAGE" != "CASA6" ]; then
             flags="$flags --sequential-platforms --prune-between-platforms"
           fi
-          uv run --locked dosho images --source-root ../candidate --pre-publish "python3 scripts/image_publish_gate.py" build "$IMAGE" $flags
+          uv run --locked dosho images --source-root ../candidate build "$IMAGE" $flags
+
+  report:
+    needs: [request, discover, build-base, build-tools]
+    if: always() && needs.request.result != 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      REQUEST: ${{ needs.request.result }}
+      ERROR: ${{ needs.request.outputs.error }}
+      SOURCE: ${{ needs.discover.outputs.source }}
+      BASES: ${{ needs.discover.outputs.bases }}
+      TOOLS: ${{ needs.discover.outputs.tools }}
+      RESULTS: ${{ needs.discover.result }} ${{ needs.build-base.result }} ${{ needs.build-tools.result }}
+    steps:
+      - name: Reply on the PR
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$REQUEST" != success ]; then
+            body="Image build refused: ${ERROR:-the request did not complete}. [Run]($run_url)"
+          elif [[ " $RESULTS " == *" failure "* || " $RESULTS " == *" cancelled "* ]]; then
+            body="Image build from \`$SOURCE\` failed. [Run]($run_url)"
+          elif [ "$BASES" = "[]" ] && [ "$TOOLS" = "[]" ]; then
+            body="Every image tag at \`$SOURCE\` is already published; nothing to build. [Run]($run_url)"
+          else
+            body="Published missing images from \`$SOURCE\`: bases $BASES, tools $TOOLS. [Run]($run_url)"
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -f body="$body"

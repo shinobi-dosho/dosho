@@ -79,8 +79,8 @@ CI pairs every push to main and every pull request with
 Shinobi main, verifying each installed version against its own source checkout
 plus package origin. Reusable and manually dispatched CI accept a `ninja-ref`
 override for a specific branch, tag, or commit. Independent core CI requires no
-companion framework; the publication workflow also requires the full paired
-tests and docs to pass.
+companion framework; image builds also wait for the full `ci.yml` run, paired
+tests and docs included, to pass.
 
 ### The pre-commit hook
 
@@ -165,70 +165,46 @@ CI builds with `-W`, so a warning is a failure.
 
 ### Publishing container images before merge
 
-Image publication is a separate human action. Pushes and merges do not publish
-release images. Wait for PR reviews and checks, mark the PR ready for review,
-and dispatch the existing `images.yml` workflow **on protected `main`**:
+Pushing to a PR does not publish images. When a PR adds or moves an image tag
+(a new `build:` entry, a `version` bump, a `bundle_version` bump), someone with
+the **admin or maintain** role on the repository comments on the PR:
 
-```bash
-gh workflow run images.yml --ref main \
-  -f pr_number=YOUR_PR_NUMBER -f head_sha=FULL_40_CHARACTER_HEAD_SHA \
-  -f override_unreviewed=false
+```
+/build-images
 ```
 
-The Actions UI offers the same inputs. The publisher must be present on
-protected `main` before dispatch. Image PRs can publish before merge by
-dispatching the trusted workflow on `main` with the candidate PR's exact
-head SHA.
-The trusted workflow, gate and CLI are pinned to that dispatch's `main` SHA.
-A separate candidate checkout supplies only the YAML manifest, Dockerfiles and
-build contexts. Candidate Python, workflows and dependency files never run on
-the credential-bearing host. A new PR commit requires a new dispatch after its
-reviews and checks pass. A rerun by a different actor is rejected; that human
-should make a fresh dispatch.
+The command must be the whole first line of the comment. The `images.yml`
+workflow then:
 
-A run fails before any GHCR login if the dispatcher is not a human repository
-collaborator with write access, the PR is a fork, closed, draft, conflicted,
-targets another branch, or its head moves. Dispatching from a candidate branch
-is rejected; the workflow must run on `main`. GitHub's `reviewDecision` must be
-`APPROVED`, including configured reviewer counts, code owners and stale review
-rules. A repository administrator may set `override_unreviewed=true` to allow
-`REVIEW_REQUIRED` (including partial approvals); this never overrides
-`CHANGES_REQUESTED`, unknown review state, failed checks or pending checks.
+1. reacts with 👀 and checks the commenter's role (organisation owners count
+   as admin);
+2. pins the PR's current head and waits, for up to an hour, until the
+   `ci.yml` run for that head passes;
+3. builds and pushes every tag in the PR's manifest that GHCR does not have
+   yet (`build-plan --missing-only`: bases first, published tags never
+   overwritten);
+4. replies on the PR with what it published, or why it refused or failed.
 
-The gate independently requires a successful `.github/workflows/ci.yml`
-pull-request run for this exact PR/head and successful `test (3.11)`,
-`test (3.12)` and `docs` jobs. It also checks the latest other workflow runs,
-check runs and commit status contexts for that SHA; older successes cannot hide
-new failures or pending reruns. Publisher workflow runs and their check suites
-are excluded so a failed publication can be retried. Skipped, neutral, unknown
-and API-error results fail closed.
-This explicit publication gate applies even when the branch ruleset has no
-required CI contexts. Unrelated manual or dev workflows need not be triggered.
+It refuses fork PRs, closed or merged PRs, and a head that changed after the
+comment: a push after the command, including one made while waiting for CI,
+needs a new `/build-images`. To retry a failed build, comment again.
 
-Each publishing job repeats the gate and checkout SHA checks before GHCR login.
-The trusted CLI validates candidate path containment (including symlink escapes),
-release names/tags and the fixed `ghcr.io/shinobi-dosho` namespace; deployment
-image overrides do not affect its plan or builds. The trusted gate runs again
-before every registry-writing command, including each staged platform push and
-final manifest creation. A change during an already running `buildx --push`
-command cannot stop the exact internal registry write; revalidation happens
-immediately before launching that command. `build-plan --missing-only` selects
-absent release tags, builds bases before tools and skips existing tags. All bases
-stage their platforms sequentially, so the final release manifest has a separate
-gate after the builds complete. Tools retain sequential build/prune settings
-with the single-platform CASA6 exception. Runs are serialized without
-cancelling a publisher already running. The separate `images-verify.yml`
-retains Monday registry checks; `images-dev.yml` and PyPI's `publish.yml` have
-their own release processes.
+The workflow always runs `main`'s copy of itself, of
+`scripts/image_publish_gate.py` and of the `dosho images` CLI, so a PR cannot
+change the rules it is judged by. The PR supplies only the manifest,
+Dockerfiles and build contexts. The CLI checks that its paths stay inside the
+checkout (symlinks included), that names and tags are valid, and that images
+go to `ghcr.io/shinobi-dosho`; deployment image overrides are ignored.
 
-**Dispatch before you merge.** The gate accepts only an open PR, so a merged
-or closed PR can never publish its images. Merging an image change without a
-successful dispatch leaves the manifest naming a tag that does not exist in
-GHCR, and every cab using that image fails to pull. To recover, open any
-follow-up PR from current `main`, get it reviewed, and dispatch `images.yml`
-for that PR's head. `build-plan --missing-only` picks up every tag that is
-still absent and skips the rest, so the follow-up PR need not touch the image
-entry itself.
+**Build before you merge.** Otherwise `main` names a tag that is not in GHCR
+until the backstop finishes, and every cab using that image fails to pull in
+the meantime. The backstop: every push to `main` that touches
+`src/dosho/images.yaml` or `src/dosho/cargo/` runs the same missing-only build
+from `main`. If that run fails, re-run it from the Actions tab, or dispatch
+`images.yml` on `main` (`gh workflow run images.yml --ref main`).
+
+`images-verify.yml` checks registry health every Monday. `images-dev.yml`
+(dev images) and `publish.yml` (PyPI) have their own release processes.
 
 ### Commit messages
 
