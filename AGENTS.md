@@ -153,27 +153,28 @@ The build/maintenance infrastructure around the manifest is landed: a
 `src/dosho/cli.py`), a `src/dosho/cargo/` Dockerfile tree (a shared
 `pip/Dockerfile` template for pip-installable tools on `BASE_ASTRO`, plus a
 dedicated per-tool dir where a tool needs one -- e.g. an era-pinned
-interpreter, as for `ragavi`/`cubical`), and the manual `images.yml` publication workflow that builds missing tags from
-an explicitly selected PR head before merge, using trusted workflow/gate/CLI
-code dispatched from protected main and candidate manifest/cargo data only.
-The secure publisher must first land on main before it can serve later PRs.
-Publication requires a human with
-repository write access, an open non-draft same-repository PR targeting main,
-an exact candidate head SHA, successful CI and all other checks, and GitHub's
-approval decision. An administrator can override incomplete approvals only;
-changes requested, failed checks and pending checks always block publication.
-The separate `images-verify.yml` checks registry health on Mondays.
+interpreter, as for `ragavi`/`cubical`), and the `images.yml` publication
+workflow. A `/build-images` PR comment from someone with the admin or maintain
+role pins the PR head, waits for its `ci.yml` run to pass, and builds missing
+tags from it. The workflow, gate (`scripts/image_publish_gate.py`) and CLI
+always come from main; the PR supplies only manifest/cargo data. Fork PRs,
+closed PRs, PRs not targeting main, PRs changing anything under `.github/`
+and a head pushed after the comment are refused, so an image change and a CI
+change belong in separate PRs. Every push to main
+touching the manifest or cargo runs the same missing-only build from main as a
+backstop. The separate `images-verify.yml` checks registry health on Mondays.
 Every tool is dosho-built except deprecated `SIMMS_CLASSIC` (a `ref:` until
 removal). `build-plan --missing-only` selects absent tags, builds bases first,
 and preserves published tags: a version change builds that image, a bundle
 version change builds all moved tags, and existing tags are skipped. See
-CONTRIBUTING.md for the dispatch command.
+CONTRIBUTING.md for details.
 
-A PR that adds or moves an image tag is not done when CI passes: the image must
-be published by a successful `images.yml` dispatch **before merge**, because
-the gate refuses merged PRs. Say so in the PR description, and do not suggest
-merging until the dispatch has succeeded. CONTRIBUTING.md describes recovery
-when a merge got there first.
+A PR that adds or moves an image tag is not done when CI passes: a maintainer
+should comment `/build-images` and the workflow's reply should confirm the
+images were published **before merge**. Otherwise main names a tag GHCR lacks
+until the backstop build on main finishes. Say so in the PR description, and
+do not suggest merging until that reply has arrived. An agent must not post
+the command itself unless the user asks it to.
 
 ## Repo layout
 

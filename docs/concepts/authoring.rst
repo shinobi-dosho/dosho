@@ -331,14 +331,13 @@ tool is editing one manifest entry.
 
 ``dosho`` builds these images itself -- see the ``dosho images`` CLI
 (``list``/``build``/``push``/``build-keys``/``build-plan``/``verify``),
-the ``dosho/cargo/`` Dockerfile tree, and the manually dispatched
-``images.yml`` workflow. Before merge, a maintainer selects an exact reviewed
-PR head while dispatching trusted workflow/CLI code on protected ``main``.
-The candidate supplies manifest/cargo data only. This publisher must first land
-on ``main`` before serving later PRs. It checks approvals and successful CI/checks before building
-and publishing missing tags. ``CONTRIBUTING.md`` documents invocation and the
-limited administrator override. ``images-verify.yml`` checks registry health
-each Monday.
+the ``dosho/cargo/`` Dockerfile tree, and the ``images.yml`` workflow.
+Before merge, a maintainer comments ``/build-images`` on the PR; the workflow
+waits for the PR's CI to pass and then builds and publishes the missing tags,
+running ``main``'s workflow and CLI over the PR's manifest/cargo data only.
+Pushes to ``main`` that touch the manifest or cargo build anything still
+missing. ``CONTRIBUTING.md`` has the details. ``images-verify.yml`` checks
+registry health each Monday.
 
 Dev images
 ~~~~~~~~~~~~

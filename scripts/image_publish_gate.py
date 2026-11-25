@@ -1,18 +1,38 @@
-"""Fail closed before publishing images from an explicitly approved PR head."""
+"""Authorize a ``/build-images`` PR comment and wait for CI on the PR head.
+
+Run by ``.github/workflows/images.yml`` from ``main``'s copy of this file, so a
+PR cannot change the rules it is judged by. It fails closed: any API error,
+malformed response or unexpected state refuses the build.
+
+On success it writes ``sha=<head>`` to ``$GITHUB_OUTPUT``; on refusal it
+writes ``error=<reason>`` there (for the reply comment) and exits non-zero.
+"""
 
 from __future__ import annotations
 
 import json
 import os
-import re
-import subprocess
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime
+
+COMMAND = "/build-images"
+ROLES = {"admin", "maintain"}  # org owners report as "admin"
+CI_PATH = ".github/workflows/ci.yml"
+# CI's own jobs must have run, so a PR cannot pass by renaming or dropping them.
+CI_JOBS = ("core (3.11)", "core (3.12)", "test (3.11)", "test (3.12)", "docs")
+# A pull_request CI run uses the PR's own workflows and the scripts they call,
+# so a PR that changes them could make its own CI pass trivially.
+PROTECTED = ".github/"
+TIMEOUT = 3600
+INTERVAL = 30
 
 
 class GateError(RuntimeError):
-    """Publication is not authorized."""
+    """The build is not authorized; the message is shown to the commenter."""
 
 
 def require(condition, message):
@@ -25,11 +45,9 @@ class GitHub:
         self.repository = repository
         self.token = token
 
-    def request(self, path, data=None):
-        url = "https://api.github.com" + path
+    def get(self, path):
         request = urllib.request.Request(
-            url,
-            data=json.dumps(data).encode() if data is not None else None,
+            f"https://api.github.com/repos/{self.repository}/{path}",
             headers={
                 "Authorization": f"Bearer {self.token}",
                 "Accept": "application/vnd.github+json",
@@ -39,12 +57,9 @@ class GitHub:
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.load(response)
 
-    def get(self, path):
-        return self.request(f"/repos/{self.repository}/{path}")
-
     def pages(self, path, key=None):
         result = []
-        for page in range(1, 1001):
+        for page in range(1, 101):
             separator = "&" if "?" in path else "?"
             payload = self.get(f"{path}{separator}per_page=100&page={page}")
             items = payload[key] if key else payload
@@ -54,154 +69,141 @@ class GitHub:
                 return result
         raise GateError("Pagination limit reached")
 
-    def review(self, number):
-        owner, name = self.repository.split("/")
-        payload = self.request(
-            "/graphql",
-            {
-                "query": """query($owner:String!, $name:String!, $number:Int!) {
-              repository(owner:$owner, name:$name) {
-                pullRequest(number:$number) { headRefOid reviewDecision }
-              }
-            }""",
-                "variables": {"owner": owner, "name": name, "number": number},
-            },
-        )
-        require(not payload.get("errors"), "Review API returned errors")
-        return payload["data"]["repository"]["pullRequest"]
+
+def is_command(body):
+    # Must start the comment: the workflow only starts for bodies that do.
+    lines = (body or "").splitlines()
+    return bool(lines) and lines[0].rstrip() == COMMAND
 
 
-def latest(items, key):
-    """API numeric IDs order creations; an older green result cannot hide a rerun."""
-    selected = {}
-    for item in items:
-        identity = key(item)
-        if identity not in selected or item["id"] > selected[identity]["id"]:
-            selected[identity] = item
-    return selected.values()
+def timestamp(value):
+    return datetime.fromisoformat(value)
 
 
-def validate(api, *, number, sha, actor, ref, run_id, dispatch_sha, override=False):
-    require(re.fullmatch(r"[0-9a-f]{40}", sha), "Expected a full lowercase 40-character head SHA")
-    require(number > 0, "Expected a positive PR number")
-    user = api.request(f"/users/{urllib.parse.quote(actor, safe='')}")
-    require(user["type"] == "User", "Dispatcher must be a human")
-    permission = api.get(f"collaborators/{urllib.parse.quote(actor, safe='')}/permission")[
-        "permission"
-    ]
+def authorize(api, login):
+    denied = f"`{login}` needs the admin or maintain role on this repository to build images"
+    try:
+        payload = api.get(f"collaborators/{urllib.parse.quote(login, safe='')}/permission")
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:  # not a collaborator at all
+            raise GateError(denied) from exc
+        raise
+    # `permission` folds maintain into write; `role_name` keeps them apart.
+    require(payload.get("role_name") in ROLES, denied)
+
+
+def pull(api, number):
+    pr = api.get(f"pulls/{number}")
     require(
-        permission in {"write", "maintain", "admin"}, "Dispatcher needs repository write permission"
+        pr["state"] == "open",
+        "This PR is not open. Merged image changes build automatically on main",
     )
-    if override:
-        require(permission == "admin", "Only an administrator may override missing approvals")
-
-    def pull():
-        pr = api.get(f"pulls/{number}")
-        require(
-            pr["state"] == "open" and pr["draft"] is False, "PR must be open and ready for review"
-        )
-        require(pr["base"]["ref"] == "main", "PR must target main")
-        require(pr["base"]["repo"]["full_name"] == api.repository, "Unexpected base repository")
-        require(pr["head"]["repo"]["full_name"] == api.repository, "Fork PRs cannot publish")
-        require(pr["head"]["sha"] == sha, "PR head changed")
-        require(ref == "refs/heads/main", "Dispatch must use protected main")
-        require(pr["mergeable"] is True, "PR mergeability is unknown or conflicted")
-        require(
-            pr["mergeable_state"] in {"clean", "blocked", "unstable", "has_hooks", "behind"},
-            "PR is not mergeable",
-        )
-        return pr
-
-    pull()
-    run = api.get(f"actions/runs/{run_id}")
     require(
-        run["event"] == "workflow_dispatch" and run["head_sha"] == dispatch_sha,
-        "Dispatch run must use trusted main SHA",
+        pr["base"]["ref"] == "main" and pr["base"]["repo"]["full_name"] == api.repository,
+        "Images can only be built from PRs targeting main",
     )
-    require(run["actor"]["login"] == actor, "Unexpected dispatch actor")
-    review = api.review(number)
-    require(review["headRefOid"] == sha, "Review head changed")
-    decision = review["reviewDecision"]
-    require(
-        decision == "APPROVED" or (override and decision == "REVIEW_REQUIRED"),
-        "Approvals missing or changes requested",
-    )
+    head_repo = pr["head"]["repo"] or {}
+    require(head_repo.get("full_name") == api.repository, "Images cannot be built from fork PRs")
+    return pr
 
-    runs = api.pages(f"actions/runs?head_sha={sha}", "workflow_runs")
-    # Workflow runs can be queued before their check runs exist.
-    publisher_suites = {run["check_suite_id"]}
-    publisher_suites.update(
-        r["check_suite_id"] for r in runs if r["workflow_id"] == run["workflow_id"]
-    )
-    other_runs = [r for r in runs if r["workflow_id"] != run["workflow_id"]]
-    for other in latest(other_runs, lambda r: (r["workflow_id"], r["event"])):
-        require(
-            other["status"] == "completed" and other["conclusion"] == "success",
-            f"Workflow {other['path']} must succeed",
-        )
+
+def require_ci_untouched(api, pr):
+    files = api.pages(f"pulls/{pr['number']}/files")
+    # The files API stops at 3000; an incomplete list cannot prove anything.
+    require(len(files) == pr["changed_files"], "Could not list every file this PR changes")
+    for f in files:
+        for name in (f["filename"], f.get("previous_filename") or ""):
+            require(
+                not name.startswith(PROTECTED),
+                f"This PR changes `{name}`. Changes under `{PROTECTED}` must merge "
+                "before images can be built from a PR",
+            )
+
+
+def ci_state(api, number, sha, requested_at):
+    """``"success"`` or ``"pending"`` for the latest CI run of this PR head."""
+    runs = api.pages(f"actions/runs?head_sha={sha}&event=pull_request", "workflow_runs")
     ci = [
         r
         for r in runs
-        if r["path"] == ".github/workflows/ci.yml"
-        and r["event"] == "pull_request"
+        if r["path"] == CI_PATH
         and r["head_sha"] == sha
         and any(p["number"] == number for p in r["pull_requests"])
     ]
-    require(ci, "No CI workflow run for this PR and exact head")
-    ci_run = max(ci, key=lambda r: (r["id"], r["run_attempt"]))
+    if not ci:
+        return "pending"
+    run = max(ci, key=lambda r: r["id"])
+    # A push makes a new run (a rerun keeps its run and created_at). A latest run
+    # newer than the command means the head may not be what the maintainer saw.
     require(
-        ci_run["status"] == "completed" and ci_run["conclusion"] == "success",
-        "Latest CI run must succeed",
+        timestamp(run["created_at"]) <= requested_at,
+        "The PR changed after the command (or its CI had not started yet). Comment again",
     )
-    jobs = api.pages(f"actions/runs/{ci_run['id']}/jobs?filter=all", "jobs")
-    by_name = {j["name"]: j for j in latest(jobs, lambda j: j["name"])}
-    for name in ("test (3.11)", "test (3.12)", "docs"):
+    if run["status"] != "completed":
+        return "pending"
+    require(run["conclusion"] == "success", f"CI did not pass: {run['html_url']}")
+    jobs = {j["name"]: j for j in api.pages(f"actions/runs/{run['id']}/jobs", "jobs")}
+    for name in CI_JOBS:
         require(
-            name in by_name
-            and by_name[name]["status"] == "completed"
-            and by_name[name]["conclusion"] == "success",
-            f"CI job {name} must succeed",
+            name in jobs and jobs[name]["conclusion"] == "success",
+            f"CI job `{name}` did not run and pass: {run['html_url']}",
         )
+    return "success"
 
-    checks = api.pages(f"commits/{sha}/check-runs?filter=all", "check_runs")
-    others = [c for c in checks if c["check_suite"]["id"] not in publisher_suites]
-    for check in latest(others, lambda c: (c["app"]["id"], c["name"])):
-        require(check["head_sha"] == sha, "Unexpected check head")
+
+def wait_for_ci(
+    api,
+    number,
+    requested_at,
+    *,
+    timeout=TIMEOUT,
+    interval=INTERVAL,
+    sleep=time.sleep,
+    clock=time.monotonic,
+):
+    """Pin the PR head, wait until its CI passes, and return the pinned SHA."""
+    pr = pull(api, number)
+    sha = pr["head"]["sha"]
+    require_ci_untouched(api, pr)  # the head re-check below covers this listing too
+    deadline = clock() + timeout
+    while True:
+        state = ci_state(api, number, sha, requested_at)
         require(
-            check["status"] == "completed" and check["conclusion"] == "success",
-            f"Check {check['name']} must succeed",
+            pull(api, number)["head"]["sha"] == sha,
+            "The PR head changed while waiting for CI. Comment again",
         )
-    statuses = api.pages(f"commits/{sha}/statuses")
-    for status in latest(statuses, lambda s: s["context"]):
-        require(status["state"] == "success", f"Status {status['context']} must succeed")
-    # Catch movement while the paginated check and review requests were running.
-    pull()
+        if state == "success":
+            return sha
+        require(clock() < deadline, f"Timed out after {timeout // 60} minutes waiting for CI")
+        sleep(interval)
+
+
+def gate(api, *, number, body, author, created_at, timeout=TIMEOUT, **wait):
+    require(is_command(body), f"Expected `{COMMAND}` on the first line")
+    authorize(api, author)
+    return wait_for_ci(api, number, timestamp(created_at), timeout=timeout, **wait)
 
 
 def main():
+    output = os.environ["GITHUB_OUTPUT"]
     try:
-        api = GitHub(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"])
-        for root, expected in (
-            (".", os.environ["GITHUB_SHA"]),
-            (os.environ["CANDIDATE_ROOT"], os.environ["HEAD_SHA"]),
-        ):
-            actual = subprocess.check_output(
-                ["git", "-C", root, "rev-parse", "HEAD"], text=True
-            ).strip()
-            require(actual == expected, "Checkout SHA does not match selected source")
-        validate(
-            api,
+        sha = gate(
+            GitHub(os.environ["GITHUB_REPOSITORY"], os.environ["GH_TOKEN"]),
             number=int(os.environ["PR_NUMBER"]),
-            sha=os.environ["HEAD_SHA"],
-            actor=os.environ["GITHUB_TRIGGERING_ACTOR"],
-            ref=os.environ["GITHUB_REF"],
-            run_id=int(os.environ["GITHUB_RUN_ID"]),
-            dispatch_sha=os.environ["GITHUB_SHA"],
-            override=os.environ["OVERRIDE_UNREVIEWED"] == "true",
+            body=os.environ["COMMENT_BODY"],
+            author=os.environ["COMMENT_AUTHOR"],
+            created_at=os.environ["COMMENT_CREATED_AT"],
+            timeout=int(os.environ.get("CI_TIMEOUT", TIMEOUT)),
         )
-    except Exception as exc:  # The gate must fail closed on malformed data and API failures too.
-        sys.exit(f"Image publication blocked: {exc}")
-    sys.stdout.write("Image publication gate passed.\n")
+    except Exception as exc:  # fail closed on API errors and malformed data too
+        reason = str(exc) if isinstance(exc, GateError) else f"gate error: {exc}"
+        reason = " ".join(reason.split())
+        with open(output, "a") as f:
+            f.write(f"error={reason}\n")
+        sys.exit(f"Image build refused: {reason}")
+    with open(output, "a") as f:
+        f.write(f"sha={sha}\n")
+    sys.stdout.write(f"Building images from {sha}.\n")
 
 
 if __name__ == "__main__":
